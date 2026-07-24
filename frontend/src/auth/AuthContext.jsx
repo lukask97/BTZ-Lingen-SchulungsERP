@@ -1,0 +1,71 @@
+import {
+    createContext, useContext, useState
+} from "react";
+
+
+export const AuthContext = createContext(null);
+
+
+export function AuthProvider({children}) {
+
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+
+
+    function login(userData) {
+
+        setUser(userData);
+
+        localStorage.setItem("user", JSON.stringify(userData));
+
+    }
+
+
+    function logout() {
+
+        setUser(null);
+
+        localStorage.removeItem("user");
+
+    }
+
+
+    function hasPermission(permission) {
+
+        if (!user || !user.permissions) return false;
+
+
+        if (user.permissions.includes("*")) return true;
+
+
+        return user.permissions.includes(permission);
+    }
+
+
+    function hasAccess(access) {
+
+        if (!user || !user.permissions) return false;
+
+
+        if (user.permissions.includes("*")) return true;
+
+
+        return user.permissions.some(p => access === p || access.startsWith(p + "."));
+    }
+
+
+    return (<AuthContext.Provider
+        value={{
+            user, login, logout, hasPermission, hasAccess
+        }}
+    >
+        {children}
+    </AuthContext.Provider>);
+
+}
+
+
+export default function useAuth() {
+
+    return useContext(AuthContext);
+
+}

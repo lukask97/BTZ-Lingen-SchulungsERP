@@ -1,0 +1,86 @@
+services:
+
+  postgres:
+
+    image: postgres:16
+
+    container_name: erp_postgres
+
+    restart: always
+
+    environment:
+
+      POSTGRES_USER: erp
+
+      POSTGRES_PASSWORD: geheim
+
+      POSTGRES_DB: erp
+
+    ports:
+
+      - "5432:5432"
+
+    volumes:
+
+      - ./database/data:/var/lib/postgresql/data
+
+
+  pgadmin:
+
+    image: dpage/pgadmin4
+
+    container_name: erp_pgadmin
+
+    restart: always
+
+    environment:
+
+      PGADMIN_DEFAULT_EMAIL: admin@test.de
+
+      PGADMIN_DEFAULT_PASSWORD: admin
+
+    ports:
+
+      - "5050:80"
+
+
+  backend:
+
+    build: ./backend
+
+    container_name: erp_backend
+
+    ports:
+
+      - "5000:5000"
+
+    volumes:
+
+      - ./backend:/app
+
+    depends_on:
+
+      - postgres
+
+
+  frontend:
+
+    build: ./frontend
+
+    container_name: erp_frontend
+
+    ports:
+
+      - "5173:5173"
+
+    volumes:
+
+      - ./frontend:/app
+
+      - /app/node_modules
+
+    command: npm run dev -- --host
+
+    depends_on:
+
+      - backend

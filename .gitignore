@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# React
+node_modules/
+dist/
+
+# IDE
+.idea/
+
+# Logs
+*.log
+
+# Environment
+.env
+
+# PostgreSQL
+postgres-data/
