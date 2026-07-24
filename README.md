@@ -19,6 +19,16 @@ npm -v
 
 ## Abhängigkeiten installieren
 
+Zuerst ein Terminal im Projektordner öffnen
+``` bash
+cd frontend/
+```
+Im Terminal sollte jetzt etwa folgendes stehen:
+
+``` cmd
+C:\...\BTZ-SchulungsERP\frontend>
+```
+
 Im Projektordner:
 
 ``` bash
