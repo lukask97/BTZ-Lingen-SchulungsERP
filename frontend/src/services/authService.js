@@ -1,28 +1,18 @@
-const users = [
-
-    {
-        username: "admin", password: "admin", permissions: ["*"]
-    },
-
-    {
-        username: "lager", password: "lager", permissions: ["artikel.lesen", "lager.buchen"]
-    },
-
-    {
-        username: "buchhaltung",
-        password: "buchhaltung",
-        permissions: ["kunde.lesen", "kunde.anlegen", "rechnung.lesen", "rechnung.erstellen"]
-    }
-
-];
+import {users} from "./mockup/mockData.js";
 
 
-export function login(u, p) {
+export function login(username,password){
 
-    let user = users.find(x => x.username === u && x.password === p);
+    const user = users.find(
+        u =>
+            u.username === username &&
+            u.password === password
+    );
 
 
-    if (!user) return null;
+    if(!user)
+        return null;
+
 
     return user;
 

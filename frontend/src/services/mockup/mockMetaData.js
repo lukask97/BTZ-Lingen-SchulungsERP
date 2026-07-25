@@ -28,7 +28,7 @@ export const feldMetadaten = [
         anzeigename: "Anschrift",
         beschreibung: "Straße und Hausnummer",
         reihenfolge: 3,
-        sichtbar: false
+        sichtbar: true
     },
 
     {
@@ -37,16 +37,11 @@ export const feldMetadaten = [
         anzeigename: "PLZ",
         beschreibung: "Postleitzahl",
         reihenfolge: 4,
-        sichtbar: false
+        sichtbar: true
     },
 
     {
-        tabelle: "kunden",
-        feld: "ort",
-        anzeigename: "Ort",
-        beschreibung: "Kundenort",
-        reihenfolge: 5,
-        sichtbar: true
+        tabelle: "kunden", feld: "ort", anzeigename: "Ort", beschreibung: "Kundenort", reihenfolge: 5, sichtbar: true
     },
 
     {
@@ -64,7 +59,16 @@ export const feldMetadaten = [
         anzeigename: "Unsere Leistungen",
         beschreibung: "Produkte und Dienstleistungen",
         reihenfolge: 7,
-        sichtbar: false
+        sichtbar: true
+    }, {
+        tabelle: "kunden",
+        feld: "notiz",
+        anzeigename: "Notiz",
+        beschreibung: "Interne Bemerkungen zum Kunden",
+        feldtyp: "textarea",
+        zeilen: 6,
+        sichtbar: true,
+        reihenfolge: 10
     },
 
 
@@ -73,43 +77,233 @@ export const feldMetadaten = [
     // ======================
 
     {
-        tabelle:"artikel",
-        feld:"artikelNr",
-        anzeigename:"Artikelnummer",
-        beschreibung:"Artikelnummer",
-        reihenfolge:1,
-        sichtbar:true
+        tabelle: "artikel",
+        feld: "artikelNr",
+        anzeigename: "Artikelnummer",
+        beschreibung: "Artikelnummer",
+        reihenfolge: 1,
+        sichtbar: true
     },
 
     {
-        tabelle:"artikel",
-        feld:"bezeichnung",
-        anzeigename:"Bezeichnung",
-        beschreibung:"Artikelname",
-        reihenfolge:2,
-        sichtbar:true
+        tabelle: "artikel",
+        feld: "bezeichnung",
+        anzeigename: "Bezeichnung",
+        beschreibung: "Artikelname",
+        reihenfolge: 2,
+        sichtbar: true
     },
 
     {
-        tabelle:"artikel",
-        feld:"preis",
-        anzeigename:"Preis",
-        beschreibung:"Verkaufspreis",
-        reihenfolge:3,
-        sichtbar:true
+        tabelle: "artikel",
+        feld: "preis",
+        anzeigename: "Preis",
+        beschreibung: "Verkaufspreis",
+        reihenfolge: 3,
+        sichtbar: true
     },
 
     {
-        tabelle:"artikel",
-        feld:"lagerbestand",
-        anzeigename:"Bestand",
-        beschreibung:"Aktueller Lagerbestand",
-        reihenfolge:4,
-        sichtbar:false
+        tabelle: "artikel",
+        feld: "lagerbestand",
+        anzeigename: "Bestand",
+        beschreibung: "Aktueller Lagerbestand",
+        reihenfolge: 4,
+        sichtbar: false
+    },
+
+    // ======================
+    // Benutzer
+    // ======================
+
+    {
+        tabelle: "benutzer",
+        feld: "username",
+        anzeigename: "Benutzername",
+        beschreibung: "Eindeutiger Benutzername",
+        reihenfolge: 1,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "benutzer",
+        feld: "email",
+        anzeigename: "Email",
+        beschreibung: "E-Mail-Adresse",
+        reihenfolge: 2,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "benutzer",
+        feld: "rolle",
+        anzeigename: "Rolle",
+        beschreibung: "Benutzerrolle",
+        reihenfolge: 3,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "benutzer",
+        feld: "aktiv",
+        anzeigename: "Aktiv",
+        beschreibung: "Benutzer ist aktiv",
+        reihenfolge: 4,
+        sichtbar: true
+    },
+
+    // ======================
+    // Rollen
+    // ======================
+
+    {
+        tabelle: "rollen",
+        feld: "name",
+        anzeigename: "Rollenname",
+        beschreibung: "Name der Rolle",
+        reihenfolge: 1,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "rollen",
+        feld: "beschreibung",
+        anzeigename: "Beschreibung",
+        beschreibung: "Beschreibung der Rolle",
+        reihenfolge: 2,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "rollen",
+        feld: "aktiv",
+        anzeigename: "Aktiv",
+        beschreibung: "Rolle ist aktiv",
+        reihenfolge: 3,
+        sichtbar: true
+    },
+
+    // ======================
+    // Rechte
+    // ======================
+
+    {
+        tabelle: "rechte",
+        feld: "name",
+        anzeigename: "Recht",
+        beschreibung: "Name des Rechts",
+        reihenfolge: 1,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "rechte",
+        feld: "beschreibung",
+        anzeigename: "Beschreibung",
+        beschreibung: "Beschreibung des Rechts",
+        reihenfolge: 2,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "rechte",
+        feld: "aktiv",
+        anzeigename: "Aktiv",
+        beschreibung: "Recht ist aktiv",
+        reihenfolge: 3,
+        sichtbar: true
+    },
+
+    // ======================
+    // Lager
+    // ======================
+
+    {
+        tabelle: "lager",
+        feld: "name",
+        anzeigename: "Lagername",
+        beschreibung: "Name des Lagers",
+        reihenfolge: 1,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "lager",
+        feld: "standort",
+        anzeigename: "Standort",
+        beschreibung: "Lagerstandort",
+        reihenfolge: 2,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "lager",
+        feld: "kapazitaet",
+        anzeigename: "Kapazität",
+        beschreibung: "Lagerkapazität",
+        reihenfolge: 3,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "lager",
+        feld: "aktiv",
+        anzeigename: "Aktiv",
+        beschreibung: "Lager ist aktiv",
+        reihenfolge: 4,
+        sichtbar: true
+    },
+
+    // ======================
+    // Rechnungen
+    // ======================
+
+    {
+        tabelle: "rechnungen",
+        feld: "rechnungsnr",
+        anzeigename: "Rechnungsnummer",
+        beschreibung: "Eindeutige Rechnungsnummer",
+        reihenfolge: 1,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "rechnungen",
+        feld: "kunde",
+        anzeigename: "Kunde",
+        beschreibung: "Kundenname",
+        reihenfolge: 2,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "rechnungen",
+        feld: "datum",
+        anzeigename: "Datum",
+        beschreibung: "Rechnungsdatum",
+        reihenfolge: 3,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "rechnungen",
+        feld: "betrag",
+        anzeigename: "Betrag",
+        beschreibung: "Rechnungsbetrag",
+        reihenfolge: 4,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "rechnungen",
+        feld: "status",
+        anzeigename: "Status",
+        beschreibung: "Rechnungsstatus",
+        reihenfolge: 5,
+        sichtbar: true
     }
 
 ];
-
 
 
 //
@@ -117,40 +311,5 @@ export const feldMetadaten = [
 //
 
 export const benutzerSpalten = [
-
-    {
-        username:"admin",
-        tabelle:"kunden",
-
-        sichtbareFelder:[
-            "kundenNr",
-            "firma",
-            "ort",
-            "segment"
-        ]
-    },
-
-
-    {
-        username:"buchhaltung",
-        tabelle:"kunden",
-
-        sichtbareFelder:[
-            "kundenNr",
-            "firma",
-            "ort"
-        ]
-    },
-
-
-    {
-        username:"lager",
-        tabelle:"kunden",
-
-        sichtbareFelder:[
-            "kundenNr",
-            "firma"
-        ]
-    }
 
 ];

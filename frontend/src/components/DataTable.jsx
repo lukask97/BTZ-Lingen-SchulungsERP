@@ -1,46 +1,90 @@
-import {useMemo, useState} from "react";
+import {useEffect, useState} from "react";
 import PermissionButton from "./PermissionButton";
+import {saveUserColumns, getUserColumns} from "../services/metadataService";
 
 export default function DataTable({
+
                                       title = "",
+
                                       columns = [],
+                                      allColumns = [],
                                       data = [],
+
                                       loading = false,
-                                      page = 1,
-                                      totalPages = 1,
-                                      pageSize = 10,
-                                      onPageChange,
-                                      onPageSizeChange,
-                                      onSearch,
-                                      onSort,
-                                      toolbarActions = [],
-                                      rowActions = [],
+
+                                      page = 1, totalPages = 1, pageSize = 10,
+
+                                      onPageChange, onPageSizeChange,
+
+                                      onSearch, onSort, onFilter,
+
+                                      toolbarActions = [], rowActions = [],
+
                                       searchable = false,
+
                                       selectableColumns = true,
+
                                       onColumnsChange,
-                                      showDetails = true,
-                                      onRowClick
+
+                                      showDetails = true, username, tableName,
+                                      
+                                      filters = []
+
+
                                   }) {
 
 
-    const [sortField, setSortField] = useState("");
-    const [sortOrder, setSortOrder] = useState("asc");
-    const columnCount = columns.length + (rowActions.length > 0 ? 1 : 0);
     const [search, setSearch] = useState("");
 
-    const [showColumns, setShowColumns] = useState(false);
+    const [sortField, setSortField] = useState("");
+    const [sortOrder, setSortOrder] = useState("asc");
+    const [activeFilters, setActiveFilters] = useState({});
+
+
     const [showColumnMenu, setShowColumnMenu] = useState(false);
+    const availableColumns = columns;
 
-    const [visibleColumns, setVisibleColumns] = useState(columns.filter(c => c.visible !== false));
+    const [visibleColumns, setVisibleColumns] = useState([]);
 
-    const detectedColumns = data.length > 0 ? Object.keys(data[0]).map(field => ({
-        field, title: field
-    })) : [];
-
-    const availableColumns = columns.length > 0 ? columns : detectedColumns;
 
     const [detailOpen, setDetailOpen] = useState(false);
     const [detailData, setDetailData] = useState(null);
+
+
+    /*
+        Initialisierung der Spalten
+    */
+
+    useEffect(() => {
+
+
+        if (!columns.length) return;
+
+
+        if (username && tableName) {
+
+            const saved = getUserColumns(username, tableName);
+
+
+            if (saved) {
+
+                const savedColumns = columns.filter(c => saved.sichtbareFelder.includes(c.field));
+
+
+                setVisibleColumns(savedColumns);
+
+                return;
+
+            }
+
+        }
+
+
+        setVisibleColumns(columns.filter(c => c.visible !== false));
+
+
+    }, [columns, username, tableName]);
+
 
     function searchChange(e) {
 
@@ -52,33 +96,40 @@ export default function DataTable({
 
     }
 
-    function openDetails(row) {
-
-        if (!showDetails) return;
-
-        setDetailData(row);
-        setDetailOpen(true);
-
+    function handleFilterChange(filterName, value) {
+        const newFilters = { ...activeFilters, [filterName]: value };
+        setActiveFilters(newFilters);
+        if (onFilter) onFilter(newFilters);
     }
+
 
     function sort(field) {
 
         let order = "asc";
 
-        if (field === sortField) order = sortOrder === "asc" ? "desc" : "asc";
+
+        if (field === sortField) {
+
+            order = sortOrder === "asc" ? "desc" : "asc";
+
+        }
+
 
         setSortField(field);
         setSortOrder(order);
 
-        onSort && onSort(field, order);
+
+        if (onSort) onSort(field, order);
+
     }
+
 
     function toggleColumn(column) {
 
-        const exists = visibleColumns.some(c => c.field === column.field);
-
-
         let result;
+
+
+        const exists = visibleColumns.some(c => c.field === column.field);
 
 
         if (exists) {
@@ -95,142 +146,341 @@ export default function DataTable({
         setVisibleColumns(result);
 
 
-        if (onColumnsChange) onColumnsChange(result);
+        saveUserColumns(username, tableName, result.map(c => c.field));
 
     }
+
+    function openDetails(row) {
+
+        if (!showDetails) return;
+
+
+        setDetailData(row);
+
+        setDetailOpen(true);
+
+    }
+
+
+    function displayValue(value) {
+
+
+        if (Array.isArray(value)) return value.join(", ");
+
+
+        if (typeof value === "boolean") return value ? "Ja" : "Nein";
+
+
+        return value ?? "";
+
+    }
+
 
     return (
 
         <div className="card">
+
+
             <div className="toolbar">
-                <h2>{title}</h2>
+
+
+                <h2>
+                    {title}
+                </h2>
+
+
                 <div className="toolbar-right">
 
-                    {searchable && <input
-                        placeholder="Suchen..."
-                        value={search}
-                        onChange={searchChange}
-                    />}
 
-                    {selectableColumns && <button
-                        className="icon-button"
-                        title="Spalten auswählen"
-                        onClick={() => setShowColumnMenu(!showColumnMenu)}
-                    >
-                        ⚙️
-                    </button>}
+                    {searchable &&
 
-                    {showColumnMenu && <div className="column-popup">
+                        <input
 
-                        <strong>
-                            Spalten
-                        </strong>
+                            placeholder="Suchen..."
 
+                            value={search}
 
-                        {availableColumns.map(c =>
+                            onChange={searchChange}
 
-                            <label key={c.field}>
+                        />
 
-                                <input
-                                    type="checkbox"
+                    }
 
-                                    checked={visibleColumns.some(v => v.field === c.field)}
+                    {filters.length > 0 && filters.map(filter => (
+                        <select 
+                            key={filter.name}
+                            value={activeFilters[filter.name] || ""} 
+                            onChange={(e) => handleFilterChange(filter.name, e.target.value)}
+                            style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid #ddd", fontSize: "14px" }}
+                        >
+                            <option value="">{filter.label}</option>
+                            {filter.options.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                        </select>
+                    ))}
 
-                                    onChange={() => toggleColumn(c)}
-                                />
-
-                                {c.title}
-
-                            </label>)}
-
-                    </div>}
-                    {toolbarActions.map(action => <PermissionButton
-                        key={action.name}
-                        permission={action.permission}
-                        onClick={action.onClick}
-                    >
-                        {action.label}
-                    </PermissionButton>)}
-
-                </div>
-            </div>
-            <table className="datatable">
-                <thead>
-                <tr>
-                    {visibleColumns.map(c => <th
-                        key={c.field}
-                        onClick={() => sort(c.field)}
-                    >
-                        {c.title}
-                        {sortField === c.field && (sortOrder === "asc" ? " ▲" : " ▼")}
-                    </th>)}
-                    {rowActions.length > 0 && <th>Aktionen</th>}
-                </tr>
-                </thead>
-                <tbody>
-                {loading === true && <tr>
-                    <td colSpan={columnCount}>
-                        Laden...
-                    </td>
-                </tr>}
-                {loading === false && data.length === 0 && <tr>
-                    <td colSpan={columnCount}>
-                        Keine Daten vorhanden
-                    </td>
-
-                </tr>}
-                {!loading && data.map(r => <tr
-                    key={r.id}
-                    onClick={() => openDetails(r)}
-                    className={showDetails ? "clickable-row" : ""}
-                >
-
-                    {visibleColumns.map(c => <td key={c.field}>
-                        {c.render ? c.render(r) : r[c.field]}
-                    </td>)}
+                    {selectableColumns &&
 
 
-                    {rowActions.length > 0 && <td>
+                        <button
 
-                        <div className="table-actions">
+                            className="icon-button"
 
-                            {rowActions.map(action =>
+                            onClick={() => setShowColumnMenu(!showColumnMenu)}
 
-                                <PermissionButton
-                                    key={action.name}
-                                    permission={action.permission}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        action.onClick(r);
-                                    }}
-                                >
-                                    {action.label}
-                                </PermissionButton>)}
+                        >
+
+                            ⚙️
+
+                        </button>
+
+                    }
+
+
+                    {showColumnMenu &&
+
+                        <div className="column-popup">
+
+                            <strong>
+                                Spalten anzeigen
+                            </strong>
+
+
+                            {allColumns.map(column =>
+
+                                <label key={column.field}>
+
+                                    <input
+
+                                        type="checkbox"
+
+                                        checked={
+                                            visibleColumns.some(
+                                                c => c.field === column.field
+                                            )
+                                        }
+
+                                        onChange={() =>
+                                            toggleColumn(column)
+                                        }
+
+                                    />
+
+                                    {column.title}
+
+                                </label>
+                            )}
 
                         </div>
 
-                    </td>}
+                    }
 
-                </tr>)}
+
+                    {toolbarActions.map(action =>
+
+                        <PermissionButton
+
+                            key={action.name}
+
+                            permission={action.permission}
+
+                            onClick={action.onClick}
+
+                        >
+
+                            {action.label}
+
+                        </PermissionButton>)}
+
+
+                </div>
+
+
+            </div>
+
+
+            <table className="datatable">
+
+
+                <thead>
+
+
+                <tr>
+
+
+                    {visibleColumns.map(column =>
+
+                        <th
+
+                            key={column.field}
+
+                            onClick={() => sort(column.field)}
+
+                        >
+
+                            {column.title}
+
+
+                            {sortField === column.field &&
+
+                                (sortOrder === "asc" ? " ▲" : " ▼")}
+
+
+                        </th>)}
+
+
+                    {rowActions.length > 0 &&
+
+                        <th>
+                            Aktionen
+                        </th>
+
+                    }
+
+
+                </tr>
+
+
+                </thead>
+
+
+                <tbody>
+
+
+                {loading &&
+
+                    <tr>
+
+                        <td colSpan={visibleColumns.length}>
+
+                            Laden...
+
+                        </td>
+
+                    </tr>
+
+                }
+
+
+                {!loading && data.length === 0 &&
+
+                    <tr>
+
+                        <td colSpan={visibleColumns.length}>
+
+                            Keine Daten vorhanden
+
+                        </td>
+
+                    </tr>
+
+                }
+
+
+                {!loading &&
+
+                    data.map(row =>
+
+                        <tr
+
+                            key={row.id}
+
+                            className={showDetails ? "clickable-row" : ""}
+
+
+                            onClick={() => openDetails(row)}
+
+
+                        >
+
+
+                            {visibleColumns.map(column =>
+
+                                <td key={column.field}>
+
+
+                                    {column.render
+
+                                        ?
+
+                                        column.render(row)
+
+                                        :
+
+                                        displayValue(row[column.field])
+
+                                    }
+
+
+                                </td>)}
+
+
+                            {rowActions.length > 0 &&
+
+
+                                <td>
+
+
+                                    {rowActions.map(action =>
+
+                                        <PermissionButton
+
+                                            key={action.name}
+
+                                            permission={action.permission}
+
+                                            onClick={(e) => {
+
+                                                e.stopPropagation();
+
+                                                action.onClick(row);
+
+                                            }}
+
+                                        >
+
+                                            {action.label}
+
+                                        </PermissionButton>)}
+
+
+                                </td>
+
+
+                            }
+
+
+                        </tr>)}
+
+
                 </tbody>
+
+
             </table>
 
 
             {detailOpen && detailData &&
 
+
                 <div className="detail-popup">
+
 
                     <div className="detail-header">
 
+
                         <h3>
                             Details
-
-                            <button
-                                onClick={() => setDetailOpen(false)}
-                            >
-                                ✕
-                            </button>
                         </h3>
+
+
+                        <button
+
+                            onClick={() => setDetailOpen(false)}
+
+                        >
+                            ✕
+                        </button>
 
 
                     </div>
@@ -238,25 +488,32 @@ export default function DataTable({
 
                     <div className="detail-body">
 
-                        {Object.entries(detailData).map(([key, value]) =>
+
+                        {Object.entries(detailData)
+                            .map(([key, value]) =>
 
                                 <div
-                                    key={key}
                                     className="detail-field"
+                                    key={key}
                                 >
 
                                     <strong>
                                         {key}
                                     </strong>
 
-                                    <span>
-                        {String(value)}
-                    </span>
 
-                                </div>
-                        )}
+                                    <span>
+
+                                        {displayValue(value)}
+
+                                    </span>
+
+
+                                </div>)}
+
 
                     </div>
+
 
                 </div>
 
@@ -265,48 +522,73 @@ export default function DataTable({
 
             <div className="pagination">
 
+
                 <button
+
                     disabled={page <= 1}
+
                     onClick={() => onPageChange && onPageChange(page - 1)}
+
                 >
                     ◀
                 </button>
 
 
                 <span>
-        Seite {page} / {totalPages}
-    </span>
+                    Seite {page} / {totalPages}
+                </span>
 
 
                 <button
+
                     disabled={page >= totalPages}
+
                     onClick={() => onPageChange && onPageChange(page + 1)}
+
                 >
                     ▶
                 </button>
 
 
                 <select
+
                     value={pageSize}
-                    onChange={e =>
-                        onPageSizeChange &&
-                        onPageSizeChange(Number(e.target.value))
-                    }
+
+                    onChange={e => onPageSizeChange && onPageSizeChange(Number(e.target.value))}
+
                 >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
+
+                    <option value="10">
+                        10
+                    </option>
+
+                    <option value="25">
+                        25
+                    </option>
+
+                    <option value="50">
+                        50
+                    </option>
+
+                    <option value="100">
+                        100
+                    </option>
+
+
                 </select>
 
 
                 <span>
-                pro Seite
+                    pro Seite
                 </span>
+
 
             </div>
 
 
         </div>
+
+
     );
+
 }

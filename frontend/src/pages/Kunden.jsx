@@ -1,193 +1,168 @@
-import {useState} from "react";
 import DataTable from "../components/DataTable";
 import Dialog from "../components/Dialog";
 import TextField from "../components/form/TextField";
 import Checkbox from "../components/form/Checkbox";
 import Label from "../components/form/Label";
+import TextArea from "../components/form/TextArea";
 
-import {
-    getKunden, addKunde, updateKunde, deleteKunde
-} from "../services/customerService";
-
+import { getColumns, getAllColumns } from "../services/metadataService";
+import useAuth from "../auth/AuthContext";
+import { useCRUDPage } from "../hooks/useCRUDPage";
+import kundenService from "../services/customerService";
+import { INITIAL_DATA, PERMISSIONS, PAGE_CONFIG } from "../constants/schemas";
+import { useState, useMemo } from "react";
 
 export default function Kunden() {
+    const { user } = useAuth();
+    const config = PAGE_CONFIG.kunden;
+    
+    // Verwende den generischen Hook
+    const {
+        data,
+        allData,
+        open,
+        editMode,
+        pageSize,
+        search,
+        currentItem,
+        setOpen,
+        setPageSize,
+        setSearch,
+        setCurrentItem,
+        neu,
+        bearbeiten,
+        loeschen,
+        speichern,
+        handleClose
+    } = useCRUDPage(config.tableName, INITIAL_DATA.kunden, kundenService);
 
-    const [kunden, setKunden] = useState(getKunden());
+    const columns = getColumns(config.tableName, user.username);
+    const allColumns = getAllColumns(config.tableName);
 
-    const [open, setOpen] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [pageSize, setPageSize] = useState(10);
-    const [search, setSearch] = useState("");
-    const [kunde, setKunde] = useState({
-        id: null, name: "", kontakt: "", email: "", telefon: "", aktiv: true
-    });
+    const [segmentFilter, setSegmentFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
 
-    const columns = [{
-        field: "id", title: "Nr."
-    }, {
-        field: "name", title: "Kunde"
-    }, {
-        field: "kontakt", title: "Kontakt"
-    }, {
-        field: "email", title: "E-Mail"
-    }, {
-        field: "telefon", title: "Telefon"
-    }];
+    const handleFieldChange = (field, value) => {
+        setCurrentItem({ ...currentItem, [field]: value });
+    };
 
-    const gefilterteKunden = kunden.filter(k => Object.values(k)
-        .join(" ")
-        .toLowerCase()
-        .includes(search.toLowerCase()));
+    const handleFilterChange = (filters) => {
+        setSegmentFilter(filters.segment || "");
+        setStatusFilter(filters.aktiv || "");
+    };
 
-    function neu() {
-
-        setEditMode(false);
-
-        setKunde({
-            id: null, name: "", kontakt: "", email: "", telefon: "", aktiv: true
-        });
-
-        setOpen(true);
-
-    }
-
-
-    function bearbeiten(k) {
-
-        setEditMode(true);
-        setKunde(k);
-        setOpen(true);
-
-    }
-
-
-    function loeschen(k) {
-
-        if (confirm("Kunde löschen?")) {
-
-            deleteKunde(k.id);
-            setKunden(getKunden());
-
+    const filteredDisplayData = useMemo(() => {
+        // Filter auf ungefilterte Daten anwenden
+        let filtered = allData;
+        if (segmentFilter) filtered = filtered.filter(item => item.segment === segmentFilter);
+        if (statusFilter) filtered = filtered.filter(item => statusFilter === "aktiv" ? item.aktiv : !item.aktiv);
+        // Dann Suche anwenden
+        if (search) {
+            filtered = filtered.filter(item =>
+                Object.values(item)
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
+            );
         }
+        return filtered;
+    }, [allData, segmentFilter, statusFilter, search]);
 
-    }
+    const kundenFilters = useMemo(() => [
+        {
+            name: "segment",
+            label: "Segment",
+            options: [
+                { value: "Einzelhandel", label: "Einzelhandel" },
+                { value: "Groß", label: "Großhandel" },
+                { value: "Öffentlich", label: "Öffentliche Institutionen" }
+            ]
+        },
+        {
+            name: "aktiv",
+            label: "Status",
+            options: [
+                { value: "aktiv", label: "Aktiv" },
+                { value: "inaktiv", label: "Inaktiv" }
+            ]
+        }
+    ], []);
 
-
-    function speichern() {
-
-        if (editMode) updateKunde(kunde); else addKunde(kunde);
-
-        setKunden(getKunden());
-        setOpen(false);
-
-    }
-
-    function anzeigen(kunde) {
-
-        console.log(kunde);
-
-    }
-
-    return (<>
-
-        <DataTable
-
-            title="Kundenverwaltung"
-
-            columns={columns}
-
-            data={gefilterteKunden}
-
-            searchable={true}
-
-            pageSize={pageSize}
-
-            onSearch={setSearch}
-
-            onPageSizeChange={setPageSize}
-            onRowClick={anzeigen}
-            toolbarActions={[{
-                name: "new", label: "Neuer Kunde", permission: "kunde.anlegen", onClick: neu
-            }]}
-
-            rowActions={[{
-                name: "edit", label: "Bearbeiten", permission: "kunde.bearbeiten", onClick: bearbeiten
-            }, {
-                name: "delete", label: "Löschen", permission: "kunde.bearbeiten", onClick: loeschen
-            }]}
-
-            page={1}
-
-        />
-
-
-        <Dialog
-
-            open={open}
-
-            title={editMode ? "Kunde bearbeiten" : "Neuer Kunde"}
-
-            onClose={() => setOpen(false)}
-
-        >
-
-            <Label required>
-                Name
-            </Label>
-
-            <TextField
-                value={kunde.name}
-                onChange={v => setKunde({...kunde, name: v})}
+    return (
+        <>
+            <DataTable
+                title={config.title}
+                tableName={config.tableName}
+                username={user.username}
+                columns={columns}
+                allColumns={allColumns}
+                data={filteredDisplayData}
+                filters={kundenFilters}
+                onFilter={handleFilterChange}
+                searchable={true}
+                pageSize={pageSize}
+                onSearch={setSearch}
+                onPageSizeChange={setPageSize}
+                toolbarActions={[
+                    { name: "new", label: "Neuer Kunde", permission: config.permissionCreate, onClick: neu }
+                ]}
+                rowActions={[
+                    { name: "edit", label: "Bearbeiten", permission: config.permissionEdit, onClick: bearbeiten },
+                    { name: "delete", label: "Löschen", permission: config.permissionEdit, onClick: loeschen }
+                ]}
+                page={1}
             />
 
-
-            <Label>
-                Ansprechpartner
-            </Label>
-
-            <TextField
-                value={kunde.kontakt}
-                onChange={v => setKunde({...kunde, kontakt: v})}
-            />
-
-
-            <Label>
-                E-Mail
-            </Label>
-
-            <TextField
-                type="email"
-                value={kunde.email}
-                onChange={v => setKunde({...kunde, email: v})}
-            />
-
-
-            <Label>
-                Telefon
-            </Label>
-
-            <TextField
-                type="tel"
-                value={kunde.telefon}
-                onChange={v => setKunde({...kunde, telefon: v})}
-            />
-
-
-            <Checkbox
-                checked={kunde.aktiv}
-                onChange={v => setKunde({...kunde, aktiv: v})}
+            <Dialog
+                open={open}
+                title={editMode ? "Kunde bearbeiten" : "Neuer Kunde"}
+                onClose={handleClose}
             >
-                Aktiv
-            </Checkbox>
+                <Label required>Kundennummer</Label>
+                <TextField value={currentItem.kundenNr} onChange={v => handleFieldChange("kundenNr", v)} />
 
+                <Label required>Firma</Label>
+                <TextField value={currentItem.firma} onChange={v => handleFieldChange("firma", v)} />
 
-            <button onClick={speichern}>
-                Speichern
-            </button>
+                <Label>Anschrift</Label>
+                <TextField value={currentItem.anschrift} onChange={v => handleFieldChange("anschrift", v)} />
 
+                <Label>PLZ</Label>
+                <TextField value={currentItem.plz} onChange={v => handleFieldChange("plz", v)} />
 
-        </Dialog>
+                <Label>Ort</Label>
+                <TextField value={currentItem.ort} onChange={v => handleFieldChange("ort", v)} />
 
-    </>);
+                <Label>Segment</Label>
+                <TextField value={currentItem.segment} onChange={v => handleFieldChange("segment", v)} />
 
+                <Label>Website</Label>
+                <TextField value={currentItem.website || ""} onChange={v => handleFieldChange("website", v)} />
+
+                <Label>Optionen</Label>
+                <TextField
+                    value={currentItem.optionen?.join(", ") || ""}
+                    onChange={v => handleFieldChange("optionen", v.split(",").map(x => x.trim()).filter(Boolean))}
+                />
+
+                <Checkbox checked={currentItem.aktiv} onChange={v => handleFieldChange("aktiv", v)}>
+                    Aktiv
+                </Checkbox>
+
+                <div className="form-row">
+                    <Label>Notiz</Label>
+                    <TextArea
+                        rows={2}
+                        placeholder="Interne Notiz zum Kunden..."
+                        value={currentItem.notiz}
+                        onChange={v => handleFieldChange("notiz", v)}
+                    />
+                </div>
+
+                <div className="form-row">
+                    <button onClick={speichern}>Speichern</button>
+                </div>
+            </Dialog>
+        </>
+    );
 }

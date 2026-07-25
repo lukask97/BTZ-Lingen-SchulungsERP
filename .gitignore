@@ -18,3 +18,4 @@ dist/
 
 # PostgreSQL
 postgres-data/
+/database/

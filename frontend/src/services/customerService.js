@@ -1,42 +1,16 @@
-let kunden = [
-    {
-        id: 1,
-        name: "Muster GmbH",
-        kontakt: "Max Mustermann",
-        email: "info@muster.de",
-        telefon: "0123456789",
-        aktiv: true
-    },
-    {
-        id: 2,
-        name: "Beispiel AG",
-        kontakt: "Anna Beispiel",
-        email: "kontakt@beispiel.de",
-        telefon: "0987654321",
-        aktiv: true
-    }
-];
+import { kunden } from "./mockup/mockData";
+import { createCRUDService } from "./genericService";
 
-export function getKunden(){
-    return kunden;
-}
+// Nutze den generischen Service für Kunden
+const kundenService = createCRUDService("kunden", kunden);
 
-export function addKunde(kunde){
-    kunde.id = Date.now();
-    kunden.push(kunde);
-}
+// Expose API für Backward-Compatibility
+export const getKunden = () => kundenService.getAll();
+export const addKunde = (kunde) => kundenService.add(kunde);
+export const updateKunde = (kunde) => kundenService.update(kunde);
+export const deleteKunde = (id) => kundenService.delete(id);
+export const getKundeById = (id) => kundenService.getById(id);
+export const searchKunden = (query) => kundenService.search(query);
 
-export function updateKunde(kunde){
-
-    const index = kunden.findIndex(k => k.id === kunde.id);
-
-    if(index >= 0)
-        kunden[index] = kunde;
-
-}
-
-export function deleteKunde(id){
-
-    kunden = kunden.filter(k => k.id !== id);
-
-}
+// Export Service für direkten Zugriff
+export default kundenService;

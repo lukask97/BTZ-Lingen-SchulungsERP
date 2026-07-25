@@ -1,218 +1,181 @@
-import {useState} from "react";
 import DataTable from "../components/DataTable";
 import Dialog from "../components/Dialog";
-import {permissions} from "../services/permissionService";
-import PermissionButton from "../components/PermissionButton";
-
-
+import TextField from "../components/form/TextField";
 import Checkbox from "../components/form/Checkbox";
 import Label from "../components/form/Label";
-import TextField from "../components/form/TextField";
 
-import {
-    getRollen, addRolle, updateRolle, deleteRolle
-} from "../services/roleService";
+import { getColumns, getAllColumns } from "../services/metadataService";
+import useAuth from "../auth/AuthContext";
+import { useCRUDPage } from "../hooks/useCRUDPage";
+import rollenService from "../services/rollenService";
+import { INITIAL_DATA, PAGE_CONFIG, PERMISSION_GROUPS } from "../constants/schemas";
+import { useState, useMemo } from "react";
 
 export default function Rollen() {
+    const { user } = useAuth();
+    const config = PAGE_CONFIG.rollen;
+    
+    const {
+        data,
+        allData,
+        open,
+        editMode,
+        pageSize,
+        search,
+        currentItem,
+        setOpen,
+        setPageSize,
+        setSearch,
+        setCurrentItem,
+        neu,
+        bearbeiten,
+        loeschen,
+        speichern,
+        handleClose
+    } = useCRUDPage(config.tableName, INITIAL_DATA.rollen, rollenService);
 
-    const [rollen, setRollen] = useState(getRollen());
-    const [open, setOpen] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [aktuelleRolle, setAktuelleRolle] = useState(null);
+    const columns = getColumns(config.tableName, user.username);
+    const allColumns = getAllColumns(config.tableName);
 
-    const [name, setName] = useState("");
-    const [rechte, setRechte] = useState([]);
-    const [selectedPermissions, setSelectedPermissions] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
 
+    const handleFieldChange = (field, value) => {
+        setCurrentItem({ ...currentItem, [field]: value });
+    };
 
-    const columns = [{field: "id", title: "Nr."}, {field: "name", title: "Rolle"}, {
-        field: "rechte", title: "Rechte", render: r => r.rechte.join(", ")
-    }];
+    const handleFilterChange = (filters) => {
+        setStatusFilter(filters.aktiv || "");
+    };
 
-
-    const permissionGroups = permissions.reduce((groups, permission) => {
-
-        if (!groups[permission.group]) {
-            groups[permission.group] = [];
+    const filteredDisplayData = useMemo(() => {
+        // Filter auf ungefilterte Daten anwenden
+        let filtered = allData;
+        if (statusFilter) {
+            filtered = filtered.filter(item => statusFilter === "aktiv" ? item.aktiv : !item.aktiv);
         }
+        // Dann Suche anwenden
+        if (search) {
+            filtered = filtered.filter(item =>
+                Object.values(item)
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
+            );
+        }
+        return filtered;
+    }, [allData, statusFilter, search]);
 
-        groups[permission.group].push(permission);
+    const rollenFilters = useMemo(() => [
+        {
+            name: "aktiv",
+            label: "Status",
+            options: [
+                { value: "aktiv", label: "Aktiv" },
+                { value: "inaktiv", label: "Inaktiv" }
+            ]
+        }
+    ], []);
 
-        return groups;
+    const handlePermissionToggle = (permission) => {
+        const permissions = currentItem.permissions || [];
+        if (permissions.includes(permission)) {
+            handleFieldChange("permissions", permissions.filter(p => p !== permission));
+        } else {
+            handleFieldChange("permissions", [...permissions, permission]);
+        }
+    };
 
-    }, {});
-
-    function toggleGroup(rights) {
-
-        const codes = rights.map(r => r.code);
-
-
-        const allSelected = codes.every(code => selectedPermissions.includes(code));
-
+    const handleGroupToggle = (groupPermissions) => {
+        const permissions = currentItem.permissions || [];
+        const groupKeys = groupPermissions.map(p => p.key);
+        const allSelected = groupKeys.every(key => permissions.includes(key));
 
         if (allSelected) {
-
-            setSelectedPermissions(selectedPermissions.filter(p => !codes.includes(p)));
-
+            handleFieldChange("permissions", permissions.filter(p => !groupKeys.includes(p)));
         } else {
-
-            setSelectedPermissions([...new Set([...selectedPermissions, ...codes])]);
-
+            const newPermissions = [...new Set([...permissions, ...groupKeys])];
+            handleFieldChange("permissions", newPermissions);
         }
-    }
+    };
 
-    function togglePermission(code) {
+    const isPermissionChecked = (permission) => {
+        return (currentItem.permissions || []).includes(permission);
+    };
 
-        if (selectedPermissions.includes(code)) {
-            setSelectedPermissions(selectedPermissions.filter(p => p !== code));
-        } else {
-            setSelectedPermissions([...selectedPermissions, code]);
-        }
+    const isGroupChecked = (groupPermissions) => {
+        const groupKeys = groupPermissions.map(p => p.key);
+        return groupKeys.every(key => isPermissionChecked(key));
+    };
 
-    }
+    return (
+        <>
+            <DataTable
+                title={config.title}
+                tableName={config.tableName}
+                username={user.username}
+                columns={columns}
+                allColumns={allColumns}
+                data={filteredDisplayData}
+                filters={rollenFilters}
+                onFilter={handleFilterChange}
+                searchable={true}
+                pageSize={pageSize}
+                onSearch={setSearch}
+                onPageSizeChange={setPageSize}
+                toolbarActions={[
+                    { name: "new", label: "Neue Rolle", permission: config.permissionCreate, onClick: neu }
+                ]}
+                rowActions={[
+                    { name: "edit", label: "Bearbeiten", permission: config.permissionEdit, onClick: bearbeiten },
+                    { name: "delete", label: "Löschen", permission: config.permissionEdit, onClick: loeschen }
+                ]}
+                page={1}
+            />
 
-    function loeschen(r) {
+            <Dialog
+                open={open}
+                title={editMode ? "Rolle bearbeiten" : "Neue Rolle"}
+                onClose={handleClose}
+            >
+                <Label required>Name</Label>
+                <TextField value={currentItem.name} onChange={v => handleFieldChange("name", v)} />
 
-        if (window.confirm("Rolle " + r.name + " löschen?")) {
-            deleteRolle(r.id);
-            setRollen(getRollen());
+                <Label>Beschreibung</Label>
+                <TextField value={currentItem.beschreibung} onChange={v => handleFieldChange("beschreibung", v)} />
 
-        }
-
-    }
-
-    function rechteAendern(code) {
-
-        if (rechte.includes(code)) {
-            setRechte(rechte.filter(r => r !== code));
-        } else {
-            setRechte([...rechte, code]);
-        }
-    }
-
-
-    function speichern() {
-
-        const rolle = {
-            id: Date.now(),
-            name: name,
-            rechte: selectedPermissions
-
-        };
-        console.log(rolle);
-        setOpen(false);
-
-    }
-
-    function neueRolle() {
-        setEditMode(false);
-        setAktuelleRolle(null);
-        setName("");
-        setRechte([]);
-        setOpen(true);
-    }
-
-
-    function bearbeiten(r) {
-        setEditMode(true);
-        setAktuelleRolle(r);
-        setName(r.name);
-        setRechte(r.rechte);
-        setOpen(true);
-    }
-
-    return (<>
-        <DataTable
-            title="Rollenverwaltung"
-            columns={columns}
-            data={rollen}
-            toolbarActions={[{
-                name: "new", label: "Neue Rolle", permission: "rolle.verwalten", onClick: () => setOpen(true)
-            }]}
-
-            rowActions={[{
-                name: "edit", label: "Bearbeiten", permission: "rolle.verwalten", onClick: bearbeiten
-            }, {
-                name: "delete", label: "Löschen", permission: "rolle.verwalten", onClick: loeschen
-            }]}
-
-            page={1}
-
-        />
-
-        <Dialog
-
-            open={open}
-
-            title="Neue Rolle"
-
-            onClose={() => setOpen(false)}
-
-            footer={
-
-                <>
-
-                    <button
-                        onClick={() => setOpen(false)}
-                    >
-                        Abbrechen
-                    </button>
-
-
-                    <button
-                        onClick={speichern}
-                    >
-                        Speichern
-                    </button>
-
-                </>
-
-            }
-
-        >
-
-
-            <div>
-
-                <Label required>Rollenname</Label>
-
-                <TextField
-                    value={name}
-                    onChange={setName}
-                />
-
-            </div>
-
-
-            <h3>
-                Berechtigungen
-            </h3>
-
-
-            {Object.entries(permissionGroups).map(([group, rights]) => (
-                <div key={group} className="permission-group">
-
-                    <Checkbox
-                        checked={rights.every(r => selectedPermissions.includes(r.code))}
-                        onChange={() => toggleGroup(rights)}
-                    >
-                        <strong>{group}</strong>
-                    </Checkbox>
-
-                    <div className="permission-list">
-                        {rights.map(permission => (
-                            <Checkbox
-                                key={permission.code}
-                                checked={selectedPermissions.includes(permission.code)}
-                                onChange={() => togglePermission(permission.code)}
-                            >
-                                {permission.text}
-                            </Checkbox>
+                <div className="form-row">
+                    <Label>Berechtigungen</Label>
+                    <div style={{ marginTop: "1rem", marginBottom: "1rem", border: "1px solid #ddd", padding: "1rem", borderRadius: "4px", maxHeight: "400px", overflowY: "auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+                        {Object.entries(PERMISSION_GROUPS).map(([groupName, groupPermissions]) => (
+                            <div key={groupName}>
+                                <div style={{ marginBottom: "0.5rem" }}>
+                                    <Checkbox
+                                        checked={isGroupChecked(groupPermissions)}
+                                        onChange={() => handleGroupToggle(groupPermissions)}
+                                    >
+                                        <strong>{groupName}</strong>
+                                    </Checkbox>
+                                </div>
+                                <div style={{ marginLeft: "2rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                                    {groupPermissions.map(permission => (
+                                        <Checkbox
+                                            key={permission.key}
+                                            checked={isPermissionChecked(permission.key)}
+                                            onChange={() => handlePermissionToggle(permission.key)}
+                                        >
+                                            {permission.label}
+                                        </Checkbox>
+                                    ))}
+                                </div>
+                            </div>
                         ))}
                     </div>
-
                 </div>
-            ))}
-        </Dialog>
-    </>);
+
+                <div className="form-row">
+                    <button onClick={speichern}>Speichern</button>
+                </div>
+            </Dialog>
+        </>
+    );
 }
