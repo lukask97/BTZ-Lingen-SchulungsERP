@@ -12,11 +12,24 @@ import Rechnungen from "../pages/Rechnungen";
 import Benutzer from "../pages/Benutzer";
 import Rollen from "../pages/Rollen";
 import Rechte from "../pages/Rechte";
+import Lieferanten from "../pages/Lieferanten";
+import Bestellungen from "../pages/Bestellungen";
+import Wareneingaenge from "../pages/Wareneingaenge";
+import Angebote from "../pages/Angebote";
+import Auftraege from "../pages/Auftraege";
+import Reklamationen from "../pages/Reklamationen";
+import Organisation from "../pages/Organisation";
+import Buchhaltung from "../pages/Buchhaltung";
+import Marketing from "../pages/Marketing";
 
 
 import ProtectedRoute from "../auth/ProtectedRoute";
 
 function AppRouter() {
+
+    const protectedPage = (access, element) => (
+        <ProtectedRoute access={access}>{element}</ProtectedRoute>
+    );
 
     return (<BrowserRouter>
         <Routes>
@@ -42,33 +55,40 @@ function AppRouter() {
                 />
                 <Route
                     path="kunden"
-                    element={<Kunden/>}
+                    element={protectedPage("kunde", <Kunden/>)}
                 />
+                <Route path="lieferanten" element={protectedPage("einkauf", <Lieferanten/>)}/>
+                <Route path="bestellungen" element={protectedPage("einkauf", <Bestellungen/>)}/>
+                <Route path="wareneingaenge" element={protectedPage("lager", <Wareneingaenge/>)}/>
+                <Route path="angebote" element={protectedPage("verkauf", <Angebote/>)}/>
+                <Route path="auftraege" element={protectedPage("verkauf", <Auftraege/>)}/>
+                <Route path="reklamationen" element={protectedPage("service", <Reklamationen/>)}/>
+                <Route path="organisation" element={protectedPage("organisation", <Organisation/>)}/>
+                <Route path="buchhaltung" element={protectedPage("buchhaltung", <Buchhaltung/>)}/>
+                <Route path="marketing" element={protectedPage("marketing", <Marketing/>)}/>
                 <Route
                     path="artikel"
-                    element={<Artikel/>}
+                    element={protectedPage("artikel", <Artikel/>)}
                 />
                 <Route
                     path="lager"
-                    element={<Lager/>}
+                    element={protectedPage("lager", <Lager/>)}
                 />
                 <Route
                     path="rechnungen"
-                    element={<Rechnungen/>}
+                    element={protectedPage("rechnung", <Rechnungen/>)}
                 />
                 <Route
                     path="benutzer"
-                    element={<Benutzer/>}
+                    element={protectedPage("benutzer", <Benutzer/>)}
                 />
                 <Route
                     path="rollen"
-                    element={<ProtectedRoute access="rolle.verwalten">
-                        <Rollen/>
-                    </ProtectedRoute>}
+                    element={protectedPage("rollen", <Rollen/>)}
                 />
                 <Route
                     path="rechte"
-                    element={<Rechte/>}
+                    element={protectedPage("rollen", <Rechte/>)}
                 />
             </Route>
         </Routes>

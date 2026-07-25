@@ -1,6 +1,18 @@
 export const feldMetadaten = [
 
     // ======================
+    // Lieferanten
+    // ======================
+    { tabelle: "lieferanten", feld: "lieferantenNr", anzeigename: "Lieferantennummer", reihenfolge: 1, sichtbar: true },
+    { tabelle: "lieferanten", feld: "firma", anzeigename: "Firma", reihenfolge: 2, sichtbar: true },
+    { tabelle: "lieferanten", feld: "anschrift", anzeigename: "Anschrift", reihenfolge: 3, sichtbar: true },
+    { tabelle: "lieferanten", feld: "plz", anzeigename: "PLZ", reihenfolge: 4, sichtbar: true },
+    { tabelle: "lieferanten", feld: "ort", anzeigename: "Ort", reihenfolge: 5, sichtbar: true },
+    { tabelle: "lieferanten", feld: "segment", anzeigename: "Segment", reihenfolge: 6, sichtbar: true },
+    { tabelle: "lieferanten", feld: "fuerBts", anzeigename: "Für BTS", reihenfolge: 7, sichtbar: true },
+    { tabelle: "lieferanten", feld: "bewertung", anzeigename: "Bewertung (1–5)", reihenfolge: 8, sichtbar: true },
+
+    // ======================
     // Kunden
     // ======================
 
@@ -87,7 +99,7 @@ export const feldMetadaten = [
 
     {
         tabelle: "artikel",
-        feld: "bezeichnung",
+        feld: "name",
         anzeigename: "Bezeichnung",
         beschreibung: "Artikelname",
         reihenfolge: 2,
@@ -105,11 +117,11 @@ export const feldMetadaten = [
 
     {
         tabelle: "artikel",
-        feld: "lagerbestand",
+        feld: "bestand",
         anzeigename: "Bestand",
         beschreibung: "Aktueller Lagerbestand",
         reihenfolge: 4,
-        sichtbar: false
+        sichtbar: true
     },
 
     // ======================

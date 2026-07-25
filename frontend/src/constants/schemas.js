@@ -1,5 +1,17 @@
 // Initiale Datenstrukturen für alle Tabellen
 export const INITIAL_DATA = {
+    lieferanten: {
+        id: null,
+        lieferantenNr: "",
+        firma: "",
+        anschrift: "",
+        plz: "",
+        ort: "",
+        segment: "",
+        fuerBts: "",
+        bewertung: 3,
+        aktiv: true
+    },
     kunden: {
         id: null,
         kundenNr: "",
@@ -128,6 +140,12 @@ export const PERMISSION_GROUPS = {
 
 // Page-Konfigurationen
 export const PAGE_CONFIG = {
+    lieferanten: {
+        title: "Lieferantenverwaltung",
+        tableName: "lieferanten",
+        permissionCreate: "einkauf.bearbeiten",
+        permissionEdit: "einkauf.bearbeiten"
+    },
     kunden: {
         title: "Kundenverwaltung",
         tableName: "kunden",

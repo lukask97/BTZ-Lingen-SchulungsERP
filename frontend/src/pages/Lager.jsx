@@ -9,6 +9,7 @@ import { useCRUDPage } from "../hooks/useCRUDPage";
 import lagerService from "../services/lagerService";
 import { INITIAL_DATA, PAGE_CONFIG } from "../constants/schemas";
 import { useState, useMemo } from "react";
+import OverviewCards from "../components/OverviewCards";
 
 export default function Lager() {
     const { user } = useAuth();
@@ -75,8 +76,16 @@ export default function Lager() {
         }
     ], []);
 
+    const aktiveLager = allData.filter(item => item.aktiv).length;
+    const kapazitaet = allData.reduce((summe, item) => summe + Number(item.kapazitaet || 0), 0);
+
     return (
         <>
+            <OverviewCards cards={[
+                { label: "Lager gesamt", value: allData.length },
+                { label: "Aktive Lager", value: aktiveLager },
+                { label: "Gesamtkapazität", value: kapazitaet }
+            ]}/>
             <DataTable
                 title={config.title}
                 tableName={config.tableName}

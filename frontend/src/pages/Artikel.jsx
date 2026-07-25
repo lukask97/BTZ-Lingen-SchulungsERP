@@ -38,6 +38,7 @@ export default function Artikel() {
     const allColumns = getAllColumns(config.tableName);
 
     const [categoryFilter, setCategoryFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
 
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
@@ -45,6 +46,7 @@ export default function Artikel() {
 
     const handleFilterChange = (filters) => {
         setCategoryFilter(filters.kategorie || "");
+        setStatusFilter(filters.aktiv || "");
     };
 
     const filteredDisplayData = useMemo(() => {
@@ -52,6 +54,9 @@ export default function Artikel() {
         let filtered = allData;
         if (categoryFilter) {
             filtered = filtered.filter(item => item.kategorie === categoryFilter);
+        }
+        if (statusFilter) {
+            filtered = filtered.filter(item => statusFilter === "aktiv" ? item.aktiv : !item.aktiv);
         }
         // Dann Suche anwenden
         if (search) {
@@ -63,16 +68,24 @@ export default function Artikel() {
             );
         }
         return filtered;
-    }, [allData, categoryFilter, search]);
+    }, [allData, categoryFilter, statusFilter, search]);
 
     const artikelFilters = useMemo(() => [
         {
             name: "kategorie",
             label: "Kategorie",
             options: [
-                { value: "Fahrrad", label: "Fahrrad" },
-                { value: "Kleidung", label: "Kleidung" },
+                { value: "Fahrräder", label: "Fahrräder" },
+                { value: "Bekleidung", label: "Bekleidung" },
                 { value: "Zubehör", label: "Zubehör" }
+            ]
+        },
+        {
+            name: "aktiv",
+            label: "Status",
+            options: [
+                { value: "aktiv", label: "Aktiv" },
+                { value: "inaktiv", label: "Inaktiv" }
             ]
         }
     ], []);

@@ -1,3 +1,102 @@
 .dashboard {
     padding: 20px;
 }
+
+.dashboard-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.dashboard-heading h1 { margin: 0; }
+.dashboard-heading p { margin-bottom: 0; }
+
+.secondary-button {
+    background: #fff;
+    border: 1px solid #1976d2;
+    color: #1976d2;
+    white-space: nowrap;
+}
+
+.secondary-button:hover { background: #eef5ff; }
+.kennzahlen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.kennzahl {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 18px;
+}
+
+.kennzahl span {
+    display: block;
+    color: #555;
+}
+
+.kennzahl strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 30px;
+    color: #1565c0;
+}
+
+.kennzahl small {
+    display: block;
+    margin-top: 4px;
+    color: #555;
+    font-size: 15px;
+}
+
+.buchhaltung-liste {
+    margin-top: 28px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.buchhaltung-liste h2 { margin-top: 0; }
+.buchhaltung-liste li { margin: 8px 0; }
+
+.button-link {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 14px;
+    border-radius: 4px;
+    background: #1976d2;
+    color: #fff;
+    text-decoration: none;
+}
+
+.prozess-einstiege { margin-top: 32px; }
+.prozess-einstiege h2 { margin-bottom: 12px; }
+
+.prozess-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+}
+
+.prozess-karte {
+    display: flex;
+    flex-direction: column;
+    min-height: 170px;
+    padding: 18px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.prozess-karte h3 { margin: 0; }
+.prozess-karte p { flex: 1; color: #555; }
+.prozess-karte a { color: #1565c0; font-weight: 600; }
+
+@media (max-width: 600px) {
+    .dashboard-heading { flex-direction: column; }
+}

@@ -11,6 +11,7 @@ import { useCRUDPage } from "../hooks/useCRUDPage";
 import kundenService from "../services/customerService";
 import { INITIAL_DATA, PERMISSIONS, PAGE_CONFIG } from "../constants/schemas";
 import { useState, useMemo } from "react";
+import OverviewCards from "../components/OverviewCards";
 
 export default function Kunden() {
     const { user } = useAuth();
@@ -88,8 +89,15 @@ export default function Kunden() {
         }
     ], []);
 
+    const aktiveKunden = allData.filter(item => item.aktiv).length;
+
     return (
         <>
+            <OverviewCards cards={[
+                { label: "Kunden gesamt", value: allData.length },
+                { label: "Aktive Kunden", value: aktiveKunden },
+                { label: "Inaktive Kunden", value: allData.length - aktiveKunden }
+            ]}/>
             <DataTable
                 title={config.title}
                 tableName={config.tableName}

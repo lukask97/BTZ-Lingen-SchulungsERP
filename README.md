@@ -45,6 +45,8 @@ Die Anwendung ist danach erreichbar unter:
 
     http://localhost:5173
 
+Eine geführte Vorstellung mit Testkonten und Klickpfaden steht in [docs/DEMO.md](docs/DEMO.md).
+
 ------------------------------------------------------------------------
 
 # Projektstruktur

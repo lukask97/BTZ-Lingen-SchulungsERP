@@ -1,4 +1,5 @@
 @import "./components.css";
+@import "./dashboard.css";
 
 * {
     box-sizing: border-box;
@@ -38,6 +39,14 @@ body {
 
 .sidebar h2 {
     margin-top: 0;
+}
+
+.sidebar-brand {
+    margin: 0 0 16px;
+    padding: 0 !important;
+    color: #1976d2 !important;
+    font-size: 24px;
+    font-weight: 700;
 }
 
 .sidebar a {

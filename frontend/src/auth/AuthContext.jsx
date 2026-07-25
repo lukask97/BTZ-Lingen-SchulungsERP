@@ -49,7 +49,7 @@ export function AuthProvider({children}) {
         if (user.permissions.includes("*")) return true;
 
 
-        return user.permissions.some(p => access === p || access.startsWith(p + "."));
+        return user.permissions.some(p => p === access || p.startsWith(access + "."));
     }
 
 

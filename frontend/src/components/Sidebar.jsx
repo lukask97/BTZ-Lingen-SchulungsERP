@@ -5,34 +5,83 @@ import useAuth from "../auth/AuthContext";
 
 const menu = [
     {
+        title: "Dashboard",
+        path: "/"
+    },
+    {
+        title: "Organisation",
+        path: "/organisation",
+        access: "organisation"
+    },
+    {
+        title: "Buchhaltung",
+        path: "/buchhaltung",
+        access: "buchhaltung"
+    },
+    {
+        title: "Lieferanten",
+        path: "/lieferanten",
+        access: "einkauf"
+    },
+    {
+        title: "Bestellungen",
+        path: "/bestellungen",
+        access: "einkauf"
+    },
+    {
+        title: "Wareneingänge",
+        path: "/wareneingaenge",
+        access: "lager"
+    },
+    {
+        title: "Angebote",
+        path: "/angebote",
+        access: "verkauf"
+    },
+    {
+        title: "Aufträge",
+        path: "/auftraege",
+        access: "verkauf"
+    },
+    {
+        title: "Reklamationen",
+        path: "/reklamationen",
+        access: "service"
+    },
+    {
+        title: "Marketing",
+        path: "/marketing",
+        access: "marketing"
+    },
+    {
         title: "Kunden",
         path: "/kunden",
-        permission: "kunde"
+        access: "kunde"
     },
     {
         title: "Artikel",
         path: "/artikel",
-        permission: "artikel"
+        access: "artikel"
     },
     {
         title: "Lager",
         path: "/lager",
-        permission: "lager"
+        access: "lager"
     },
     {
         title: "Rechnungen",
         path: "/rechnungen",
-        permission: "rechnung"
+        access: "rechnung"
     },
     {
         title: "Benutzer",
         path: "/benutzer",
-        permission: "benutzer"
+        access: "benutzer"
     },
     {
         title: "Rollen",
         path: "/rollen",
-        permission: "rolle"
+        access: "rollen"
     }
 ];
 
@@ -46,7 +95,7 @@ export default function Sidebar() {
 
         <nav className="sidebar">
 
-            <h2>ERP</h2>
+            <Link className="sidebar-brand" to="/">ERP</Link>
             {
                 menu.map(item =>
 
