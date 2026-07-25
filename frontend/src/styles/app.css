@@ -1,0 +1,72 @@
+@import "./components.css";
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Segoe UI, Arial, sans-serif;
+    background: #f3f5f7;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+.header {
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+}
+
+.sidebar {
+    width: 230px;
+    background: #fff;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    margin-top: 0;
+}
+
+.sidebar a {
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+}
+
+.sidebar a:hover {
+    background: #eef5ff;
+}
+
+.sidebar-user {
+    margin-top: auto;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+
+.sidebar button {
+    margin-top: 15px;
+    width: 100%;
+}
+
+.table-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.table-actions button {
+    width: 110px;
+}
