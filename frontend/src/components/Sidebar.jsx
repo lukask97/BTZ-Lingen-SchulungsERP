@@ -1,94 +1,25 @@
-import {Link} from "react-router-dom";
+import { useState } from "react";
+import {Link, useLocation} from "react-router-dom";
 import Can from "../auth/Can";
-import useAuth from "../auth/AuthContext";
-
-
-const menu = [
-    {
-        title: "Dashboard",
-        path: "/"
-    },
-    {
-        title: "Organisation",
-        path: "/organisation",
-        access: "organisation"
-    },
-    {
-        title: "Buchhaltung",
-        path: "/buchhaltung",
-        access: "buchhaltung"
-    },
-    {
-        title: "Lieferanten",
-        path: "/lieferanten",
-        access: "einkauf"
-    },
-    {
-        title: "Bestellungen",
-        path: "/bestellungen",
-        access: "einkauf"
-    },
-    {
-        title: "Wareneingänge",
-        path: "/wareneingaenge",
-        access: "lager"
-    },
-    {
-        title: "Angebote",
-        path: "/angebote",
-        access: "verkauf"
-    },
-    {
-        title: "Aufträge",
-        path: "/auftraege",
-        access: "verkauf"
-    },
-    {
-        title: "Reklamationen",
-        path: "/reklamationen",
-        access: "service"
-    },
-    {
-        title: "Marketing",
-        path: "/marketing",
-        access: "marketing"
-    },
-    {
-        title: "Kunden",
-        path: "/kunden",
-        access: "kunde"
-    },
-    {
-        title: "Artikel",
-        path: "/artikel",
-        access: "artikel"
-    },
-    {
-        title: "Lager",
-        path: "/lager",
-        access: "lager"
-    },
-    {
-        title: "Rechnungen",
-        path: "/rechnungen",
-        access: "rechnung"
-    },
-    {
-        title: "Benutzer",
-        path: "/benutzer",
-        access: "benutzer"
-    },
-    {
-        title: "Rollen",
-        path: "/rollen",
-        access: "rollen"
-    }
-];
+import useAuth from "../auth/useAuth";
+import { NAVIGATION_GROUPS, SCENARIO_MENU, SCENARIO_OVERVIEW } from "../constants/navigation";
 
 
 export default function Sidebar() {
 
     const {user, logout} = useAuth();
+    const location = useLocation();
+    const [collapsedGroups, setCollapsedGroups] = useState(() => Object.fromEntries(
+        NAVIGATION_GROUPS.map(group => {
+            const matchesGroup = location.pathname === group.overviewPath || group.items.some(item => location.pathname === item.path);
+            return [group.key, !matchesGroup];
+        })
+    ));
+    const [scenariosCollapsed, setScenariosCollapsed] = useState(() => !location.pathname.startsWith("/szenarien") && location.pathname !== SCENARIO_OVERVIEW.path);
+
+    const toggleGroup = (key) => {
+        setCollapsedGroups(current => ({ ...current, [key]: !current[key] }));
+    };
 
 
     return (
@@ -96,19 +27,45 @@ export default function Sidebar() {
         <nav className="sidebar">
 
             <Link className="sidebar-brand" to="/">ERP</Link>
-            {
-                menu.map(item =>
-
-                    <Can
-                        key={item.path}
-                        access={item.access}
-                    >
-                        <Link to={item.path}>
-                            {item.title}
-                        </Link>
+            {NAVIGATION_GROUPS.map(group => <div key={group.title} className="sidebar-group">
+                <div className="sidebar-section-row">
+                    <Can access={group.access}>
+                        <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>
                     </Can>
-                )
-            }
+                    <button type="button" className="sidebar-toggle" onClick={() => toggleGroup(group.key)}>
+                        {collapsedGroups[group.key] ? "▸" : "▾"}
+                    </button>
+                </div>
+                <div className={`sidebar-group-links ${collapsedGroups[group.key] ? "is-collapsed" : ""}`}>
+                    {group.items.map(item =>
+                        <Can
+                            key={item.path}
+                            access={item.access}
+                        >
+                            <Link to={item.path}>
+                                {item.title}
+                            </Link>
+                        </Can>
+                    )}
+                </div>
+            </div>)}
+            <div className="sidebar-group">
+                <div className="sidebar-section-row">
+                    <Link className="sidebar-section-title sidebar-section-link" to={SCENARIO_OVERVIEW.path}>{SCENARIO_OVERVIEW.title}</Link>
+                    <button type="button" className="sidebar-toggle" onClick={() => setScenariosCollapsed(current => !current)}>
+                        {scenariosCollapsed ? "▸" : "▾"}
+                    </button>
+                </div>
+                <div className={`sidebar-group-links sidebar-group-links-scenarios ${scenariosCollapsed ? "is-collapsed" : ""}`}>
+                    {SCENARIO_MENU.map(item =>
+                        <Can key={item.path} access={item.access}>
+                            <Link className="sidebar-scenario-link" to={item.path}>
+                                {item.title}
+                            </Link>
+                        </Can>
+                    )}
+                </div>
+            </div>
 
             <div className="sidebar-user">
                 Angemeldet als:

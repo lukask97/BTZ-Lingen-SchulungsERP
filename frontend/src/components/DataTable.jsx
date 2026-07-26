@@ -1,6 +1,27 @@
 import {useEffect, useState} from "react";
 import PermissionButton from "./PermissionButton";
+import Dialog from "./Dialog";
 import {saveUserColumns, getUserColumns} from "../services/metadataService";
+
+function resolveActionVariant(action) {
+    if (action.variant) return action.variant;
+
+    const name = String(action.name || "").toLowerCase();
+
+    if (["edit", "new", "create"].includes(name)) return "secondary";
+    if (["delete", "remove", "reject", "cancel"].includes(name)) return "danger";
+    if (["approve", "done", "start", "ship", "invite", "favorite", "book"].includes(name)) return "success";
+    if (["remind"].includes(name)) return "warning";
+
+    return "primary";
+}
+
+function formatDetailLabel(key) {
+    return String(key)
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .replace(/_/g, " ")
+        .replace(/^./, char => char.toUpperCase());
+}
 
 export default function DataTable({
 
@@ -24,7 +45,7 @@ export default function DataTable({
 
                                       selectableColumns = true,
 
-                                      onColumnsChange,
+                                      onColumnsChange: _onColumnsChange,
 
                                       showDetails = true, username, tableName,
                                       
@@ -42,8 +63,6 @@ export default function DataTable({
 
 
     const [showColumnMenu, setShowColumnMenu] = useState(false);
-    const availableColumns = columns;
-
     const [visibleColumns, setVisibleColumns] = useState([]);
 
 
@@ -284,6 +303,8 @@ export default function DataTable({
                             key={action.name}
 
                             permission={action.permission}
+                            variant={resolveActionVariant(action)}
+                            className={action.className}
 
                             onClick={action.onClick}
 
@@ -352,8 +373,8 @@ export default function DataTable({
 
                     <tr>
 
-                        <td colSpan={visibleColumns.length}>
-
+                        <td colSpan={visibleColumns.length + (rowActions.length > 0 ? 1 : 0)}>
+                        
                             Laden...
 
                         </td>
@@ -367,8 +388,8 @@ export default function DataTable({
 
                     <tr>
 
-                        <td colSpan={visibleColumns.length}>
-
+                        <td colSpan={visibleColumns.length + (rowActions.length > 0 ? 1 : 0)}>
+                        
                             Keine Daten vorhanden
 
                         </td>
@@ -420,15 +441,19 @@ export default function DataTable({
 
 
                                 <td>
-
-
-                                    {rowActions.map(action =>
+                                    <div className="table-actions">
+                                    {rowActions
+                                        .filter(action => action.isVisible ? action.isVisible(row) : true)
+                                        .map(action =>
 
                                         <PermissionButton
 
                                             key={action.name}
 
                                             permission={action.permission}
+                                            variant={resolveActionVariant(action)}
+                                            className={action.className}
+                                            disabled={action.isDisabled ? action.isDisabled(row) : false}
 
                                             onClick={(e) => {
 
@@ -443,8 +468,7 @@ export default function DataTable({
                                             {action.label}
 
                                         </PermissionButton>)}
-
-
+                                    </div>
                                 </td>
 
 
@@ -460,64 +484,23 @@ export default function DataTable({
             </table>
 
 
-            {detailOpen && detailData &&
-
-
-                <div className="detail-popup">
-
-
-                    <div className="detail-header">
-
-
-                        <h3>
-                            Details
-                        </h3>
-
-
-                        <button
-
-                            onClick={() => setDetailOpen(false)}
-
-                        >
-                            ✕
-                        </button>
-
-
-                    </div>
-
-
-                    <div className="detail-body">
-
-
-                        {Object.entries(detailData)
-                            .map(([key, value]) =>
-
-                                <div
-                                    className="detail-field"
-                                    key={key}
-                                >
-
-                                    <strong>
-                                        {key}
-                                    </strong>
-
-
-                                    <span>
-
-                                        {displayValue(value)}
-
-                                    </span>
-
-
-                                </div>)}
-
-
-                    </div>
-
-
+            <Dialog open={detailOpen && !!detailData} title="Details" onClose={() => setDetailOpen(false)}>
+                <div className="form-row detail-summary">
+                    <p>Ausgewählter Datensatz mit allen aktuell sichtbaren Informationen.</p>
                 </div>
-
-            }
+                {detailData && Object.entries(detailData).map(([key, value]) =>
+                    <div
+                        className="detail-field"
+                        key={key}
+                    >
+                        <span className="detail-label">
+                            {formatDetailLabel(key)}
+                        </span>
+                        <div className="detail-value">
+                            {displayValue(value)}
+                        </div>
+                    </div>)}
+            </Dialog>
 
 
             <div className="pagination">
@@ -525,6 +508,7 @@ export default function DataTable({
 
                 <button
 
+                    type="button"
                     disabled={page <= 1}
 
                     onClick={() => onPageChange && onPageChange(page - 1)}
@@ -541,6 +525,7 @@ export default function DataTable({
 
                 <button
 
+                    type="button"
                     disabled={page >= totalPages}
 
                     onClick={() => onPageChange && onPageChange(page + 1)}

@@ -4,7 +4,7 @@ import TextField from "../components/form/TextField";
 import Label from "../components/form/Label";
 
 import { getColumns, getAllColumns } from "../services/metadataService";
-import useAuth from "../auth/AuthContext";
+import useAuth from "../auth/useAuth";
 import { useCRUDPage } from "../hooks/useCRUDPage";
 import lagerService from "../services/lagerService";
 import { INITIAL_DATA, PAGE_CONFIG } from "../constants/schemas";
@@ -16,14 +16,12 @@ export default function Lager() {
     const config = PAGE_CONFIG.lager;
     
     const {
-        data,
         allData,
         open,
         editMode,
         pageSize,
         search,
         currentItem,
-        setOpen,
         setPageSize,
         setSearch,
         setCurrentItem,

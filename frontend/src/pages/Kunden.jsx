@@ -6,10 +6,10 @@ import Label from "../components/form/Label";
 import TextArea from "../components/form/TextArea";
 
 import { getColumns, getAllColumns } from "../services/metadataService";
-import useAuth from "../auth/AuthContext";
+import useAuth from "../auth/useAuth";
 import { useCRUDPage } from "../hooks/useCRUDPage";
 import kundenService from "../services/customerService";
-import { INITIAL_DATA, PERMISSIONS, PAGE_CONFIG } from "../constants/schemas";
+import { INITIAL_DATA, PAGE_CONFIG } from "../constants/schemas";
 import { useState, useMemo } from "react";
 import OverviewCards from "../components/OverviewCards";
 
@@ -19,14 +19,12 @@ export default function Kunden() {
     
     // Verwende den generischen Hook
     const {
-        data,
         allData,
         open,
         editMode,
         pageSize,
         search,
         currentItem,
-        setOpen,
         setPageSize,
         setSearch,
         setCurrentItem,

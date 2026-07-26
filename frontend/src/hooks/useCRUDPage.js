@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { getColumns, getAllColumns } from "../services/metadataService";
 
 /**
  * Generischer Hook für alle CRUD-Seiten
@@ -11,7 +10,7 @@ import { getColumns, getAllColumns } from "../services/metadataService";
  */
 export function useCRUDPage(tableName, initialData, services) {
     // States
-    const [data, setData] = useState(services.getAll());
+    const [data, setData] = useState(services.list());
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [pageSize, setPageSize] = useState(10);
@@ -43,8 +42,8 @@ export function useCRUDPage(tableName, initialData, services) {
     // Löschen-Aktion
     const loeschen = (item) => {
         if (confirm(`Möchten Sie diesen Eintrag wirklich löschen?`)) {
-            services.delete(item.id);
-            setData(services.getAll());
+            services.remove(item.id);
+            setData(services.list());
         }
     };
 
@@ -53,9 +52,9 @@ export function useCRUDPage(tableName, initialData, services) {
         if (editMode) {
             services.update(currentItem);
         } else {
-            services.add(currentItem);
+            services.create(currentItem);
         }
-        setData(services.getAll());
+        setData(services.list());
         setOpen(false);
     };
 

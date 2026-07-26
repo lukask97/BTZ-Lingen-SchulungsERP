@@ -194,7 +194,7 @@ export let users = [
         username: "lager",
         password: "lager",
         name: "Lager Mitarbeiter",
-        permissions: ["artikel.lesen", "lager.buchen", "einkauf.lesen"]
+        permissions: ["artikel.lesen", "lager.buchen", "lager.lesen", "einkauf.lesen", "einkauf.bearbeiten"]
     },
 
 
@@ -203,14 +203,14 @@ export let users = [
         username: "buchhaltung",
         password: "buchhaltung",
         name: "Buchhaltung",
-        permissions: ["kunde.lesen", "kunde.anlegen", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen"]
+        permissions: ["kunde.lesen", "kunde.anlegen", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
     },
     {
         id: 4,
         username: "marketing",
         password: "marketing",
         name: "Marketing Mitarbeiter",
-        permissions: ["marketing.lesen", "marketing.bearbeiten"]
+        permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
     }
 
 ];
@@ -228,6 +228,7 @@ export let lieferanten = [
         segment: "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
         fuerBts: "Alternativlieferant für Zubehör und Lastenbikes",
         bewertung: 4,
+        favorit: false,
         aktiv: true
     },
     {
@@ -240,6 +241,7 @@ export let lieferanten = [
         segment: "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
         fuerBts: "",
         bewertung: 5,
+        favorit: true,
         aktiv: true
     },
     {
@@ -252,6 +254,7 @@ export let lieferanten = [
         segment: "",
         fuerBts: "",
         bewertung: 3,
+        favorit: false,
         aktiv: true
     },
     {
@@ -264,6 +267,7 @@ export let lieferanten = [
         segment: "Klassischer Baumarkt mit Fahrradabteilung",
         fuerBts: "Soll Lieferant sein und Kunde",
         bewertung: 3,
+        favorit: false,
         aktiv: true
     }
 ];
@@ -309,7 +313,8 @@ export let reklamationen = [
 
 export let marketingaktionen = [
     { id: 1, typ: "Kampagne", titel: "Sommeraktion Lastenbikes", datum: "2026-08-01", status: "geplant", beschreibung: "Regionale Kampagne für Lastenbikes und Zubehör." },
-    { id: 2, typ: "Newsletter", titel: "Newsletter August", datum: "2026-08-05", status: "Entwurf", beschreibung: "Neue Fahrräder, Serviceangebote und Termine." }
+    { id: 2, typ: "Newsletter", titel: "Newsletter August", datum: "2026-08-05", status: "Entwurf", beschreibung: "Neue Fahrräder, Serviceangebote und Termine." },
+    { id: 3, typ: "Event", titel: "Betriebshoffest", datum: "2026-09-10", status: "geplant", beschreibung: "Schulungs- und Kundenevent mit Testfahrten." }
 ];
 
 export let abteilungen = [
@@ -322,4 +327,197 @@ export let abteilungen = [
     { id: 7, kuerzel: "MW-FP", name: "Fuhrpark", zuordnung: "B – Materialwirtschaft", aufgaben: ["Übersichten und Einsatzplanung", "TÜV und Papiere", "Miete, Leasing und Kauf"] },
     { id: 8, kuerzel: "IT", name: "IT und Kommunikation", zuordnung: "D – Stabsstelle unter Bürowesen", aufgaben: ["IT-Ausstattung", "Webshop, Flyer und Präsentationen", "Bilder und Gestaltung", "Schnittstelle für WW, BW und AGF"] },
     { id: 9, kuerzel: "AGF", name: "Stellvertretende Geschäftsführung", zuordnung: "Übergeordnet", aufgaben: ["Stellvertretende Leitung für die Geschäftsführung"] }
+];
+
+export let kundenanfragen = [
+    {
+        id: 1,
+        typ: "Produktanfrage",
+        kundeId: 1,
+        kunde: "Campus Baumarkt GmbH",
+        kanal: "Telefon",
+        status: "offen",
+        datum: "2026-07-24",
+        anliegen: "Frage nach Lieferzeiten für Sicherheitsjacken."
+    }
+];
+
+export let zahlungen = [
+    {
+        id: 1,
+        rechnungsnr: "RE-2024-001",
+        kunde: "Campus Baumarkt GmbH",
+        datum: "2026-07-22",
+        betrag: 1250.5,
+        methode: "Überweisung"
+    }
+];
+
+export let mahnungen = [
+    {
+        id: 1,
+        rechnungsnr: "RE-2024-002",
+        kunde: "Emsland Tourismus GmbH",
+        datum: "2026-07-23",
+        status: "gesendet",
+        stufe: "1. Mahnung"
+    }
+];
+
+export let belege = [
+    {
+        id: 1,
+        typ: "Rechnungskopie",
+        bezug: "RE-2024-001",
+        datum: "2026-07-21",
+        status: "archiviert",
+        beschreibung: "Digitale Ablage für die erste Beispielrechnung."
+    }
+];
+
+export let freigaben = [
+    {
+        id: 1,
+        titel: "Rabattfreigabe Großkunde",
+        bereich: "verkauf",
+        status: "offen",
+        verantwortung: "Geschäftsführung",
+        datum: "2026-07-25"
+    }
+];
+
+export let berichte = [
+    {
+        id: 1,
+        titel: "Wochenbericht Vertrieb",
+        bereich: "verkauf",
+        datum: "2026-07-25",
+        status: "fertig",
+        zusammenfassung: "3 offene Angebote, 1 neuer Auftrag, 1 Reklamation."
+    },
+    {
+        id: 2,
+        titel: "Lagerüberblick",
+        bereich: "logistik",
+        datum: "2026-07-25",
+        status: "Entwurf",
+        zusammenfassung: "Niedrige Bestände bei Lastenrädern und Helmen."
+    }
+];
+
+export let versandauftraege = [
+    {
+        id: 1,
+        versandNr: "LOG-2026-001",
+        auftrag: "VK-2026-1201",
+        kunde: "Campus Baumarkt GmbH",
+        datum: "2026-07-26",
+        status: "in Vorbereitung",
+        transport: "Spedition Nord"
+    }
+];
+
+export let retouren = [
+    {
+        id: 1,
+        retourenNr: "RET-2026-001",
+        kunde: "Emsland Tourismus GmbH",
+        artikel: "Fahrradhelm",
+        datum: "2026-07-25",
+        status: "eingegangen",
+        grund: "Transportschaden"
+    }
+];
+
+export let bewerber = [
+    {
+        id: 1,
+        name: "Lena Fischer",
+        stelle: "Kaufmännische Assistenz",
+        datum: "2026-07-20",
+        status: "eingegangen",
+        notiz: "Gute Vorkenntnisse in Excel und Kundenkontakt."
+    }
+];
+
+export let mitarbeiter = [
+    {
+        id: 1,
+        name: "Tom Berger",
+        abteilung: "Lager",
+        rolle: "Fachkraft",
+        eintritt: "2024-08-01",
+        status: "aktiv"
+    },
+    {
+        id: 2,
+        name: "Mira Koch",
+        abteilung: "Marketing",
+        rolle: "Koordinatorin",
+        eintritt: "2025-02-15",
+        status: "aktiv"
+    }
+];
+
+export let arbeitszeiten = [
+    {
+        id: 1,
+        mitarbeiter: "Tom Berger",
+        datum: "2026-07-25",
+        von: "08:00",
+        bis: "16:30",
+        status: "erfasst"
+    }
+];
+
+export let urlaubsantraege = [
+    {
+        id: 1,
+        mitarbeiter: "Mira Koch",
+        von: "2026-08-10",
+        bis: "2026-08-14",
+        tage: 5,
+        status: "offen"
+    }
+];
+
+export let schulungen = [
+    {
+        id: 1,
+        titel: "Produktschulung Lastenbikes",
+        zielgruppe: "Verkauf",
+        datum: "2026-08-18",
+        status: "geplant",
+        ort: "Seminarraum 2"
+    }
+];
+
+export let firmenkonto = [
+    {
+        id: 1,
+        datum: "2024-10-01",
+        betreff: "Stammkapitaleinzahlung",
+        info: "",
+        soll: 0,
+        haben: 25000,
+        saldo: 25000
+    },
+    {
+        id: 2,
+        datum: "",
+        betreff: "",
+        info: "",
+        soll: 0,
+        haben: 0,
+        saldo: 25000
+    },
+    {
+        id: 3,
+        datum: "",
+        betreff: "",
+        info: "",
+        soll: 0,
+        haben: 0,
+        saldo: 25000
+    }
 ];

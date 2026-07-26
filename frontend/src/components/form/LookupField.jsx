@@ -1,52 +1,79 @@
+import { useEffect, useMemo, useState } from "react";
+
 export default function LookupField({
-                                        value = "",
-                                        options = [],
-                                        onChange,
-                                        onCreate,
-                                        onEdit,
-                                        placeholder = "Bitte auswählen...",
-                                        disabled = false,
-                                        required = false
+    value = "",
+    options = [],
+    onChange,
+    onCreate,
+    onEdit,
+    placeholder = "Bitte auswählen...",
+    disabled = false,
+    required = false
+}) {
+    const [query, setQuery] = useState("");
+    const [open, setOpen] = useState(false);
 
-                                    }) {
+    const selectedOption = options.find(option => String(option.value) === String(value));
 
-    return (<div className="lookup-field">
+    useEffect(() => {
+        setQuery(selectedOption?.label || "");
+    }, [selectedOption?.label]);
 
-            <select
-                value={value}
+    const filteredOptions = useMemo(() => {
+        const normalizedQuery = query.trim().toLowerCase();
+        if (!normalizedQuery) return options;
+        return options.filter(option => option.label.toLowerCase().includes(normalizedQuery));
+    }, [options, query]);
+
+    const selectOption = (option) => {
+        setQuery(option.label);
+        setOpen(false);
+        if (onChange) onChange(String(option.value));
+    };
+
+    return <div className="lookup-field">
+        <div className="lookup-input-wrapper">
+            <input
+                value={query}
                 disabled={disabled}
                 required={required}
-                onChange={e => onChange && onChange(e.target.value)}
-            >
-                <option value="">
-                    {placeholder}
-                </option>
-
-                {options.map(option => (<option
+                placeholder={placeholder}
+                onFocus={() => setOpen(true)}
+                onChange={(event) => {
+                    setQuery(event.target.value);
+                    setOpen(true);
+                    if (!event.target.value && onChange) onChange("");
+                }}
+            />
+            {open && !disabled && <div className="lookup-dropdown">
+                {filteredOptions.length === 0 ? <div className="lookup-empty">Keine Treffer</div> :
+                    filteredOptions.map(option => <button
                         key={option.value}
-                        value={option.value}
+                        type="button"
+                        className="lookup-option"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => selectOption(option)}
                     >
                         {option.label}
-                    </option>))}
-            </select>
+                    </button>)}
+            </div>}
+        </div>
 
-            {onCreate && <button
-                type="button"
-                onClick={onCreate}
-                title="Neu anlegen"
-            >
-                +
-            </button>}
+        {onCreate && <button
+            type="button"
+            onClick={onCreate}
+            title="Neu anlegen"
+        >
+            +
+        </button>}
 
-            {onEdit && <button
-                type="button"
-                disabled={!value}
-                onClick={() => onEdit(value)}
-                title="Bearbeiten"
-            >
-                ✎
-            </button>}
-
-        </div>);
-
+        {onEdit && <button
+            type="button"
+            disabled={!value}
+            onClick={() => onEdit(value)}
+            title="Bearbeiten"
+        >
+            ✎
+        </button>}
+    </div>;
 }

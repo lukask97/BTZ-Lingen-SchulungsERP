@@ -2,6 +2,7 @@ import { useState } from "react";
 import DataTable from "../components/DataTable";
 import Dialog from "../components/Dialog";
 import Label from "../components/form/Label";
+import LookupField from "../components/form/LookupField";
 import NumberField from "../components/form/NumberField";
 import angeboteService, { naechsteAngebotsnummer } from "../services/angeboteService";
 import kundenService from "../services/customerService";
@@ -23,6 +24,8 @@ export default function Angebote() {
     const [statusFilter, setStatusFilter] = useState("");
     const kunden = kundenService.getAll().filter(item => item.aktiv);
     const artikel = artikelService.getAll().filter(item => item.aktiv);
+    const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
+    const artikelOptionen = artikel.map(item => ({ value: String(item.id), label: `${item.artikelNr} - ${item.name} (${Number(item.preis).toFixed(2)} €)` }));
 
     const neu = () => {
         setKundeId(kunden[0]?.id ? String(kunden[0].id) : "");
@@ -89,11 +92,9 @@ export default function Angebote() {
             onFilter={filters => setStatusFilter(filters.status || "")}
         />
         <Dialog open={offen} title="Neues Angebot" onClose={() => setOffen(false)}>
-            <div><Label required>Kunde</Label><select value={kundeId} onChange={event => setKundeId(event.target.value)}>
-                <option value="">Bitte wählen</option>{kunden.map(item => <option key={item.id} value={item.id}>{item.firma}</option>)}</select></div>
+            <div><Label required>Kunde</Label><LookupField value={kundeId} options={kundenOptionen} onChange={setKundeId} placeholder="Kunde suchen..."/></div>
             <div><Label>Datum</Label><input type="date" value={heute()} disabled/></div>
-            <div className="form-row bestellposition-hinzufuegen"><div><Label>Artikel</Label><select value={artikelId} onChange={event => setArtikelId(event.target.value)}>
-                <option value="">Bitte wählen</option>{artikel.map(item => <option key={item.id} value={item.id}>{item.name} ({Number(item.preis).toFixed(2)} €)</option>)}</select></div>
+            <div className="form-row bestellposition-hinzufuegen"><div><Label>Artikel</Label><LookupField value={artikelId} options={artikelOptionen} onChange={setArtikelId} placeholder="Artikel suchen..."/></div>
                 <div><Label>Menge</Label><NumberField value={menge} min="1" onChange={wert => setMenge(Number(wert))}/></div>
                 <button type="button" onClick={positionHinzufuegen}>Position hinzufügen</button></div>
             <div className="form-row"><Label required>Angebotspositionen</Label>

@@ -5,7 +5,7 @@ import Checkbox from "../components/form/Checkbox";
 import Label from "../components/form/Label";
 
 import { getColumns, getAllColumns } from "../services/metadataService";
-import useAuth from "../auth/AuthContext";
+import useAuth from "../auth/useAuth";
 import { useCRUDPage } from "../hooks/useCRUDPage";
 import rollenService from "../services/rollenService";
 import { INITIAL_DATA, PAGE_CONFIG, PERMISSION_GROUPS } from "../constants/schemas";
@@ -16,14 +16,12 @@ export default function Rollen() {
     const config = PAGE_CONFIG.rollen;
     
     const {
-        data,
         allData,
         open,
         editMode,
         pageSize,
         search,
         currentItem,
-        setOpen,
         setPageSize,
         setSearch,
         setCurrentItem,

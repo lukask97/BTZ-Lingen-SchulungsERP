@@ -2,6 +2,7 @@ import { useState } from "react";
 import DataTable from "../components/DataTable";
 import Dialog from "../components/Dialog";
 import Label from "../components/form/Label";
+import LookupField from "../components/form/LookupField";
 import NumberField from "../components/form/NumberField";
 import bestellungenService, { naechsteBestellnummer } from "../services/bestellungenService";
 import lieferantenService from "../services/lieferantenService";
@@ -22,6 +23,8 @@ export default function Bestellungen() {
     const [statusFilter, setStatusFilter] = useState("");
     const lieferanten = lieferantenService.getAll().filter(item => item.aktiv);
     const artikel = artikelService.getAll().filter(item => item.aktiv);
+    const lieferantenOptionen = lieferanten.map(item => ({ value: String(item.id), label: `${item.lieferantenNr} - ${item.firma}` }));
+    const artikelOptionen = artikel.map(item => ({ value: String(item.id), label: `${item.artikelNr} - ${item.name} (Bestand: ${item.bestand})` }));
 
     const neu = () => {
         setLieferantId(lieferanten[0]?.id ? String(lieferanten[0].id) : "");
@@ -98,18 +101,12 @@ export default function Bestellungen() {
         />
         <Dialog open={offen} title="Neue Bestellung" onClose={() => setOffen(false)}>
             <div><Label required>Lieferant</Label>
-                <select value={lieferantId} onChange={event => setLieferantId(event.target.value)}>
-                    <option value="">Bitte wählen</option>
-                    {lieferanten.map(item => <option key={item.id} value={item.id}>{item.firma}</option>)}
-                </select>
+                <LookupField value={lieferantId} options={lieferantenOptionen} onChange={setLieferantId} placeholder="Lieferant suchen..."/>
             </div>
             <div><Label>Bestelldatum</Label><input type="date" value={heute()} disabled/></div>
             <div className="form-row bestellposition-hinzufuegen">
                 <div><Label>Artikel</Label>
-                    <select value={artikelId} onChange={event => setArtikelId(event.target.value)}>
-                        <option value="">Bitte wählen</option>
-                        {artikel.map(item => <option key={item.id} value={item.id}>{item.name} (Bestand: {item.bestand})</option>)}
-                    </select>
+                    <LookupField value={artikelId} options={artikelOptionen} onChange={setArtikelId} placeholder="Artikel suchen..."/>
                 </div>
                 <div><Label>Menge</Label><NumberField value={menge} min="1" onChange={wert => setMenge(Number(wert))}/></div>
                 <button type="button" onClick={positionHinzufuegen}>Position hinzufügen</button>

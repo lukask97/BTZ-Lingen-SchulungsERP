@@ -9,7 +9,7 @@ import { getAllColumns, getColumns } from "../services/metadataService";
 import lieferantenService from "../services/lieferantenService";
 import { INITIAL_DATA, PAGE_CONFIG } from "../constants/schemas";
 import { useCRUDPage } from "../hooks/useCRUDPage";
-import useAuth from "../auth/AuthContext";
+import useAuth from "../auth/useAuth";
 import OverviewCards from "../components/OverviewCards";
 import { useState } from "react";
 

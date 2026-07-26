@@ -1,16 +1,20 @@
-import useAuth from "../auth/AuthContext";
+import useAuth from "../auth/useAuth";
 
 
 export default function PermissionButton({
                                              permission,
                                              children,
                                              onClick,
-                                             disabled = false
+                                             disabled = false,
+                                             variant = "primary",
+                                             className = ""
                                          }) {
 
     const {hasPermission} = useAuth();
     return (
         <button
+            type="button"
+            className={`button-${variant} ${className}`.trim()}
             disabled={disabled || !hasPermission(permission)}
             onClick={onClick}
         >

@@ -8,12 +8,6 @@ import {
 } from "./mockup/mockStorage";
 
 
-const metaDaten = loadData("feldMetadaten", feldMetadaten);
-
-
-const spaltenDaten = loadData("benutzerSpalten", benutzerSpalten);
-
-
 export function getColumns(tabelle, username) {
 
 

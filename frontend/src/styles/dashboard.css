@@ -12,14 +12,10 @@
 .dashboard-heading h1 { margin: 0; }
 .dashboard-heading p { margin-bottom: 0; }
 
-.secondary-button {
-    background: #fff;
-    border: 1px solid #1976d2;
-    color: #1976d2;
+.dashboard-reset-button {
     white-space: nowrap;
 }
 
-.secondary-button:hover { background: #eef5ff; }
 .kennzahlen {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

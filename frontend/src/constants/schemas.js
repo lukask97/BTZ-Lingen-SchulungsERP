@@ -66,6 +66,7 @@ export const INITIAL_DATA = {
     rechnungen: {
         id: null,
         rechnungsnr: "",
+        kundeId: "",
         kunde: "",
         datum: "",
         betrag: 0,
@@ -94,6 +95,30 @@ export const PERMISSIONS = {
 
 // Alle verfügbaren Berechtigungen gruppiert
 export const PERMISSION_GROUPS = {
+    "Einkauf": [
+        { key: "einkauf.lesen", label: "Einkauf lesen" },
+        { key: "einkauf.bearbeiten", label: "Einkauf bearbeiten" }
+    ],
+    "Verkauf": [
+        { key: "verkauf.lesen", label: "Verkauf lesen" },
+        { key: "verkauf.bearbeiten", label: "Verkauf bearbeiten" }
+    ],
+    "Service": [
+        { key: "service.lesen", label: "Service lesen" },
+        { key: "service.bearbeiten", label: "Service bearbeiten" }
+    ],
+    "Marketing": [
+        { key: "marketing.lesen", label: "Marketing lesen" },
+        { key: "marketing.bearbeiten", label: "Marketing bearbeiten" }
+    ],
+    "Buchhaltung": [
+        { key: "buchhaltung.lesen", label: "Buchhaltung lesen" },
+        { key: "buchhaltung.bearbeiten", label: "Buchhaltung bearbeiten" }
+    ],
+    "Geschäftsführung": [
+        { key: "gf.lesen", label: "Geschäftsführung lesen" },
+        { key: "gf.bearbeiten", label: "Geschäftsführung bearbeiten" }
+    ],
     "Kunden": [
         { key: "kunde.anlegen", label: "Kunde anlegen" },
         { key: "kunde.bearbeiten", label: "Kunde bearbeiten" },

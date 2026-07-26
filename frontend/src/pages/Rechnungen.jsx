@@ -1,12 +1,14 @@
 import DataTable from "../components/DataTable";
 import Dialog from "../components/Dialog";
 import TextField from "../components/form/TextField";
+import LookupField from "../components/form/LookupField";
 import Label from "../components/form/Label";
 
 import { getColumns, getAllColumns } from "../services/metadataService";
-import useAuth from "../auth/AuthContext";
+import useAuth from "../auth/useAuth";
 import { useCRUDPage } from "../hooks/useCRUDPage";
 import rechnungenService from "../services/rechnungenService";
+import kundenService from "../services/customerService";
 import { INITIAL_DATA, PAGE_CONFIG } from "../constants/schemas";
 import { useState, useMemo } from "react";
 
@@ -15,14 +17,12 @@ export default function Rechnungen() {
     const config = PAGE_CONFIG.rechnungen;
     
     const {
-        data,
         allData,
         open,
         editMode,
         pageSize,
         search,
         currentItem,
-        setOpen,
         setPageSize,
         setSearch,
         setCurrentItem,
@@ -35,11 +35,22 @@ export default function Rechnungen() {
 
     const columns = getColumns(config.tableName, user.username);
     const allColumns = getAllColumns(config.tableName);
+    const kunden = kundenService.list().filter(item => item.aktiv);
+    const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
 
     const [statusFilter, setStatusFilter] = useState("");
 
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
+    };
+
+    const handleKundeChange = (value) => {
+        const kunde = kunden.find(item => String(item.id) === String(value));
+        setCurrentItem({
+            ...currentItem,
+            kundeId: value,
+            kunde: kunde?.firma || ""
+        });
     };
 
     const handleFilterChange = (filters) => {
@@ -110,7 +121,12 @@ export default function Rechnungen() {
                 <TextField value={currentItem.rechnungsnr} onChange={v => handleFieldChange("rechnungsnr", v)} />
 
                 <Label required>Kunde</Label>
-                <TextField value={currentItem.kunde} onChange={v => handleFieldChange("kunde", v)} />
+                <LookupField
+                    value={currentItem.kundeId || String(kunden.find(item => item.firma === currentItem.kunde)?.id || "")}
+                    options={kundenOptionen}
+                    onChange={handleKundeChange}
+                    placeholder="Kunde suchen..."
+                />
 
                 <Label>Datum</Label>
                 <TextField value={currentItem.datum} onChange={v => handleFieldChange("datum", v)} type="date" />
@@ -119,7 +135,11 @@ export default function Rechnungen() {
                 <TextField value={currentItem.betrag} onChange={v => handleFieldChange("betrag", v)} type="number" />
 
                 <Label>Status</Label>
-                <TextField value={currentItem.status} onChange={v => handleFieldChange("status", v)} />
+                <select value={currentItem.status} onChange={event => handleFieldChange("status", event.target.value)}>
+                    <option value="offen">Offen</option>
+                    <option value="bezahlt">Bezahlt</option>
+                    <option value="storniert">Storniert</option>
+                </select>
 
                 <div className="form-row">
                     <button onClick={speichern}>Speichern</button>

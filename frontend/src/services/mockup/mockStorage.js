@@ -35,7 +35,11 @@ export function saveData(key, data){
 const TEST_DATA_KEYS = [
     "kunden", "artikel", "benutzer", "rollen", "rechte", "lager", "rechnungen",
     "lieferanten", "bestellungen", "angebote", "auftraege", "reklamationen",
-    "marketingaktionen", "abteilungen", "feldMetadaten", "benutzerSpalten"
+    "marketingaktionen", "abteilungen", "kundenanfragen", "zahlungen", "mahnungen",
+    "belege", "freigaben", "berichte", "versandauftraege", "retouren", "bewerber",
+    "mitarbeiter", "arbeitszeiten", "urlaubsantraege", "schulungen",
+    "firmenkonto",
+    "feldMetadaten", "benutzerSpalten"
 ];
 
 export function resetTestData() {

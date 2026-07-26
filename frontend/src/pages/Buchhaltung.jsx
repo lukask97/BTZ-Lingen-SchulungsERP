@@ -22,7 +22,13 @@ export default function Buchhaltung() {
             <h2>Offene Rechnungen</h2>
             {offeneRechnungen.length === 0 ? <p>Zurzeit sind keine Rechnungen offen.</p> :
                 <ul>{offeneRechnungen.map(rechnung => <li key={rechnung.id}><strong>{rechnung.rechnungsnr}</strong> – {rechnung.kunde}: {euro(Number(rechnung.betrag))}</li>)}</ul>}
-            <Link className="button-link" to="/rechnungen">Zur Rechnungsverwaltung</Link>
+            <div className="link-list">
+                <Link className="button-link" to="/firmenkonto">Zum Firmenkonto</Link>
+                <Link className="button-link" to="/rechnungen">Zur Rechnungsverwaltung</Link>
+                <Link className="button-link" to="/zahlungen">Zu den Zahlungen</Link>
+                <Link className="button-link" to="/mahnungen">Zu den Mahnungen</Link>
+                <Link className="button-link" to="/belege">Zum Belegarchiv</Link>
+            </div>
         </section>
     </>;
 }

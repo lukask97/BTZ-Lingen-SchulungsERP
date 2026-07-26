@@ -5,7 +5,7 @@ import TextArea from "../components/form/TextArea";
 import Label from "../components/form/Label";
 
 import { getColumns, getAllColumns } from "../services/metadataService";
-import useAuth from "../auth/AuthContext";
+import useAuth from "../auth/useAuth";
 import { useCRUDPage } from "../hooks/useCRUDPage";
 import rechteService from "../services/rechteService";
 import { INITIAL_DATA, PAGE_CONFIG } from "../constants/schemas";
@@ -16,14 +16,12 @@ export default function Rechte() {
     const config = PAGE_CONFIG.rechte;
     
     const {
-        data,
         allData,
         open,
         editMode,
         pageSize,
         search,
         currentItem,
-        setOpen,
         setPageSize,
         setSearch,
         setCurrentItem,

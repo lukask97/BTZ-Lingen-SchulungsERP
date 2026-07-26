@@ -17,10 +17,6 @@
     margin: 0;
 }
 
-.search {
-    width: 250px;
-}
-
 button {
     padding: 8px 14px;
     border: none;
@@ -34,21 +30,49 @@ button:hover {
     background: #1565c0;
 }
 
-button:disabled {
-    opacity: .5;
-    cursor: default;
+.button-primary {
+    background: #1976d2;
 }
 
-.btn-edit {
-    margin-right: 5px;
+.button-primary:hover {
+    background: #1565c0;
 }
 
-.btn-delete {
+.button-secondary {
+    background: #455a64;
+}
+
+.button-secondary:hover {
+    background: #37474f;
+}
+
+.button-success {
+    background: #2e7d32;
+}
+
+.button-success:hover {
+    background: #256428;
+}
+
+.button-warning {
+    background: #ef6c00;
+}
+
+.button-warning:hover {
+    background: #d15f00;
+}
+
+.button-danger {
     background: #c62828;
 }
 
-.btn-delete:hover {
+.button-danger:hover {
     background: #b71c1c;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .datatable {
@@ -146,31 +170,15 @@ button:disabled {
     color: #d32f2f;
 }
 
-
-.toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
 .toolbar-right {
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.toolbar h2 {
-    margin: 0;
+    position: relative;
 }
 
 .search {
     width: 250px;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .form-label {
@@ -226,10 +234,53 @@ button:disabled {
 .lookup-field {
     display: flex;
     gap: 8px;
+    align-items: flex-start;
 }
 
-.lookup-field select {
+.lookup-input-wrapper {
+    position: relative;
     flex: 1;
+}
+
+.lookup-input-wrapper input {
+    width: 100%;
+    padding: 8px;
+}
+
+.lookup-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 220px;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    z-index: 20;
+}
+
+.lookup-option,
+.lookup-empty {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+}
+
+.lookup-option {
+    border-radius: 0;
+    background: #fff;
+    color: #1f2937;
+}
+
+.lookup-option:hover {
+    background: #eef5ff;
+}
+
+.lookup-empty {
+    color: #6b7280;
 }
 
 .lookup-field button {
@@ -244,57 +295,32 @@ button:disabled {
     background: #f3f3f3;
 }
 
-
-.toolbar-right {
-    position: relative;
-}
-
-
 .icon-button {
     cursor: pointer;
     padding: 5px 8px;
 }
 
-
 .column-popup {
-
     position: absolute;
-
     right: 0;
     top: 35px;
-
     background: white;
-
     border: 1px solid #ccc;
-
     border-radius: 6px;
-
     padding: 10px;
-
     width: 200px;
-
     box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
-
     z-index: 100;
-
 }
-
 
 .column-popup label {
-
     display: flex;
-
     gap: 8px;
-
     padding: 5px;
-
 }
 
-
 .column-popup label:hover {
-
     background: #f3f3f3;
-
 }
 
 .bestellposition-hinzufuegen {
@@ -329,3 +355,77 @@ button:disabled {
 
 .link-button:hover { background: #eef5ff; }
 .form-error { color: #c62828; }
+.scenario-document {
+    display: grid;
+    gap: 14px;
+}
+
+.scenario-document-section p,
+.scenario-list {
+    margin: 6px 0 0;
+}
+
+.firmenkonto-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.firmenkonto-header strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.firmenkonto-header .module-hint {
+    margin: 0;
+}
+
+.firmenkonto-table td:nth-child(4),
+.firmenkonto-table td:nth-child(5),
+.firmenkonto-table td:nth-child(6),
+.firmenkonto-table th:nth-child(4),
+.firmenkonto-table th:nth-child(5),
+.firmenkonto-table th:nth-child(6) {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.firmenkonto-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.detail-summary {
+    margin-bottom: 4px;
+}
+
+.detail-summary p {
+    margin: 0;
+    color: #556070;
+}
+
+.detail-field {
+    display: grid;
+    gap: 6px;
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.detail-value {
+    color: #0f172a;
+    font-weight: 600;
+    word-break: break-word;
+}

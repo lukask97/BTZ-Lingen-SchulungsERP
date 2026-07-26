@@ -10,77 +10,59 @@ import { loadData, saveData } from "./mockup/mockStorage";
 export function createCRUDService(tableName, initialData = []) {
     let tableData = loadData(tableName, initialData);
 
-    return {
-        /**
-         * Alle Daten abrufen
-         */
-        getAll: () => {
-            tableData = loadData(tableName, initialData);
-            return tableData;
-        },
+    const reload = () => {
+        tableData = loadData(tableName, initialData);
+        return tableData;
+    };
 
-        /**
-         * Ein Element nach ID abrufen
-         */
-        getById: (id) => {
-            return tableData.find(item => item.id === id);
-        },
+    const persist = (nextData) => {
+        tableData = nextData;
+        saveData(tableName, tableData);
+        return tableData;
+    };
 
-        /**
-         * Neues Element hinzufügen
-         */
-        add: (item) => {
-            item.id = Date.now();
-            tableData.push(item);
-            saveData(tableName, tableData);
-            return item;
-        },
+    const createId = () => Date.now() + Math.floor(Math.random() * 1000);
 
-        /**
-         * Element aktualisieren
-         */
-        update: (item) => {
-            tableData = tableData.map(d => d.id === item.id ? item : d);
-            saveData(tableName, tableData);
-            return item;
+    const api = {
+        list: () => reload(),
+        getById: (id) => reload().find(item => item.id === id),
+        create: (item) => {
+            const created = { ...item, id: item.id ?? createId() };
+            persist([...reload(), created]);
+            return created;
         },
-
-        /**
-         * Element löschen
-         */
-        delete: (id) => {
-            tableData = tableData.filter(d => d.id !== id);
-            saveData(tableName, tableData);
+        update: (idOrItem, payload) => {
+            const current = reload();
+            const nextItem = typeof idOrItem === "object" ? idOrItem : { ...(current.find(item => item.id === idOrItem) || {}), ...payload, id: idOrItem };
+            persist(current.map(item => item.id === nextItem.id ? nextItem : item));
+            return nextItem;
         },
-
-        /**
-         * Mehrere Elemente löschen
-         */
-        deleteMultiple: (ids) => {
-            tableData = tableData.filter(d => !ids.includes(d.id));
-            saveData(tableName, tableData);
+        remove: (id) => {
+            persist(reload().filter(item => item.id !== id));
         },
-
-        /**
-         * Suchen in Daten
-         */
+        removeMany: (ids) => {
+            persist(reload().filter(item => !ids.includes(item.id)));
+        },
         search: (query) => {
-            return tableData.filter(item =>
+            return reload().filter(item =>
                 Object.values(item).join(" ").toLowerCase().includes(query.toLowerCase())
             );
         },
-
-        /**
-         * Daten nach Feld sortieren
-         */
         sortBy: (field, order = "asc") => {
-            return [...tableData].sort((a, b) => {
+            return [...reload()].sort((a, b) => {
                 if (order === "asc") {
                     return a[field] > b[field] ? 1 : -1;
-                } else {
-                    return a[field] < b[field] ? 1 : -1;
                 }
+                return a[field] < b[field] ? 1 : -1;
             });
         }
+    };
+
+    return {
+        ...api,
+        getAll: api.list,
+        add: api.create,
+        delete: api.remove,
+        deleteMultiple: api.removeMany
     };
 }
