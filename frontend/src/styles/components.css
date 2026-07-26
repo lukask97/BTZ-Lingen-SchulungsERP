@@ -4,6 +4,7 @@
     border-radius: 6px;
     padding: 20px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+    min-width: 0;
 }
 
 .toolbar {
@@ -78,6 +79,17 @@ button:disabled {
 .datatable {
     width: 100%;
     border-collapse: collapse;
+}
+
+.datatable-wrapper {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.datatable-wrapper .datatable {
+    min-width: max-content;
 }
 
 .datatable th,
@@ -428,4 +440,60 @@ button:disabled {
     color: #0f172a;
     font-weight: 600;
     word-break: break-word;
+}
+
+.detail-link {
+    color: #1565c0;
+    text-decoration: none;
+}
+
+.detail-link:hover {
+    text-decoration: underline;
+}
+
+.personalakte-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.personalakte-select {
+    min-width: 280px;
+    flex: 1;
+}
+
+.personalakte-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.personalakte-links .button-link {
+    margin-top: 0;
+}
+
+.personalakte-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.personalakte-summary div {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.personalakte-summary span {
+    display: block;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.personalakte-summary strong {
+    color: #0f172a;
 }

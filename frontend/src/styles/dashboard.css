@@ -79,6 +79,12 @@
     gap: 16px;
 }
 
+.lernpfad-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
 .prozess-karte {
     display: flex;
     flex-direction: column;
@@ -93,6 +99,202 @@
 .prozess-karte p { flex: 1; color: #555; }
 .prozess-karte a { color: #1565c0; font-weight: 600; }
 
+.lernpfad-karte {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.lernpfad-kopf {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.lernpfad-kopf h3 {
+    margin: 0;
+}
+
+.lernpfad-kopf span {
+    font-size: 12px;
+    color: #46607d;
+    background: #e8f1fb;
+    border-radius: 999px;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+.lernpfad-karte p {
+    margin: 0;
+    color: #556070;
+}
+
+.lernpfad-schritte {
+    margin: 0;
+    padding-left: 20px;
+    color: #1e293b;
+}
+
+.lernpfad-schritte li {
+    margin-bottom: 8px;
+}
+
+.dashboard-two-column {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 28px;
+}
+
+.dashboard-panel {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.dashboard-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.dashboard-panel-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.dashboard-panel-header span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.task-list,
+.activity-list,
+.teacher-class-list {
+    display: grid;
+    gap: 12px;
+}
+
+.task-card,
+.teacher-class-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    background: #f8fafc;
+}
+
+.task-card strong,
+.teacher-class-card strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.task-card p,
+.teacher-class-card p {
+    margin: 0 0 8px;
+    color: #556070;
+}
+
+.task-card a,
+.teacher-class-card span {
+    color: #1565c0;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.dashboard-note-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #334155;
+}
+
+.dashboard-note-list li {
+    margin: 0 0 10px;
+}
+
+.dashboard-mini-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.dashboard-mini-links .button-link {
+    margin-top: 0;
+}
+
+.activity-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    padding: 12px 0;
+    border-top: 1px solid #e2e8f0;
+}
+
+.activity-row:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.activity-date {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.activity-row strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #0f172a;
+}
+
+.activity-row p {
+    margin: 0;
+    color: #556070;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+}
+
+.status-card {
+    border-radius: 8px;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+}
+
+.status-card span {
+    display: block;
+    color: #556070;
+    margin-bottom: 8px;
+}
+
+.status-card strong {
+    color: #0f172a;
+    font-size: 20px;
+}
+
+.tone-good {
+    background: #eefbf2;
+}
+
+.tone-warn {
+    background: #fff7ed;
+}
+
 @media (max-width: 600px) {
     .dashboard-heading { flex-direction: column; }
+    .activity-row { grid-template-columns: 1fr; }
 }

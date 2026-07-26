@@ -14,11 +14,19 @@ body {
 .layout {
     display: flex;
     min-height: 100vh;
+    width: 100%;
+    overflow: hidden;
 }
 
 .content {
     flex: 1;
+    min-width: 0;
     padding: 20px;
+    overflow-x: hidden;
+}
+
+.content main {
+    min-width: 0;
 }
 
 .header {
@@ -30,6 +38,8 @@ body {
 
 .sidebar {
     width: 248px;
+    min-width: 248px;
+    flex-shrink: 0;
     background: #fff;
     border-right: 1px solid #ddd;
     padding: 12px;
@@ -191,4 +201,66 @@ body {
 
 .scenario-page form {
     max-width: 720px;
+}
+
+.ampel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.ampel-card {
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid #d7dce2;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ampel-card span {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ampel-card strong {
+    font-size: 24px;
+}
+
+.ampel-card small {
+    color: #4b5563;
+}
+
+.ampel-open {
+    background: #fff8db;
+    border-color: #ead38a;
+}
+
+.ampel-due {
+    background: #ffe3e0;
+    border-color: #e1a7a1;
+}
+
+.ampel-paid {
+    background: #e4f4e8;
+    border-color: #9fc7aa;
+}
+
+.ampel-cancelled {
+    background: #eef1f4;
+    border-color: #cfd7df;
+}
+
+.ampel-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid transparent;
 }

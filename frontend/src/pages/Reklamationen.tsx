@@ -1,0 +1,84 @@
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import DataTable from "../components/DataTable";
+import Dialog from "../components/Dialog";
+import Label from "../components/form/Label";
+import LookupField from "../components/form/LookupField";
+import TextArea from "../components/form/TextArea";
+import reklamationenService, { naechsteReklamationsnummer } from "../services/reklamationenService";
+import kundenService from "../services/customerService";
+import OverviewCards from "../components/OverviewCards";
+
+const heute = () => new Date().toISOString().slice(0, 10);
+
+export default function Reklamationen() {
+    const [reklamationen, setReklamationen] = useState(reklamationenService.getAll());
+    const [offen, setOffen] = useState(false);
+    const [kundeId, setKundeId] = useState("");
+    const [beschreibung, setBeschreibung] = useState("");
+    const [fehler, setFehler] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const kunden = kundenService.getAll();
+    const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
+
+    const neu = () => {
+        setKundeId(kunden[0]?.id ? String(kunden[0].id) : "");
+        setBeschreibung("");
+        setFehler("");
+        setOffen(true);
+    };
+
+    const speichern = () => {
+        const kunde = kunden.find(item => item.id === Number(kundeId));
+        if (!kunde || !beschreibung.trim()) {
+            setFehler("Bitte einen Kunden und eine Beschreibung angeben.");
+            return;
+        }
+        reklamationenService.add({
+            reklamationsNr: naechsteReklamationsnummer(),
+            kundeId: kunde.id,
+            kunde: kunde.firma,
+            datum: heute(),
+            beschreibung: beschreibung.trim(),
+            status: "neu"
+        });
+        setReklamationen(reklamationenService.getAll());
+        setOffen(false);
+    };
+
+    const ersatzlieferungPlanen = reklamation => {
+        if (reklamation.status !== "neu") return;
+        reklamationenService.update({ ...reklamation, status: "Ersatzlieferung geplant" });
+        setReklamationen(reklamationenService.getAll());
+    };
+
+    const neueReklamationen = reklamationen.filter(item => item.status === "neu").length;
+    const ersatzlieferungen = reklamationen.filter(item => item.status === "Ersatzlieferung geplant").length;
+
+    return <>
+        <OverviewCards cards={[
+            { label: "Reklamationen gesamt", value: reklamationen.length },
+            { label: "Neu", value: neueReklamationen },
+            { label: "Ersatzlieferung geplant", value: ersatzlieferungen }
+        ]}/>
+        <DataTable title="Reklamationen" selectableColumns={false} data={reklamationen.filter(item => !statusFilter || item.status === statusFilter)}
+            columns={[
+                { field: "reklamationsNr", title: "Nummer" }, { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "datum", title: "Datum" }, { field: "beschreibung", title: "Beschreibung" },
+                { field: "status", title: "Status" }
+            ]}
+            detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kunden?focus=${row.kundeId}` : null}
+            toolbarActions={[{ name: "new", label: "Reklamation erfassen", permission: "service.bearbeiten", onClick: neu }]}
+            rowActions={[{ name: "replacement", label: "Ersatzlieferung planen", permission: "service.bearbeiten", onClick: ersatzlieferungPlanen }]}
+            filters={[{ name: "status", label: "Status", options: [{ value: "neu", label: "Neu" }, { value: "Ersatzlieferung geplant", label: "Ersatzlieferung geplant" }] }]}
+            onFilter={filters => setStatusFilter(filters.status || "")}
+        />
+        <Dialog open={offen} title="Reklamation erfassen" onClose={() => setOffen(false)}>
+            <div><Label required>Kunde</Label><LookupField value={kundeId} options={kundenOptionen} onChange={setKundeId} placeholder="Kunde suchen..."/></div>
+            <div><Label>Datum</Label><input type="date" value={heute()} disabled/></div>
+            <div className="form-row"><Label required>Beschreibung</Label><TextArea rows={4} value={beschreibung} placeholder="Was ist passiert?" onChange={setBeschreibung}/>
+                {fehler && <p className="form-error">{fehler}</p>}</div>
+            <div className="form-row"><button onClick={speichern}>Reklamation speichern</button></div>
+        </Dialog>
+    </>;
+}
