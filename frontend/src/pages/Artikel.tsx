@@ -175,6 +175,10 @@ export default function Artikel() {
                 <Label>Verkaufspreis</Label>
                 <NumberField value={currentItem.verkaufspreis} min="0" step="0.01" format="currency" onChange={v => handleFieldChange("verkaufspreis", Number(v || 0))} />
 
+                <div className="form-row">
+                    <p>Ohne EK-Preis gilt der Artikel als selbst hergestellt. Ohne VK-Preis ist er nicht verkaufbar. Komponenten und Baugruppen können verkauft werden, sobald ein VK-Preis hinterlegt ist.</p>
+                </div>
+
                 <Label>Bestand</Label>
                 <NumberField value={currentItem.bestand} min="0" step="1" onChange={v => handleFieldChange("bestand", Number(v || 0))} />
 

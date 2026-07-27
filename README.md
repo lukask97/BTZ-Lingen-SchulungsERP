@@ -49,38 +49,6 @@ Eine geführte Vorstellung mit Testkonten und Klickpfaden steht in [docs/DEMO.md
 
 ------------------------------------------------------------------------
 
-# Projektstruktur
-
-    src
-    │
-    ├── components
-    │   ├── DataTable.jsx
-    │   ├── Dialog.jsx
-    │   ├── PermissionButton.jsx
-    │   └── form
-    │       ├── TextField.jsx
-    │       ├── Checkbox.jsx
-    │       └── Label.jsx
-    │
-    ├── pages
-    │   ├── Kunden.jsx
-    │   ├── Artikel.jsx
-    │   ├── Lager.jsx
-    │   └── Rollen.jsx
-    │
-    ├── services
-    │   ├── authService.jsx
-    │   ├── permissionService.jsx
-    │   └── roleService.jsx
-    │
-    ├── auth
-    │   └── AuthContext.jsx
-    │
-    └── router
-        └── AppRouter.jsx
-
-------------------------------------------------------------------------
-
 # Anmeldung
 
 Aktuell werden Benutzer lokal verwaltet.

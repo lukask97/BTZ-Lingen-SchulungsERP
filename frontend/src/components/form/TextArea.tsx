@@ -9,6 +9,7 @@ export default function TextArea({
 
     return (
         <textarea
+            className="form-textarea"
             rows={rows}
             value={value}
             placeholder={placeholder}

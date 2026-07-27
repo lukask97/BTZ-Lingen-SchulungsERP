@@ -428,6 +428,8 @@ export let angebote = [
         kunde: "Campus Baumarkt GmbH",
         datum: "2026-07-22",
         gueltigBis: "2026-08-05",
+        rabattBetrag: 0,
+        gesamtbetrag: 1348.5,
         status: "offen",
         positionen: [{ artikelId: 2, artikel: "Sicherheitsjacke", menge: 15, einzelpreis: 89.9 }]
     }
@@ -441,6 +443,8 @@ export let auftraege = [
         kunde: "Campus Baumarkt GmbH",
         datum: "2026-07-25",
         status: "offen",
+        rabattBetrag: 0,
+        gesamtbetrag: 1348.5,
         positionen: [{ artikelId: 2, artikel: "Sicherheitsjacke", menge: 15, einzelpreis: 89.9 }],
         angebotId: 1
     }

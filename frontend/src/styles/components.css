@@ -161,11 +161,24 @@ button:disabled {
 
 .dialog-body .form-row {
     grid-column: 1 / -1;
+    width: 100%;
 }
 
 .dialog-body textarea,
 .dialog-body .form-textarea {
     grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    display: block;
+}
+
+.dialog-body .form-row textarea,
+.dialog-body .form-row .form-textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    display: block;
 }
 
 .dialog-close {

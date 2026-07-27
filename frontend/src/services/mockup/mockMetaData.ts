@@ -132,13 +132,29 @@ export const feldMetadaten = [
         reihenfolge: 5,
         sichtbar: true
     },
+    {
+        tabelle: "artikel",
+        feld: "beschaffungsart",
+        anzeigename: "Beschaffung",
+        beschreibung: "Zukauf oder Herstellung",
+        reihenfolge: 6,
+        sichtbar: true
+    },
+    {
+        tabelle: "artikel",
+        feld: "verkaufsstatus",
+        anzeigename: "Verkauf",
+        beschreibung: "Verkaufbar oder nicht verkaufbar",
+        reihenfolge: 7,
+        sichtbar: true
+    },
 
     {
         tabelle: "artikel",
         feld: "bestand",
         anzeigename: "Bestand",
         beschreibung: "Aktueller Lagerbestand",
-        reihenfolge: 6,
+        reihenfolge: 8,
         sichtbar: true
     },
 

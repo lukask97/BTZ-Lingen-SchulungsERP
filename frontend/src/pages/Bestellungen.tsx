@@ -28,12 +28,12 @@ export default function Bestellungen() {
     const [suchbegriff, setSuchbegriff] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const lieferanten = lieferantenService.getAll();
-    const artikel = artikelService.getAll().filter(item => item.artikelTyp !== "Dienstleistung");
+    const artikel = artikelService.getAll().filter(item => item.istEinkaufbar);
     const einkaufsdokumente = einkaufsdokumenteService.list();
     const lieferantenOptionen = lieferanten.map(item => ({ value: String(item.id), label: `${item.lieferantenNr} - ${item.firma}` }));
     const artikelOptionen = artikel.map(item => ({
         value: String(item.id),
-        label: `${item.artikelNr} - ${item.name} (EK: ${Number(item.einkaufspreis ?? item.preis ?? 0).toFixed(2)} €, Bestand: ${item.bestand})`
+        label: `${item.artikelNr} - ${item.name} [${item.artikelTyp}] (EK: ${Number(item.einkaufspreis ?? item.preis ?? 0).toFixed(2)} €, Bestand: ${item.bestand})`
     }));
 
     const neu = () => {
@@ -134,6 +134,7 @@ export default function Bestellungen() {
                 <div><Label>Menge</Label><NumberField value={menge} min="1" onChange={wert => setMenge(Number(wert))}/></div>
                 <button type="button" onClick={positionHinzufuegen}>Position hinzufügen</button>
             </div>
+            <div className="form-row"><p>Es werden nur Artikel mit EK-Preis angezeigt. Artikel ohne EK-Preis gelten als selbst hergestellt.</p></div>
             <div className="form-row">
                 <Label required>Bestellpositionen</Label>
                 {positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">

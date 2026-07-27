@@ -6,6 +6,7 @@ import Dialog from "../components/Dialog";
 import Label from "../components/form/Label";
 import LookupField from "../components/form/LookupField";
 import NumberField from "../components/form/NumberField";
+import TextArea from "../components/form/TextArea";
 import angeboteService, { naechsteAngebotsnummer } from "../services/angeboteService";
 import auftraegeService from "../services/auftraegeService";
 import customerInquiryService from "../services/customerInquiryService";
@@ -25,6 +26,7 @@ const inTagen = tage => {
     return datum.toISOString().slice(0, 10);
 };
 const gesamtbetrag = positionen => positionen.reduce((summe, position) => summe + position.menge * position.einzelpreis, 0);
+const gesamtNachAbzug = (positionen, rabattBetrag = 0) => Math.max(0, gesamtbetrag(positionen) - Number(rabattBetrag || 0));
 const istOffenesAngebot = angebot => !["angenommen", "abgelehnt"].includes(String(angebot?.status || "").toLowerCase());
 
 export default function Angebote() {
@@ -40,8 +42,10 @@ export default function Angebote() {
     const [statusFilter, setStatusFilter] = useState("");
     const [sourceInquiryId, setSourceInquiryId] = useState("");
     const [gueltigBis, setGueltigBis] = useState(inTagen(14));
+    const [rabattBetrag, setRabattBetrag] = useState(0);
+    const [verguenstigungsGrund, setVerguenstigungsGrund] = useState("");
     const kunden = kundenService.getAll();
-    const artikel = artikelService.getAll().filter(item => item.artikelTyp !== "Komponente");
+    const artikel = artikelService.getAll().filter(item => item.istVerkaeuflich);
     const services = servicesService.getAll();
     const leistungen = useMemo(() => [
         ...artikel.map(item => ({ ...item, leistungTyp: "Artikel" })),
@@ -54,8 +58,18 @@ export default function Angebote() {
     const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
     const leistungsOptionen = leistungen.map(item => ({
         value: `${item.leistungTyp}:${item.id}`,
-        label: `${item.leistungTyp === "Service" ? item.serviceNr : item.artikelNr} - ${item.name} [${item.leistungTyp}] (${Number(item.verkaufspreis ?? item.preis ?? 0).toFixed(2)} €)`
+        label: `${item.leistungTyp === "Service" ? item.serviceNr : item.artikelNr} - ${item.name} [${item.leistungTyp === "Artikel" ? item.artikelTyp : item.leistungTyp}] (${Number(item.verkaufspreis ?? item.preis ?? 0).toFixed(2)} €)`
     }));
+    const angebotColumns = [
+        { field: "angebotsNr", title: "Angebotsnummer" },
+        { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+        { field: "datum", title: "Datum" },
+        { field: "gueltigBis", title: "Gültig bis", render: row => row.gueltigBis || "-" },
+        { field: "status", title: "Status" },
+        { field: "prozess", title: "Prozess" },
+        { field: "gesamt", title: "Gesamt" },
+        { field: "positionenText", title: "Positionen" }
+    ];
 
     useEffect(() => {
         if (searchParams.get("new") !== "fromInquiry") return;
@@ -66,6 +80,8 @@ export default function Angebote() {
         setMenge(1);
         setPositionen([]);
         setGueltigBis(inTagen(14));
+        setRabattBetrag(0);
+        setVerguenstigungsGrund("");
         setFehler("");
         setOffen(true);
     }, [searchParams, kunden, leistungen]);
@@ -77,6 +93,8 @@ export default function Angebote() {
         setMenge(1);
         setPositionen([]);
         setGueltigBis(inTagen(14));
+        setRabattBetrag(0);
+        setVerguenstigungsGrund("");
         setFehler("");
         setOffen(true);
     };
@@ -121,6 +139,9 @@ export default function Angebote() {
             kunde: kunde.firma,
             datum: heute(),
             gueltigBis,
+            rabattBetrag: Number(rabattBetrag || 0),
+            verguenstigungsGrund: verguenstigungsGrund.trim(),
+            gesamtbetrag: gesamtNachAbzug(positionen, rabattBetrag),
             status: "offen",
             positionen
         });
@@ -172,12 +193,12 @@ export default function Angebote() {
     const data = angebote.map(angebot => ({
         ...angebot,
         positionenText: angebot.positionen.map(position => `${position.artikel} (${position.menge})`).join(", "),
-        gesamt: `${gesamtbetrag(angebot.positionen).toFixed(2)} €`,
+        gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag).toFixed(2)} €`,
         prozess: getSalesStepLabel(getSalesStep(angebot, auftraege, vertriebsdokumente, versandauftraege))
     }));
     const offeneAngebote = angebote.filter(istOffenesAngebot);
     const auftraegeAusAngeboten = angebote.filter(item => item.status === "angenommen").length;
-    const offenerWert = gesamtbetrag(offeneAngebote.flatMap(item => item.positionen));
+    const offenerWert = offeneAngebote.reduce((summe, angebot) => summe + gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag), 0);
 
     return <>
         <OverviewCards cards={[
@@ -186,12 +207,9 @@ export default function Angebote() {
             { label: "Offener Angebotswert", value: `${offenerWert.toFixed(2)} €` },
             { label: "In Aufträge übernommen", value: auftraegeAusAngeboten }
         ]}/>
-        <DataTable title="Angebote" selectableColumns={false} data={data.filter(item => !statusFilter || item.status === statusFilter)}
-            columns={[
-                { field: "angebotsNr", title: "Angebotsnummer" }, { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
-                { field: "datum", title: "Datum" }, { field: "gueltigBis", title: "Gültig bis", render: row => row.gueltigBis || "-" }, { field: "status", title: "Status" },
-                { field: "prozess", title: "Prozess" }, { field: "gesamt", title: "Gesamt" }, { field: "positionenText", title: "Positionen" }
-            ]}
+        <DataTable title="Angebote" selectableColumns data={data.filter(item => !statusFilter || item.status === statusFilter)}
+            columns={angebotColumns}
+            allColumns={angebotColumns}
             focusRowId={searchParams.get("focus") || ""}
             toolbarActions={[{ name: "new", label: "Neues Angebot", permission: "verkauf.bearbeiten", onClick: neu }]}
             rowActions={[
@@ -229,10 +247,26 @@ export default function Angebote() {
             <div className="form-row bestellposition-hinzufuegen"><div><Label>Artikel / Service</Label><LookupField value={leistungId} options={leistungsOptionen} onChange={setLeistungId} placeholder="Artikel oder Service suchen..."/></div>
                 <div><Label>Menge</Label><NumberField value={menge} min="1" onChange={wert => setMenge(Number(wert))}/></div>
                 <button type="button" onClick={positionHinzufuegen}>Position hinzufügen</button></div>
+            <div className="form-row"><p>Es werden nur Artikel mit VK-Preis angezeigt. Komponenten und Baugruppen können verkauft werden, wenn ein VK-Preis hinterlegt ist.</p></div>
             <div className="form-row"><Label required>Angebotspositionen</Label>
                 {positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">{positionen.map(position => <li key={`${position.leistungTyp}-${position.artikelId}`}>{position.artikel} [{position.leistungTyp}]: {position.menge} × {position.einzelpreis.toFixed(2)} €
                     <button type="button" className="link-button" onClick={() => setPositionen(items => items.filter(item => !(item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp)))}>Entfernen</button></li>)}</ul>}
-                {positionen.length > 0 && <strong>Gesamt: {gesamtbetrag(positionen).toFixed(2)} €</strong>}
+                {positionen.length > 0 && <>
+                    <strong>Zwischensumme: {gesamtbetrag(positionen).toFixed(2)} €</strong>
+                    <div className="form-row">
+                        <div>
+                            <Label>Vergünstigung</Label>
+                            <NumberField value={rabattBetrag} min="0" step="0.01" format="currency" onChange={wert => setRabattBetrag(Number(wert || 0))}/>
+                        </div>
+                    </div>
+                    <div className="form-row">
+                        <div>
+                            <Label>Grund für Vergünstigung</Label>
+                            <TextArea rows={2} value={verguenstigungsGrund} onChange={setVerguenstigungsGrund} placeholder="z. B. Spar-Paket, Mengenrabatt, Familienrabatt..."/>
+                        </div>
+                    </div>
+                    <strong>Gesamt nach Vergünstigung: {gesamtNachAbzug(positionen, rabattBetrag).toFixed(2)} €</strong>
+                </>}
                 {fehler && <p className="form-error">{fehler}</p>}</div>
             <div className="form-row"><button onClick={speichern}>Angebot speichern</button></div>
         </Dialog>

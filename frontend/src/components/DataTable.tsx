@@ -187,8 +187,9 @@ export default function DataTable({
 
         setVisibleColumns(result);
 
-
-        saveUserColumns(username, tableName, result.map(c => c.field));
+        if (username && tableName) {
+            saveUserColumns(username, tableName, result.map(c => c.field));
+        }
 
     }
 
@@ -323,7 +324,7 @@ export default function DataTable({
                             </strong>
 
 
-                            {allColumns.map(column =>
+                            {(allColumns.length > 0 ? allColumns : columns).map(column =>
 
                                 <label key={column.field}>
 

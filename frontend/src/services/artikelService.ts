@@ -6,13 +6,19 @@ const baseService = createCRUDService("artikel", artikel);
 
 export function normalizeArtikel(item = {}) {
     const basisPreis = Number(item.preis ?? 0);
+    const einkaufspreis = Number(item.einkaufspreis ?? basisPreis);
+    const verkaufspreis = Number(item.verkaufspreis ?? basisPreis);
     return {
         ...item,
         artikelTyp: item.artikelTyp || (Array.isArray(item.komponenten) && item.komponenten.length > 0 ? "Baugruppe" : "Einzelartikel"),
-        einkaufspreis: Number(item.einkaufspreis ?? basisPreis),
-        verkaufspreis: Number(item.verkaufspreis ?? basisPreis),
+        einkaufspreis,
+        verkaufspreis,
         bestand: Number(item.bestand ?? 0),
-        komponenten: Array.isArray(item.komponenten) ? item.komponenten : []
+        komponenten: Array.isArray(item.komponenten) ? item.komponenten : [],
+        istEinkaufbar: einkaufspreis > 0,
+        istVerkaeuflich: verkaufspreis > 0,
+        beschaffungsart: einkaufspreis > 0 ? "Zukauf" : "Herstellung",
+        verkaufsstatus: verkaufspreis > 0 ? "Verkaufbar" : "Nicht verkaufbar"
     };
 }
 

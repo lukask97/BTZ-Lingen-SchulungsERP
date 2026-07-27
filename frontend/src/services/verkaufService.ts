@@ -14,6 +14,9 @@ export function angebotInAuftragUebernehmen(angebotId) {
         datum: new Date().toISOString().slice(0, 10),
         status: "offen",
         positionen: angebot.positionen,
+        rabattBetrag: Number(angebot.rabattBetrag || 0),
+        verguenstigungsGrund: angebot.verguenstigungsGrund || "",
+        gesamtbetrag: Number(angebot.gesamtbetrag || 0),
         angebotId: angebot.id
     });
     angeboteService.update({ ...angebot, status: "angenommen" });
