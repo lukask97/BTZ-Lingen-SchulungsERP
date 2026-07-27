@@ -33,7 +33,7 @@ export function saveData(key, data){
 // Ein Reset löscht nur lokale Browser-Testdaten. Beim nächsten Laden werden
 // die zentralen Startdaten wieder aus mockData.js übernommen.
 const TEST_DATA_KEYS = [
-    "kunden", "artikel", "benutzer", "rollen", "rechte", "lager", "rechnungen",
+    "kunden", "artikel", "benutzer", "rollen", "rechte", "lager",
     "services",
     "lieferanten", "bestellungen", "angebote", "auftraege", "reklamationen",
     "marketingaktionen", "abteilungen", "kundenanfragen", "zahlungen", "mahnungen",

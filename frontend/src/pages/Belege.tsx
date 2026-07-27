@@ -86,8 +86,7 @@ export default function Belege() {
                 options: [
                     { value: "Rechnungskopie", label: "Rechnungskopie" },
                     { value: "Zahlungsbeleg", label: "Zahlungsbeleg" },
-                    { value: "Mahnschreiben", label: "Mahnschreiben" },
-                    { value: "Eingangsrechnung", label: "Eingangsrechnung" }
+                    { value: "Mahnschreiben", label: "Mahnschreiben" }
                 ]
             }]}
             onFilter={filters => setTypFilter(filters.typ || "")}
@@ -108,7 +107,6 @@ export default function Belege() {
                 <option value="Rechnungskopie">Rechnungskopie</option>
                 <option value="Zahlungsbeleg">Zahlungsbeleg</option>
                 <option value="Mahnschreiben">Mahnschreiben</option>
-                <option value="Eingangsrechnung">Eingangsrechnung</option>
             </select></div>
             <div><Label>Bezugsart</Label><select value={current.bezugTyp || "Rechnung"} onChange={event => setCurrent(item => ({ ...item, bezugTyp: event.target.value }))}>
                 <option value="Rechnung">Rechnung</option>

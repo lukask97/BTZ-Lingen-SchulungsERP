@@ -17,11 +17,12 @@ import { angebotInAuftragUebernehmen } from "../services/verkaufService";
 import OverviewCards from "../components/OverviewCards";
 import vertriebsdokumenteService from "../services/vertriebsdokumenteService";
 import versandService from "../services/versandService";
+import { getCustomerName } from "../utils/customerReferences";
 import { getSalesStep, getSalesStepLabel } from "../utils/processFlow";
 
-const heute = () => new Date().toISOString().slice(0, 10);
+const heute = () => "2026-07-27";
 const inTagen = tage => {
-    const datum = new Date();
+    const datum = new Date("2026-07-27");
     datum.setDate(datum.getDate() + tage);
     return datum.toISOString().slice(0, 10);
 };
@@ -44,6 +45,7 @@ export default function Angebote() {
     const [gueltigBis, setGueltigBis] = useState(inTagen(14));
     const [rabattBetrag, setRabattBetrag] = useState(0);
     const [verguenstigungsGrund, setVerguenstigungsGrund] = useState("");
+    const [angebotsNrDraft, setAngebotsNrDraft] = useState("");
     const kunden = kundenService.getAll();
     const artikel = artikelService.getAll().filter(item => item.istVerkaeuflich);
     const services = servicesService.getAll();
@@ -58,13 +60,18 @@ export default function Angebote() {
     const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
     const leistungsOptionen = leistungen.map(item => ({
         value: `${item.leistungTyp}:${item.id}`,
-        label: `${item.leistungTyp === "Service" ? item.serviceNr : item.artikelNr} - ${item.name} [${item.leistungTyp === "Artikel" ? item.artikelTyp : item.leistungTyp}] (${Number(item.verkaufspreis ?? item.preis ?? 0).toFixed(2)} €)`
+        label: `${item.leistungTyp === "Service" ? item.serviceNr : item.artikelNr} - ${item.name} [${item.leistungTyp === "Artikel" ? item.artikelTyp : item.leistungTyp}] (${Number(item.verkaufspreis ?? item.preis ?? 0).toFixed(2)} EUR)`
     }));
+    const newMode = searchParams.get("new");
+    const inquiryIdFromQuery = searchParams.get("anfrageId") || "";
+    const kundeIdFromQuery = searchParams.get("kundeId") || "";
+    const defaultKundeId = String(kunden[0]?.id || "");
+    const defaultLeistungId = leistungen[0] ? `${leistungen[0].leistungTyp}:${leistungen[0].id}` : "";
     const angebotColumns = [
         { field: "angebotsNr", title: "Angebotsnummer" },
         { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
         { field: "datum", title: "Datum" },
-        { field: "gueltigBis", title: "Gültig bis", render: row => row.gueltigBis || "-" },
+        { field: "gueltigBis", title: "Gueltig bis", render: row => row.gueltigBis || "-" },
         { field: "status", title: "Status" },
         { field: "prozess", title: "Prozess" },
         { field: "gesamt", title: "Gesamt" },
@@ -72,30 +79,39 @@ export default function Angebote() {
     ];
 
     useEffect(() => {
-        if (searchParams.get("new") !== "fromInquiry") return;
-        const kundeIdFromQuery = searchParams.get("kundeId") || String(kunden[0]?.id || "");
-        setSourceInquiryId(searchParams.get("anfrageId") || "");
-        setKundeId(kundeIdFromQuery);
-        setLeistungId(leistungen[0] ? `${leistungen[0].leistungTyp}:${leistungen[0].id}` : "");
+        if (newMode !== "fromInquiry") return;
+        setSourceInquiryId(inquiryIdFromQuery);
+        setKundeId(kundeIdFromQuery || defaultKundeId);
+        setLeistungId(defaultLeistungId);
         setMenge(1);
         setPositionen([]);
         setGueltigBis(inTagen(14));
         setRabattBetrag(0);
         setVerguenstigungsGrund("");
         setFehler("");
+        setAngebotsNrDraft(naechsteAngebotsnummer());
         setOffen(true);
-    }, [searchParams, kunden, leistungen]);
+    }, [newMode, inquiryIdFromQuery, kundeIdFromQuery, defaultKundeId, defaultLeistungId]);
+
+    const handleClose = () => {
+        setOffen(false);
+        setFehler("");
+        if (newMode) {
+            navigate("/angebote", { replace: true });
+        }
+    };
 
     const neu = () => {
         setSourceInquiryId("");
-        setKundeId(kunden[0]?.id ? String(kunden[0].id) : "");
-        setLeistungId(leistungen[0] ? `${leistungen[0].leistungTyp}:${leistungen[0].id}` : "");
+        setKundeId(defaultKundeId);
+        setLeistungId(defaultLeistungId);
         setMenge(1);
         setPositionen([]);
         setGueltigBis(inTagen(14));
         setRabattBetrag(0);
         setVerguenstigungsGrund("");
         setFehler("");
+        setAngebotsNrDraft(naechsteAngebotsnummer());
         setOffen(true);
     };
 
@@ -104,8 +120,10 @@ export default function Angebote() {
         if (!auswahl || Number(menge) <= 0) return;
         setPositionen(vorherige => {
             const vorhanden = vorherige.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp);
-            if (vorhanden) return vorherige.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp
-                ? { ...item, menge: item.menge + Number(menge) } : item);
+            if (vorhanden) {
+                return vorherige.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp
+                    ? { ...item, menge: item.menge + Number(menge) } : item);
+            }
             return [...vorherige, {
                 artikelId: auswahl.id,
                 artikel: auswahl.name,
@@ -121,11 +139,11 @@ export default function Angebote() {
     const speichern = () => {
         const kunde = kunden.find(item => item.id === Number(kundeId));
         if (!kunde || positionen.length === 0) {
-            setFehler("Bitte einen Kunden und mindestens eine Position auswählen.");
+            setFehler("Bitte einen Kunden und mindestens eine Position auswaehlen.");
             return;
         }
         if (!gueltigBis) {
-            setFehler("Bitte eine Frist für das Angebot angeben.");
+            setFehler("Bitte eine Frist fuer das Angebot angeben.");
             return;
         }
         if (gueltigBis < heute()) {
@@ -133,10 +151,9 @@ export default function Angebote() {
             return;
         }
         const neuesAngebot = angeboteService.add({
-            angebotsNr: naechsteAngebotsnummer(),
+            angebotsNr: angebotsNrDraft,
             anfrageId: sourceInquiryId ? Number(sourceInquiryId) : "",
             kundeId: kunde.id,
-            kunde: kunde.firma,
             datum: heute(),
             gueltigBis,
             rabattBetrag: Number(rabattBetrag || 0),
@@ -153,7 +170,7 @@ export default function Angebote() {
         }
         setAngebote(angeboteService.getAll());
         setSourceInquiryId("");
-        setOffen(false);
+        handleClose();
     };
 
     const aufAntwortWarten = angebot => {
@@ -167,7 +184,7 @@ export default function Angebote() {
             alert("Bitte zuerst auf die Kundenantwort warten.");
             return;
         }
-        if (!confirm(`Angebot ${angebot.angebotsNr} als angenommen bestätigen und Auftrag anlegen?`)) return;
+        if (!confirm(`Angebot ${angebot.angebotsNr} als angenommen bestaetigen und Auftrag anlegen?`)) return;
         angebotInAuftragUebernehmen(angebot.id);
         setAngebote(angeboteService.getAll());
     };
@@ -188,12 +205,13 @@ export default function Angebote() {
         setAngebote(angeboteService.getAll());
     };
 
-    const findeAuftragZuAngebot = (angebotId) => auftraege.find(item => item.angebotId === angebotId);
+    const findeAuftragZuAngebot = angebotId => auftraege.find(item => item.angebotId === angebotId);
 
     const data = angebote.map(angebot => ({
         ...angebot,
+        kunde: getCustomerName(angebot.kundeId, angebot.kunde),
         positionenText: angebot.positionen.map(position => `${position.artikel} (${position.menge})`).join(", "),
-        gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag).toFixed(2)} €`,
+        gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag).toFixed(2)} EUR`,
         prozess: getSalesStepLabel(getSalesStep(angebot, auftraege, vertriebsdokumente, versandauftraege))
     }));
     const offeneAngebote = angebote.filter(istOffenesAngebot);
@@ -204,8 +222,8 @@ export default function Angebote() {
         <OverviewCards cards={[
             { label: "Angebote gesamt", value: angebote.length },
             { label: "Noch offen", value: offeneAngebote.length },
-            { label: "Offener Angebotswert", value: `${offenerWert.toFixed(2)} €` },
-            { label: "In Aufträge übernommen", value: auftraegeAusAngeboten }
+            { label: "Offener Angebotswert", value: `${offenerWert.toFixed(2)} EUR` },
+            { label: "In Auftraege uebernommen", value: auftraegeAusAngeboten }
         ]}/>
         <DataTable title="Angebote" selectableColumns data={data.filter(item => !statusFilter || item.status === statusFilter)}
             columns={angebotColumns}
@@ -214,9 +232,9 @@ export default function Angebote() {
             toolbarActions={[{ name: "new", label: "Neues Angebot", permission: "verkauf.bearbeiten", onClick: neu }]}
             rowActions={[
                 { name: "wait", label: "Auf Antwort warten", permission: "verkauf.bearbeiten", onClick: aufAntwortWarten, variant: "secondary", isVisible: row => row.status === "offen" },
-                { name: "accept", label: "Annahme bestätigen", permission: "verkauf.bearbeiten", onClick: annahmeBestaetigen, variant: "success", isVisible: row => row.status === "wartet auf Antwort" },
-                { name: "reject", label: "Ablehnung bestätigen", permission: "verkauf.bearbeiten", onClick: ablehnungBestaetigen, variant: "danger", isVisible: row => row.status === "wartet auf Antwort" },
-                { name: "orderOpen", label: "Auftrag öffnen", permission: "verkauf.bearbeiten", onClick: row => {
+                { name: "accept", label: "Annahme bestaetigen", permission: "verkauf.bearbeiten", onClick: annahmeBestaetigen, variant: "success", isVisible: row => row.status === "wartet auf Antwort" },
+                { name: "reject", label: "Ablehnung bestaetigen", permission: "verkauf.bearbeiten", onClick: ablehnungBestaetigen, variant: "danger", isVisible: row => row.status === "wartet auf Antwort" },
+                { name: "orderOpen", label: "Auftrag oeffnen", permission: "verkauf.bearbeiten", onClick: row => {
                     const auftrag = findeAuftragZuAngebot(row.id);
                     if (auftrag) navigate(`/auftraege?focus=${auftrag.id}`);
                 }, variant: "secondary", isVisible: row => !!findeAuftragZuAngebot(row.id) },
@@ -238,34 +256,34 @@ export default function Angebote() {
                 return null;
             }}
         />
-        <Dialog open={offen} title="Neues Angebot" onClose={() => setOffen(false)}>
+        <Dialog open={offen} title="Neues Angebot" onClose={handleClose}>
             <div><Label required>Kunde</Label><LookupField value={kundeId} options={kundenOptionen} onChange={setKundeId} placeholder="Kunde suchen..."/></div>
             <div className="form-row">
-                <div><Label>Datum</Label><input type="date" value={heute()} disabled/></div>
-                <div><Label required>Gültig bis</Label><input type="date" value={gueltigBis} onChange={event => setGueltigBis(event.target.value)}/></div>
+                <div><Label>Angebotsnummer</Label><input type="text" value={angebotsNrDraft} disabled/></div>
+                <div><Label required>Gueltig bis</Label><input type="date" value={gueltigBis} onChange={event => setGueltigBis(event.target.value)}/></div>
             </div>
             <div className="form-row bestellposition-hinzufuegen"><div><Label>Artikel / Service</Label><LookupField value={leistungId} options={leistungsOptionen} onChange={setLeistungId} placeholder="Artikel oder Service suchen..."/></div>
                 <div><Label>Menge</Label><NumberField value={menge} min="1" onChange={wert => setMenge(Number(wert))}/></div>
-                <button type="button" onClick={positionHinzufuegen}>Position hinzufügen</button></div>
-            <div className="form-row"><p>Es werden nur Artikel mit VK-Preis angezeigt. Komponenten und Baugruppen können verkauft werden, wenn ein VK-Preis hinterlegt ist.</p></div>
+                <button type="button" onClick={positionHinzufuegen}>Position hinzufuegen</button></div>
+            <div className="form-row"><p>Es werden nur Artikel mit VK-Preis angezeigt. Komponenten und Baugruppen koennen verkauft werden, wenn ein VK-Preis hinterlegt ist.</p></div>
             <div className="form-row"><Label required>Angebotspositionen</Label>
-                {positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">{positionen.map(position => <li key={`${position.leistungTyp}-${position.artikelId}`}>{position.artikel} [{position.leistungTyp}]: {position.menge} × {position.einzelpreis.toFixed(2)} €
+                {positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">{positionen.map(position => <li key={`${position.leistungTyp}-${position.artikelId}`}>{position.artikel} [{position.leistungTyp}]: {position.menge} x {position.einzelpreis.toFixed(2)} EUR
                     <button type="button" className="link-button" onClick={() => setPositionen(items => items.filter(item => !(item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp)))}>Entfernen</button></li>)}</ul>}
                 {positionen.length > 0 && <>
-                    <strong>Zwischensumme: {gesamtbetrag(positionen).toFixed(2)} €</strong>
+                    <strong>Zwischensumme: {gesamtbetrag(positionen).toFixed(2)} EUR</strong>
                     <div className="form-row">
                         <div>
-                            <Label>Vergünstigung</Label>
+                            <Label>Verguenstigung</Label>
                             <NumberField value={rabattBetrag} min="0" step="0.01" format="currency" onChange={wert => setRabattBetrag(Number(wert || 0))}/>
                         </div>
                     </div>
                     <div className="form-row">
                         <div>
-                            <Label>Grund für Vergünstigung</Label>
+                            <Label>Grund fuer Verguenstigung</Label>
                             <TextArea rows={2} value={verguenstigungsGrund} onChange={setVerguenstigungsGrund} placeholder="z. B. Spar-Paket, Mengenrabatt, Familienrabatt..."/>
                         </div>
                     </div>
-                    <strong>Gesamt nach Vergünstigung: {gesamtNachAbzug(positionen, rabattBetrag).toFixed(2)} €</strong>
+                    <strong>Gesamt nach Verguenstigung: {gesamtNachAbzug(positionen, rabattBetrag).toFixed(2)} EUR</strong>
                 </>}
                 {fehler && <p className="form-error">{fehler}</p>}</div>
             <div className="form-row"><button onClick={speichern}>Angebot speichern</button></div>

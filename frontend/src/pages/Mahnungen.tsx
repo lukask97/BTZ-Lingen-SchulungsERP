@@ -5,6 +5,7 @@ import OverviewCards from "../components/OverviewCards";
 import mahnungenService from "../services/mahnungenService";
 import rechnungenService from "../services/rechnungenService";
 import kundenService from "../services/customerService";
+import { getCustomerName } from "../utils/customerReferences";
 
 const today = "2026-07-26";
 
@@ -22,7 +23,7 @@ export default function Mahnungen() {
     const erzeugen = (rechnung) => {
         mahnungenService.create({
             rechnungsnr: rechnung.rechnungsnr,
-            kunde: rechnung.kunde,
+            kunde: getCustomerName(rechnung.kundeId, rechnung.kunde),
             datum: today,
             status: "gesendet",
             stufe: "1. Mahnung"

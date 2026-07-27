@@ -271,55 +271,6 @@ export let lager = [
 
 ];
 
-export let rechnungen = [
-
-    {
-        id: 1, 
-        rechnungsnr: "RE-2024-001", 
-        rechnungstyp: "Ausgangsrechnung",
-        kundeId: 1,
-        kunde: "Campus Baumarkt GmbH",
-        bestellungId: "",
-        bestellNr: "",
-        datum: "2024-01-15",
-        faelligAm: "2024-01-29",
-        betrag: 1250.50,
-        status: "bezahlt",
-        mahnstufe: "-"
-    },
-
-    {
-        id: 2,
-        rechnungsnr: "RE-2024-002",
-        rechnungstyp: "Ausgangsrechnung",
-        kundeId: 2,
-        kunde: "Emsland Tourismus GmbH",
-        bestellungId: "",
-        bestellNr: "",
-        datum: "2026-07-10",
-        faelligAm: "2026-07-20",
-        betrag: 3499.00,
-        status: "offen",
-        mahnstufe: "1. Mahnung"
-    },
-
-    {
-        id: 3,
-        rechnungsnr: "ER-2026-003",
-        rechnungstyp: "Eingangsrechnung",
-        lieferantId: 1,
-        kunde: "Weber GmbH",
-        bestellungId: 1,
-        bestellNr: "EK-2026-001",
-        datum: "2026-07-24",
-        faelligAm: "2026-07-30",
-        betrag: 599.99,
-        status: "offen",
-        mahnstufe: "-"
-    }
-
-];
-
 export let users = [
 
     {
@@ -442,11 +393,38 @@ export let auftraege = [
         kundeId: 1,
         kunde: "Campus Baumarkt GmbH",
         datum: "2026-07-25",
-        status: "offen",
+        status: "abgerechnet",
         rabattBetrag: 0,
         gesamtbetrag: 1348.5,
+        faelligAm: "2026-08-08",
         positionen: [{ artikelId: 2, artikel: "Sicherheitsjacke", menge: 15, einzelpreis: 89.9 }],
         angebotId: 1
+    },
+    {
+        id: 2,
+        auftragNr: "VK-2026-1202",
+        kundeId: 2,
+        kunde: "Emsland Tourismus GmbH",
+        datum: "2026-07-20",
+        status: "bezahlt",
+        rabattBetrag: 0,
+        gesamtbetrag: 1799.7,
+        faelligAm: "2026-08-03",
+        positionen: [{ artikelId: 3, artikel: "Fahrradhelm", menge: 30, einzelpreis: 59.99 }],
+        angebotId: ""
+    },
+    {
+        id: 3,
+        auftragNr: "VK-2026-1203",
+        kundeId: 1,
+        kunde: "Campus Baumarkt GmbH",
+        datum: "2026-07-26",
+        status: "offen",
+        rabattBetrag: 0,
+        gesamtbetrag: 799,
+        faelligAm: "",
+        positionen: [{ artikelId: 1, artikel: "Schulungsfahrrad City", menge: 1, einzelpreis: 799 }],
+        angebotId: ""
     }
 ];
 
@@ -497,11 +475,13 @@ export let kundenanfragen = [
 export let zahlungen = [
     {
         id: 1,
-        rechnungsnr: "RE-2024-001",
+        auftragId: 2,
+        auftragNr: "VK-2026-1202",
+        rechnungsnr: "RE-2026-1202",
         zahlungsart: "Eingang",
-        kunde: "Campus Baumarkt GmbH",
+        kunde: "Emsland Tourismus GmbH",
         datum: "2026-07-22",
-        betrag: 1250.5,
+        betrag: 1799.7,
         methode: "Überweisung"
     }
 ];
@@ -509,8 +489,10 @@ export let zahlungen = [
 export let mahnungen = [
     {
         id: 1,
-        rechnungsnr: "RE-2024-002",
-        kunde: "Emsland Tourismus GmbH",
+        auftragId: 1,
+        auftragNr: "VK-2026-1201",
+        rechnungsnr: "RE-2026-1201",
+        kunde: "Campus Baumarkt GmbH",
         datum: "2026-07-23",
         status: "gesendet",
         stufe: "1. Mahnung"
@@ -522,7 +504,7 @@ export let belege = [
         id: 1,
         typ: "Rechnungskopie",
         bezugTyp: "Rechnung",
-        bezug: "RE-2024-001",
+        bezug: "RE-2026-1202",
         datum: "2026-07-21",
         status: "archiviert",
         beschreibung: "Digitale Ablage für die erste Beispielrechnung."
@@ -531,7 +513,7 @@ export let belege = [
         id: 2,
         typ: "Zahlungsbeleg",
         bezugTyp: "Rechnung",
-        bezug: "RE-2024-001",
+        bezug: "RE-2026-1202",
         datum: "2026-07-22",
         status: "archiviert",
         beschreibung: "Zahlungseingang per Überweisung wurde abgelegt."
@@ -540,19 +522,10 @@ export let belege = [
         id: 3,
         typ: "Mahnschreiben",
         bezugTyp: "Rechnung",
-        bezug: "RE-2024-002",
+        bezug: "RE-2026-1201",
         datum: "2026-07-23",
         status: "versendet",
         beschreibung: "1. Mahnung für eine fällige Ausgangsrechnung."
-    },
-    {
-        id: 4,
-        typ: "Eingangsrechnung",
-        bezugTyp: "Rechnung",
-        bezug: "ER-2026-003",
-        datum: "2026-07-24",
-        status: "archiviert",
-        beschreibung: "Lieferantenrechnung zur Bestellung wurde abgelegt."
     }
 ];
 

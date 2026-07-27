@@ -3,6 +3,8 @@
 Diese Uebersicht fasst die aktuell im Mockup verwendeten Tabellen in Tabellenform zusammen.  
 Beziehungen stehen direkt bei den Feldern in Klammern, zum Beispiel `kunde_id (kunden)`.
 
+Fuer das aktuelle vereinfachte Mockup-Modell des Vertriebsprozesses siehe auch [Auftragsmodell-Verkaufsprozess.md](docs/Auftragsmodell-Verkaufsprozess.md).
+
 ## Hinweise
 
 | Thema | Hinweis |
@@ -32,10 +34,10 @@ Beziehungen stehen direkt bei den Feldern in Klammern, zum Beispiel `kunde_id (k
 |---|---|---|---|
 | `kundenanfragen` | Erfassung eingehender Kundenanfragen | <ul><li>`id`</li><li>`typ`</li><li>`kunde_id (kunden)`</li><li>`angebot_id (angebote)`</li><li>`kanal`</li><li>`status`</li><li>`datum`</li><li>`anliegen`</li></ul> | Dient als Einstieg in den Vertriebsprozess. |
 | `angebote` | Verkaufsangebote | <ul><li>`id`</li><li>`angebots_nr`</li><li>`anfrage_id (kundenanfragen)`</li><li>`kunde_id (kunden)`</li><li>`datum`</li><li>`status`</li></ul> | Positionen liegen aktuell noch als Array im Datensatz. |
-| `auftraege` | Bestaetigte Verkaufsauftraege | <ul><li>`id`</li><li>`auftrag_nr`</li><li>`kunde_id (kunden)`</li><li>`angebot_id (angebote)`</li><li>`datum`</li><li>`status`</li></ul> | Referenziert durch Vertriebsdokumente und Versand. |
-| `vertriebsdokumente` | Auftragsbestaetigung, Lieferschein, Transportpapier | <ul><li>`id`</li><li>`auftrag_id (auftraege)`</li><li>`auftrag_nr`</li><li>`kunde_id (kunden)`</li><li>`dokument_typ`</li><li>`titel`</li><li>`datum`</li><li>`status`</li><li>`versendet_am`</li><li>`notiz`</li></ul> | Positionsdaten werden aktuell teilweise mitgespeichert, sollten spaeter aus dem Auftrag abgeleitet werden. |
+| `auftraege` | Bestaetigte Verkaufsauftraege | <ul><li>`id`</li><li>`auftrag_nr`</li><li>`kunde_id (kunden)`</li><li>`angebot_id (angebote)`</li><li>`datum`</li><li>`status`</li><li>`faellig_am`</li></ul> | Zentrale Verkaufstabelle. Rechnungsansicht und Zahlungsbezug werden im Mockup aus dem Auftragsstatus abgeleitet. |
+| `vertriebsdokumente` | Auftragsbestaetigung, Begleitdokumente und Unterrichtsbelege | <ul><li>`id`</li><li>`auftrag_id (auftraege)`</li><li>`auftrag_nr`</li><li>`kunde_id (kunden)`</li><li>`dokument_typ`</li><li>`titel`</li><li>`datum`</li><li>`status`</li><li>`versendet_am`</li><li>`notiz`</li></ul> | Im aktuellen Mockup nicht die fachliche Hauptquelle fuer Liefer- oder Rechnungslogik. |
 | `versandauftraege` | Versandvorgaenge zu Auftraegen | <ul><li>`id`</li><li>`versand_nr`</li><li>`auftrag_id (auftraege)`</li><li>`datum`</li><li>`status`</li><li>`transport`</li></ul> | Im Mockup bereits mit Prozessreihenfolge verbunden. |
-| `reklamationen` | Reklamationen aus Vertrieb und Service | <ul><li>`id`</li><li>`reklamations_nr`</li><li>`kunde_id (kunden)`</li><li>`datum`</li><li>`beschreibung`</li><li>`status`</li></ul> | Spaeter optional mit `auftrag_id (auftraege)` oder `rechnung_id (rechnungen)` erweiterbar. |
+| `reklamationen` | Reklamationen aus Vertrieb und Service | <ul><li>`id`</li><li>`reklamations_nr`</li><li>`kunde_id (kunden)`</li><li>`datum`</li><li>`beschreibung`</li><li>`status`</li></ul> | Spaeter optional mit `auftrag_id (auftraege)` erweiterbar. |
 | `retouren` | Retourenprozess in Logistik und Service | <ul><li>`id`</li><li>`retouren_nr`</li><li>`kunde`</li><li>`artikel`</li><li>`datum`</li><li>`status`</li><li>`grund`</li></ul> | Kunde und Artikel sind aktuell noch Freitext; spaeter besser `kunde_id (kunden)` und optional `artikel_id (artikel)`. |
 
 ---
@@ -53,9 +55,9 @@ Beziehungen stehen direkt bei den Feldern in Klammern, zum Beispiel `kunde_id (k
 
 | Tabelle | Zweck | Wichtige Felder | Hinweise |
 |---|---|---|---|
-| `rechnungen` | Ausgangs- und Eingangsrechnungen | <ul><li>`id`</li><li>`rechnungs_nr`</li><li>`rechnungstyp`</li><li>`kunde_id (kunden)`</li><li>`lieferant_id (lieferanten)`</li><li>`bestellung_id (bestellungen)`</li><li>`bestell_nr`</li><li>`datum`</li><li>`faellig_am`</li><li>`betrag`</li><li>`status`</li><li>`mahnstufe`</li></ul> | Je nach `rechnungstyp` ist entweder Kunde oder Lieferant relevant. |
-| `zahlungen` | Zahlungseingaenge und -ausgaenge | <ul><li>`id`</li><li>`rechnungs_nr`</li><li>`zahlungsart`</li><li>`kunde`</li><li>`datum`</li><li>`betrag`</li><li>`methode`</li></ul> | Aktuell noch ueber Rechnungsnummer statt ID angebunden; spaeter besser `rechnung_id (rechnungen)`. |
-| `mahnungen` | Mahnvorgaenge zu Rechnungen | <ul><li>`id`</li><li>`rechnungs_nr`</li><li>`kunde`</li><li>`datum`</li><li>`status`</li><li>`stufe`</li></ul> | Aktuell ebenfalls noch ueber Rechnungsnummer angebunden; spaeter besser `rechnung_id (rechnungen)`. |
+| `rechnungen` | Abgeleitete Sicht im Mockup, keine eigenstaendige Kerntabelle mehr | <ul><li>`rechnungs_nr`</li><li>`auftrag_id (auftraege)`</li><li>`kunde_id (kunden)`</li><li>`datum`</li><li>`faellig_am`</li><li>`betrag`</li><li>`status`</li></ul> | Die Rechnungsansicht wird aus Auftraegen mit geeigneten Statuswerten abgeleitet. |
+| `zahlungen` | Zahlungseingaenge und -ausgaenge | <ul><li>`id`</li><li>`auftrag_id (auftraege)`</li><li>`auftrag_nr`</li><li>`rechnungs_nr`</li><li>`zahlungsart`</li><li>`kunde`</li><li>`datum`</li><li>`betrag`</li><li>`methode`</li></ul> | Im Mockup fachlich ueber den Auftrag verbunden. |
+| `mahnungen` | Mahnvorgaenge zu abgerechneten Auftraegen | <ul><li>`id`</li><li>`auftrag_id (auftraege)`</li><li>`auftrag_nr`</li><li>`rechnungs_nr`</li><li>`kunde`</li><li>`datum`</li><li>`status`</li><li>`stufe`</li></ul> | Im Mockup fachlich ueber den Auftrag verbunden. |
 | `belege` | Beleg- und Dokumentenarchiv | <ul><li>`id`</li><li>`typ`</li><li>`bezug_typ`</li><li>`bezug`</li><li>`datum`</li><li>`status`</li><li>`beschreibung`</li></ul> | Kann spaeter polymorph bleiben oder spezialisiert werden. |
 | `firmenkonto` | Vereinfachte Kontobewegungen fuer Schulungszwecke | <ul><li>`id`</li><li>`datum`</li><li>`betreff`</li><li>`info`</li><li>`soll`</li><li>`haben`</li><li>`saldo`</li></ul> | Rein didaktische Buchungstabelle. |
 
@@ -118,7 +120,7 @@ Beziehungen stehen direkt bei den Feldern in Klammern, zum Beispiel `kunde_id (k
 | 1 | Stammdaten | `kunden`, `lieferanten`, `artikel`, `services`, `mitarbeiter` |
 | 2 | Kerngeschaeft | `angebote`, `auftraege`, `bestellungen` |
 | 3 | Positionsdaten | `angebotspositionen`, `auftragspositionen`, `bestellpositionen` |
-| 4 | Folgeprozesse | `vertriebsdokumente`, `versandauftraege`, `einkaufsdokumente`, `rechnungen` |
+| 4 | Folgeprozesse | `vertriebsdokumente`, `versandauftraege`, `einkaufsdokumente` |
 | 5 | Buchhaltung | `zahlungen`, `mahnungen`, `belege`, `firmenkonto` |
 | 6 | Personal und Zusatzmodule | `bewerber`, `arbeitszeiten`, `urlaubsantraege`, `krankmeldungen`, `schulungen`, `personalakten` |
 | 7 | Organisation und Rechte | `rollen`, `rechte`, `rollen_rechte`, `benutzer` |
@@ -133,6 +135,6 @@ Beziehungen stehen direkt bei den Feldern in Klammern, zum Beispiel `kunde_id (k
 | Positionen | Arrays aus `angebote`, `auftraege`, `bestellungen` in eigene Positions-Tabellen auslagern |
 | Stuecklisten | `komponenten` aus `artikel` in `artikel_stueckliste` ueberfuehren |
 | Fremdschluessel | Freitextfelder wie `kunde`, `lieferant`, `rechnungs_nr`, `bestellNr` soweit moeglich durch IDs ersetzen |
-| Statuswerte | Statuslogik fuer Angebot, Auftrag, Bestellung, Versand und Rechnung zentralisieren |
+| Statuswerte | Statuslogik fuer Angebot, Auftrag, Bestellung und Versand zentralisieren; im Mockup wird die Rechnung daraus abgeleitet |
 
 
