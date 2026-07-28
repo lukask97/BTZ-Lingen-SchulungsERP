@@ -46,4 +46,3 @@ const TEST_DATA_KEYS = [
 export function resetTestData() {
     TEST_DATA_KEYS.forEach(key => sessionStorage.removeItem(key));
 }
-
