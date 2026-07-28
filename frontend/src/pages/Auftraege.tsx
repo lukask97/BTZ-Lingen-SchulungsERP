@@ -46,6 +46,7 @@ export default function Auftraege() {
     const auftraege = useMemo(() => auftraegeService.getAll(), [refreshKey]);
     const versandauftraege = versandService.list();
     const vertriebsdokumente = vertriebsdokumenteService.list();
+    const anfragen = customerInquiryService.list();
     const kunden = kundenService.list();
     const artikel = artikelService.getAll().filter(item => item.istVerkaeuflich);
     const services = servicesService.getAll();
@@ -58,6 +59,7 @@ export default function Auftraege() {
         value: `${item.leistungTyp}:${item.id}`,
         label: `${item.leistungTyp === "Service" ? item.serviceNr : item.artikelNr} - ${item.name} (${Number(item.verkaufspreis ?? item.preis ?? 0).toFixed(2)} EUR)`
     }));
+    const findeAnfrage = anfrageId => anfragen.find(item => String(item.id) === String(anfrageId));
     const newMode = searchParams.get("new");
     const inquiryIdFromQuery = searchParams.get("anfrageId") || "";
     const kundeIdFromQuery = searchParams.get("kundeId") || "";
@@ -84,6 +86,7 @@ export default function Auftraege() {
     const data = auftraege.map(auftrag => ({
         ...auftrag,
         kunde: getCustomerName(auftrag.kundeId, auftrag.kunde),
+        anliegenText: findeAnfrage(auftrag.anfrageId)?.anliegen || "-",
         positionenText: (auftrag.positionen || []).map(position => `${position.artikel} (${position.menge})`).join(", "),
         prozess: getSalesStepLabel(
             findeVersandZuAuftrag(auftrag.id)?.status === "versendet"
@@ -193,6 +196,7 @@ export default function Auftraege() {
                 { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "datum", title: "Datum" },
                 { field: "status", title: "Status" },
+                { field: "anliegenText", title: "Anliegen" },
                 { field: "prozess", title: "Prozess" },
                 { field: "positionenText", title: "Positionen" }
             ]}
@@ -218,6 +222,9 @@ export default function Auftraege() {
             ]}
         />
         <Dialog open={open} title={sourceInquiryId ? "Direkten Auftrag aus Kundenanfrage anlegen" : "Neuen Auftrag anlegen"} onClose={handleClose}>
+            {sourceInquiryId && findeAnfrage(sourceInquiryId) && <div className="module-panel">
+                <div><Label>Ausgangsanfrage</Label><p>{findeAnfrage(sourceInquiryId)?.anliegen}</p></div>
+            </div>}
             <div><Label required>Kunde</Label><LookupField value={kundeId} options={kundenOptionen} onChange={setKundeId} placeholder="Kunde suchen..."/></div>
             <div className="form-row">
                 <div><Label>Auftragsnummer</Label><input type="text" value={auftragNrDraft} disabled/></div>

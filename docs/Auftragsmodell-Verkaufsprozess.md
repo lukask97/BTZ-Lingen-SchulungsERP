@@ -12,6 +12,7 @@ Lieferung und Rechnungsstellung werden aus dem Auftragsstatus abgeleitet.
 
 Der gesamte Vertriebsprozess laeuft im Mockup ueber:
 
+- `kundenanfragen`
 - `angebote`
 - `auftraege`
 - `auftragspositionen` fachlich im Datensatz enthalten
@@ -21,6 +22,8 @@ Der gesamte Vertriebsprozess laeuft im Mockup ueber:
 
 Das bedeutet:
 
+- Eine Kundenanfrage kann beantwortet werden, ohne sofort geloescht oder nur als gelesen markiert zu werden
+- Eine Kundenanfrage kann direkt in ein Angebot oder direkt in einen Auftrag ueberfuehrt werden
 - Ein Angebot ist ein eigener Datensatz in `angebote`
 - Nach Annahme entsteht ein Datensatz in `auftraege`
 - Die weitere Bearbeitung wird ueber `auftraege.status` gesteuert
@@ -56,17 +59,28 @@ Im aktuellen Mockup werden vor allem diese Zustande genutzt:
 
 ## 3. Vereinfachter Ablauf
 
+### 0. Kundenanfrage
+
+- Datensatz in `kundenanfragen`
+- Das Anliegen bleibt im Mockup sichtbar
+- Eine Antwort kann direkt erfasst werden
+- Status wechselt zum Beispiel von `offen` auf `beantwortet`
+
 ### 1. Angebot
 
+- Kann aus einer Kundenanfrage entstehen
 - Datensatz in `angebote`
 - Positionen liegen direkt im Datensatz als Array
+- Das urspruengliche Anliegen der Anfrage bleibt ueber `anfrageId` sichtbar
 - Noch kein Lagerabgang
 
 ### 2. Auftrag
 
 - Datensatz in `auftraege`
 - Bezug auf `angebotId` moeglich
+- Kann auch direkt aus einer Kundenanfrage entstehen, ohne vorheriges Angebot
 - Positionen liegen direkt im Auftrag
+- Das urspruengliche Anliegen der Anfrage bleibt ueber `anfrageId` sichtbar
 
 ### 3. Lieferung
 
@@ -95,14 +109,30 @@ Im aktuellen Mockup werden vor allem diese Zustande genutzt:
 
 ## 4. Relevante Tabellen im Mockup
 
+### `kundenanfragen`
+
+Wichtige Felder:
+
+- `id`
+- `typ`
+- `kundeId`
+- `kanal`
+- `status`
+- `datum`
+- `anliegen`
+- `antwort`
+- `beantwortetAm`
+- `angebotId`
+- `auftragId`
+
 ### `angebote`
 
 Wichtige Felder:
 
 - `id`
 - `angebotsNr`
+- `anfrageId`
 - `kundeId`
-- `kunde`
 - `datum`
 - `gueltigBis`
 - `status`
@@ -116,7 +146,7 @@ Wichtige Felder:
 - `id`
 - `auftragNr`
 - `kundeId`
-- `kunde`
+- `anfrageId`
 - `angebotId`
 - `datum`
 - `status`
@@ -174,7 +204,10 @@ Im Mockup zeigt `bezug` meist auf die abgeleitete Rechnungsnummer.
 
 Die wichtigsten Beziehungen sind:
 
+- `kundenanfragen.kundeId -> kunden.id`
+- `angebote.anfrageId -> kundenanfragen.id`
 - `angebote.kundeId -> kunden.id`
+- `auftraege.anfrageId -> kundenanfragen.id`
 - `auftraege.kundeId -> kunden.id`
 - `auftraege.angebotId -> angebote.id`
 - `zahlungen.auftragId -> auftraege.id`
@@ -192,6 +225,12 @@ Zusatzlich wird im Mockup ueber fachliche Nummern gearbeitet:
 ### Rechnungsnummer
 
 - Regel: `VK-...` wird zu `RE-...`
+
+### Anliegen aus Kundenanfragen
+
+- Wenn ein Angebot aus einer Anfrage entsteht, bleibt das Anliegen sichtbar
+- Wenn ein Auftrag direkt aus einer Anfrage entsteht, bleibt das Anliegen ebenfalls sichtbar
+- Im Mockup wird das Anliegen in den Ansichten fuer Angebote und Auftraege angezeigt
 
 ### Rechnungsansicht
 
@@ -244,10 +283,11 @@ Fuer ein Schulungs-ERP ist das in der aktuellen Projektphase absichtlich so geha
 
 Fuer das aktuelle Mockup sollte die Dokumentation immer von diesem Kern ausgehen:
 
-1. `angebote`
-2. `auftraege`
-3. `zahlungen`
-4. `mahnungen`
-5. `belege`
+1. `kundenanfragen`
+2. `angebote`
+3. `auftraege`
+4. `zahlungen`
+5. `mahnungen`
+6. `belege`
 
 Alles Weitere ist im Moment eher eine Anzeige, ein Unterrichtsdokument oder eine spaetere Ausbauoption, aber nicht die fachliche Hauptstruktur.

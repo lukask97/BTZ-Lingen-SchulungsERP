@@ -32,9 +32,9 @@ Fuer das aktuelle vereinfachte Mockup-Modell des Vertriebsprozesses siehe auch [
 
 | Tabelle | Zweck | Wichtige Felder | Hinweise |
 |---|---|---|---|
-| `kundenanfragen` | Erfassung eingehender Kundenanfragen | <ul><li>`id`</li><li>`typ`</li><li>`kunde_id (kunden)`</li><li>`angebot_id (angebote)`</li><li>`kanal`</li><li>`status`</li><li>`datum`</li><li>`anliegen`</li></ul> | Dient als Einstieg in den Vertriebsprozess. |
-| `angebote` | Verkaufsangebote | <ul><li>`id`</li><li>`angebots_nr`</li><li>`anfrage_id (kundenanfragen)`</li><li>`kunde_id (kunden)`</li><li>`datum`</li><li>`status`</li></ul> | Positionen liegen aktuell noch als Array im Datensatz. |
-| `auftraege` | Bestaetigte Verkaufsauftraege | <ul><li>`id`</li><li>`auftrag_nr`</li><li>`kunde_id (kunden)`</li><li>`angebot_id (angebote)`</li><li>`datum`</li><li>`status`</li><li>`faellig_am`</li></ul> | Zentrale Verkaufstabelle. Rechnungsansicht und Zahlungsbezug werden im Mockup aus dem Auftragsstatus abgeleitet. |
+| `kundenanfragen` | Erfassung eingehender Kundenanfragen | <ul><li>`id`</li><li>`typ`</li><li>`kunde_id (kunden)`</li><li>`angebot_id (angebote)`</li><li>`auftrag_id (auftraege)`</li><li>`kanal`</li><li>`status`</li><li>`datum`</li><li>`anliegen`</li><li>`antwort`</li><li>`beantwortet_am`</li></ul> | Dient als Einstieg in den Vertriebsprozess. Anfragen koennen beantwortet oder direkt in Angebot bzw. Auftrag uebernommen werden. |
+| `angebote` | Verkaufsangebote | <ul><li>`id`</li><li>`angebots_nr`</li><li>`anfrage_id (kundenanfragen)`</li><li>`kunde_id (kunden)`</li><li>`datum`</li><li>`status`</li></ul> | Positionen liegen aktuell noch als Array im Datensatz. Das Anliegen der Anfrage bleibt ueber `anfrage_id` sichtbar. |
+| `auftraege` | Bestaetigte Verkaufsauftraege | <ul><li>`id`</li><li>`auftrag_nr`</li><li>`kunde_id (kunden)`</li><li>`anfrage_id (kundenanfragen)`</li><li>`angebot_id (angebote)`</li><li>`datum`</li><li>`status`</li><li>`faellig_am`</li></ul> | Zentrale Verkaufstabelle. Ein Auftrag kann direkt aus einer Anfrage oder aus einem Angebot entstehen. Anliegen aus der Anfrage bleiben sichtbar. Rechnungsansicht und Zahlungsbezug werden im Mockup aus dem Auftragsstatus abgeleitet. |
 | `vertriebsdokumente` | Auftragsbestaetigung, Begleitdokumente und Unterrichtsbelege | <ul><li>`id`</li><li>`auftrag_id (auftraege)`</li><li>`auftrag_nr`</li><li>`kunde_id (kunden)`</li><li>`dokument_typ`</li><li>`titel`</li><li>`datum`</li><li>`status`</li><li>`versendet_am`</li><li>`notiz`</li></ul> | Im aktuellen Mockup nicht die fachliche Hauptquelle fuer Liefer- oder Rechnungslogik. |
 | `versandauftraege` | Versandvorgaenge zu Auftraegen | <ul><li>`id`</li><li>`versand_nr`</li><li>`auftrag_id (auftraege)`</li><li>`datum`</li><li>`status`</li><li>`transport`</li></ul> | Im Mockup bereits mit Prozessreihenfolge verbunden. |
 | `reklamationen` | Reklamationen aus Vertrieb und Service | <ul><li>`id`</li><li>`reklamations_nr`</li><li>`kunde_id (kunden)`</li><li>`datum`</li><li>`beschreibung`</li><li>`status`</li></ul> | Spaeter optional mit `auftrag_id (auftraege)` erweiterbar. |
@@ -118,7 +118,7 @@ Fuer das aktuelle vereinfachte Mockup-Modell des Vertriebsprozesses siehe auch [
 | Schritt | Bereich | Tabellen |
 |---|---|---|
 | 1 | Stammdaten | `kunden`, `lieferanten`, `artikel`, `services`, `mitarbeiter` |
-| 2 | Kerngeschaeft | `angebote`, `auftraege`, `bestellungen` |
+| 2 | Kerngeschaeft | `kundenanfragen`, `angebote`, `auftraege`, `bestellungen` |
 | 3 | Positionsdaten | `angebotspositionen`, `auftragspositionen`, `bestellpositionen` |
 | 4 | Folgeprozesse | `vertriebsdokumente`, `versandauftraege`, `einkaufsdokumente` |
 | 5 | Buchhaltung | `zahlungen`, `mahnungen`, `belege`, `firmenkonto` |

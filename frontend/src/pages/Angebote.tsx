@@ -57,6 +57,7 @@ export default function Angebote() {
     const vertriebsdokumente = vertriebsdokumenteService.list();
     const versandauftraege = versandService.list();
     const anfragen = customerInquiryService.list();
+    const findeAnfrage = anfrageId => anfragen.find(item => String(item.id) === String(anfrageId));
     const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
     const leistungsOptionen = leistungen.map(item => ({
         value: `${item.leistungTyp}:${item.id}`,
@@ -73,6 +74,7 @@ export default function Angebote() {
         { field: "datum", title: "Datum" },
         { field: "gueltigBis", title: "Gueltig bis", render: row => row.gueltigBis || "-" },
         { field: "status", title: "Status" },
+        { field: "anliegenText", title: "Anliegen" },
         { field: "prozess", title: "Prozess" },
         { field: "gesamt", title: "Gesamt" },
         { field: "positionenText", title: "Positionen" }
@@ -210,6 +212,7 @@ export default function Angebote() {
     const data = angebote.map(angebot => ({
         ...angebot,
         kunde: getCustomerName(angebot.kundeId, angebot.kunde),
+        anliegenText: findeAnfrage(angebot.anfrageId)?.anliegen || "-",
         positionenText: angebot.positionen.map(position => `${position.artikel} (${position.menge})`).join(", "),
         gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag).toFixed(2)} EUR`,
         prozess: getSalesStepLabel(getSalesStep(angebot, auftraege, vertriebsdokumente, versandauftraege))
@@ -257,6 +260,9 @@ export default function Angebote() {
             }}
         />
         <Dialog open={offen} title="Neues Angebot" onClose={handleClose}>
+            {sourceInquiryId && findeAnfrage(sourceInquiryId) && <div className="module-panel">
+                <div><Label>Ausgangsanfrage</Label><p>{findeAnfrage(sourceInquiryId)?.anliegen}</p></div>
+            </div>}
             <div><Label required>Kunde</Label><LookupField value={kundeId} options={kundenOptionen} onChange={setKundeId} placeholder="Kunde suchen..."/></div>
             <div className="form-row">
                 <div><Label>Angebotsnummer</Label><input type="text" value={angebotsNrDraft} disabled/></div>
