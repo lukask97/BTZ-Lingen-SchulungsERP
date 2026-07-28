@@ -56,6 +56,8 @@ Sie ist bewusst kompakt gehalten und soll helfen, typische kaufmaennische Ablaeu
 ### Kundenpflege
 
 - [x] Neukundenanfrage erfassen
+- [x] Anliegen der Kundenanfrage sichtbar halten
+- [x] Kundenanfrage beantworten
 - [x] Kundenstammdaten anlegen
 - [x] Kundenbedarf festhalten
 
@@ -70,6 +72,7 @@ Sie ist bewusst kompakt gehalten und soll helfen, typische kaufmaennische Ablaeu
 
 - [x] Angebot annehmen
 - [x] Auftrag anlegen
+- [x] Auftrag direkt aus Kundenanfrage anlegen
 - [x] Auftragsbestaetigung erstellen
 - [x] Auftragsbestaetigung versenden
 
@@ -83,7 +86,7 @@ Sie ist bewusst kompakt gehalten und soll helfen, typische kaufmaennische Ablaeu
 
 - [x] Neukundenprozess vollstaendig nachvollziehen
 - [x] Angebot in Auftrag ueberfuehren
-- [ ] Folgekommunikation dokumentieren
+- [x] Folgekommunikation dokumentieren
 
 ---
 
@@ -211,8 +214,10 @@ Sie ist bewusst kompakt gehalten und soll helfen, typische kaufmaennische Ablaeu
 
 ### Vertriebskette
 
+- [x] Kundenanfrage beantwortet
 - [x] Angebot offen
 - [x] Angebot angenommen
+- [x] Anliegen in Angebot oder Auftrag sichtbar
 - [x] Auftragsbestaetigung erstellt
 - [x] Auftragsbestaetigung gesendet
 - [x] Versand vorbereitet

@@ -11,6 +11,7 @@ import rechnungenService from "../services/rechnungenService";
 import zahlungenService from "../services/zahlungenService";
 import kundenService from "../services/customerService";
 import lieferantenService from "../services/lieferantenService";
+import { getCustomerName } from "../utils/customerReferences";
 
 const today = "2026-07-26";
 
@@ -48,7 +49,7 @@ export default function Zahlungen() {
         zahlungenService.create({
             rechnungsnr: rechnung.rechnungsnr,
             zahlungsart: rechnung.rechnungstyp === "Eingangsrechnung" ? "Ausgang" : "Eingang",
-            kunde: rechnung.kunde,
+            kunde: getCustomerName(rechnung.kundeId, rechnung.kunde),
             datum: today,
             betrag: Number(betrag),
             methode: "Überweisung"

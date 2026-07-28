@@ -11,6 +11,7 @@ import OverviewCards from "../components/OverviewCards";
 import auftraegeService from "../services/auftraegeService";
 import vertriebsdokumenteService from "../services/vertriebsdokumenteService";
 import { openDocumentPdf } from "../utils/documentPdf";
+import { getCustomerName } from "../utils/customerReferences";
 import { getConfirmationDocument } from "../utils/processFlow";
 
 const today = "2026-07-26";
@@ -93,7 +94,7 @@ export default function Vertriebsdokumente() {
             auftragId: Number(current.auftragId),
             auftragNr: auftrag.auftragNr,
             kundeId: auftrag.kundeId,
-            kunde: auftrag.kunde,
+            kunde: getCustomerName(auftrag.kundeId, auftrag.kunde),
             titel,
             positionen: auftrag.positionen || [],
             versendetAm: current.versendetAm || "",
@@ -123,7 +124,9 @@ export default function Vertriebsdokumente() {
             referenceValue: dokument.auftragNr,
             partnerLabel: "Kunde",
             partnerValue: dokument.kunde,
-            positions: auftrag?.positionen || dokument.positionen || []
+            positions: auftrag?.positionen || dokument.positionen || [],
+            deductionAmount: auftrag?.rabattBetrag || 0,
+            deductionReason: auftrag?.verguenstigungsGrund || ""
         });
     };
 
