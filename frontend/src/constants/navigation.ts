@@ -10,6 +10,20 @@ export const NAVIGATION_GROUPS = [
         ]
     },
     {
+        key: "lehrkraft",
+        title: "Lehrkraft",
+        overviewPath: "/lehrkraft",
+        access: "gf",
+        adminOnly: true,
+        items: [
+            { title: "Lehrkraft-Übersicht", path: "/lehrkraft", access: "gf" },
+            { title: "Kundenkorrespondenz", path: "/lehrkraft/kundenkorrespondenz", access: "gf" },
+            { title: "Lieferantenkorrespondenz", path: "/lehrkraft/lieferantenkorrespondenz", access: "gf" },
+            { title: "Zahlungen extern", path: "/lehrkraft/zahlungen", access: "gf" },
+            { title: "Rechnungen extern", path: "/lehrkraft/rechnungen", access: "gf" }
+        ]
+    },
+    {
         key: "einkauf",
         title: "Einkauf (EK)",
         overviewPath: "/themen/einkauf",
@@ -18,9 +32,7 @@ export const NAVIGATION_GROUPS = [
             { title: "Lieferanten", path: "/lieferanten", access: "einkauf" },
             { title: "Lieferantenvergleich", path: "/lieferantenvergleich", access: "einkauf" },
             { title: "Bestellungen", path: "/bestellungen", access: "einkauf" },
-            { title: "Einkaufsdokumente", path: "/einkaufsdokumente", access: "einkauf" },
-            { title: "Wareneingänge", path: "/wareneingaenge", access: "lager" },
-            { title: "Lager", path: "/lager", access: "lager" }
+            { title: "Wareneingänge", path: "/wareneingaenge", access: "lager" }
         ]
     },
     {
@@ -54,7 +66,9 @@ export const NAVIGATION_GROUPS = [
         access: "logistik",
         items: [
             { title: "Logistik", path: "/logistik", access: "logistik" },
+            { title: "Bestand", path: "/bestand", access: "lager" },
             { title: "Artikel", path: "/artikel", access: "artikel" },
+            { title: "Kategorien", path: "/kategorien", access: "artikel" },
             { title: "Versand", path: "/versand", access: "logistik" },
             { title: "Retouren", path: "/retouren", access: "logistik" }
         ]

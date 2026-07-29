@@ -27,7 +27,9 @@ export const INITIAL_DATA = {
         id: null,
         artikelNr: "",
         name: "",
+        kategorieId: "",
         kategorie: "",
+        kategoriePfad: "",
         artikelTyp: "Einzelartikel",
         einkaufspreis: 0,
         verkaufspreis: 0,
@@ -35,11 +37,19 @@ export const INITIAL_DATA = {
         beschreibung: "",
         komponenten: []
     },
+    kategorien: {
+        id: null,
+        name: "",
+        parentId: "",
+        beschreibung: ""
+    },
     services: {
         id: null,
         serviceNr: "",
         name: "",
         kategorie: "",
+        berechnungstyp: "Pauschal",
+        zeEinheit: "",
         einkaufspreis: 0,
         verkaufspreis: 0,
         beschreibung: ""
@@ -190,6 +200,12 @@ export const PAGE_CONFIG = {
     artikel: {
         title: "Artikelverwaltung",
         tableName: "artikel",
+        permissionCreate: PERMISSIONS.ARTIKEL_ANLEGEN,
+        permissionEdit: PERMISSIONS.ARTIKEL_BEARBEITEN
+    },
+    kategorien: {
+        title: "Kategorien",
+        tableName: "kategorien",
         permissionCreate: PERMISSIONS.ARTIKEL_ANLEGEN,
         permissionEdit: PERMISSIONS.ARTIKEL_BEARBEITEN
     },

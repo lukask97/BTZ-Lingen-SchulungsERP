@@ -108,10 +108,19 @@ export const feldMetadaten = [
 
     {
         tabelle: "artikel",
+        feld: "kategoriePfad",
+        anzeigename: "Kategorie",
+        beschreibung: "Kategorie mit Unterkategorie",
+        reihenfolge: 3,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "artikel",
         feld: "artikelTyp",
         anzeigename: "Typ",
         beschreibung: "Einzelartikel, Komponente oder Baugruppe",
-        reihenfolge: 3,
+        reihenfolge: 4,
         sichtbar: true
     },
 
@@ -120,16 +129,15 @@ export const feldMetadaten = [
         feld: "einkaufspreis",
         anzeigename: "EK-Preis",
         beschreibung: "Einkaufspreis",
-        reihenfolge: 4,
+        reihenfolge: 5,
         sichtbar: true
     },
-
     {
         tabelle: "artikel",
         feld: "verkaufspreis",
         anzeigename: "VK-Preis",
         beschreibung: "Verkaufspreis",
-        reihenfolge: 5,
+        reihenfolge: 6,
         sichtbar: true
     },
     {
@@ -137,24 +145,48 @@ export const feldMetadaten = [
         feld: "beschaffungsart",
         anzeigename: "Beschaffung",
         beschreibung: "Zukauf oder Herstellung",
-        reihenfolge: 6,
-        sichtbar: true
-    },
-    {
-        tabelle: "artikel",
-        feld: "verkaufsstatus",
-        anzeigename: "Verkauf",
-        beschreibung: "Verkaufbar oder nicht verkaufbar",
         reihenfolge: 7,
         sichtbar: true
     },
 
     {
         tabelle: "artikel",
+        feld: "verkaufsstatus",
+        anzeigename: "Verkauf",
+        beschreibung: "Verkaufbar oder nicht verkaufbar",
+        reihenfolge: 8,
+        sichtbar: true
+    },
+    {
+        tabelle: "artikel",
         feld: "bestand",
         anzeigename: "Bestand",
         beschreibung: "Aktueller Lagerbestand",
-        reihenfolge: 8,
+        reihenfolge: 9,
+        sichtbar: true
+    },
+    {
+        tabelle: "kategorien",
+        feld: "name",
+        anzeigename: "Kategorie",
+        beschreibung: "Name der Kategorie",
+        reihenfolge: 1,
+        sichtbar: true
+    },
+    {
+        tabelle: "kategorien",
+        feld: "parentName",
+        anzeigename: "Oberkategorie",
+        beschreibung: "Direkte Oberkategorie",
+        reihenfolge: 2,
+        sichtbar: true
+    },
+    {
+        tabelle: "kategorien",
+        feld: "pfad",
+        anzeigename: "Pfad",
+        beschreibung: "Vollstaendige Kategoriehierarchie",
+        reihenfolge: 3,
         sichtbar: true
     },
 
@@ -184,10 +216,26 @@ export const feldMetadaten = [
     },
     {
         tabelle: "services",
+        feld: "berechnungstyp",
+        anzeigename: "Berechnung",
+        beschreibung: "Pauschal oder Zeiteinheit",
+        reihenfolge: 4,
+        sichtbar: true
+    },
+    {
+        tabelle: "services",
+        feld: "zeEinheit",
+        anzeigename: "ZE",
+        beschreibung: "Zeiteinheit, falls nach ZE berechnet wird",
+        reihenfolge: 5,
+        sichtbar: true
+    },
+    {
+        tabelle: "services",
         feld: "einkaufspreis",
         anzeigename: "EK-Preis",
         beschreibung: "Interner Einkaufspreis",
-        reihenfolge: 4,
+        reihenfolge: 6,
         sichtbar: true
     },
     {
@@ -195,7 +243,7 @@ export const feldMetadaten = [
         feld: "verkaufspreis",
         anzeigename: "VK-Preis",
         beschreibung: "Verkaufspreis",
-        reihenfolge: 5,
+        reihenfolge: 7,
         sichtbar: true
     },
 

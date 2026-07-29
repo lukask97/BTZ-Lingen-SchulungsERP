@@ -36,7 +36,7 @@ const TEST_DATA_KEYS = [
     "kunden", "artikel", "benutzer", "rollen", "rechte", "lager",
     "services",
     "lieferanten", "bestellungen", "angebote", "auftraege", "reklamationen",
-    "marketingaktionen", "abteilungen", "kundenanfragen", "zahlungen", "mahnungen",
+    "marketingaktionen", "abteilungen", "kundenanfragen", "nachrichten", "zahlungen", "mahnungen",
     "belege", "freigaben", "berichte", "versandauftraege", "retouren", "bewerber",
     "mitarbeiter", "arbeitszeiten", "urlaubsantraege", "schulungen",
     "firmenkonto",

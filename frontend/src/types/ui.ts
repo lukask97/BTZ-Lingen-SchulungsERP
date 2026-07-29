@@ -104,4 +104,5 @@ export interface DataTableProps {
     focusRowId?: string | number;
     focusField?: string;
     detailLinkResolver?: (args: { field: string; row: any; value: any }) => string | null;
+    rowClassName?: (row: any) => string;
 }

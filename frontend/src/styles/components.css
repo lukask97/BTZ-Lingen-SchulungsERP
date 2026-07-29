@@ -112,6 +112,15 @@ button:disabled {
     background: #eef5ff;
 }
 
+.datatable tbody tr.datatable-row-critical,
+.datatable tbody tr.datatable-row-critical:nth-child(even) {
+    background: #fde8e8;
+}
+
+.datatable tbody tr.datatable-row-critical:hover {
+    background: #f8caca;
+}
+
 .pagination {
     display: flex;
     justify-content: center;
@@ -212,6 +221,16 @@ button:disabled {
     font-weight: 600;
 }
 
+.label-with-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.label-with-hint .form-label {
+    margin-bottom: 0;
+}
+
 .required {
     color: red;
     margin-left: 4px;
@@ -310,6 +329,43 @@ button:disabled {
 
 .lookup-field button {
     min-width: 36px;
+}
+
+.help-hint {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: #1976d2;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: help;
+    outline: none;
+}
+
+.help-hint:focus-visible {
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+}
+
+.help-hint-tooltip {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 240px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.24);
+    z-index: 50;
 }
 
 .clickable-row {

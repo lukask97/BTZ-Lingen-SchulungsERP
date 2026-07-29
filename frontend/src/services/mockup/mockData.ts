@@ -43,7 +43,9 @@ export let artikel = [
         id: 1,
         artikelNr: "ART001",
         name: "Schulungsfahrrad City",
-        kategorie: "Fahrräder",
+        kategorieId: 4,
+        kategorie: "Fahrraeder",
+        kategoriePfad: "Fahrraeder > Citybike",
         artikelTyp: "Baugruppe",
         einkaufspreis: 420,
         verkaufspreis: 799,
@@ -62,7 +64,9 @@ export let artikel = [
         id: 2,
         artikelNr: "ART002",
         name: "Sicherheitsjacke",
+        kategorieId: 6,
         kategorie: "Bekleidung",
+        kategoriePfad: "Bekleidung > Sicherheitsbekleidung",
         artikelTyp: "Einzelartikel",
         einkaufspreis: 39.9,
         verkaufspreis: 89.9,
@@ -75,7 +79,9 @@ export let artikel = [
         id: 3,
         artikelNr: "ART003",
         name: "Fahrradhelm",
-        kategorie: "Zubehör",
+        kategorieId: 8,
+        kategorie: "Zubehoer",
+        kategoriePfad: "Zubehoer > Helm",
         artikelTyp: "Einzelartikel",
         einkaufspreis: 24.5,
         verkaufspreis: 59.99,
@@ -87,7 +93,9 @@ export let artikel = [
         id: 4,
         artikelNr: "ART004",
         name: "Fahrradrahmen",
-        kategorie: "Komponenten",
+        kategorieId: 10,
+        kategorie: "Mechanik",
+        kategoriePfad: "Mechanik > Rahmen",
         artikelTyp: "Komponente",
         einkaufspreis: 120,
         verkaufspreis: 199,
@@ -99,7 +107,9 @@ export let artikel = [
         id: 5,
         artikelNr: "ART005",
         name: "Lenker",
-        kategorie: "Komponenten",
+        kategorieId: 11,
+        kategorie: "Mechanik",
+        kategoriePfad: "Mechanik > Lenker",
         artikelTyp: "Komponente",
         einkaufspreis: 18,
         verkaufspreis: 34.9,
@@ -111,7 +121,9 @@ export let artikel = [
         id: 6,
         artikelNr: "ART006",
         name: "Reifen 28 Zoll",
-        kategorie: "Komponenten",
+        kategorieId: 12,
+        kategorie: "Mechanik",
+        kategoriePfad: "Mechanik > Reifen",
         artikelTyp: "Komponente",
         einkaufspreis: 14.5,
         verkaufspreis: 29.9,
@@ -123,7 +135,9 @@ export let artikel = [
         id: 7,
         artikelNr: "ART007",
         name: "Sattel Komfort",
-        kategorie: "Komponenten",
+        kategorieId: 13,
+        kategorie: "Mechanik",
+        kategoriePfad: "Mechanik > Sattel",
         artikelTyp: "Komponente",
         einkaufspreis: 16,
         verkaufspreis: 39,
@@ -139,6 +153,8 @@ export let services = [
         serviceNr: "SER001",
         name: "Reparatur",
         kategorie: "Werkstatt",
+        berechnungstyp: "Pauschal",
+        zeEinheit: "",
         einkaufspreis: 0,
         verkaufspreis: 65,
         beschreibung: "Einfache Werkstattleistung für Reparaturen."
@@ -148,6 +164,8 @@ export let services = [
         serviceNr: "SER002",
         name: "Wartung",
         kategorie: "Werkstatt",
+        berechnungstyp: "Pauschal",
+        zeEinheit: "",
         einkaufspreis: 0,
         verkaufspreis: 89,
         beschreibung: "Wartungspaket für Fahrräder oder Fuhrpark."
@@ -155,17 +173,21 @@ export let services = [
     {
         id: 3,
         serviceNr: "SER003",
-        name: "Leasing",
+        name: "Miete",
         kategorie: "Vertrag",
+        berechnungstyp: "ZE",
+        zeEinheit: "1 Tag",
         einkaufspreis: 0,
         verkaufspreis: 149,
-        beschreibung: "Leasingpauschale als Serviceangebot."
+        beschreibung: "Mietleistung mit Berechnung je Zeiteinheit von einem Tag."
     },
     {
         id: 4,
         serviceNr: "SER004",
         name: "Lieferung",
         kategorie: "Logistik",
+        berechnungstyp: "Pauschal",
+        zeEinheit: "",
         einkaufspreis: 0,
         verkaufspreis: 35,
         beschreibung: "Lieferung zum Kundenstandort."
@@ -175,6 +197,8 @@ export let services = [
         serviceNr: "SER005",
         name: "Abholung",
         kategorie: "Logistik",
+        berechnungstyp: "Pauschal",
+        zeEinheit: "",
         einkaufspreis: 0,
         verkaufspreis: 20,
         beschreibung: "Abholung beim Kunden oder Partner."
@@ -364,8 +388,83 @@ export let bestellungen = [
         lieferantId: 1,
         lieferant: "Weber GmbH",
         datum: "2026-07-20",
-        status: "offen",
-        positionen: [{ artikelId: 1, artikel: "Lastenrad Premium", menge: 3 }]
+        status: "angefragt",
+        positionen: [{ artikelId: 3, artikel: "Fahrradhelm", menge: 3 }]
+    }
+];
+
+export let kategorien = [
+    {
+        id: 1,
+        name: "Fahrraeder",
+        parentId: "",
+        beschreibung: "Komplette Fahrraeder und fahrbereite Baugruppen."
+    },
+    {
+        id: 4,
+        name: "Citybike",
+        parentId: 1,
+        beschreibung: "Komplette City- und Schulungsfahrraeder."
+    },
+    {
+        id: 5,
+        name: "Bekleidung",
+        parentId: "",
+        beschreibung: "Bekleidung und Sicherheitsausstattung."
+    },
+    {
+        id: 6,
+        name: "Sicherheitsbekleidung",
+        parentId: 5,
+        beschreibung: "Warn- und Schutzkleidung fuer den Einsatz."
+    },
+    {
+        id: 7,
+        name: "Zubehoer",
+        parentId: "",
+        beschreibung: "Zusatzprodukte rund ums Fahrrad."
+    },
+    {
+        id: 8,
+        name: "Helm",
+        parentId: 7,
+        beschreibung: "Helme und Schutzzubehoer."
+    },
+    {
+        id: 9,
+        name: "Mechanik",
+        parentId: "",
+        beschreibung: "Mechanische Bauteile und Einzelkomponenten."
+    },
+    {
+        id: 10,
+        name: "Rahmen",
+        parentId: 9,
+        beschreibung: "Rahmen und tragende Elemente."
+    },
+    {
+        id: 11,
+        name: "Lenker",
+        parentId: 9,
+        beschreibung: "Lenker und Bedienelemente."
+    },
+    {
+        id: 12,
+        name: "Reifen",
+        parentId: 9,
+        beschreibung: "Reifen und laufende Teile."
+    },
+    {
+        id: 13,
+        name: "Sattel",
+        parentId: 9,
+        beschreibung: "Saettel und Sitzkomponenten."
+    },
+    {
+        id: 14,
+        name: "Fahrradkette",
+        parentId: 9,
+        beschreibung: "Antriebskomponenten wie Ketten und Kettenraeeder."
     }
 ];
 
@@ -373,15 +472,18 @@ export let bestellungen = [
 export let angebote = [
     {
         id: 1,
-        angebotsNr: "ANG-2026-001",
-        anfrageId: "",
+        angebotsNr: "ANG-2026-001.0",
+        angebotsBasisNr: "ANG-2026-001",
+        revision: 0,
+        vorgangId: "anfrage-1",
+        anfrageId: 1,
         kundeId: 1,
         kunde: "Campus Baumarkt GmbH",
         datum: "2026-07-22",
         gueltigBis: "2026-08-05",
         rabattBetrag: 0,
         gesamtbetrag: 1348.5,
-        status: "offen",
+        status: "wartet auf Antwort",
         positionen: [{ artikelId: 2, artikel: "Sicherheitsjacke", menge: 15, einzelpreis: 89.9 }]
     }
 ];
@@ -464,11 +566,41 @@ export let kundenanfragen = [
         typ: "Produktanfrage",
         kundeId: 1,
         kunde: "Campus Baumarkt GmbH",
-        angebotId: "",
+        vorgangId: "anfrage-1",
+        angebotId: 1,
         kanal: "Telefon",
-        status: "offen",
+        status: "in Bearbeitung",
         datum: "2026-07-24",
         anliegen: "Frage nach Lieferzeiten für Sicherheitsjacken."
+    }
+];
+
+export let nachrichten = [
+    {
+        id: 1,
+        vorgangId: "anfrage-1",
+        anfrageId: 1,
+        angebotId: "",
+        datum: "2026-07-24",
+        senderRolle: "Kunde",
+        senderName: "Campus Baumarkt GmbH",
+        kanal: "Telefon",
+        betreff: "Lieferzeiten für Sicherheitsjacken",
+        nachricht: "Wir benötigen eine Rückmeldung zu Lieferzeiten und möglichen Mengenstaffeln.",
+        typ: "Anfrage"
+    },
+    {
+        id: 2,
+        vorgangId: "anfrage-1",
+        anfrageId: 1,
+        angebotId: 1,
+        datum: "2026-07-25",
+        senderRolle: "Verkauf",
+        senderName: "Schülerfirma Verkauf",
+        kanal: "E-Mail",
+        betreff: "Angebot ANG-2026-001.0",
+        nachricht: "Ein erstes Angebot wurde erstellt und an den Kunden zur Prüfung weitergegeben.",
+        typ: "Angebot"
     }
 ];
 
@@ -481,8 +613,10 @@ export let zahlungen = [
         zahlungsart: "Eingang",
         kunde: "Emsland Tourismus GmbH",
         datum: "2026-07-22",
+        ausfuehrenAm: "2026-07-22",
         betrag: 1799.7,
-        methode: "Überweisung"
+        methode: "Überweisung",
+        status: "ausgefuehrt"
     }
 ];
 

@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import PermissionButton from "./PermissionButton";
 import Dialog from "./Dialog";
-import { saveUserColumns, getUserColumns } from "../services/metadataService";
+import { saveUserColumns, getUserColumns } from "../services/core/metadataService";
 import type { DataTableColumn, DataTableProps } from "../types/ui";
 
 function resolveActionVariant(action) {
@@ -33,6 +33,8 @@ function formatDetailLabel(key) {
 function formatObjectValue(value) {
   if (!value || typeof value !== "object") return value ?? "";
 
+  if ("label" in value) return value.label;
+
   if ("artikel" in value && "menge" in value) {
     return `${value.artikel}: ${value.menge}`;
   }
@@ -47,6 +49,19 @@ function formatObjectValue(value) {
     )
     .map(([key, entry]) => `${formatDetailLabel(key)}: ${entry}`)
     .join(", ");
+}
+
+function isLinkValue(value) {
+  return !!value && typeof value === "object" && "label" in value && "to" in value;
+}
+
+function normalizeSortValue(value) {
+  if (Array.isArray(value)) return value.map((entry) => normalizeSortValue(entry)).join(", ");
+  if (isLinkValue(value)) return String(value.label || "").toLowerCase();
+  if (value && typeof value === "object") return formatObjectValue(value).toLowerCase();
+  if (typeof value === "number") return value;
+  if (typeof value === "boolean") return value ? 1 : 0;
+  return String(value ?? "").toLowerCase();
 }
 
 export default function DataTable({
@@ -86,6 +101,7 @@ export default function DataTable({
   focusRowId = "",
   focusField = "id",
   detailLinkResolver,
+  rowClassName,
 }: DataTableProps) {
   const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -151,6 +167,23 @@ export default function DataTable({
     if (onSort) onSort(field, order);
   }
 
+  const sortedData = useMemo(() => {
+    if (!sortField) return data;
+
+    return [...data].sort((a, b) => {
+      const aValue = normalizeSortValue(a?.[sortField]);
+      const bValue = normalizeSortValue(b?.[sortField]);
+
+      if (aValue === bValue) return 0;
+
+      if (sortOrder === "asc") {
+        return aValue > bValue ? 1 : -1;
+      }
+
+      return aValue < bValue ? 1 : -1;
+    });
+  }, [data, sortField, sortOrder]);
+
   function toggleColumn(column) {
     let result;
 
@@ -209,6 +242,26 @@ export default function DataTable({
   }
 
   function renderDetailValue(field, row, value) {
+    if (Array.isArray(value) && value.every(isLinkValue)) {
+      return (
+        <div className="link-list">
+          {value.map((entry) => (
+            <Link key={`${field}-${entry.to}-${entry.label}`} className="detail-link" to={entry.to}>
+              {entry.label}
+            </Link>
+          ))}
+        </div>
+      );
+    }
+
+    if (isLinkValue(value)) {
+      return (
+        <Link className="detail-link" to={value.to}>
+          {value.label}
+        </Link>
+      );
+    }
+
     const linkTarget = detailLinkResolver
       ? detailLinkResolver({ field, row, value })
       : null;
@@ -347,7 +400,7 @@ export default function DataTable({
               </tr>
             )}
 
-            {!loading && data.length === 0 && (
+            {!loading && sortedData.length === 0 && (
               <tr>
                 <td
                   colSpan={
@@ -360,10 +413,10 @@ export default function DataTable({
             )}
 
             {!loading &&
-              data.map((row) => (
+              sortedData.map((row) => (
                 <tr
                   key={row.id}
-                  className={showDetails ? "clickable-row" : ""}
+                  className={[showDetails ? "clickable-row" : "", rowClassName ? rowClassName(row) : ""].filter(Boolean).join(" ")}
                   onClick={() => openDetails(row)}
                 >
                   {visibleColumns.map((column) => (

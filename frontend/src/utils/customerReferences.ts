@@ -1,4 +1,4 @@
-import kundenService from "../services/customerService";
+import kundenService from "../services/verkauf/customerService";
 
 export function getCustomerById(kundeId: number | string) {
     return kundenService.list().find(item => String(item.id) === String(kundeId)) || null;

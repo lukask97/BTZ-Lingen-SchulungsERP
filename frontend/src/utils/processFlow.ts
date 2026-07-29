@@ -10,9 +10,9 @@ export const SALES_STEPS = {
 };
 
 export const PURCHASE_STEPS = {
-    BESTELLUNG_OFFEN: 1,
-    DOKUMENT_ERSTELLT: 2,
-    DOKUMENT_VERSENDET: 3,
+    ANFRAGE_ERFASST: 1,
+    DURCH_LEHRKRAFT_BESTAETIGT: 2,
+    AN_LIEFERANTEN_VERSENDET: 3,
     WARENEINGANG_GEBUCHT: 4
 };
 
@@ -81,24 +81,22 @@ export function getPurchaseDocuments(bestellungId, dokumente = []) {
     return dokumente.filter(item => normalize(item.bestellungId) === normalize(bestellungId));
 }
 
-export function getPurchaseStep(bestellung, dokumente = []) {
-    if (!bestellung) return PURCHASE_STEPS.BESTELLUNG_OFFEN;
+export function getPurchaseStep(bestellung) {
+    if (!bestellung) return PURCHASE_STEPS.ANFRAGE_ERFASST;
     if (bestellung.status === "eingegangen") return PURCHASE_STEPS.WARENEINGANG_GEBUCHT;
-
-    const zugehoerigeDokumente = getPurchaseDocuments(bestellung.id, dokumente);
-    if (zugehoerigeDokumente.length === 0) return PURCHASE_STEPS.BESTELLUNG_OFFEN;
-    if (!zugehoerigeDokumente.some(item => item.status === "versendet")) return PURCHASE_STEPS.DOKUMENT_ERSTELLT;
-    return PURCHASE_STEPS.DOKUMENT_VERSENDET;
+    if (bestellung.status === "versendet") return PURCHASE_STEPS.AN_LIEFERANTEN_VERSENDET;
+    if (bestellung.status === "bestaetigt") return PURCHASE_STEPS.DURCH_LEHRKRAFT_BESTAETIGT;
+    return PURCHASE_STEPS.ANFRAGE_ERFASST;
 }
 
 export function getPurchaseStepLabel(step) {
     switch (step) {
-        case PURCHASE_STEPS.BESTELLUNG_OFFEN:
-            return "1. Bestellung offen";
-        case PURCHASE_STEPS.DOKUMENT_ERSTELLT:
-            return "2. Dokument erstellt";
-        case PURCHASE_STEPS.DOKUMENT_VERSENDET:
-            return "3. Dokument versendet";
+        case PURCHASE_STEPS.ANFRAGE_ERFASST:
+            return "1. Anfrage erfasst";
+        case PURCHASE_STEPS.DURCH_LEHRKRAFT_BESTAETIGT:
+            return "2. Bestellung bestaetigt";
+        case PURCHASE_STEPS.AN_LIEFERANTEN_VERSENDET:
+            return "3. Bestellung versendet";
         case PURCHASE_STEPS.WARENEINGANG_GEBUCHT:
             return "4. Wareneingang gebucht";
         default:
@@ -106,8 +104,8 @@ export function getPurchaseStepLabel(step) {
     }
 }
 
-export function canBookGoodsReceipt(bestellung, dokumente = []) {
-    return getPurchaseStep(bestellung, dokumente) >= PURCHASE_STEPS.DOKUMENT_VERSENDET && bestellung.status !== "eingegangen";
+export function canBookGoodsReceipt(bestellung) {
+    return bestellung?.status === "versendet";
 }
 
 export function canCreateIncomingInvoice(bestellung) {

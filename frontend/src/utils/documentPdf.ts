@@ -9,7 +9,8 @@ export function openDocumentPdf({
     partnerValue,
     positions = [],
     deductionAmount = 0,
-    deductionReason = ""
+    deductionReason = "",
+    appendixPages = []
 }) {
     const popup = window.open("", "_blank", "width=900,height=1200");
     if (!popup) return;
@@ -20,11 +21,8 @@ export function openDocumentPdf({
         .replaceAll(">", "&gt;");
 
     const formatCurrency = (value) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(value || 0));
-    const positionsTotal = positions.reduce((sum, position) => sum + Number(position.menge || 0) * Number(position.einzelpreis || 0), 0);
-    const deduction = Number(deductionAmount || 0);
-    const finalTotal = Math.max(0, positionsTotal - deduction);
 
-    const positionsHtml = positions.length === 0
+    const renderPositionsHtml = (pagePositions = []) => pagePositions.length === 0
         ? "<p>Keine Positionen vorhanden.</p>"
         : `<table>
             <thead>
@@ -36,7 +34,7 @@ export function openDocumentPdf({
                 </tr>
             </thead>
             <tbody>
-                ${positions.map((position) => `<tr>
+                ${pagePositions.map((position) => `<tr>
                     <td>${safe(position.artikel)}</td>
                     <td>${safe(position.menge)}</td>
                     <td>${safe(formatCurrency(position.einzelpreis ?? 0))}</td>
@@ -45,13 +43,132 @@ export function openDocumentPdf({
             </tbody>
         </table>`;
 
-    const deductionHtml = deduction > 0
-        ? `<section class="deduction">
+    const renderDeductionHtml = (pageDeductionAmount = 0, pageDeductionReason = "") => {
+        const deduction = Number(pageDeductionAmount || 0);
+        if (deduction <= 0) return "";
+        return `<section class="deduction">
             <strong>Zusaetzlicher Abzug</strong>
             <p>Betrag: ${safe(formatCurrency(deduction))}</p>
-            <p>Grund: ${safe(deductionReason || "Kein Grund hinterlegt.")}</p>
-        </section>`
-        : "";
+            <p>Grund: ${safe(pageDeductionReason || "Kein Grund hinterlegt.")}</p>
+        </section>`;
+    };
+
+    const renderHistoryHtml = (historyEntries = []) => historyEntries.length === 0
+        ? "<p>Keine Verlaufseinträge vorhanden.</p>"
+        : `<ul class="history-list">
+            ${historyEntries.map((entry) => `<li>
+                <strong>${safe(entry.date || "")}</strong>
+                <span>${safe(entry.label || "")}</span>
+                <p>${safe(entry.text || "")}</p>
+            </li>`).join("")}
+        </ul>`;
+
+    const renderDocumentPage = ({
+        pageTitle,
+        pageSubject,
+        pageDate,
+        pageNote,
+        pageReferenceLabel,
+        pageReferenceValue,
+        pagePartnerLabel,
+        pagePartnerValue,
+        pagePositions = [],
+        pageDeductionAmount = 0,
+        pageDeductionReason = ""
+    }) => {
+        const positionsTotal = pagePositions.reduce((sum, position) => sum + Number(position.menge || 0) * Number(position.einzelpreis || 0), 0);
+        const deduction = Number(pageDeductionAmount || 0);
+        const finalTotal = Math.max(0, positionsTotal - deduction);
+
+        return `<section class="pdf-page">
+            <h1>${safe(pageTitle)}</h1>
+            <p>${safe(pageSubject)}</p>
+            <section class="meta">
+                <div><span>Datum</span><strong>${safe(pageDate)}</strong></div>
+                <div><span>${safe(pageReferenceLabel)}</span><strong>${safe(pageReferenceValue)}</strong></div>
+                <div><span>${safe(pagePartnerLabel)}</span><strong>${safe(pagePartnerValue)}</strong></div>
+                <div><span>Quelle</span><strong>Automatisch aus ERP-Daten erzeugt</strong></div>
+            </section>
+            <section class="content">
+                <strong>Hinweis / Inhalt</strong>
+                <p>${safe(pageNote || "Kein zusaetzlicher Hinweis hinterlegt.")}</p>
+                <strong>Positionen</strong>
+                ${renderPositionsHtml(pagePositions)}
+                <div class="totals">
+                    <strong>Zwischensumme: ${safe(formatCurrency(positionsTotal))}</strong>
+                </div>
+                ${renderDeductionHtml(pageDeductionAmount, pageDeductionReason)}
+                <div class="totals">
+                    <strong>${pageDeductionAmount > 0 ? "Gesamt nach Abzug" : "Gesamt"}: ${safe(formatCurrency(finalTotal))}</strong>
+                </div>
+            </section>
+        </section>`;
+    };
+
+    const renderHistoryPage = ({
+        pageTitle,
+        pageSubject,
+        pageDate,
+        pageNote,
+        pageReferenceValue,
+        pagePartnerLabel,
+        pagePartnerValue,
+        historyEntries = []
+    }) => `<section class="pdf-page">
+        <h1>${safe(pageTitle)}</h1>
+        <p>${safe(pageSubject)}</p>
+        <section class="meta">
+            <div><span>Stand</span><strong>${safe(pageDate)}</strong></div>
+            <div><span>Vorgang</span><strong>${safe(pageReferenceValue)}</strong></div>
+            <div><span>${safe(pagePartnerLabel)}</span><strong>${safe(pagePartnerValue)}</strong></div>
+            <div><span>Quelle</span><strong>Automatisch aus ERP-Daten erzeugt</strong></div>
+        </section>
+        <section class="content">
+            <strong>Verlauf</strong>
+            <p>${safe(pageNote || "Kein zusätzlicher Hinweis hinterlegt.")}</p>
+            ${renderHistoryHtml(historyEntries)}
+        </section>
+    </section>`;
+
+    const allPagesHtml = [
+        renderDocumentPage({
+            pageTitle: title,
+            pageSubject: subject,
+            pageDate: date,
+            pageNote: note,
+            pageReferenceLabel: referenceLabel,
+            pageReferenceValue: referenceValue,
+            pagePartnerLabel: partnerLabel,
+            pagePartnerValue: partnerValue,
+            pagePositions: positions,
+            pageDeductionAmount: deductionAmount,
+            pageDeductionReason: deductionReason
+        }),
+        ...appendixPages.map((page) => page.pageType === "history"
+            ? renderHistoryPage({
+                pageTitle: page.title,
+                pageSubject: page.subject || subject,
+                pageDate: page.date || date,
+                pageNote: page.note || "",
+                pageReferenceValue: page.referenceValue || referenceValue,
+                pagePartnerLabel: page.partnerLabel || partnerLabel,
+                pagePartnerValue: page.partnerValue || partnerValue,
+                historyEntries: page.historyEntries || []
+            })
+            : renderDocumentPage({
+                pageTitle: page.title,
+                pageSubject: page.subject || subject,
+                pageDate: page.date || date,
+                pageNote: page.note || "",
+                pageReferenceLabel: page.referenceLabel || referenceLabel,
+                pageReferenceValue: page.referenceValue || referenceValue,
+                pagePartnerLabel: page.partnerLabel || partnerLabel,
+                pagePartnerValue: page.partnerValue || partnerValue,
+                pagePositions: page.positions || [],
+                pageDeductionAmount: page.deductionAmount || 0,
+                pageDeductionReason: page.deductionReason || ""
+            }))
+    ].join("");
 
     popup.document.write(`<!DOCTYPE html>
 <html lang="de">
@@ -73,6 +190,11 @@ export function openDocumentPdf({
         .actions { display: flex; gap: 12px; margin: 0 0 24px; }
         .actions button { border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; background: #111827; color: white; font-size: 14px; }
         .actions .secondary { background: #e5e7eb; color: #111827; }
+        .pdf-page + .pdf-page { page-break-before: always; margin-top: 48px; }
+        .history-list { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 12px; }
+        .history-list li { border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 14px; background: #f9fafb; }
+        .history-list span { display: block; font-size: 12px; text-transform: uppercase; color: #6b7280; margin-top: 4px; }
+        .history-list p { margin: 8px 0 0; }
         .footer { margin-top: 24px; font-size: 12px; color: #6b7280; }
         @media print {
             .actions { display: none; }
@@ -85,27 +207,7 @@ export function openDocumentPdf({
         <button onclick="window.print()">Drucken</button>
         <button class="secondary" onclick="window.close()">Schliessen</button>
     </div>
-    <h1>${safe(title)}</h1>
-    <p>${safe(subject)}</p>
-    <section class="meta">
-        <div><span>Datum</span><strong>${safe(date)}</strong></div>
-        <div><span>${safe(referenceLabel)}</span><strong>${safe(referenceValue)}</strong></div>
-        <div><span>${safe(partnerLabel)}</span><strong>${safe(partnerValue)}</strong></div>
-        <div><span>Quelle</span><strong>Automatisch aus ERP-Daten erzeugt</strong></div>
-    </section>
-    <section class="content">
-        <strong>Hinweis / Inhalt</strong>
-        <p>${safe(note || "Kein zusaetzlicher Hinweis hinterlegt.")}</p>
-        <strong>Positionen</strong>
-        ${positionsHtml}
-        <div class="totals">
-            <strong>Zwischensumme: ${safe(formatCurrency(positionsTotal))}</strong>
-        </div>
-        ${deductionHtml}
-        <div class="totals">
-            ${deduction > 0 ? `<strong>Gesamt nach Abzug: ${safe(formatCurrency(finalTotal))}</strong>` : ""}
-        </div>
-    </section>
+    ${allPagesHtml}
     <p class="footer">Automatisch erzeugtes Schulungsdokument</p>
 </body>
 </html>`);

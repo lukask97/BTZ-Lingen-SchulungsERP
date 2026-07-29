@@ -28,7 +28,9 @@ export default function Sidebar() {
         <nav className="sidebar">
 
             <Link className="sidebar-brand" to="/">ERP</Link>
-            {NAVIGATION_GROUPS.filter(group => isAdmin || group.key !== "verwaltung").map(group => <div key={group.title} className="sidebar-group">
+            {NAVIGATION_GROUPS
+                .filter(group => (isAdmin || group.key !== "verwaltung") && (!group.adminOnly || isAdmin))
+                .map(group => <div key={group.title} className="sidebar-group">
                 <div className="sidebar-section-row">
                     <Can access={group.access}>
                         <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>

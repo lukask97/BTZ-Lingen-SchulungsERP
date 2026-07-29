@@ -4,58 +4,64 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import LoginLayout from "../layouts/LoginLayout";
 
-import Login from "../pages/Login";
-import Dashboard from "../pages/Dashboard";
-import Kunden from "../pages/Kunden";
-import Artikel from "../pages/Artikel";
-import Lager from "../pages/Lager";
-import Rechnungen from "../pages/Rechnungen";
-import Benutzer from "../pages/Benutzer";
-import Rollen from "../pages/Rollen";
-import Rechte from "../pages/Rechte";
-import Lieferanten from "../pages/Lieferanten";
-import Bestellungen from "../pages/Bestellungen";
-import Wareneingaenge from "../pages/Wareneingaenge";
-import Angebote from "../pages/Angebote";
-import Auftraege from "../pages/Auftraege";
-import Services from "../pages/Services";
-import Reklamationen from "../pages/Reklamationen";
-import Organisation from "../pages/Organisation";
-import Buchhaltung from "../pages/Buchhaltung";
-import Marketing from "../pages/Marketing";
-import Kundenanfragen from "../pages/Kundenanfragen";
-import Zahlungen from "../pages/Zahlungen";
-import Mahnungen from "../pages/Mahnungen";
-import Belege from "../pages/Belege";
-import Freigaben from "../pages/Freigaben";
-import Berichte from "../pages/Berichte";
-import Logistik from "../pages/Logistik";
-import Personalwesen from "../pages/Personalwesen";
-import Geschaeftsfuehrung from "../pages/Geschaeftsfuehrung";
-import EinkaufOverview from "../pages/EinkaufOverview";
-import Einkaufsdokumente from "../pages/Einkaufsdokumente";
-import Lieferantenvergleich from "../pages/Lieferantenvergleich";
-import RegionaleBestellung from "../pages/scenarios/RegionaleBestellung";
-import Grossbestellung from "../pages/scenarios/Grossbestellung";
-import Firmenauftrag from "../pages/scenarios/Firmenauftrag";
-import Eventbestellung from "../pages/scenarios/Eventbestellung";
-import ServiceSzenario from "../pages/scenarios/ServiceSzenario";
-import Transportverzoegerung from "../pages/scenarios/Transportverzoegerung";
-import Kooperation from "../pages/scenarios/Kooperation";
-import VerkaufOverview from "../pages/VerkaufOverview";
-import Vertriebsdokumente from "../pages/Vertriebsdokumente";
-import VerwaltungOverview from "../pages/VerwaltungOverview";
-import SzenarienOverview from "../pages/SzenarienOverview";
-import Versand from "../pages/Versand";
-import Retouren from "../pages/Retouren";
-import Bewerber from "../pages/Bewerber";
-import Mitarbeiter from "../pages/Mitarbeiter";
-import Personalakte from "../pages/Personalakte";
-import Arbeitszeiten from "../pages/Arbeitszeiten";
-import Urlaubsantraege from "../pages/Urlaubsantraege";
-import Krankmeldungen from "../pages/Krankmeldungen";
-import Schulungen from "../pages/Schulungen";
-import Firmenkonto from "../pages/Firmenkonto";
+import Login from "../pages/auth/Login";
+import Dashboard from "../pages/start/Dashboard";
+import Organisation from "../pages/start/Organisation";
+import LehrkraftOverview from "../pages/lehrkraft/LehrkraftOverview";
+import LehrkraftKundenkorrespondenz from "../pages/lehrkraft/LehrkraftKundenkorrespondenz";
+import LehrkraftLieferantenkorrespondenz from "../pages/lehrkraft/LehrkraftLieferantenkorrespondenz";
+import LehrkraftZahlungen from "../pages/lehrkraft/LehrkraftZahlungen";
+import LehrkraftRechnungen from "../pages/lehrkraft/LehrkraftRechnungen";
+import EinkaufOverview from "../pages/einkauf/EinkaufOverview";
+import Lieferanten from "../pages/einkauf/Lieferanten";
+import Lieferantenvergleich from "../pages/einkauf/Lieferantenvergleich";
+import Bestellungen from "../pages/einkauf/Bestellungen";
+import Einkaufsdokumente from "../pages/einkauf/Einkaufsdokumente";
+import Wareneingaenge from "../pages/einkauf/Wareneingaenge";
+import VerkaufOverview from "../pages/verkauf/VerkaufOverview";
+import Kunden from "../pages/verkauf/Kunden";
+import Kundenanfragen from "../pages/verkauf/Kundenanfragen";
+import Angebote from "../pages/verkauf/Angebote";
+import Auftraege from "../pages/verkauf/Auftraege";
+import Services from "../pages/verkauf/Services";
+import Vertriebsdokumente from "../pages/verkauf/Vertriebsdokumente";
+import Reklamationen from "../pages/verkauf/Reklamationen";
+import Marketing from "../pages/marketing/Marketing";
+import Logistik from "../pages/logistik/Logistik";
+import Artikel from "../pages/logistik/Artikel";
+import Bestand from "../pages/logistik/Bestand";
+import Kategorien from "../pages/logistik/Kategorien";
+import Versand from "../pages/logistik/Versand";
+import Retouren from "../pages/logistik/Retouren";
+import Personalwesen from "../pages/personalwesen/Personalwesen";
+import Bewerber from "../pages/personalwesen/Bewerber";
+import Mitarbeiter from "../pages/personalwesen/Mitarbeiter";
+import Personalakte from "../pages/personalwesen/Personalakte";
+import Arbeitszeiten from "../pages/personalwesen/Arbeitszeiten";
+import Urlaubsantraege from "../pages/personalwesen/Urlaubsantraege";
+import Krankmeldungen from "../pages/personalwesen/Krankmeldungen";
+import Schulungen from "../pages/personalwesen/Schulungen";
+import Buchhaltung from "../pages/buchhaltung/Buchhaltung";
+import Firmenkonto from "../pages/buchhaltung/Firmenkonto";
+import Rechnungen from "../pages/buchhaltung/Rechnungen";
+import Zahlungen from "../pages/buchhaltung/Zahlungen";
+import Mahnungen from "../pages/buchhaltung/Mahnungen";
+import Belege from "../pages/buchhaltung/Belege";
+import Geschaeftsfuehrung from "../pages/gf/Geschaeftsfuehrung";
+import Berichte from "../pages/gf/Berichte";
+import Freigaben from "../pages/gf/Freigaben";
+import VerwaltungOverview from "../pages/verwaltung/VerwaltungOverview";
+import Benutzer from "../pages/verwaltung/Benutzer";
+import Rollen from "../pages/verwaltung/Rollen";
+import Rechte from "../pages/verwaltung/Rechte";
+import SzenarienOverview from "../pages/szenarien/SzenarienOverview";
+import RegionaleBestellung from "../pages/szenarien/RegionaleBestellung";
+import Grossbestellung from "../pages/szenarien/Grossbestellung";
+import Firmenauftrag from "../pages/szenarien/Firmenauftrag";
+import Eventbestellung from "../pages/szenarien/Eventbestellung";
+import ServiceSzenario from "../pages/szenarien/ServiceSzenario";
+import Transportverzoegerung from "../pages/szenarien/Transportverzoegerung";
+import Kooperation from "../pages/szenarien/Kooperation";
 
 
 import ProtectedRoute from "../auth/ProtectedRoute";
@@ -88,6 +94,11 @@ function AppRouter() {
                     index
                     element={<Dashboard/>}
                 />
+                <Route path="lehrkraft" element={protectedPage("gf", <LehrkraftOverview/> )}/>
+                <Route path="lehrkraft/kundenkorrespondenz" element={protectedPage("gf", <LehrkraftKundenkorrespondenz/>)}/>
+                <Route path="lehrkraft/lieferantenkorrespondenz" element={protectedPage("gf", <LehrkraftLieferantenkorrespondenz/>)}/>
+                <Route path="lehrkraft/zahlungen" element={protectedPage("gf", <LehrkraftZahlungen/>)}/>
+                <Route path="lehrkraft/rechnungen" element={protectedPage("gf", <LehrkraftRechnungen/>)}/>
                 <Route
                     path="kunden"
                     element={protectedPage("kunde", <Kunden/>)}
@@ -113,6 +124,7 @@ function AppRouter() {
                 <Route path="buchhaltung" element={protectedPage("buchhaltung", <Buchhaltung/>)}/>
                 <Route path="marketing" element={protectedPage("marketing", <Marketing/>)}/>
                 <Route path="logistik" element={protectedPage("logistik", <Logistik/>)}/>
+                <Route path="bestand" element={protectedPage("lager", <Bestand/>)}/>
                 <Route path="personalwesen" element={protectedPage("personalwesen", <Personalwesen/>)}/>
                 <Route path="geschaeftsfuehrung" element={protectedPage("gf", <Geschaeftsfuehrung/>)}/>
                 <Route
@@ -120,8 +132,12 @@ function AppRouter() {
                     element={protectedPage("artikel", <Artikel/>)}
                 />
                 <Route
+                    path="kategorien"
+                    element={protectedPage("artikel", <Kategorien/>)}
+                />
+                <Route
                     path="lager"
-                    element={protectedPage("lager", <Lager/>)}
+                    element={protectedPage("lager", <Bestand/>)}
                 />
                 <Route
                     path="rechnungen"
