@@ -66,6 +66,7 @@ function normalizeSortValue(value) {
 
 export default function DataTable({
   title = "",
+  toolbarContent,
 
   columns = [],
   allColumns = [],
@@ -295,6 +296,8 @@ export default function DataTable({
         <h2>{title}</h2>
 
         <div className="toolbar-right">
+          {toolbarContent}
+
           {searchable && (
             <input
               placeholder="Suchen..."

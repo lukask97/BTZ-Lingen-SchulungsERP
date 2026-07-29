@@ -18,9 +18,7 @@ export const NAVIGATION_GROUPS = [
         items: [
             { title: "Lehrkraft-Übersicht", path: "/lehrkraft", access: "gf" },
             { title: "Kundenkorrespondenz", path: "/lehrkraft/kundenkorrespondenz", access: "gf" },
-            { title: "Lieferantenkorrespondenz", path: "/lehrkraft/lieferantenkorrespondenz", access: "gf" },
-            { title: "Zahlungen extern", path: "/lehrkraft/zahlungen", access: "gf" },
-            { title: "Rechnungen extern", path: "/lehrkraft/rechnungen", access: "gf" }
+            { title: "Lieferantenkorrespondenz", path: "/lehrkraft/lieferantenkorrespondenz", access: "gf" }
         ]
     },
     {
@@ -96,6 +94,7 @@ export const NAVIGATION_GROUPS = [
         access: "buchhaltung",
         items: [
             { title: "Buchhaltung", path: "/buchhaltung", access: "buchhaltung" },
+            { title: "ABC-Analyse", path: "/abc-analyse", access: "buchhaltung" },
             { title: "Firmenkonto", path: "/firmenkonto", access: "buchhaltung" },
             { title: "Rechnungen", path: "/rechnungen", access: "rechnung" },
             { title: "Zahlungen", path: "/zahlungen", access: "buchhaltung" },

@@ -13,6 +13,7 @@ export let kunden = [
         plz: "49809",
         ort: "Lingen",
         segment: "Baumarkt",
+        abc: "A",
 
         optionen: ["Fahrradbekleidung", "Sicherheitsbekleidung", "Sonderfahrräder", "Lastenbikes"],
         notiz:""
@@ -27,6 +28,7 @@ export let kunden = [
         plz: "49716",
         ort: "Meppen",
         segment: "Tourismus",
+        abc: "B",
 
         optionen: ["Bikes aller Art", "Leasing", "Reparatur Service"],
 
@@ -220,6 +222,12 @@ export let benutzer = [
     },
     {
         id: 4, username: "marketing", email: "marketing@test.de", password: "marketing", rolle: "Marketing"
+    },
+    {
+        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi"
+    },
+    {
+        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior"
     }
 
 ];
@@ -323,7 +331,24 @@ export let users = [
         username: "marketing",
         password: "marketing",
         name: "Marketing Mitarbeiter",
+        rolle: "Marketing",
         permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
+    },
+    {
+        id: 5,
+        username: "verkauf_azubi",
+        password: "verkauf",
+        name: "Verkauf Azubi",
+        rolle: "Verkauf Azubi",
+        permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+    },
+    {
+        id: 6,
+        username: "verkauf_senior",
+        password: "verkauf",
+        name: "Verkauf Senior",
+        rolle: "Verkauf Senior",
+        permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
     }
 
 ];
@@ -341,7 +366,7 @@ export let lieferanten = [
         segment: "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
         fuerBts: "Alternativlieferant für Zubehör und Lastenbikes",
         bewertung: 4,
-        favorit: false
+        abc: "B"
     },
     {
         id: 2,
@@ -353,7 +378,7 @@ export let lieferanten = [
         segment: "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
         fuerBts: "",
         bewertung: 5,
-        favorit: true
+        abc: "A"
     },
     {
         id: 3,
@@ -365,7 +390,7 @@ export let lieferanten = [
         segment: "",
         fuerBts: "",
         bewertung: 3,
-        favorit: false
+        abc: "C"
     },
     {
         id: 4,
@@ -377,7 +402,7 @@ export let lieferanten = [
         segment: "Klassischer Baumarkt mit Fahrradabteilung",
         fuerBts: "Soll Lieferant sein und Kunde",
         bewertung: 3,
-        favorit: false
+        abc: "C"
     }
 ];
 

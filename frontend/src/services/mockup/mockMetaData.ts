@@ -12,6 +12,8 @@ export const feldMetadaten = [
     { tabelle: "lieferanten", feld: "fuerBts", anzeigename: "Für BTS", reihenfolge: 7, sichtbar: true },
     { tabelle: "lieferanten", feld: "bewertung", anzeigename: "Bewertung (1–5)", reihenfolge: 8, sichtbar: true },
 
+    { tabelle: "lieferanten", feld: "abc", anzeigename: "ABC", reihenfolge: 9, sichtbar: true },
+
     // ======================
     // Kunden
     // ======================
@@ -67,10 +69,19 @@ export const feldMetadaten = [
 
     {
         tabelle: "kunden",
+        feld: "abc",
+        anzeigename: "ABC",
+        beschreibung: "ABC-Einstufung des Kunden",
+        reihenfolge: 7,
+        sichtbar: true
+    },
+
+    {
+        tabelle: "kunden",
         feld: "optionen",
         anzeigename: "Unsere Leistungen",
         beschreibung: "Produkte und Dienstleistungen",
-        reihenfolge: 7,
+        reihenfolge: 8,
         sichtbar: true
     }, {
         tabelle: "kunden",
@@ -80,7 +91,7 @@ export const feldMetadaten = [
         feldtyp: "textarea",
         zeilen: 6,
         sichtbar: true,
-        reihenfolge: 10
+        reihenfolge: 11
     },
 
 

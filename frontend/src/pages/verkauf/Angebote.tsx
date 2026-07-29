@@ -1,377 +1,215 @@
 // @ts-nocheck
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import useAuth from "../../auth/useAuth";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
+import HelpHint from "../../components/HelpHint";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
 import TextArea from "../../components/form/TextArea";
-import angeboteService, { naechsteAngebotsnummer } from "../../services/verkauf/angeboteService";
-import auftraegeService from "../../services/verkauf/auftraegeService";
+import Checkbox from "../../components/form/Checkbox";
+import OverviewCards from "../../components/OverviewCards";
+import angeboteService, { naechsteAngebotsrevision } from "../../services/verkauf/angeboteService";
 import customerInquiryService from "../../services/verkauf/customerInquiryService";
 import kundenService from "../../services/verkauf/customerService";
+import benutzerService from "../../services/verwaltung/benutzerService";
 import artikelService from "../../services/logistik/artikelService";
 import servicesService from "../../services/verkauf/servicesService";
-import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
-import { angebotInAuftragUebernehmen } from "../../services/verkauf/verkaufService";
-import OverviewCards from "../../components/OverviewCards";
+import auftraegeService from "../../services/verkauf/auftraegeService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import versandService from "../../services/logistik/versandService";
 import { getCustomerName } from "../../utils/customerReferences";
+import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
+import { formatTimestampForDisplay, getBerlinDate } from "../../utils/dateTime";
 import { getSalesStep, getSalesStepLabel } from "../../utils/processFlow";
-import { naechsteAngebotsrevision } from "../../services/verkauf/angeboteService";
 import { openDocumentPdf } from "../../utils/documentPdf";
 
-const heute = () => "2026-07-27";
-const jetzt = () => new Date().toISOString();
-const inTagen = tage => {
-    const datum = new Date("2026-07-27");
-    datum.setDate(datum.getDate() + tage);
-    return datum.toISOString().slice(0, 10);
+const heute = getBerlinDate();
+const gesamtNachAbzug = (positionen, rabattBetrag = 0) => Math.max(
+    0,
+    (positionen || []).reduce((summe, position) => summe + Number(position.menge) * Number(position.einzelpreis), 0) - Number(rabattBetrag || 0)
+);
+const istOffenesAngebot = angebot => !["angenommen", "abgelehnt", "beendet"].includes(String(angebot?.status || "").toLowerCase());
+const plusTage = tage => {
+    const basis = new Date(`${heute}T12:00:00`);
+    basis.setDate(basis.getDate() + tage);
+    return basis.toISOString().slice(0, 10);
 };
-const gesamtbetrag = positionen => positionen.reduce((summe, position) => summe + position.menge * position.einzelpreis, 0);
-const gesamtNachAbzug = (positionen, rabattBetrag = 0) => Math.max(0, gesamtbetrag(positionen) - Number(rabattBetrag || 0));
-const istOffenesAngebot = angebot => !["angenommen", "abgelehnt", "ersetzt"].includes(String(angebot?.status || "").toLowerCase());
+const toLeistung = (item, typ) => ({
+    id: item.id,
+    leistungTyp: typ,
+    nummer: typ === "Service" ? item.serviceNr : item.artikelNr,
+    name: item.name,
+    preis: Number(item.verkaufspreis ?? item.preis ?? 0),
+    artikelTyp: typ === "Service" ? "Dienstleistung" : item.artikelTyp
+});
+
+function normalizeText(value = "") {
+    return String(value || "").toLowerCase();
+}
 
 export default function Angebote() {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const [angebote, setAngebote] = useState(angeboteService.getAll());
-    const [offen, setOffen] = useState(false);
-    const [verhandlungOpen, setVerhandlungOpen] = useState(false);
-    const [editOfferId, setEditOfferId] = useState(null);
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [activeTab, setActiveTab] = useState("offen");
+    const [open, setOpen] = useState(false);
+    const [sourceInquiryId, setSourceInquiryId] = useState("");
     const [kundeId, setKundeId] = useState("");
     const [leistungId, setLeistungId] = useState("");
     const [menge, setMenge] = useState(1);
-    const [positionen, setPositionen] = useState([]);
-    const [fehler, setFehler] = useState("");
-    const [statusFilter, setStatusFilter] = useState("");
-    const [sourceInquiryId, setSourceInquiryId] = useState("");
-    const [gueltigBis, setGueltigBis] = useState(inTagen(14));
+    const [positionenDraft, setPositionenDraft] = useState([]);
+    const [gueltigBis, setGueltigBis] = useState(plusTage(14));
     const [rabattBetrag, setRabattBetrag] = useState(0);
     const [verguenstigungsGrund, setVerguenstigungsGrund] = useState("");
+    const [fehler, setFehler] = useState("");
     const [angebotsNrDraft, setAngebotsNrDraft] = useState("");
-    const [verhandlungsAngebot, setVerhandlungsAngebot] = useState(null);
-    const [vorgangsNachrichten, setVorgangsNachrichten] = useState([]);
-    const [nachrichtenForm, setNachrichtenForm] = useState({ kanal: "E-Mail", betreff: "", nachricht: "" });
-    const kunden = kundenService.getAll();
-    const artikel = artikelService.getAll().filter(item => item.istVerkaeuflich);
-    const services = servicesService.getAll();
-    const leistungen = useMemo(() => [
-        ...artikel.map(item => ({ ...item, leistungTyp: "Artikel" })),
-        ...services.map(item => ({ ...item, leistungTyp: "Service" }))
-    ], [artikel, services]);
+    const [bearbeiter, setBearbeiter] = useState("");
+    const [selectedTemplateOfferId, setSelectedTemplateOfferId] = useState("");
+    const [direktSenden, setDirektSenden] = useState(false);
+
+    const angebote = useMemo(() => angeboteService.getAll(), [refreshKey]);
     const auftraege = auftraegeService.getAll();
     const vertriebsdokumente = vertriebsdokumenteService.list();
     const versandauftraege = versandService.list();
     const anfragen = customerInquiryService.list();
-    const findeAnfrage = anfrageId => anfragen.find(item => String(item.id) === String(anfrageId));
-    const angeboteZuVorgang = vorgangId => angebote
-        .filter(item => item.vorgangId === vorgangId)
-        .sort((a, b) => Number(a.revision || 0) - Number(b.revision || 0));
+    const kunden = kundenService.list();
+    const benutzer = benutzerService.list();
+    const artikel = artikelService.getAll().filter(item => item.istVerkaeuflich);
+    const services = servicesService.getAll();
+    const leistungen = [
+        ...artikel.map(item => toLeistung(item, "Artikel")),
+        ...services.map(item => toLeistung(item, "Service"))
+    ];
     const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
+    const bearbeiterOptionen = benutzer.map(item => ({ value: String(item.username || item.id), label: `${item.name || item.username} (${item.rolle || "Team"})` }));
     const leistungsOptionen = leistungen.map(item => ({
         value: `${item.leistungTyp}:${item.id}`,
-        label: `${item.leistungTyp === "Service" ? item.serviceNr : item.artikelNr} - ${item.name} [${item.leistungTyp === "Artikel" ? item.artikelTyp : item.leistungTyp}] (${Number(item.verkaufspreis ?? item.preis ?? 0).toFixed(2)} EUR)`
+        label: `${item.nummer} - ${item.name} (${item.preis.toFixed(2)} EUR)`
     }));
+    const findeAnfrage = anfrageId => anfragen.find(item => String(item.id) === String(anfrageId));
     const newMode = searchParams.get("new");
     const inquiryIdFromQuery = searchParams.get("anfrageId") || "";
     const kundeIdFromQuery = searchParams.get("kundeId") || "";
+    const templateOfferIdFromQuery = searchParams.get("templateOfferId") || "";
     const defaultKundeId = String(kunden[0]?.id || "");
     const defaultLeistungId = leistungen[0] ? `${leistungen[0].leistungTyp}:${leistungen[0].id}` : "";
+    const istErfahrenerVerkaeufer = useMemo(() => {
+        const rolle = normalizeText(user?.rolle || user?.username || user?.name || "");
+        return Boolean(
+            user?.permissions?.includes("*")
+            || rolle.includes("admin")
+            || rolle.includes("senior")
+            || rolle.includes("leitung")
+            || rolle.includes("erfahren")
+        );
+    }, [user]);
+    const brauchtFreigabe = !istErfahrenerVerkaeufer;
+
+    const sendeAngebotAnKunden = (angebot) => {
+        if (!angebot?.anfrageId) return;
+        const anfrage = findeAnfrage(angebot.anfrageId);
+        if (!anfrage) return;
+        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Pruefung zu.`;
+
+        nachrichtenService.create({
+            vorgangId: angebot.vorgangId || anfrage.vorgangId || `anfrage-${anfrage.id}`,
+            anfrageId: anfrage.id,
+            angebotId: angebot.id,
+            datum: heute,
+            zeitpunkt: `${heute}T12:00:00`,
+            senderRolle: "Verkauf",
+            senderName: "Schuelerfirma Verkauf",
+            kanal: anfrage.kanal || "E-Mail",
+            betreff: `Angebot ${angebot.angebotsNr}`,
+            nachricht: text,
+            typ: "Angebot"
+        });
+
+        customerInquiryService.update({
+            ...anfrage,
+            status: "beantwortet",
+            angebotId: angebot.id,
+            antwort: text,
+            beantwortetAm: heute
+        });
+    };
+
+    const initialisiereDialog = (anfrageId = "", kunde = "", templateOfferId = "") => {
+        const inquiry = findeAnfrage(anfrageId);
+        const vorgangId = inquiry?.vorgangId || (anfrageId ? `anfrage-${anfrageId}` : "");
+        const revisionInfo = naechsteAngebotsrevision(vorgangId || `angebot-${Date.now()}`);
+        const templateOffer = templateOfferId ? angeboteService.getById(templateOfferId) : null;
+        const templatePositionen = (templateOffer?.positionen || []).map(position => ({ ...position }));
+
+        setSourceInquiryId(anfrageId);
+        setKundeId(kunde || inquiry?.kundeId ? String(kunde || inquiry?.kundeId) : defaultKundeId);
+        setLeistungId(defaultLeistungId);
+        setMenge(1);
+        setPositionenDraft(templatePositionen);
+        setGueltigBis(templateOffer?.gueltigBis || plusTage(14));
+        setRabattBetrag(Number(templateOffer?.rabattBetrag || 0));
+        setVerguenstigungsGrund(templateOffer?.verguenstigungsGrund || "");
+        setFehler("");
+        setAngebotsNrDraft(`${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`);
+        setBearbeiter(String(benutzer[0]?.username || benutzer[0]?.id || ""));
+        setSelectedTemplateOfferId(String(templateOfferId || ""));
+        setDirektSenden(brauchtFreigabe);
+        setOpen(true);
+    };
+
+    useEffect(() => {
+        if (newMode !== "fromInquiry") return;
+        initialisiereDialog(inquiryIdFromQuery, kundeIdFromQuery, templateOfferIdFromQuery);
+    }, [newMode, inquiryIdFromQuery, kundeIdFromQuery, templateOfferIdFromQuery, defaultLeistungId, brauchtFreigabe]);
+
     const angebotColumns = [
         { field: "angebotsNr", title: "Angebotsnummer" },
         { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
         { field: "datum", title: "Datum" },
         { field: "gueltigBis", title: "Gueltig bis", render: row => row.gueltigBis || "-" },
         { field: "status", title: "Status" },
+        { field: "freigabeText", title: "Freigabe" },
         { field: "anliegenText", title: "Anliegen" },
         { field: "prozess", title: "Prozess" },
         { field: "gesamt", title: "Gesamt" },
         { field: "positionenText", title: "Positionen" }
     ];
 
-    useEffect(() => {
-        if (newMode !== "fromInquiry") return;
-        setSourceInquiryId(inquiryIdFromQuery);
-        setKundeId(kundeIdFromQuery || defaultKundeId);
-        setLeistungId(defaultLeistungId);
-        setMenge(1);
-        setPositionen([]);
-        setGueltigBis(inTagen(14));
-        setRabattBetrag(0);
-        setVerguenstigungsGrund("");
-        setFehler("");
-        setAngebotsNrDraft(naechsteAngebotsnummer());
-        setEditOfferId(null);
-        setOffen(true);
-    }, [newMode, inquiryIdFromQuery, kundeIdFromQuery, defaultKundeId, defaultLeistungId]);
+    const neuesteAngebote = useMemo(() => {
+        const gruppiert = new Map();
 
-    const handleClose = () => {
-        setOffen(false);
-        setFehler("");
-        if (newMode) {
-            navigate("/angebote", { replace: true });
-        }
-    };
-
-    const neu = () => {
-        setSourceInquiryId("");
-        setKundeId(defaultKundeId);
-        setLeistungId(defaultLeistungId);
-        setMenge(1);
-        setPositionen([]);
-        setGueltigBis(inTagen(14));
-        setRabattBetrag(0);
-        setVerguenstigungsGrund("");
-        setFehler("");
-        setAngebotsNrDraft(naechsteAngebotsnummer());
-        setEditOfferId(null);
-        setOffen(true);
-    };
-
-    const angebotBearbeiten = angebot => {
-        setEditOfferId(angebot.id);
-        setSourceInquiryId(String(angebot.anfrageId || ""));
-        setKundeId(String(angebot.kundeId || defaultKundeId));
-        setLeistungId(defaultLeistungId);
-        setMenge(1);
-        setPositionen((angebot.positionen || []).map(position => ({ ...position })));
-        setGueltigBis(angebot.gueltigBis || inTagen(14));
-        setRabattBetrag(Number(angebot.rabattBetrag || 0));
-        setVerguenstigungsGrund(angebot.verguenstigungsGrund || "");
-        setVorgangsNachrichten(listNachrichtenZuVorgang(angebot.vorgangId));
-        setFehler("");
-        setAngebotsNrDraft(angebot.angebotsNr);
-        setOffen(true);
-    };
-
-    const positionHinzufuegen = () => {
-        const auswahl = leistungen.find(item => `${item.leistungTyp}:${item.id}` === String(leistungId));
-        if (!auswahl || Number(menge) <= 0) return;
-        setPositionen(vorherige => {
-            const vorhanden = vorherige.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp);
-            if (vorhanden) {
-                return vorherige.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp
-                    ? { ...item, menge: item.menge + Number(menge) } : item);
+        angebote.forEach(angebot => {
+            const key = String(angebot.anfrageId || angebot.vorgangId || angebot.id);
+            const vorhanden = gruppiert.get(key);
+            if (!vorhanden || Number(angebot.revision || 0) > Number(vorhanden.revision || 0)) {
+                gruppiert.set(key, angebot);
             }
-            return [...vorherige, {
-                artikelId: auswahl.id,
-                artikel: auswahl.name,
-                artikelTyp: auswahl.leistungTyp === "Service" ? "Dienstleistung" : auswahl.artikelTyp,
-                leistungTyp: auswahl.leistungTyp,
-                serviceId: auswahl.leistungTyp === "Service" ? auswahl.id : "",
-                menge: Number(menge),
-                einzelpreis: Number(auswahl.verkaufspreis ?? auswahl.preis ?? 0)
-            }];
         });
-    };
 
-    const speichern = () => {
-        const kunde = kunden.find(item => item.id === Number(kundeId));
-        if (!kunde || positionen.length === 0) {
-            setFehler("Bitte einen Kunden und mindestens eine Position auswaehlen.");
-            return;
-        }
-        if (!gueltigBis) {
-            setFehler("Bitte eine Frist fuer das Angebot angeben.");
-            return;
-        }
-        if (gueltigBis < heute()) {
-            setFehler("Die Frist darf nicht in der Vergangenheit liegen.");
-            return;
-        }
-        const payload = {
-            angebotsNr: angebotsNrDraft,
-            angebotsBasisNr: String(angebotsNrDraft).replace(/\.\d+$/, ""),
-            revision: Number(String(angebotsNrDraft).split(".").at(-1) || 0),
-            vorgangId: sourceInquiryId ? `anfrage-${sourceInquiryId}` : `angebot-${String(angebotsNrDraft).replace(/\.\d+$/, "")}`,
-            anfrageId: sourceInquiryId ? Number(sourceInquiryId) : "",
-            kundeId: kunde.id,
-            datum: heute(),
-            gueltigBis,
-            rabattBetrag: Number(rabattBetrag || 0),
-            verguenstigungsGrund: verguenstigungsGrund.trim(),
-            gesamtbetrag: gesamtNachAbzug(positionen, rabattBetrag),
-            status: "offen",
-            positionen
-        };
-        const neuesAngebot = editOfferId
-            ? angeboteService.update(editOfferId, payload)
-            : angeboteService.add(payload);
-        if (sourceInquiryId && !editOfferId) {
-            const anfrage = anfragen.find(item => String(item.id) === String(sourceInquiryId));
-            if (anfrage) {
-                customerInquiryService.update({ ...anfrage, status: "in Bearbeitung", angebotId: neuesAngebot.id, vorgangId: anfrage.vorgangId || `anfrage-${anfrage.id}` });
-                nachrichtenService.create({
-                    vorgangId: anfrage.vorgangId || `anfrage-${anfrage.id}`,
-                    anfrageId: anfrage.id,
-                    angebotId: neuesAngebot.id,
-                    datum: heute(),
-                    zeitpunkt: jetzt(),
-                    senderRolle: "Verkauf",
-                    senderName: "Schülerfirma Verkauf",
-                    kanal: "E-Mail",
-                    betreff: `Angebot ${neuesAngebot.angebotsNr}`,
-                    nachricht: "Ein Angebot wurde erstellt und zur Rückmeldung weitergegeben.",
-                    typ: "Angebot"
-                });
-            }
-        }
-        setAngebote(angeboteService.getAll());
-        setSourceInquiryId("");
-        setEditOfferId(null);
-        handleClose();
-    };
-
-    const aufAntwortWarten = angebot => {
-        if (angebot.status !== "offen") return;
-        angeboteService.update({ ...angebot, status: "wartet auf Antwort" });
-        nachrichtenService.create({
-            vorgangId: angebot.vorgangId,
-            anfrageId: angebot.anfrageId || "",
-            angebotId: angebot.id,
-            datum: heute(),
-            zeitpunkt: jetzt(),
-            senderRolle: "Verkauf",
-            senderName: "Schülerfirma Verkauf",
-            kanal: "E-Mail",
-            betreff: `Angebot ${angebot.angebotsNr} versendet`,
-            nachricht: "Das Angebot wurde zur Prüfung an den Kunden weitergegeben. Es wird auf Rückmeldung gewartet.",
-            typ: "Status"
-        });
-        setAngebote(angeboteService.getAll());
-    };
-
-    const annahmeBestaetigen = angebot => {
-        if (angebot.status !== "wartet auf Antwort") {
-            alert("Bitte zuerst auf die Kundenantwort warten.");
-            return;
-        }
-        if (!confirm(`Angebot ${angebot.angebotsNr} als angenommen bestaetigen und Auftrag anlegen?`)) return;
-        angebotInAuftragUebernehmen(angebot.id);
-        nachrichtenService.create({
-            vorgangId: angebot.vorgangId,
-            anfrageId: angebot.anfrageId || "",
-            angebotId: angebot.id,
-            datum: heute(),
-            zeitpunkt: jetzt(),
-            senderRolle: "Kunde",
-            senderName: angebot.kunde || getCustomerName(angebot.kundeId, ""),
-            kanal: "E-Mail",
-            betreff: `Annahme ${angebot.angebotsNr}`,
-            nachricht: "Der Kunde hat das Angebot angenommen.",
-            typ: "Antwort"
-        });
-        setAngebote(angeboteService.getAll());
-    };
-
-    const ablehnungBestaetigen = angebot => {
-        if (angebot.status !== "wartet auf Antwort") {
-            alert("Bitte zuerst auf die Kundenantwort warten.");
-            return;
-        }
-        if (!confirm(`Angebot ${angebot.angebotsNr} als abgelehnt markieren?`)) return;
-        angeboteService.update({ ...angebot, status: "abgelehnt" });
-        nachrichtenService.create({
-            vorgangId: angebot.vorgangId,
-            anfrageId: angebot.anfrageId || "",
-            angebotId: angebot.id,
-            datum: heute(),
-            zeitpunkt: jetzt(),
-            senderRolle: "Kunde",
-            senderName: angebot.kunde || getCustomerName(angebot.kundeId, ""),
-            kanal: "E-Mail",
-            betreff: `Ablehnung ${angebot.angebotsNr}`,
-            nachricht: "Der Kunde hat das Angebot abgelehnt.",
-            typ: "Antwort"
-        });
-        if (angebot.anfrageId) {
-            const anfrage = anfragen.find(item => String(item.id) === String(angebot.anfrageId));
-            if (anfrage) {
-                customerInquiryService.update({ ...anfrage, status: "erledigt", angebotId: angebot.id });
-            }
-        }
-        setAngebote(angeboteService.getAll());
-    };
-
-    const verhandlungOeffnen = angebot => {
-        setVerhandlungsAngebot(angebot);
-        setVorgangsNachrichten(listNachrichtenZuVorgang(angebot.vorgangId));
-        setNachrichtenForm({
-            kanal: "E-Mail",
-            betreff: `Rückfrage zu ${angebot.angebotsNr}`,
-            nachricht: ""
-        });
-        setVerhandlungOpen(true);
-    };
-
-    const nachrichtSpeichern = () => {
-        if (!verhandlungsAngebot || !nachrichtenForm.nachricht.trim()) return;
-        nachrichtenService.create({
-            vorgangId: verhandlungsAngebot.vorgangId,
-            anfrageId: verhandlungsAngebot.anfrageId || "",
-            angebotId: verhandlungsAngebot.id,
-            datum: heute(),
-            zeitpunkt: jetzt(),
-            senderRolle: "Kunde",
-            senderName: verhandlungsAngebot.kunde,
-            kanal: nachrichtenForm.kanal,
-            betreff: nachrichtenForm.betreff.trim() || "Nachricht",
-            nachricht: nachrichtenForm.nachricht.trim(),
-            typ: "Nachricht"
-        });
-        if (verhandlungsAngebot.status !== "angenommen") {
-            angeboteService.update({ ...verhandlungsAngebot, status: "neu verhandeln" });
-            setAngebote(angeboteService.getAll());
-            setVerhandlungsAngebot(current => current ? { ...current, status: "neu verhandeln" } : current);
-        }
-        setVorgangsNachrichten(listNachrichtenZuVorgang(verhandlungsAngebot.vorgangId));
-        setNachrichtenForm(form => ({ ...form, nachricht: "" }));
-    };
-
-    const neuesVerhandlungsangebot = () => {
-        if (!verhandlungsAngebot) return;
-        const revisionInfo = naechsteAngebotsrevision(verhandlungsAngebot.vorgangId);
-        angeboteService.update({ ...verhandlungsAngebot, status: "ersetzt" });
-        const neuesAngebot = angeboteService.add({
-            ...verhandlungsAngebot,
-            id: undefined,
-            angebotsBasisNr: revisionInfo.angebotsBasisNr,
-            revision: revisionInfo.revision,
-            angebotsNr: `${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`,
-            datum: heute(),
-            status: "offen"
-        });
-        if (verhandlungsAngebot.anfrageId) {
-            const anfrage = customerInquiryService.list().find(item => String(item.id) === String(verhandlungsAngebot.anfrageId));
-            if (anfrage) customerInquiryService.update({ ...anfrage, angebotId: neuesAngebot.id, status: "in Bearbeitung" });
-        }
-        nachrichtenService.create({
-            vorgangId: neuesAngebot.vorgangId,
-            anfrageId: neuesAngebot.anfrageId || "",
-            angebotId: neuesAngebot.id,
-            datum: heute(),
-            zeitpunkt: jetzt(),
-            senderRolle: "Verkauf",
-            senderName: "Schülerfirma Verkauf",
-            kanal: "E-Mail",
-            betreff: `Neues Angebot ${neuesAngebot.angebotsNr}`,
-            nachricht: "Auf Basis der Verhandlung wurde ein überarbeitetes Angebot erstellt.",
-            typ: "Angebot"
-        });
-        setAngebote(angeboteService.getAll());
-        setVerhandlungsAngebot(neuesAngebot);
-        setVorgangsNachrichten(listNachrichtenZuVorgang(neuesAngebot.vorgangId));
-    };
+        return Array.from(gruppiert.values())
+            .map(angebot => ({
+                ...angebot,
+                freigabeStatus: angebot.freigabeStatus || "keine",
+                freigabeText: angebot.freigabeStatus === "angefragt" ? "Freigabe offen" : (angebot.freigabeStatus === "freigegeben" ? "Freigegeben" : "-"),
+                kunde: getCustomerName(angebot.kundeId, angebot.kunde),
+                anliegenText: findeAnfrage(angebot.anfrageId)?.anliegen || "-",
+                positionenText: (angebot.positionen || []).map(position => `${position.artikel} (${position.menge})`).join(", "),
+                gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag).toFixed(2)} EUR`,
+                prozess: getSalesStepLabel(getSalesStep(angebot, auftraege, vertriebsdokumente, versandauftraege))
+            }))
+            .sort((a, b) => String(b.datum || "").localeCompare(String(a.datum || "")));
+    }, [angebote, anfragen, auftraege, vertriebsdokumente, versandauftraege]);
 
     const angebotAlsPdf = angebot => {
         openDocumentPdf({
             title: `Angebot ${angebot.angebotsNr}`,
-            subject: "Automatisch erzeugtes Angebotsdokument für den Schulungseinsatz.",
+            subject: "Automatisch erzeugtes Angebotsdokument fuer den Schulungseinsatz.",
             date: angebot.datum,
-            note: angebot.verguenstigungsGrund || "Kein zusätzlicher Hinweis hinterlegt.",
+            note: angebot.verguenstigungsGrund || "Kein zusaetzlicher Hinweis hinterlegt.",
             referenceLabel: "Angebot",
             referenceValue: angebot.angebotsNr,
             partnerLabel: "Kunde",
@@ -382,133 +220,245 @@ export default function Angebote() {
         });
     };
 
-    const angebotAusVerhandlungBearbeiten = angebot => {
-        setVerhandlungOpen(false);
-        angebotBearbeiten(angebot);
+    const anfrageImDialog = findeAnfrage(sourceInquiryId);
+    const chatNachrichten = anfrageImDialog?.vorgangId ? listNachrichtenZuVorgang(anfrageImDialog.vorgangId) : [];
+    const weiterleitungsAusschnitt = chatNachrichten.slice(-3);
+    const bearbeiterLabel = bearbeiterOptionen.find(item => item.value === String(bearbeiter))?.label || "Noch nicht zugewiesen";
+    const bisherigeAngeboteImDialog = anfrageImDialog?.vorgangId
+        ? angebote
+            .filter(item => item.vorgangId === anfrageImDialog.vorgangId)
+            .sort((a, b) => Number(a.revision || 0) - Number(b.revision || 0))
+        : [];
+
+    const positionHinzufuegen = () => {
+        const auswahl = leistungen.find(item => `${item.leistungTyp}:${item.id}` === String(leistungId));
+        if (!auswahl || Number(menge) <= 0) return;
+        setPositionenDraft(vorherige => {
+            const vorhanden = vorherige.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp);
+            if (vorhanden) {
+                return vorherige.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp
+                    ? { ...item, menge: Number(item.menge) + Number(menge) }
+                    : item);
+            }
+            return [...vorherige, {
+                artikelId: auswahl.id,
+                artikel: auswahl.name,
+                artikelTyp: auswahl.artikelTyp,
+                leistungTyp: auswahl.leistungTyp,
+                serviceId: auswahl.leistungTyp === "Service" ? auswahl.id : "",
+                menge: Number(menge),
+                einzelpreis: auswahl.preis
+            }];
+        });
     };
 
-    const data = angebote
-        .filter(angebot => String(angebot.status || "").toLowerCase() !== "ersetzt")
-        .map(angebot => ({
-        ...angebot,
-        kunde: getCustomerName(angebot.kundeId, angebot.kunde),
-        anliegenText: findeAnfrage(angebot.anfrageId)?.anliegen || "-",
-        positionenText: angebot.positionen.map(position => `${position.artikel} (${position.menge})`).join(", "),
-        gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag).toFixed(2)} EUR`,
-        prozess: getSalesStepLabel(getSalesStep(angebot, auftraege, vertriebsdokumente, versandauftraege))
-    }));
-    const offeneAngebote = angebote.filter(istOffenesAngebot);
-    const auftraegeAusAngeboten = angebote.filter(item => item.status === "angenommen").length;
-    const offenerWert = offeneAngebote.reduce((summe, angebot) => summe + gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag), 0);
+    const speichern = () => {
+        const kunde = kunden.find(item => String(item.id) === String(kundeId));
+        const anfrage = findeAnfrage(sourceInquiryId);
+        const vorgangId = anfrage?.vorgangId || (sourceInquiryId ? `anfrage-${sourceInquiryId}` : `angebot-${Date.now()}`);
+
+        if (!kunde || positionenDraft.length === 0) {
+            setFehler("Bitte einen Kunden und mindestens eine Position auswaehlen.");
+            return;
+        }
+
+        const revisionInfo = naechsteAngebotsrevision(vorgangId);
+        const sollDirektSenden = brauchtFreigabe ? true : direktSenden;
+        const freigabeNoetig = brauchtFreigabe;
+        const status = sollDirektSenden && !freigabeNoetig ? "wartet auf Antwort" : "in Vorbereitung";
+        const neuesAngebot = angeboteService.add({
+            angebotsNr: `${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`,
+            angebotsBasisNr: revisionInfo.angebotsBasisNr,
+            revision: revisionInfo.revision,
+            vorgangId,
+            anfrageId: sourceInquiryId || "",
+            kundeId: kunde.id,
+            kunde: kunde.firma,
+            datum: heute,
+            gueltigBis,
+            rabattBetrag: Number(rabattBetrag || 0),
+            verguenstigungsGrund: verguenstigungsGrund.trim(),
+            gesamtbetrag: gesamtNachAbzug(positionenDraft, rabattBetrag),
+            status,
+            positionen: positionenDraft,
+            bearbeiter,
+            direktSendenGewuenscht: sollDirektSenden,
+            freigabeStatus: freigabeNoetig ? "angefragt" : (sollDirektSenden ? "freigegeben" : "keine"),
+            freigabeAngefragtVon: user?.username || bearbeiter,
+            freigegebenVon: sollDirektSenden && !freigabeNoetig ? (user?.username || "") : ""
+        });
+
+        if (anfrage) {
+            customerInquiryService.update({
+                ...anfrage,
+                kundeId: kunde.id,
+                kunde: kunde.firma,
+                vorgangId
+            });
+        }
+
+        if (sollDirektSenden && !freigabeNoetig) {
+            sendeAngebotAnKunden(neuesAngebot);
+        }
+
+        if (sourceInquiryId && anfrage?.vorgangId) {
+            nachrichtenService.create({
+                vorgangId: anfrage.vorgangId,
+                anfrageId: anfrage.id,
+                angebotId: "",
+                datum: heute,
+                senderRolle: "Verkauf",
+                senderName: "Schuelerfirma Verkauf",
+                betreff: `Interne Weiterleitung an ${bearbeiterLabel}`,
+                nachricht: `Die Anfrage wurde intern an ${bearbeiterLabel} zur Angebotserstellung weitergeleitet.`,
+                typ: "Interne Weiterleitung"
+            });
+        }
+
+        setRefreshKey(value => value + 1);
+        handleClose();
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setFehler("");
+        setSelectedTemplateOfferId("");
+        setDirektSenden(brauchtFreigabe);
+        if (newMode) {
+            navigate("/angebote", { replace: true });
+        }
+    };
+
+    const offeneAngebote = neuesteAngebote.filter(item => istOffenesAngebot(item) && item.freigabeStatus !== "angefragt");
+    const freizugebendeAngebote = neuesteAngebote.filter(item => item.freigabeStatus === "angefragt");
+    const zumChatNavigieren = row => {
+        const anfrage = findeAnfrage(row.anfrageId);
+        if (!anfrage) {
+            navigate("/kundenanfragen");
+            return;
+        }
+        navigate(`/kundenanfragen?focus=${anfrage.id}`);
+    };
+    const angebotFreigeben = (angebot) => {
+        const aktualisiert = {
+            ...angebot,
+            freigabeStatus: "freigegeben",
+            freigegebenVon: user?.username || user?.name || "verkauf",
+            status: angebot.direktSendenGewuenscht ? "wartet auf Antwort" : (angebot.status || "in Vorbereitung")
+        };
+        angeboteService.update(aktualisiert);
+        if (angebot.direktSendenGewuenscht) {
+            sendeAngebotAnKunden(aktualisiert);
+        }
+        setRefreshKey(value => value + 1);
+    };
+    const dashboardTabs = [
+        { key: "offen", label: "Offene Angebote", value: offeneAngebote.length },
+        { key: "freigabe", label: "Freizugebende Angebote", value: freizugebendeAngebote.length }
+    ];
+    const sichtbareAngebote = activeTab === "freigabe" ? freizugebendeAngebote : offeneAngebote;
 
     return <>
-        <OverviewCards cards={[
-            { label: "Angebote gesamt", value: angebote.length },
-            { label: "Noch offen", value: offeneAngebote.length },
-            { label: "Offener Angebotswert", value: `${offenerWert.toFixed(2)} EUR` },
-            { label: "In Auftraege uebernommen", value: auftraegeAusAngeboten }
-        ]}/>
-        <DataTable title="Angebote" selectableColumns data={data.filter(item => !statusFilter || item.status === statusFilter)}
+        <div className="kennzahlen">
+            {dashboardTabs.map(card => <button key={card.key} type="button" className={`kennzahl kennzahl-button${activeTab === card.key ? " is-active" : ""}`} onClick={() => setActiveTab(card.key)}>
+                <span>{card.label}</span>
+                <strong>{card.value}</strong>
+            </button>)}
+        </div>
+        <DataTable
+            title={activeTab === "freigabe" ? "Freizugebende Angebote" : "Offene Angebote"}
+            selectableColumns={false}
+            data={sichtbareAngebote}
             columns={angebotColumns}
-            allColumns={angebotColumns}
-            focusRowId={searchParams.get("focus") || ""}
-            toolbarActions={[{ name: "new", label: "Neues Angebot", permission: "verkauf.bearbeiten", onClick: neu }]}
+            toolbarActions={[{ name: "new", label: "Neues Angebot", permission: "verkauf.bearbeiten", onClick: () => initialisiereDialog() }]}
             rowActions={[
-                { name: "thread", label: "Verhandlung", permission: "verkauf.bearbeiten", onClick: verhandlungOeffnen, variant: "secondary" },
-                { name: "edit", label: "Bearbeiten", permission: "verkauf.bearbeiten", onClick: angebotBearbeiten, variant: "secondary", isVisible: row => !["angenommen", "abgelehnt"].includes(String(row.status || "").toLowerCase()) },
+                { name: "thread", label: "Zum Chat", permission: "verkauf.bearbeiten", onClick: zumChatNavigieren, variant: "secondary", isVisible: row => !!row.anfrageId },
                 { name: "pdf", label: "PDF", permission: "verkauf.bearbeiten", onClick: angebotAlsPdf, variant: "secondary" },
-                { name: "wait", label: "Auf Antwort warten", permission: "verkauf.bearbeiten", onClick: aufAntwortWarten, variant: "secondary", isVisible: row => row.status === "offen" },
-                { name: "accept", label: "Annahme bestaetigen", permission: "verkauf.bearbeiten", onClick: annahmeBestaetigen, variant: "success", isVisible: row => row.status === "wartet auf Antwort" },
-                { name: "reject", label: "Ablehnung bestaetigen", permission: "verkauf.bearbeiten", onClick: ablehnungBestaetigen, variant: "danger", isVisible: row => row.status === "wartet auf Antwort" }
+                { name: "approve", label: "Freigabe", onClick: angebotFreigeben, variant: "success", isVisible: row => row.freigabeStatus === "angefragt" && istErfahrenerVerkaeufer }
             ]}
-            filters={[{ name: "status", label: "Status", options: [
-                { value: "offen", label: "Offen" },
-                { value: "wartet auf Antwort", label: "Wartet auf Antwort" },
-                { value: "neu verhandeln", label: "Neu verhandeln" },
-                { value: "ersetzt", label: "Ersetzt" },
-                { value: "angenommen", label: "Angenommen" },
-                { value: "abgelehnt", label: "Abgelehnt" }
-            ] }]}
-            onFilter={filters => setStatusFilter(filters.status || "")}
             detailLinkResolver={({ field, row, value }) => {
                 if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 if (field === "anfrageId" && value) return `/kundenanfragen?focus=${value}`;
                 return null;
             }}
         />
-        <Dialog open={offen} title={editOfferId ? "Angebot bearbeiten" : "Neues Angebot"} onClose={handleClose}>
-            {sourceInquiryId && findeAnfrage(sourceInquiryId) && <div className="module-panel">
-                <div><Label>Ausgangsanfrage</Label><p>{findeAnfrage(sourceInquiryId)?.anliegen}</p></div>
+        <Dialog open={open} title={sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot"} onClose={handleClose}>
+            {sourceInquiryId && anfrageImDialog && <div className="offer-forward-panel form-row">
+                <div className="offer-forward-grid">
+                    <div className="offer-forward-card">
+                        <Label>Kunde</Label>
+                        <p>{getCustomerName(anfrageImDialog.kundeId, anfrageImDialog.kunde)}</p>
+                    </div>
+                    <div className="offer-forward-card">
+                        <Label>Anfrage-Nr.</Label>
+                        <p>{anfrageImDialog.vorgangId || `anfrage-${anfrageImDialog.id}`}</p>
+                    </div>
+                    <div className="offer-forward-card">
+                        <Label>Bearbeitet von</Label>
+                        <LookupField value={bearbeiter} options={bearbeiterOptionen} onChange={setBearbeiter} placeholder="Bearbeiter auswaehlen..."/>
+                    </div>
+                </div>
+                <div className="offer-forward-card">
+                    <Label>Chat-Ausschnitt zum Nachlesen</Label>
+                    {weiterleitungsAusschnitt.length === 0 ? <p>Noch keine weiterleitbaren Nachrichten vorhanden.</p> : <div className="offer-forward-thread">
+                        {weiterleitungsAusschnitt.map(nachricht => <article key={nachricht.id} className="offer-forward-message">
+                            <div className="offer-forward-message-meta">
+                                <strong>{nachricht.senderName || nachricht.senderRolle}</strong>
+                                <span>{formatTimestampForDisplay(nachricht.zeitpunkt || nachricht.datum)} | {nachricht.betreff}</span>
+                            </div>
+                            <p>{nachricht.nachricht}</p>
+                        </article>)}
+                    </div>}
+                </div>
             </div>}
-            {editOfferId && vorgangsNachrichten.length > 0 && <div className="module-panel">
-                <div><Label>Nachrichtenverlauf zum Vorgang</Label></div>
-                <ul className="positionsliste">
-                    {vorgangsNachrichten.map(item => <li key={item.id}><strong>{String(item.zeitpunkt || item.datum).replace("T", " ").slice(0, 16)}</strong> - {item.senderRolle}: {item.betreff}<br/>{item.nachricht}</li>)}
-                </ul>
+            {sourceInquiryId && bisherigeAngeboteImDialog.length > 0 && <div className="form-row thread-template-section">
+                <Label>Fruehere Angebote als Vorlage</Label>
+                <p className="thread-template-hint">Bei Bedarf kann ein bisheriger Angebotsstand uebernommen und anschliessend geaendert werden.</p>
+                <div className="thread-template-panel">
+                    <div className="thread-document-links">
+                        {bisherigeAngeboteImDialog.map(item => <button
+                            key={`dialog-template-${item.id}`}
+                            type="button"
+                            className={`thread-document-link${String(selectedTemplateOfferId) === String(item.id) ? " is-active" : ""}`}
+                            onClick={() => initialisiereDialog(sourceInquiryId, String(kundeId || anfrageImDialog.kundeId || ""), String(item.id))}
+                        >
+                            {item.angebotsNr} uebernehmen
+                        </button>)}
+                    </div>
+                </div>
             </div>}
-            <div><Label required>Kunde</Label><LookupField value={kundeId} options={kundenOptionen} onChange={setKundeId} placeholder="Kunde suchen..."/></div>
             <div className="form-row">
                 <div><Label>Angebotsnummer</Label><input type="text" value={angebotsNrDraft} disabled/></div>
-                <div><Label required>Gueltig bis</Label><input type="date" value={gueltigBis} onChange={event => setGueltigBis(event.target.value)}/></div>
+                <div><Label>Gueltig bis</Label><input type="date" value={gueltigBis} onChange={event => setGueltigBis(event.target.value)}/></div>
             </div>
-            <div className="form-row bestellposition-hinzufuegen"><div><Label>Artikel / Service</Label><LookupField value={leistungId} options={leistungsOptionen} onChange={setLeistungId} placeholder="Artikel oder Service suchen..."/></div>
+            <div className="form-row bestellposition-hinzufuegen">
+                <div><Label>Artikel / Service</Label><LookupField value={leistungId} options={leistungsOptionen} onChange={setLeistungId} placeholder="Artikel oder Service suchen..."/></div>
                 <div><Label>Menge</Label><NumberField value={menge} min="1" onChange={wert => setMenge(Number(wert))}/></div>
-                <button type="button" onClick={positionHinzufuegen}>Position hinzufuegen</button></div>
-            <div className="form-row"><p>Es werden nur Artikel mit VK-Preis angezeigt. Komponenten und Baugruppen koennen verkauft werden, wenn ein VK-Preis hinterlegt ist.</p></div>
-            <div className="form-row"><Label required>Angebotspositionen</Label>
-                {positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">{positionen.map(position => <li key={`${position.leistungTyp}-${position.artikelId}`}>{position.artikel} [{position.leistungTyp}]: {position.menge} x {position.einzelpreis.toFixed(2)} EUR
-                    <button type="button" className="link-button" onClick={() => setPositionen(items => items.filter(item => !(item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp)))}>Entfernen</button></li>)}</ul>}
-                {positionen.length > 0 && <>
-                    <strong>Zwischensumme: {gesamtbetrag(positionen).toFixed(2)} EUR</strong>
-                    <div className="form-row">
-                        <div>
-                            <Label>Verguenstigung</Label>
-                            <NumberField value={rabattBetrag} min="0" step="0.01" format="currency" onChange={wert => setRabattBetrag(Number(wert || 0))}/>
-                        </div>
-                    </div>
-                    <div className="form-row">
-                        <div>
-                            <Label>Grund fuer Verguenstigung</Label>
-                            <TextArea rows={2} value={verguenstigungsGrund} onChange={setVerguenstigungsGrund} placeholder="z. B. Spar-Paket, Mengenrabatt, Familienrabatt..."/>
-                        </div>
-                    </div>
-                    <strong>Gesamt nach Verguenstigung: {gesamtNachAbzug(positionen, rabattBetrag).toFixed(2)} EUR</strong>
-                </>}
-                {fehler && <p className="form-error">{fehler}</p>}</div>
+                <button type="button" onClick={positionHinzufuegen}>Position hinzufuegen</button>
+            </div>
+            <div className="form-row">
+                <Label>Angebotspositionen</Label>
+                {positionenDraft.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">
+                    {positionenDraft.map(position => <li key={`${position.leistungTyp}-${position.artikelId}`}>{position.artikel}: {position.menge} x {position.einzelpreis.toFixed(2)} EUR
+                        <button type="button" className="link-button" onClick={() => setPositionenDraft(items => items.filter(item => !(item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp)))}>Entfernen</button>
+                    </li>)}
+                </ul>}
+            </div>
+            <div className="form-row">
+                <div><Label>Verguenstigung</Label><NumberField value={rabattBetrag} min="0" step="0.01" format="currency" onChange={wert => setRabattBetrag(Number(wert || 0))}/></div>
+            </div>
+            <div className="form-row">
+                <div><Label>Grund fuer Verguenstigung</Label><TextArea rows={2} value={verguenstigungsGrund} onChange={setVerguenstigungsGrund}/></div>
+            </div>
+            <div className="form-row offer-send-checkbox-row">
+                <Checkbox checked={brauchtFreigabe ? true : direktSenden} onChange={setDirektSenden} disabled={brauchtFreigabe}>
+                    direkt senden
+                </Checkbox>
+                <HelpHint text={istErfahrenerVerkaeufer ? "Das Angebot wird nach dem Speichern sofort an den Kunden gesendet." : "Vor dem Senden muss ein Verkauf Senior oder eine hoehere Rolle die Freigabe erteilen."} />
+            </div>
+            <div className="form-row"><strong>Gesamt: {gesamtNachAbzug(positionenDraft, rabattBetrag).toFixed(2)} EUR</strong></div>
+            {fehler && <p className="form-error">{fehler}</p>}
             <div className="form-row"><button onClick={speichern}>Angebot speichern</button></div>
-        </Dialog>
-        <Dialog open={verhandlungOpen} title={verhandlungsAngebot ? `Verhandlung zu ${verhandlungsAngebot.angebotsNr}` : "Verhandlung"} onClose={() => setVerhandlungOpen(false)}>
-            {verhandlungsAngebot && <>
-                <div className="module-panel">
-                    <div><Label>Vorgang</Label><strong>{verhandlungsAngebot.vorgangId}</strong></div>
-                    <div><Label>Kunde</Label><strong>{verhandlungsAngebot.kunde}</strong></div>
-                    <div><Label>Aktueller Angebotsstand</Label><strong>{verhandlungsAngebot.angebotsNr}</strong></div>
-                    <div><Label>Status</Label><strong>{verhandlungsAngebot.status}</strong></div>
-                </div>
-                <div className="form-row">
-                    <Label>Angebotsstaende</Label>
-                    <ul className="positionsliste">
-                        {angeboteZuVorgang(verhandlungsAngebot.vorgangId).map(item => <li key={item.id}>{item.angebotsNr} - {item.status}</li>)}
-                    </ul>
-                </div>
-                <div className="form-row">
-                    <Label>Nachrichtenverlauf</Label>
-                    {vorgangsNachrichten.length === 0 ? <p>Noch keine Nachrichten vorhanden.</p> : <ul className="positionsliste">
-                    {vorgangsNachrichten.map(item => <li key={item.id}><strong>{String(item.zeitpunkt || item.datum).replace("T", " ").slice(0, 16)}</strong> - {item.senderRolle}: {item.betreff}<br/>{item.nachricht}</li>)}
-                    </ul>}
-                </div>
-                <div className="form-row">
-                    <div><Label>Kanal</Label><select value={nachrichtenForm.kanal} onChange={event => setNachrichtenForm(value => ({ ...value, kanal: event.target.value }))}><option>E-Mail</option><option>Telefon</option><option>Portal</option></select></div>
-                </div>
-                <div><Label>Betreff</Label><input type="text" value={nachrichtenForm.betreff} onChange={event => setNachrichtenForm(value => ({ ...value, betreff: event.target.value }))}/></div>
-                <div className="form-row"><Label>Nachricht</Label><TextArea rows={4} value={nachrichtenForm.nachricht} onChange={value => setNachrichtenForm(form => ({ ...form, nachricht: value }))} placeholder="Rueckfrage, Aenderungswunsch oder Antwort erfassen..."/></div>
-                <div className="form-row">
-                    <button type="button" className="button-secondary" onClick={nachrichtSpeichern}>Nachricht speichern</button>
-                    <button type="button" className="button-secondary" onClick={() => angebotAusVerhandlungBearbeiten(verhandlungsAngebot)}>Aktuelles Angebot bearbeiten</button>
-                    <button type="button" className="button-secondary" onClick={() => angebotAlsPdf(verhandlungsAngebot)}>PDF öffnen</button>
-                    <button type="button" onClick={neuesVerhandlungsangebot}>Neues Angebotsupdate anlegen</button>
-                </div>
-            </>}
         </Dialog>
     </>;
 }

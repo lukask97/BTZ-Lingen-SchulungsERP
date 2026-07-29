@@ -10,6 +10,9 @@ import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
+import nachrichtenService from "../../services/verkauf/nachrichtenService";
+import customerInquiryService from "../../services/verkauf/customerInquiryService";
+import angeboteService from "../../services/verkauf/angeboteService";
 import { openDocumentPdf } from "../../utils/documentPdf";
 import { getCustomerName } from "../../utils/customerReferences";
 import { getConfirmationDocument } from "../../utils/processFlow";
@@ -31,6 +34,8 @@ export default function Vertriebsdokumente() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const auftraege = auftraegeService.list();
+    const anfragen = customerInquiryService.list();
+    const angebote = angeboteService.getAll();
     const initialAuftragId = searchParams.get("auftrag") || String(auftraege[0]?.id || "");
     const [selectedAuftragId, setSelectedAuftragId] = useState(initialAuftragId);
     const [dokumente, setDokumente] = useState(vertriebsdokumenteService.list());
@@ -136,6 +141,33 @@ export default function Vertriebsdokumente() {
             status: "versendet",
             versendetAm: today
         });
+
+        if (dokument.dokumentTyp === "AuftragsbestÃ¤tigung") {
+            const auftrag = auftraege.find(item => String(item.id) === String(dokument.auftragId));
+            const angebot = auftrag?.angebotId ? angebote.find(item => String(item.id) === String(auftrag.angebotId)) : null;
+            const anfrage = auftrag?.anfrageId
+                ? anfragen.find(item => String(item.id) === String(auftrag.anfrageId))
+                : angebot?.anfrageId
+                    ? anfragen.find(item => String(item.id) === String(angebot.anfrageId))
+                    : null;
+            const vorgangId = anfrage?.vorgangId || angebot?.vorgangId || (anfrage ? `anfrage-${anfrage.id}` : "");
+
+            if (vorgangId) {
+                nachrichtenService.create({
+                    vorgangId,
+                    anfrageId: anfrage?.id || "",
+                    angebotId: angebot?.id || auftrag?.angebotId || "",
+                    datum: today,
+                    senderRolle: "Verkauf",
+                    senderName: "Schuelerfirma Verkauf",
+                    kanal: "E-Mail",
+                    betreff: dokument.titel || `AuftragsbestÃ¤tigung ${auftrag?.auftragNr || ""}`.trim(),
+                    nachricht: `Die AuftragsbestÃ¤tigung ${dokument.titel || ""} wurde an den Kunden versendet.`,
+                    typ: "AuftragsbestÃ¤tigung"
+                });
+            }
+        }
+
         setDokumente(vertriebsdokumenteService.list());
     };
 

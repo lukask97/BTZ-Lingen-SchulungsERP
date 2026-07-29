@@ -1,7 +1,9 @@
+const STORAGE_SYNC_KEY = "mock-storage-sync";
+
 export function loadData(key, defaultData){
 
     const saved =
-        sessionStorage.getItem(key);
+        localStorage.getItem(key);
 
 
     if(saved){
@@ -9,7 +11,7 @@ export function loadData(key, defaultData){
     }
 
 
-    sessionStorage.setItem(
+    localStorage.setItem(
         key,
         JSON.stringify(defaultData)
     );
@@ -23,10 +25,15 @@ export function loadData(key, defaultData){
 
 export function saveData(key, data){
 
-    sessionStorage.setItem(
+    localStorage.setItem(
         key,
         JSON.stringify(data)
     );
+
+    localStorage.setItem(STORAGE_SYNC_KEY, JSON.stringify({
+        key,
+        updatedAt: new Date().toISOString()
+    }));
 
 }
 
@@ -44,5 +51,23 @@ const TEST_DATA_KEYS = [
 ];
 
 export function resetTestData() {
-    TEST_DATA_KEYS.forEach(key => sessionStorage.removeItem(key));
+    TEST_DATA_KEYS.forEach(key => localStorage.removeItem(key));
+}
+
+export function subscribeToStorageSync(keys, callback) {
+    const watchedKeys = new Set(keys);
+
+    const handleStorage = (event) => {
+        if (event.key !== STORAGE_SYNC_KEY || !event.newValue) return;
+
+        try {
+            const payload = JSON.parse(event.newValue);
+            if (watchedKeys.has(payload.key)) callback(payload);
+        } catch {
+            // Ignoriere ungueltige Sync-Payloads aus der Testumgebung.
+        }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
 }

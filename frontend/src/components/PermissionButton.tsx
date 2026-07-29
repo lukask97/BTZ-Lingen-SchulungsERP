@@ -15,7 +15,7 @@ export default function PermissionButton({
         <button
             type="button"
             className={`button-${variant} ${className}`.trim()}
-            disabled={disabled || !hasPermission(permission)}
+            disabled={disabled || (permission ? !hasPermission(permission) : false)}
             onClick={onClick}
         >
             {children}

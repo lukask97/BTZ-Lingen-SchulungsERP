@@ -1,10 +1,11 @@
 import { nachrichten } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
+import { getBerlinTimestamp } from "../../utils/dateTime";
 
 const service = createCRUDService("nachrichten", nachrichten);
 
 function normalizeMessage(item: any = {}) {
-    const basisZeitpunkt = item.zeitpunkt || (item.datum ? `${item.datum}T00:00:00.000Z` : new Date(0).toISOString());
+    const basisZeitpunkt = item.zeitpunkt || (item.datum ? `${item.datum}T00:00:00` : getBerlinTimestamp(new Date(0)));
     return {
         ...item,
         zeitpunkt: basisZeitpunkt

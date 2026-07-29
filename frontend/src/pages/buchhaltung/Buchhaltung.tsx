@@ -87,6 +87,7 @@ export default function Buchhaltung() {
                 <ul>{offenePosten.map(item => <li key={item.id}><Link className="detail-link" to={item.link}><strong>{item.referenz}</strong></Link> – {item.partner} · {item.quelltyp} · {item.fachtyp} · {item.faelligAm || "ohne Termin"} · {item.ampel}: {euro(Number(item.betrag))}</li>)}</ul>}
             <p>Didaktische Einordnung: Nicht nur die Rechnung selbst steht im Mittelpunkt, sondern der intern zu dokumentierende offene Vorgang bis zur Klärung.</p>
             <div className="link-list">
+                <Link className="button-link" to="/abc-analyse">Zur ABC-Analyse</Link>
                 <Link className="button-link" to="/firmenkonto">Zum Firmenkonto</Link>
                 <Link className="button-link" to="/rechnungen">Zur Rechnungsverwaltung</Link>
                 <Link className="button-link" to="/zahlungen">Zu den Zahlungen</Link>

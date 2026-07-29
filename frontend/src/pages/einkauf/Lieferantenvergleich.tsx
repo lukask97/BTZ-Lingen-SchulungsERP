@@ -5,9 +5,12 @@ import lieferantenService from "../../services/einkauf/lieferantenService";
 export default function Lieferantenvergleich() {
     const lieferanten = lieferantenService.list();
 
-    const favoritMarkieren = (lieferant) => {
+    const alsAMarkieren = (lieferant) => {
         lieferanten.forEach(item => {
-            lieferantenService.update({ ...item, favorit: item.id === lieferant.id });
+            lieferantenService.update({
+                ...item,
+                abc: item.id === lieferant.id ? "A" : item.abc === "A" ? "B" : (item.abc || "C")
+            });
         });
     };
 
@@ -16,24 +19,21 @@ export default function Lieferantenvergleich() {
     return <>
         <OverviewCards cards={[
             { label: "Lieferanten", value: lieferanten.length },
-            { label: "Bester Lieferant", value: bester?.firma || "–" },
-            { label: "Favorit gesetzt", value: lieferanten.filter(item => item.favorit).length }
+            { label: "Bester Lieferant", value: bester?.firma || "-" },
+            { label: "ABC A", value: lieferanten.filter(item => item.abc === "A").length }
         ]}/>
         <DataTable
             title="Lieferantenvergleich"
             selectableColumns={false}
-            data={lieferanten.map(item => ({
-                ...item,
-                favoritLabel: item.favorit ? "Ja" : "Nein"
-            }))}
+            data={lieferanten}
             columns={[
                 { field: "firma", title: "Lieferant" },
                 { field: "segment", title: "Segment" },
                 { field: "bewertung", title: "Bewertung" },
-                { field: "fuerBts", title: "Für BTS" },
-                { field: "favoritLabel", title: "Favorit" }
+                { field: "fuerBts", title: "Fuer BTS" },
+                { field: "abc", title: "ABC" }
             ]}
-            rowActions={[{ name: "favorite", label: "Als Favorit markieren", permission: "einkauf.bearbeiten", onClick: favoritMarkieren, variant: "success" }]}
+            rowActions={[{ name: "favorite", label: "Als A markieren", permission: "einkauf.bearbeiten", onClick: alsAMarkieren, variant: "success" }]}
         />
     </>;
 }

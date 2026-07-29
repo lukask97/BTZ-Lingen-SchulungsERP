@@ -1,6 +1,6 @@
 const API_URL = "http://localhost:5000/api";
 
-export const DATA_PROVIDER = "mock-session-storage";
+export const DATA_PROVIDER = "mock-local-storage";
 
 export function getApiConfig() {
     return {

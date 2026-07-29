@@ -47,6 +47,7 @@ import Rechnungen from "../pages/buchhaltung/Rechnungen";
 import Zahlungen from "../pages/buchhaltung/Zahlungen";
 import Mahnungen from "../pages/buchhaltung/Mahnungen";
 import Belege from "../pages/buchhaltung/Belege";
+import ABCAnalyse from "../pages/buchhaltung/ABCAnalyse";
 import Geschaeftsfuehrung from "../pages/gf/Geschaeftsfuehrung";
 import Berichte from "../pages/gf/Berichte";
 import Freigaben from "../pages/gf/Freigaben";
@@ -147,6 +148,7 @@ function AppRouter() {
                 <Route path="mahnungen" element={protectedPage("buchhaltung", <Mahnungen/>)}/>
                 <Route path="belege" element={protectedPage("buchhaltung", <Belege/>)}/>
                 <Route path="firmenkonto" element={protectedPage("buchhaltung", <Firmenkonto/>)}/>
+                <Route path="abc-analyse" element={protectedPage("buchhaltung", <ABCAnalyse/>)}/>
                 <Route path="freigaben" element={protectedPage("gf", <Freigaben/>)}/>
                 <Route path="berichte" element={protectedPage("gf", <Berichte/>)}/>
                 <Route path="bewerber" element={protectedPage("personalwesen", <Bewerber/>)}/>

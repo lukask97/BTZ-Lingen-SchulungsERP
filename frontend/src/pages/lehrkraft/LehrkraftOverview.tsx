@@ -17,7 +17,7 @@ export default function LehrkraftOverview() {
     const zahlungen = zahlungenService.list();
 
     const offeneAnfragen = kundenkorrespondenz.filter(item => !["erledigt", "archiviert"].includes(String(item.status || "").toLowerCase())).length;
-    const offeneAngebote = angebote.filter(item => !["angenommen", "abgelehnt", "ersetzt"].includes(String(item.status || "").toLowerCase())).length;
+    const offeneAngebote = angebote.filter(item => !["angenommen", "abgelehnt", "beendet"].includes(String(item.status || "").toLowerCase())).length;
     const offeneWarenannahmen = vertriebsdokumente.filter(item =>
         ["lieferschein", "warenbegleitpapier", "transportpapier"].includes(String(item.dokumentTyp || "").toLowerCase())
         && String(item.status || "").toLowerCase() !== "versendet"
@@ -30,7 +30,7 @@ export default function LehrkraftOverview() {
 
     return <>
         <h1>Lehrkraft</h1>
-        <p>Diese Sicht bündelt die wichtigsten Unterlagen und Kommunikationsflächen für Unterricht, Kontrolle und Versand. Die Bearbeitung bleibt in den vorhandenen Fachseiten, aber hier ist der Einstieg für die Lehrkraft kompakter zusammengefasst.</p>
+        <p>Diese Sicht buendelt die wichtigsten Unterlagen und Kommunikationsflaechen fuer Unterricht, Kontrolle und Versand. Die Bearbeitung bleibt in den vorhandenen Fachseiten, aber hier ist der Einstieg fuer die Lehrkraft kompakter zusammengefasst.</p>
 
         <OverviewCards cards={[
             { label: "Kundenanfragen offen", value: offeneAnfragen },
@@ -47,15 +47,15 @@ export default function LehrkraftOverview() {
                     <h2>Kundenkorrespondenz</h2>
                     <span>Verkauf</span>
                 </div>
-                <p>Hier sieht die Lehrkraft, ob sie auf Kundenanfragen reagieren, Angebote beantworten oder eine Warenannahme beziehungsweise Transportbescheinigung bestätigen muss.</p>
+                <p>Hier sieht die Lehrkraft, ob sie auf Kundenanfragen reagieren, Angebote beantworten oder eine Warenannahme beziehungsweise Transportbescheinigung bestaetigen muss.</p>
                 <ul className="dashboard-note-list">
-                    <li>{offeneAnfragen} Anfragen oder Rückmeldungen sind noch nicht abgeschlossen.</li>
-                    <li>{offeneAngebote} Angebote warten noch auf Annahme, Ablehnung oder Rückfrage.</li>
+                    <li>{offeneAnfragen} Anfragen oder Rueckmeldungen sind noch nicht abgeschlossen.</li>
+                    <li>{offeneAngebote} Angebote warten noch auf Annahme, Ablehnung oder Rueckfrage.</li>
                     <li>{offeneWarenannahmen} Warenannahmen oder Transportunterlagen sind noch offen.</li>
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Kundenkorrespondenz öffnen</Link>
-                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Offene Antworten öffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Kundenkorrespondenz oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Offene Antworten oeffnen</Link>
                 </div>
             </article>
 
@@ -71,8 +71,8 @@ export default function LehrkraftOverview() {
                     <li>{versendeteBestellungen} Bestellungen warten auf Wareneingang in der Schuelerfirma.</li>
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Lieferantenkorrespondenz öffnen</Link>
-                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Bestellungen öffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Lieferantenkorrespondenz oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Bestellungen oeffnen</Link>
                 </div>
             </article>
         </section>
@@ -80,33 +80,33 @@ export default function LehrkraftOverview() {
         <section className="dashboard-two-column">
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header">
-                    <h2>Debitorenzahlungen</h2>
-                    <span>Buchhaltung</span>
+                    <h2>Zahlungen extern</h2>
+                    <span>Kunden</span>
                 </div>
-                <p>Hier sieht die Lehrkraft, welche Zahlungen von Kunden gegenüber der Schülerfirma noch erwartet oder erst geplant sind.</p>
+                <p>Hier sieht die Lehrkraft, welche Zahlungen von Kunden gegenueber der Schuelerfirma noch erwartet oder erst geplant sind. Dieser Bereich gehoert zur Kundenkorrespondenz.</p>
                 <ul className="dashboard-note-list">
-                    <li>Die Schülerfirma führt die Zahlung nicht selbst aus, sondern dokumentiert Zahlungserwartung, Eingang oder Klärung.</li>
-                    <li>{offeneDebitorenzahlungen} Debitorenzahlungen sind noch offen oder noch nicht ausgeführt.</li>
+                    <li>Die Schuelerfirma fuehrt die Zahlung nicht selbst aus, sondern dokumentiert Zahlungserwartung, Eingang oder Klaerung.</li>
+                    <li>{offeneDebitorenzahlungen} Debitorenzahlungen sind noch offen oder noch nicht ausgefuehrt.</li>
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/lehrkraft/zahlungen">Debitorenzahlungen öffnen</Link>
-                    <Link className="button-link" to="/lehrkraft/zahlungen">Externe Zahlungen öffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/zahlungen">Zahlungen extern oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Zur Kundenkorrespondenz</Link>
                 </div>
             </article>
 
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header">
-                    <h2>Rechnungen gegenüber der Schülerfirma</h2>
-                    <span>Kontrolle</span>
+                    <h2>Rechnungen extern</h2>
+                    <span>Lieferanten</span>
                 </div>
-                <p>Diese Sicht dient als kompakter Einstieg in Rechnungen, offene Posten und Belegbezug. So kann die Lehrkraft prüfen, ob die Klasse die Vorgänge nachvollziehbar dokumentiert hat.</p>
+                <p>Diese Sicht dient als kompakter Einstieg in Rechnungen, offene Posten und Belegbezug gegenueber der Schuelerfirma. Dieser Bereich gehoert zur Lieferantenkorrespondenz.</p>
                 <ul className="dashboard-note-list">
-                    <li>{offeneRechnungenZurSchuelerfirma} Rechnungen sind noch offen oder noch nicht vollständig ausgeglichen.</li>
+                    <li>{offeneRechnungenZurSchuelerfirma} Rechnungen sind noch offen oder noch nicht vollstaendig ausgeglichen.</li>
                     <li>Belege, Zahlungen und Mahnungen bleiben direkt mit dem Vorgang verbunden.</li>
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/lehrkraft/rechnungen">Rechnungen öffnen</Link>
-                    <Link className="button-link" to="/belege">Belege öffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/rechnungen">Rechnungen extern oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Zur Lieferantenkorrespondenz</Link>
                 </div>
             </article>
         </section>

@@ -54,6 +54,7 @@ export default function Lieferanten() {
             <div><Label>PLZ</Label><TextField value={crud.currentItem.plz || ""} onChange={wert => feldAendern("plz", wert)}/></div>
             <div><Label>Ort</Label><TextField value={crud.currentItem.ort || ""} onChange={wert => feldAendern("ort", wert)}/></div>
             <div><Label>Bewertung (1–5)</Label><NumberField value={crud.currentItem.bewertung} min="1" max="5" onChange={wert => feldAendern("bewertung", Number(wert))}/></div>
+            <div><Label>ABC</Label><TextField value={crud.currentItem.abc || ""} onChange={wert => feldAendern("abc", wert.toUpperCase().slice(0, 1))}/></div>
             <div className="form-row"><Label>Segment</Label><TextArea rows={2} value={crud.currentItem.segment || ""} onChange={wert => feldAendern("segment", wert)}/></div>
             <div className="form-row"><Label>Für BTS</Label><TextArea rows={2} value={crud.currentItem.fuerBts || ""} onChange={wert => feldAendern("fuerBts", wert)}/></div>
             <div className="form-row"><button onClick={crud.speichern}>Speichern</button></div>

@@ -79,9 +79,11 @@ export default function Bestellungen() {
 
     const data = bestellungen.map(bestellung => ({
         ...bestellung,
+        lieferantAnzeige: bestellung.lieferant || "Noch nicht zugeordnet",
         positionenText: bestellung.positionen.map(position => `${position.artikel} (${position.menge})`).join(", "),
         prozess: getPurchaseStepLabel(getPurchaseStep(bestellung))
     })).filter(bestellung => (!statusFilter || bestellung.status === statusFilter) && Object.values(bestellung).join(" ").toLowerCase().includes(suchbegriff.toLowerCase()));
+    const gemeldeteBedarfe = bestellungen.filter(item => item.status === "bedarf gemeldet").length;
     const angefragteBestellungen = bestellungen.filter(item => item.status === "angefragt").length;
     const versendeteBestellungen = bestellungen.filter(item => item.status === "versendet").length;
     const eingegangeneBestellungen = bestellungen.filter(item => item.status === "eingegangen").length;
@@ -89,6 +91,7 @@ export default function Bestellungen() {
     return <>
         <OverviewCards cards={[
             { label: "Bestellungen gesamt", value: bestellungen.length },
+            { label: "Bedarf gemeldet", value: gemeldeteBedarfe },
             { label: "Angefragt", value: angefragteBestellungen },
             { label: "Versendet", value: versendeteBestellungen },
             { label: "Wareneingang gebucht", value: eingegangeneBestellungen }
@@ -97,7 +100,7 @@ export default function Bestellungen() {
             title="Bestellungen"
             columns={[
                 { field: "bestellNr", title: "Bestellnummer" },
-                { field: "lieferant", title: "Lieferant", render: row => row.lieferantId ? <Link className="detail-link" to={`/lieferanten?focus=${row.lieferantId}`}>{row.lieferant}</Link> : row.lieferant },
+                { field: "lieferantAnzeige", title: "Lieferant", render: row => row.lieferantId ? <Link className="detail-link" to={`/lieferanten?focus=${row.lieferantId}`}>{row.lieferant}</Link> : row.lieferantAnzeige },
                 { field: "datum", title: "Datum" },
                 { field: "status", title: "Status" },
                 { field: "prozess", title: "Prozess" },
@@ -110,6 +113,7 @@ export default function Bestellungen() {
             searchable
             onSearch={setSuchbegriff}
             filters={[{ name: "status", label: "Status", options: [
+                { value: "bedarf gemeldet", label: "Bedarf gemeldet" },
                 { value: "angefragt", label: "Angefragt" },
                 { value: "bestaetigt", label: "Bestaetigt" },
                 { value: "versendet", label: "Versendet" },

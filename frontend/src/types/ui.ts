@@ -80,6 +80,7 @@ export interface DataTableFilter {
 
 export interface DataTableProps {
     title?: string;
+    toolbarContent?: ReactNode;
     columns?: DataTableColumn[];
     allColumns?: DataTableColumn[];
     data?: any[];

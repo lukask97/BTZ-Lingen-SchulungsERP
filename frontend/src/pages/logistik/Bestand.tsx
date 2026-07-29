@@ -4,14 +4,12 @@ import { Link, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
-import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
 import artikelService from "../../services/logistik/artikelService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import bestellungenService, { naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
-import lieferantenService from "../../services/einkauf/lieferantenService";
 
-const heute = "2026-07-28";
+const heute = "2026-07-29";
 const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
 
 function getVerplanteMengen(auftraege) {
@@ -52,7 +50,6 @@ export default function Bestand() {
     const [bedarfDialogOpen, setBedarfDialogOpen] = useState(false);
     const [ausgewaehlterArtikel, setAusgewaehlterArtikel] = useState(null);
     const [neuerBestand, setNeuerBestand] = useState(0);
-    const [lieferantId, setLieferantId] = useState("");
     const [artikelId, setArtikelId] = useState("");
     const [menge, setMenge] = useState(1);
     const [positionen, setPositionen] = useState([]);
@@ -60,14 +57,9 @@ export default function Bestand() {
 
     const artikel = useMemo(() => artikelService.getAll(), [refreshKey]);
     const auftraege = useMemo(() => auftraegeService.getAll(), [refreshKey]);
-    const lieferanten = useMemo(() => lieferantenService.getAll(), [refreshKey]);
     const verplanteMengen = useMemo(() => getVerplanteMengen(auftraege), [auftraege]);
     const einkaufbareArtikel = useMemo(() => artikel.filter(item => item.istEinkaufbar), [artikel]);
 
-    const lieferantenOptionen = lieferanten.map(item => ({
-        value: String(item.id),
-        label: `${item.lieferantenNr} - ${item.firma}`
-    }));
     const artikelOptionen = einkaufbareArtikel.map(item => ({
         value: String(item.id),
         label: `${item.artikelNr} - ${item.name} (${item.artikelTyp})`
@@ -108,7 +100,6 @@ export default function Bestand() {
 
     const bedarfsmeldungStarten = (row) => {
         setAusgewaehlterArtikel(row);
-        setLieferantId(row.lieferantId ? String(row.lieferantId) : String(lieferanten[0]?.id || ""));
         setArtikelId(String(row.id));
         setMenge(getBestellvorschlag(row, row.verplant, kritischerBestand));
         setPositionen([{
@@ -151,18 +142,18 @@ export default function Bestand() {
     };
 
     const bedarfsmeldungSpeichern = () => {
-        const lieferant = lieferanten.find(item => String(item.id) === String(lieferantId));
-        if (!lieferant || positionen.length === 0) {
-            setFehler("Bitte Lieferant und mindestens eine Position auswählen.");
+        if (positionen.length === 0) {
+            setFehler("Bitte mindestens eine Position auswaehlen.");
             return;
         }
 
         bestellungenService.add({
             bestellNr: naechsteBestellnummer(),
-            lieferantId: lieferant.id,
-            lieferant: lieferant.firma,
+            lieferantId: "",
+            lieferant: "",
             datum: heute,
-            status: "angefragt",
+            status: "bedarf gemeldet",
+            quelle: "Bestand",
             positionen
         });
 
@@ -237,16 +228,13 @@ export default function Bestand() {
         </Dialog>
 
         <Dialog open={bedarfDialogOpen} title="Bedarfsmeldung erstellen" onClose={() => setBedarfDialogOpen(false)}>
-            <div><Label required>Lieferant</Label>
-                <LookupField value={lieferantId} options={lieferantenOptionen} onChange={setLieferantId} placeholder="Lieferant suchen..."/>
-            </div>
             <div className="form-row">
                 <div><Label>Ausgangspunkt</Label><p>{ausgewaehlterArtikel?.artikelNr} - {ausgewaehlterArtikel?.name}</p></div>
                 <div><Label>Verfuegbar</Label><p>{ausgewaehlterArtikel?.verfuegbar ?? 0}</p></div>
             </div>
             <div className="form-row bestellposition-hinzufuegen">
                 <div><Label>Artikel</Label>
-                    <LookupField value={artikelId} options={artikelOptionen} onChange={setArtikelId} placeholder="Artikel suchen..."/>
+                    <input value={ausgewaehlterArtikel?.name || ""} disabled />
                 </div>
                 <div><Label>Menge</Label><NumberField value={menge} min="1" step="1" onChange={wert => setMenge(Number(wert || 1))}/></div>
                 <button type="button" onClick={positionHinzufuegen}>Position hinzufuegen</button>
@@ -262,7 +250,7 @@ export default function Bestand() {
                 {fehler && <p className="form-error">{fehler}</p>}
             </div>
             <div className="form-row">
-                <p>Beim Speichern wird direkt eine Einkaufsanfrage fuer die Lehrkraftsicht angelegt.</p>
+                <p>Beim Speichern wird nur eine Bedarfsmeldung fuer den Einkauf angelegt. Ein Lieferant wird noch nicht festgelegt und der Einkauf bearbeitet den Vorgang spaeter weiter.</p>
             </div>
             <div className="form-row"><button onClick={bedarfsmeldungSpeichern}>Bedarfsmeldung speichern</button></div>
         </Dialog>

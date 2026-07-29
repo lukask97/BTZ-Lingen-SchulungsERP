@@ -131,6 +131,9 @@ export default function Kunden() {
                 <Label>Segment</Label>
                 <TextField value={currentItem.segment} onChange={v => handleFieldChange("segment", v)} />
 
+                <Label>ABC</Label>
+                <TextField value={currentItem.abc || ""} onChange={v => handleFieldChange("abc", v.toUpperCase().slice(0, 1))} />
+
                 <Label>Website</Label>
                 <TextField value={currentItem.website || ""} onChange={v => handleFieldChange("website", v)} />
 

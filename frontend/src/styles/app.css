@@ -29,6 +29,21 @@ body {
     min-width: 0;
 }
 
+.content-shell {
+    min-width: 0;
+}
+
+.content-shell-teacher {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: stretch;
+    gap: 20px;
+}
+
+.content-shell-teacher main {
+    min-width: 0;
+}
+
 .header {
     background: #fff;
     border-bottom: 1px solid #ddd;
@@ -188,6 +203,68 @@ body {
     margin-bottom: 20px;
 }
 
+.teacher-notes-panel {
+    min-width: 0;
+}
+
+.teacher-notes-card {
+    position: sticky;
+    top: 20px;
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+    background: #fffdf5;
+    border: 1px solid #e4d7a8;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(94, 82, 28, 0.08);
+}
+
+.teacher-notes-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.teacher-notes-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.teacher-notes-header span {
+    font-size: 12px;
+    font-weight: 700;
+    color: #7c6b2f;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.teacher-notes-hint {
+    margin: 0;
+    color: #5b6470;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.teacher-notes-textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 420px;
+    padding: 14px;
+    border: 1px solid #d9cfaa;
+    border-radius: 10px;
+    background: #fffef9;
+    resize: none;
+    font: inherit;
+    line-height: 1.5;
+}
+
+.teacher-notes-textarea:focus {
+    outline: 2px solid #d6b94a;
+    outline-offset: 1px;
+}
+
 .module-list {
     margin: 0;
     padding-left: 18px;
@@ -263,4 +340,32 @@ body {
     font-size: 12px;
     font-weight: 700;
     border: 1px solid transparent;
+}
+
+.kennzahl-button {
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    cursor: pointer;
+}
+
+.kennzahl-button.is-active {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.12);
+    background: #eef5ff;
+}
+
+@media (max-width: 1180px) {
+    .content-shell-teacher {
+        grid-template-columns: 1fr;
+    }
+
+    .teacher-notes-card {
+        position: static;
+        min-height: 320px;
+    }
+
+    .teacher-notes-textarea {
+        min-height: 260px;
+    }
 }

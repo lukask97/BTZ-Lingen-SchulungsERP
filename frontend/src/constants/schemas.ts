@@ -9,7 +9,8 @@ export const INITIAL_DATA = {
         ort: "",
         segment: "",
         fuerBts: "",
-        bewertung: 3
+        bewertung: 3,
+        abc: "C"
     },
     kunden: {
         id: null,
@@ -19,6 +20,7 @@ export const INITIAL_DATA = {
         plz: "",
         ort: "",
         segment: "",
+        abc: "C",
         website: "",
         optionen: [],
         notiz: ""

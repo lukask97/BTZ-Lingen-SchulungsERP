@@ -56,7 +56,7 @@ function Dashboard() {
     const niedrigeBestaende = artikel.filter(item => Number(item.bestand) < 10).length;
     const offeneAnfragen = anfragen.filter(item => item.status === "offen").length;
     const offeneLehrkraftAnfragen = anfragen.filter(item => !["erledigt", "archiviert"].includes(String(item.status || "").toLowerCase())).length;
-    const offeneLehrkraftAngebote = angebote.filter(item => !["angenommen", "abgelehnt", "ersetzt"].includes(String(item.status || "").toLowerCase())).length;
+    const offeneLehrkraftAngebote = angebote.filter(item => !["angenommen", "abgelehnt", "beendet"].includes(String(item.status || "").toLowerCase())).length;
     const offeneWarenannahmen = vertriebsdokumente.filter(item =>
         ["lieferschein", "warenbegleitpapier", "transportpapier"].includes(String(item.dokumentTyp || "").toLowerCase())
         && String(item.status || "").toLowerCase() !== "versendet"

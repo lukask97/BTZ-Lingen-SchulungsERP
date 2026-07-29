@@ -35,6 +35,7 @@ export function getConfirmationDocument(auftragId, dokumente = []) {
 export function getSalesStep(angebot, auftraege = [], dokumente = [], versandauftraege = []) {
     if (angebot?.status === "abgelehnt") return SALES_STEPS.ANGEBOT_ABGELEHNT;
     if (angebot?.status === "wartet auf Antwort") return SALES_STEPS.ANGEBOT_WARTET_AUF_ANTWORT;
+    if (angebot?.status === "beendet") return SALES_STEPS.ANGEBOT_OFFEN;
 
     const auftrag = getOrderForOffer(angebot.id, auftraege);
     if (!auftrag) return SALES_STEPS.ANGEBOT_OFFEN;
