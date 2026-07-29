@@ -22,6 +22,7 @@ import { getPaymentOpenItemStatus, isPendingPayment } from "../../utils/openItem
 
 const today = "2026-07-29";
 const jetzt = () => getBerlinTimestamp();
+const OFFER_OPEN_STATUSES = ["wartet auf antwort"];
 
 const FILTER_OPTIONS = {
     anfragen: [
@@ -32,6 +33,7 @@ const FILTER_OPTIONS = {
         { value: "archiviert", label: "Archiviert", defaultSelected: false }
     ],
     angebote: [
+        { value: "in vorbereitung", label: "In Vorbereitung", defaultSelected: false },
         { value: "wartet auf antwort", label: "Wartet auf Antwort", defaultSelected: true },
         { value: "angenommen", label: "Angenommen", defaultSelected: false },
         { value: "abgelehnt", label: "Abgelehnt", defaultSelected: false },
@@ -60,6 +62,7 @@ const STATUS_HELP = {
         { label: "Archiviert", text: "Der Vorgang ist abgeschlossen und zaehlt nicht mehr zu den offenen Faellen." }
     ],
     angebote: [
+        { label: "In Vorbereitung", text: "Das Angebot wird intern vorbereitet und zaehlt noch nicht zu den offenen Angeboten beim Kunden." },
         { label: "Wartet auf Antwort", text: "Das Angebot liegt dem Kunden vor und wartet auf Rueckmeldung." },
         { label: "Angenommen", text: "Der Kunde hat das Angebot akzeptiert." },
         { label: "Abgelehnt", text: "Der Kunde hat das Angebot nicht angenommen." },
@@ -220,7 +223,7 @@ export default function LehrkraftKundenkorrespondenz() {
 
     const dashboardTabs = [
         { key: "anfragen", label: "Offene Anfragen", value: anfragenDaten.filter(item => item.statusNormalized !== "archiviert").length },
-        { key: "angebote", label: "Offene Angebote", value: alleAngebote.filter(item => !["angenommen", "abgelehnt", "beendet"].includes(item.statusNormalized)).length },
+        { key: "angebote", label: "Offene Angebote", value: alleAngebote.filter(item => OFFER_OPEN_STATUSES.includes(item.statusNormalized)).length },
         { key: "zahlungen", label: "Offene Zahlungen", value: zahlungen.filter(item => item.zahlungsart !== "Ausgang" && isPendingPayment(item)).length },
         { key: "warenannahme", label: "Offene Warenannahme", value: offeneWarenannahmen.filter(item => item.statusNormalized !== "versendet").length }
     ];
@@ -658,7 +661,7 @@ export default function LehrkraftKundenkorrespondenz() {
             offerHrefResolver={item => `/angebote?focus=${item.id}`}
             documentLinks={getVorgangDokumente(threadItem.vorgangId)}
             headerActionLink={{ id: "combined-pdf", label: "Alles in einem Dokument", onClick: () => vorgangAlsSammelPdf(threadItem) }}
-            actionLinks={aktuellesAngebotZuVorgang(threadItem.vorgangId) && !["angenommen", "abgelehnt", "beendet"].includes(normalizeStatus(aktuellesAngebotZuVorgang(threadItem.vorgangId)?.status)) ? [
+            actionLinks={aktuellesAngebotZuVorgang(threadItem.vorgangId) && OFFER_OPEN_STATUSES.includes(normalizeStatus(aktuellesAngebotZuVorgang(threadItem.vorgangId)?.status)) ? [
                 { id: "accept-offer", label: "Annehmen", onClick: () => entscheidungVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId), "angenommen") },
                 { id: "reject-offer", label: "Ablehnen", onClick: () => entscheidungVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId), "abgelehnt") },
                 { id: "end-negotiation", label: "Verhandlung beenden", onClick: () => entscheidungVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId), "beendet") }

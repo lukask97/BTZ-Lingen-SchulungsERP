@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Seite-1" id="KLzXyK1H091yduQImyyR">
-        <mxGraphModel dx="916" dy="749" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0" adaptiveColors="auto">
+        <mxGraphModel dx="466" dy="749" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0" adaptiveColors="auto">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -21,13 +21,18 @@
                         <mxPoint x="-198" y="-1" as="offset"/>
                     </mxGeometry>
                 </mxCell>
+                <mxCell id="2" value="Fall: Angebotsanfrage" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-20" vertex="1" connectable="0">
+                    <mxGeometry x="0.6429" relative="1" as="geometry">
+                        <mxPoint x="106" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
                 <mxCell id="x6UzvQq-8GM_oqX7-h0n-22" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.098;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.098;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-19" target="x6UzvQq-8GM_oqX7-h0n-18" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="280" y="340" as="sourcePoint"/>
                         <mxPoint x="180" y="280" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="x6UzvQq-8GM_oqX7-h0n-23" value="Angebot erstellen und senden" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-22" vertex="1" connectable="0">
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-23" value="Angebot erstellen, &lt;br&gt;ggf.&amp;nbsp;freigeben&amp;nbsp;&lt;br&gt;&amp;nbsp;und senden" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-22" vertex="1" connectable="0">
                     <mxGeometry x="0.1428" relative="1" as="geometry">
                         <mxPoint x="194" as="offset"/>
                     </mxGeometry>
@@ -38,7 +43,7 @@
                         <mxPoint x="330" y="290" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="x6UzvQq-8GM_oqX7-h0n-25" value="Angebotannahme oder&lt;br&gt;&amp;nbsp;Ablehnung" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-24" vertex="1" connectable="0">
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-25" value="Angebotannahme &lt;br&gt;oder&amp;nbsp;Ablehnung" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-24" vertex="1" connectable="0">
                     <mxGeometry x="0.0378" relative="1" as="geometry">
                         <mxPoint x="-184" as="offset"/>
                     </mxGeometry>
@@ -133,7 +138,7 @@
                         <mxPoint x="-163" y="-40" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="x6UzvQq-8GM_oqX7-h0n-51" value="Zahlung mit Skonto(14 Tage)&lt;br&gt;reguläre Zahlung(bis 27 Tage)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-51" value="Zahlung mit Skonto(14 Tage)&lt;br&gt;reguläre Zahlung(bis 28 Tage)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
                     <mxGeometry x="480" y="680" as="geometry"/>
                 </mxCell>
                 <mxCell id="x6UzvQq-8GM_oqX7-h0n-52" value="" style="endArrow=classic;html=1;rounded=0;exitX=-0.008;exitY=0.635;exitDx=0;exitDy=0;exitPerimeter=0;dashed=1;entryX=1.019;entryY=0.636;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-34" edge="1">
@@ -175,6 +180,9 @@
                         <mxPoint x="400" y="439.52" as="sourcePoint"/>
                         <mxPoint x="200" y="439.52" as="targetPoint"/>
                     </mxGeometry>
+                </mxCell>
+                <mxCell id="4" value="&lt;font style=&quot;&quot;&gt;&lt;font&gt;Alternativ: Kunde stoppt &lt;br&gt;die Verhandlung&lt;br&gt;&lt;/font&gt;&lt;span style=&quot;&quot;&gt;=&amp;gt; Ende&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontColor=light-dark(#000000, #ff0000);labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="340" width="160" height="50" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

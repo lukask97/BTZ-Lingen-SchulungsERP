@@ -31,7 +31,21 @@ const gesamtNachAbzug = (positionen, rabattBetrag = 0) => Math.max(
     0,
     (positionen || []).reduce((summe, position) => summe + Number(position.menge) * Number(position.einzelpreis), 0) - Number(rabattBetrag || 0)
 );
-const istOffenesAngebot = angebot => !["angenommen", "abgelehnt", "beendet"].includes(String(angebot?.status || "").toLowerCase());
+const istOffenesAngebot = angebot => ["wartet auf antwort"].includes(String(angebot?.status || "").toLowerCase());
+const STATUS_FILTER_OPTIONS = [
+    { value: "in vorbereitung", label: "In Vorbereitung", defaultSelected: true },
+    { value: "wartet auf antwort", label: "Wartet auf Antwort", defaultSelected: true },
+    { value: "angenommen", label: "Angenommen", defaultSelected: true },
+    { value: "abgelehnt", label: "Abgelehnt", defaultSelected: true },
+    { value: "beendet", label: "Beendet", defaultSelected: true }
+];
+const STATUS_HELP = [
+    { label: "In Vorbereitung", text: "Das Angebot wird intern vorbereitet und zaehlt noch nicht zu den offenen Angeboten beim Kunden." },
+    { label: "Wartet auf Antwort", text: "Das Angebot liegt dem Kunden vor und wartet auf Rueckmeldung." },
+    { label: "Angenommen", text: "Der Kunde hat das Angebot akzeptiert." },
+    { label: "Abgelehnt", text: "Der Kunde hat das Angebot nicht angenommen." },
+    { label: "Beendet", text: "Das Angebot ist abgeschlossen und fuer die weitere Bearbeitung nicht mehr aktiv." }
+];
 const plusTage = tage => {
     const basis = new Date(`${heute}T12:00:00`);
     basis.setDate(basis.getDate() + tage);
@@ -50,13 +64,42 @@ function normalizeText(value = "") {
     return String(value || "").toLowerCase();
 }
 
+function getDefaultStatusFilter() {
+    return STATUS_FILTER_OPTIONS.filter(option => option.defaultSelected).map(option => option.value);
+}
+
+function MultiStatusFilter({ options, selectedValues, onToggle }) {
+    const [open, setOpen] = useState(false);
+    const activeCount = selectedValues.length;
+
+    return (
+        <div className="multi-filter">
+            <button type="button" className="multi-filter-trigger" onClick={() => setOpen(current => !current)}>
+                Statusfilter ({activeCount})
+            </button>
+            {open && <div className="multi-filter-menu">
+                <strong>Status anzeigen</strong>
+                {options.map(option => <label key={option.value} className="multi-filter-option">
+                    <input
+                        type="checkbox"
+                        checked={selectedValues.includes(option.value)}
+                        onChange={() => onToggle(option.value)}
+                    />
+                    <span>{option.label}</span>
+                </label>)}
+            </div>}
+        </div>
+    );
+}
+
 export default function Angebote() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [refreshKey, setRefreshKey] = useState(0);
-    const [activeTab, setActiveTab] = useState("offen");
+    const [activeTab, setActiveTab] = useState("laufend");
     const [open, setOpen] = useState(false);
+    const [selectedStatuses, setSelectedStatuses] = useState(getDefaultStatusFilter);
     const [sourceInquiryId, setSourceInquiryId] = useState("");
     const [kundeId, setKundeId] = useState("");
     const [leistungId, setLeistungId] = useState("");
@@ -193,6 +236,7 @@ export default function Angebote() {
         return Array.from(gruppiert.values())
             .map(angebot => ({
                 ...angebot,
+                statusNormalized: normalizeText(angebot.status),
                 freigabeStatus: angebot.freigabeStatus || "keine",
                 freigabeText: angebot.freigabeStatus === "angefragt" ? "Freigabe offen" : (angebot.freigabeStatus === "freigegeben" ? "Freigegeben" : "-"),
                 kunde: getCustomerName(angebot.kundeId, angebot.kunde),
@@ -329,8 +373,17 @@ export default function Angebote() {
         }
     };
 
-    const offeneAngebote = neuesteAngebote.filter(item => istOffenesAngebot(item) && item.freigabeStatus !== "angefragt");
-    const freizugebendeAngebote = neuesteAngebote.filter(item => item.freigabeStatus === "angefragt");
+    const toggleStatus = value => {
+        setSelectedStatuses(currentValues => (
+            currentValues.includes(value)
+                ? currentValues.filter(entry => entry !== value)
+                : [...currentValues, value]
+        ));
+    };
+
+    const laufendeAngebote = neuesteAngebote.filter(item => istOffenesAngebot(item));
+    const freizugebendeAngebote = neuesteAngebote.filter(item => item.statusNormalized === "in vorbereitung");
+    const alleAngebote = neuesteAngebote.filter(item => selectedStatuses.includes(item.statusNormalized));
     const zumChatNavigieren = row => {
         const anfrage = findeAnfrage(row.anfrageId);
         if (!anfrage) {
@@ -353,10 +406,20 @@ export default function Angebote() {
         setRefreshKey(value => value + 1);
     };
     const dashboardTabs = [
-        { key: "offen", label: "Offene Angebote", value: offeneAngebote.length },
-        { key: "freigabe", label: "Freizugebende Angebote", value: freizugebendeAngebote.length }
+        { key: "laufend", label: "Laufende Angebote", value: laufendeAngebote.length },
+        { key: "freigabe", label: "Freizugebende Angebote", value: freizugebendeAngebote.length },
+        { key: "alle", label: "Alle Angebote", value: neuesteAngebote.length }
     ];
-    const sichtbareAngebote = activeTab === "freigabe" ? freizugebendeAngebote : offeneAngebote;
+    const sichtbareAngebote = activeTab === "freigabe"
+        ? freizugebendeAngebote
+        : activeTab === "alle"
+            ? alleAngebote
+            : laufendeAngebote;
+    const tableTitle = activeTab === "freigabe"
+        ? "Freizugebende Angebote"
+        : activeTab === "alle"
+            ? "Alle Angebote"
+            : "Laufende Angebote";
 
     return <>
         <div className="kennzahlen">
@@ -365,11 +428,25 @@ export default function Angebote() {
                 <strong>{card.value}</strong>
             </button>)}
         </div>
+        {activeTab === "alle" && <div className="dashboard-panel">
+            <div className="dashboard-panel-header">
+                <h2>Statushilfe Angebote</h2>
+                <span>Verkauf</span>
+            </div>
+            <ul className="dashboard-note-list">
+                {STATUS_HELP.map(item => <li key={item.label}><strong>{item.label}:</strong> {item.text}</li>)}
+            </ul>
+        </div>}
         <DataTable
-            title={activeTab === "freigabe" ? "Freizugebende Angebote" : "Offene Angebote"}
+            title={tableTitle}
             selectableColumns={false}
             data={sichtbareAngebote}
             columns={angebotColumns}
+            toolbarContent={activeTab === "alle" ? <MultiStatusFilter
+                options={STATUS_FILTER_OPTIONS}
+                selectedValues={selectedStatuses}
+                onToggle={toggleStatus}
+            /> : null}
             toolbarActions={[{ name: "new", label: "Neues Angebot", permission: "verkauf.bearbeiten", onClick: () => initialisiereDialog() }]}
             rowActions={[
                 { name: "thread", label: "Zum Chat", permission: "verkauf.bearbeiten", onClick: zumChatNavigieren, variant: "secondary", isVisible: row => !!row.anfrageId },

@@ -8,6 +8,8 @@ import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import { isPendingPayment } from "../../utils/openItems";
 
+const OFFER_OPEN_STATUSES = ["wartet auf antwort"];
+
 export default function LehrkraftOverview() {
     const kundenkorrespondenz = customerInquiryService.list();
     const angebote = angeboteService.getAll();
@@ -17,7 +19,7 @@ export default function LehrkraftOverview() {
     const zahlungen = zahlungenService.list();
 
     const offeneAnfragen = kundenkorrespondenz.filter(item => !["erledigt", "archiviert"].includes(String(item.status || "").toLowerCase())).length;
-    const offeneAngebote = angebote.filter(item => !["angenommen", "abgelehnt", "beendet"].includes(String(item.status || "").toLowerCase())).length;
+    const offeneAngebote = angebote.filter(item => OFFER_OPEN_STATUSES.includes(String(item.status || "").toLowerCase())).length;
     const offeneWarenannahmen = vertriebsdokumente.filter(item =>
         ["lieferschein", "warenbegleitpapier", "transportpapier"].includes(String(item.dokumentTyp || "").toLowerCase())
         && String(item.status || "").toLowerCase() !== "versendet"
