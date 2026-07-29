@@ -1,0 +1,182 @@
+<mxfile host="65bd71144e">
+    <diagram name="Seite-1" id="KLzXyK1H091yduQImyyR">
+        <mxGraphModel dx="916" dy="749" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0" adaptiveColors="auto">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-18" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="200" width="160" height="820" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-19" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="200" width="160" height="820" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-20" value="" style="endArrow=classic;html=1;rounded=0;entryX=-0.006;entryY=0.049;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1.008;exitY=0.049;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-18" target="x6UzvQq-8GM_oqX7-h0n-19" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="230" y="240" as="sourcePoint"/>
+                        <mxPoint x="210" y="190" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-21" value="Anfrage&lt;br&gt;(Bestellung, Support,&lt;br&gt;&amp;nbsp;Sonstiges)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-20" vertex="1" connectable="0">
+                    <mxGeometry x="0.1809" y="-1" relative="1" as="geometry">
+                        <mxPoint x="-198" y="-1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-22" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.098;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.098;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-19" target="x6UzvQq-8GM_oqX7-h0n-18" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="280" y="340" as="sourcePoint"/>
+                        <mxPoint x="180" y="280" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-23" value="Angebot erstellen und senden" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-22" vertex="1" connectable="0">
+                    <mxGeometry x="0.1428" relative="1" as="geometry">
+                        <mxPoint x="194" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-24" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.146;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.146;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-18" target="x6UzvQq-8GM_oqX7-h0n-19" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="280" y="340" as="sourcePoint"/>
+                        <mxPoint x="330" y="290" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-25" value="Angebotannahme oder&lt;br&gt;&amp;nbsp;Ablehnung" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-24" vertex="1" connectable="0">
+                    <mxGeometry x="0.0378" relative="1" as="geometry">
+                        <mxPoint x="-184" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-26" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.098;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1.006;entryY=0.112;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;" parent="1" target="x6UzvQq-8GM_oqX7-h0n-18" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="360" as="sourcePoint"/>
+                        <mxPoint x="220" y="360" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-27" value="bei Ablehnung ggf. ein neues&amp;nbsp;&lt;br&gt;Angebot erstellen &amp;amp; senden" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-26" vertex="1" connectable="0">
+                    <mxGeometry x="0.1428" relative="1" as="geometry">
+                        <mxPoint x="194" y="39" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-28" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.098;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.098;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="400" as="sourcePoint"/>
+                        <mxPoint x="200" y="400" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-29" value="Auftragsbestätigung &lt;br&gt;erstellen &amp;amp; senden" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-28" vertex="1" connectable="0">
+                    <mxGeometry x="0.1428" relative="1" as="geometry">
+                        <mxPoint x="194" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-32" value="Kunde" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="140" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-33" value="Schülerfirma" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="140" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-34" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="200" width="160" height="820" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-35" value="Intern" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="140" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-36" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.293;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.293;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-19" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="558.56" y="441.64" as="sourcePoint"/>
+                        <mxPoint x="720" y="440" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-38" value="Lieferschein erstellen &amp;amp; senden" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="480" y="440" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-40" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.341;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.341;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-34" target="x6UzvQq-8GM_oqX7-h0n-19" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="540" y="490" as="sourcePoint"/>
+                        <mxPoint x="590" y="440" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-41" value="Warenbegleitpapier&lt;br&gt;(intern oder Dienstleister)&lt;br&gt;Erstellen &amp;amp; versenden&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-40" vertex="1" connectable="0">
+                    <mxGeometry x="-0.759" y="-1" relative="1" as="geometry">
+                        <mxPoint x="89" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-42" value="" style="endArrow=classic;html=1;rounded=0;entryX=1.01;entryY=0.426;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="398.4" y="560.68" as="sourcePoint"/>
+                        <mxPoint x="200.00000000000003" y="560" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-43" value="Ware versenden/liefern&lt;br&gt;und Rechnung übermitteln" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-42" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1829" relative="1" as="geometry">
+                        <mxPoint x="160" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-46" value="Rechnung erstellen&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="480" y="520" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-47" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.146;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.146;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="200" y="600" as="sourcePoint"/>
+                        <mxPoint x="400" y="600" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-48" value="Warenempfang bestätigen" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-47" vertex="1" connectable="0">
+                    <mxGeometry x="0.0378" relative="1" as="geometry">
+                        <mxPoint x="-184" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-49" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.146;exitDx=0;exitDy=0;exitPerimeter=0;dashed=1;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="560" y="680" as="sourcePoint"/>
+                        <mxPoint x="720" y="680" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-50" value="Auf Eingang der Zahlung &lt;br&gt;warten" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-49" vertex="1" connectable="0">
+                    <mxGeometry x="0.0378" relative="1" as="geometry">
+                        <mxPoint x="-163" y="-40" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-51" value="Zahlung mit Skonto(14 Tage)&lt;br&gt;reguläre Zahlung(bis 27 Tage)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="480" y="680" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-52" value="" style="endArrow=classic;html=1;rounded=0;exitX=-0.008;exitY=0.635;exitDx=0;exitDy=0;exitPerimeter=0;dashed=1;entryX=1.019;entryY=0.636;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-34" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="716.96" y="720" as="sourcePoint"/>
+                        <mxPoint x="560" y="721.3" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-53" value="Zahlung mit dem &lt;br&gt;Auftrag abgleichen" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-52" vertex="1" connectable="0">
+                    <mxGeometry x="0.0378" relative="1" as="geometry">
+                        <mxPoint x="164" y="-1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-55" value="Bei fehlendem Zahlungeingang:&lt;br&gt;Zahlungerinnerung (21 Tagen)&lt;br&gt;1. Mahnung&amp;nbsp;&lt;br&gt;2.Mahnung&lt;br&gt;Übergabe an Inkasso" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="480" y="800" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-56" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.732;exitDx=0;exitDy=0;exitPerimeter=0;dashed=1;entryX=1.019;entryY=0.636;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="x6UzvQq-8GM_oqX7-h0n-19" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="359" y="800" as="sourcePoint"/>
+                        <mxPoint x="200" y="800.3" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-58" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.537;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;" parent="1" target="x6UzvQq-8GM_oqX7-h0n-19" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="200" y="840" as="sourcePoint"/>
+                        <mxPoint x="250" y="790" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-60" value="Bezahlen oder weiter &lt;br&gt;ignorieren" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="x6UzvQq-8GM_oqX7-h0n-58" vertex="1" connectable="0">
+                    <mxGeometry x="-0.7718" relative="1" as="geometry">
+                        <mxPoint x="-103" y="23" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-61" value="Der Auftrag kann &lt;br&gt;archiviert werden&lt;div&gt;&lt;br/&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="480" y="960" as="geometry"/>
+                </mxCell>
+                <mxCell id="x6UzvQq-8GM_oqX7-h0n-62" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.098;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.098;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="439.52" as="sourcePoint"/>
+                        <mxPoint x="200" y="439.52" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
