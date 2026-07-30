@@ -1,0 +1,14 @@
+$kind: collection
+description: API-Tests fuer Login, Reset und Kundenkorrespondenz im BTZ-SchulungsERP.
+variables:
+  baseUrl: http://localhost:5000/api
+scripts:
+  - type: http:beforeRequest
+    code: |-
+      const now = new Date();
+      const isoDate = now.toISOString().slice(0, 10);
+      const compactDate = isoDate.replace(/-/g, '');
+      pm.environment.set('requestDate', isoDate);
+      pm.environment.set('requestDateCompact', compactDate);
+      pm.environment.set('requestTimestamp', now.toISOString());
+    language: text/javascript

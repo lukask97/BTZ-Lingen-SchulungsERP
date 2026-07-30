@@ -17,6 +17,7 @@ import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumente
 import { kundenanfrageInAuftragUebernehmen, naechsteAuftragsnummer } from "../../services/verkauf/verkaufService";
 import { getCustomerName } from "../../utils/customerReferences";
 import { canStartShipping, getConfirmationDocument, getSalesStepLabel, SALES_STEPS } from "../../utils/processFlow";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const heute = "2026-07-27";
 const gesamtbetrag = positionen => positionen.reduce((summe, position) => summe + Number(position.menge) * Number(position.einzelpreis), 0);
@@ -35,6 +36,10 @@ const toLeistung = (item, typ) => ({
 });
 
 export default function Auftraege() {
+    const syncTick = useStorageSyncRefresh([
+        "auftraege", "versandauftraege", "vertriebsdokumente",
+        "kundenanfragen", "kunden", "artikel", "services"
+    ]);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [refreshKey, setRefreshKey] = useState(0);
@@ -51,7 +56,7 @@ export default function Auftraege() {
     const [fehler, setFehler] = useState("");
     const [auftragNrDraft, setAuftragNrDraft] = useState("");
 
-    const auftraege = useMemo(() => auftraegeService.getAll(), [refreshKey]);
+    const auftraege = useMemo(() => auftraegeService.getAll(), [refreshKey, syncTick]);
     const versandauftraege = versandService.list();
     const vertriebsdokumente = vertriebsdokumenteService.list();
     const anfragen = customerInquiryService.list();

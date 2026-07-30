@@ -24,6 +24,8 @@ services:
 
       - ./database/data:/var/lib/postgresql/data
 
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+
 
   pgadmin:
 
@@ -39,9 +41,19 @@ services:
 
       PGADMIN_DEFAULT_PASSWORD: admin
 
+      PGADMIN_REPLACE_SERVERS_ON_STARTUP: "True"
+
+      PGPASS_FILE: /pgpassfile
+
     ports:
 
       - "5050:80"
+
+    volumes:
+
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+
+      - ./docker/pgadmin/pgpassfile:/pgpassfile:ro
 
 
   backend:
@@ -49,6 +61,12 @@ services:
     build: ./backend
 
     container_name: erp_backend
+
+    environment:
+
+      ERP_DATA_MODE: postgres
+
+      DATABASE_DSN: dbname=erp user=erp password=geheim host=postgres port=5432
 
     ports:
 
@@ -79,7 +97,7 @@ services:
 
       - /app/node_modules
 
-    command: npm run dev -- --host
+    command: sh -c "npm install && npm run dev -- --host"
 
     depends_on:
 

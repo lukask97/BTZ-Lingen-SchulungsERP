@@ -6,12 +6,16 @@ import Label from "../../components/form/Label";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 
 export default function Mitarbeiter() {
     const navigate = useNavigate();
-    const [mitarbeiter, setMitarbeiter] = useState(mitarbeiterService.list());
+    const [mitarbeiter, setMitarbeiter] = useSyncedServiceData(
+        ["mitarbeiter", "bewerber", "personalakten"],
+        () => mitarbeiterService.list()
+    );
     const [open, setOpen] = useState(false);
     const [current, setCurrent] = useState({ name: "", abteilung: "", rolle: "", eintritt: today, status: "im Einsatz" });
 

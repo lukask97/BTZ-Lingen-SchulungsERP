@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import artikelService from "../../services/logistik/artikelService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function EinkaufOverview() {
+    useStorageSyncRefresh(["lieferanten", "bestellungen", "artikel"]);
+
     const lieferanten = lieferantenService.list();
     const bestellungen = bestellungenService.list();
     const artikel = artikelService.list();

@@ -13,8 +13,9 @@ export interface AuthUser {
 
 export interface AuthContextValue {
     user: AuthUser | null;
+    isAuthReady: boolean;
     login: (userData: AuthUser) => void;
-    logout: () => void;
+    logout: () => Promise<void>;
     hasPermission: (permission: PermissionKey) => boolean;
     hasAccess: (access: string) => boolean;
 }

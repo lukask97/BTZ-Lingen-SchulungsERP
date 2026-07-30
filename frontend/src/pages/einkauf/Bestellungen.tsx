@@ -11,13 +11,14 @@ import lieferantenService from "../../services/einkauf/lieferantenService";
 import artikelService from "../../services/logistik/artikelService";
 import OverviewCards from "../../components/OverviewCards";
 import { canBookGoodsReceipt, getPurchaseStep, getPurchaseStepLabel } from "../../utils/processFlow";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const heute = () => new Date().toISOString().slice(0, 10);
 
 export default function Bestellungen() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const [bestellungen, setBestellungen] = useState(bestellungenService.getAll());
+    const [bestellungen, setBestellungen] = useSyncedServiceData(["bestellungen"], () => bestellungenService.getAll());
     const [offen, setOffen] = useState(false);
     const [lieferantId, setLieferantId] = useState("");
     const [artikelId, setArtikelId] = useState("");

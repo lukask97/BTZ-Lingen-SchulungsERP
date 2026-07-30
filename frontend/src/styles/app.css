@@ -13,7 +13,7 @@ body {
 
 .layout {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
     width: 100%;
     overflow: hidden;
 }
@@ -21,8 +21,10 @@ body {
 .content {
     flex: 1;
     min-width: 0;
+    height: 100vh;
     padding: 20px;
     overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .content main {
@@ -55,13 +57,21 @@ body {
     width: 248px;
     min-width: 248px;
     flex-shrink: 0;
+    height: 100vh;
     background: #fff;
     border-right: 1px solid #ddd;
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 2px;
+    overflow: hidden;
+}
+
+.sidebar-menu {
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    padding-right: 4px;
 }
 
 .sidebar h2 {
@@ -98,15 +108,24 @@ body {
 }
 
 .sidebar-user {
-    margin-top: auto;
     border-top: 1px solid #ddd;
     padding-top: 10px;
     font-size: 12px;
 }
 
+.sidebar-footer {
+    flex-shrink: 0;
+    background: #fff;
+    padding-top: 8px;
+}
+
 .sidebar button {
     margin-top: 10px;
     width: 100%;
+}
+
+.sidebar-logout-button {
+    margin-top: 10px;
 }
 
 .table-actions {

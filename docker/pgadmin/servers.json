@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "BTZ ERP Postgres",
+      "Group": "BTZ-SchulungsERP",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "erp",
+      "Username": "erp",
+      "SSLMode": "prefer"
+    }
+  }
+}

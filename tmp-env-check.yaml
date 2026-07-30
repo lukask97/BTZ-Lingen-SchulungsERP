@@ -1,0 +1,49 @@
+version: '1.0.0'
+name: 'BTZ-SchulungsERP Local'
+type: environment
+values:
+  - key: baseUrl
+    value: 'http://localhost:5000/api'
+    enabled: true
+  - key: username
+    value: 'gf'
+    enabled: true
+  - key: password
+    value: 'gf'
+    enabled: true
+  - key: lagerUsername
+    value: 'lager'
+    enabled: true
+  - key: lagerPassword
+    value: 'lager'
+    enabled: true
+  - key: kundeId
+    value: '1'
+    enabled: true
+  - key: kundeName
+    value: 'Campus Baumarkt GmbH'
+    enabled: true
+  - key: anfrageId
+    value: ''
+    enabled: true
+  - key: vorgangId
+    value: ''
+    enabled: true
+  - key: angebotId
+    value: ''
+    enabled: true
+  - key: nachrichtId
+    value: ''
+    enabled: true
+  - key: userId
+    value: ''
+    enabled: true
+  - key: requestDate
+    value: ''
+    enabled: true
+  - key: requestDateCompact
+    value: ''
+    enabled: true
+  - key: requestTimestamp
+    value: ''
+    enabled: true

@@ -1,3 +1,6 @@
+import { isDatabaseModeEnabled, syncApiRequest } from "../core/api";
+import { clearTableCache, invalidateTableCaches } from "../core/dataCache";
+
 const STORAGE_SYNC_KEY = "mock-storage-sync";
 
 export function loadData(key, defaultData){
@@ -37,9 +40,9 @@ export function saveData(key, data){
 
 }
 
-// Ein Reset löscht nur lokale Browser-Testdaten. Beim nächsten Laden werden
-// die zentralen Startdaten wieder aus mockData.js übernommen.
-const TEST_DATA_KEYS = [
+// Ein Reset löscht im Mock-Modus nur lokale Browser-Testdaten.
+// Im DB-Modus werden die zentralen Seed-Daten neu in die Datenbank geladen.
+export const SYNC_DATA_KEYS = [
     "kunden", "artikel", "benutzer", "rollen", "rechte", "lager",
     "services",
     "lieferanten", "bestellungen", "angebote", "auftraege", "reklamationen",
@@ -47,14 +50,27 @@ const TEST_DATA_KEYS = [
     "belege", "freigaben", "berichte", "versandauftraege", "retouren", "bewerber",
     "mitarbeiter", "arbeitszeiten", "urlaubsantraege", "schulungen",
     "firmenkonto",
-    "feldMetadaten", "benutzerSpalten"
+    "benutzerSpalten"
 ];
 
 export function resetTestData() {
-    TEST_DATA_KEYS.forEach(key => localStorage.removeItem(key));
+    if (isDatabaseModeEnabled()) {
+        clearTableCache();
+        syncResetDatabase();
+        return;
+    }
+    SYNC_DATA_KEYS.forEach(key => localStorage.removeItem(key));
 }
 
 export function subscribeToStorageSync(keys, callback) {
+    if (isDatabaseModeEnabled()) {
+        const interval = window.setInterval(() => {
+            invalidateTableCaches(keys);
+            callback({ key: "poll", updatedAt: new Date().toISOString() });
+        }, 3000);
+        return () => window.clearInterval(interval);
+    }
+
     const watchedKeys = new Set(keys);
 
     const handleStorage = (event) => {
@@ -70,4 +86,10 @@ export function subscribeToStorageSync(keys, callback) {
 
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
+}
+
+function syncResetDatabase() {
+    syncApiRequest("/reset", {
+        method: "POST"
+    });
 }

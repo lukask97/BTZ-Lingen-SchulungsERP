@@ -4,8 +4,11 @@ import berichteService from "../../services/gf/berichteService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import freigabenService from "../../services/gf/freigabenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function Geschaeftsfuehrung() {
+    useStorageSyncRefresh(["freigaben", "berichte", "auftraege", "bestellungen", "zahlungen"]);
+
     const freigaben = freigabenService.list();
     const berichte = berichteService.list();
     const auftraege = auftraegeService.list();

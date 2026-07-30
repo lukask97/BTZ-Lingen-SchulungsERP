@@ -26,58 +26,63 @@ export default function Sidebar() {
     return (
 
         <nav className="sidebar">
-
             <Link className="sidebar-brand" to="/">ERP</Link>
-            {NAVIGATION_GROUPS
-                .filter(group => (isAdmin || group.key !== "verwaltung") && (!group.adminOnly || isAdmin))
-                .map(group => <div key={group.title} className="sidebar-group">
-                <div className="sidebar-section-row">
-                    <Can access={group.access}>
-                        <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>
-                    </Can>
-                    <button type="button" className="sidebar-toggle" onClick={() => toggleGroup(group.key)}>
-                        {collapsedGroups[group.key] ? "▸" : "▾"}
-                    </button>
-                </div>
-                <div className={`sidebar-group-links ${collapsedGroups[group.key] ? "is-collapsed" : ""}`}>
-                    {group.items.map(item =>
-                        <Can
-                            key={item.path}
-                            access={item.access}
-                        >
-                            <Link to={item.path}>
-                                {item.title}
-                            </Link>
+            <div className="sidebar-menu">
+                {NAVIGATION_GROUPS
+                    .filter(group => (isAdmin || group.key !== "verwaltung") && (!group.adminOnly || isAdmin))
+                    .map(group => <div key={group.title} className="sidebar-group">
+                    <div className="sidebar-section-row">
+                        <Can access={group.access}>
+                            <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>
                         </Can>
-                    )}
+                        <button type="button" className="sidebar-toggle" onClick={() => toggleGroup(group.key)}>
+                            {collapsedGroups[group.key] ? "▸" : "▾"}
+                        </button>
+                    </div>
+                    <div className={`sidebar-group-links ${collapsedGroups[group.key] ? "is-collapsed" : ""}`}>
+                        {group.items.map(item =>
+                            <Can
+                                key={item.path}
+                                access={item.access}
+                            >
+                                <Link to={item.path}>
+                                    {item.title}
+                                </Link>
+                            </Can>
+                        )}
+                    </div>
                 </div>
-            </div>)}
-            {isAdmin && <div className="sidebar-group">
-                <div className="sidebar-section-row">
-                    <Link className="sidebar-section-title sidebar-section-link" to={SCENARIO_OVERVIEW.path}>{SCENARIO_OVERVIEW.title}</Link>
-                    <button type="button" className="sidebar-toggle" onClick={() => setScenariosCollapsed(current => !current)}>
-                        {scenariosCollapsed ? "▸" : "▾"}
-                    </button>
-                </div>
-                <div className={`sidebar-group-links sidebar-group-links-scenarios ${scenariosCollapsed ? "is-collapsed" : ""}`}>
-                    {SCENARIO_MENU.map(item =>
-                        <Can key={item.path} access={item.access}>
-                            <Link className="sidebar-scenario-link" to={item.path}>
-                                {item.title}
-                            </Link>
-                        </Can>
-                    )}
-                </div>
-            </div>}
-
-            <div className="sidebar-user">
-                Angemeldet als:
-                <strong>{user?.username}</strong>
+                )}
+                {isAdmin && (
+                    <div className="sidebar-group">
+                        <div className="sidebar-section-row">
+                            <Link className="sidebar-section-title sidebar-section-link" to={SCENARIO_OVERVIEW.path}>{SCENARIO_OVERVIEW.title}</Link>
+                            <button type="button" className="sidebar-toggle" onClick={() => setScenariosCollapsed(current => !current)}>
+                                {scenariosCollapsed ? "▸" : "▾"}
+                            </button>
+                        </div>
+                        <div className={`sidebar-group-links sidebar-group-links-scenarios ${scenariosCollapsed ? "is-collapsed" : ""}`}>
+                            {SCENARIO_MENU.map(item =>
+                                <Can key={item.path} access={item.access}>
+                                    <Link className="sidebar-scenario-link" to={item.path}>
+                                        {item.title}
+                                    </Link>
+                                </Can>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
-            <button onClick={logout}>
-                Logout
-            </button>
 
+            <div className="sidebar-footer">
+                <div className="sidebar-user">
+                    Angemeldet als:
+                    <strong>{user?.username}</strong>
+                </div>
+                <button className="sidebar-logout-button" onClick={() => void logout()}>
+                    Logout
+                </button>
+            </div>
         </nav>
 
     );

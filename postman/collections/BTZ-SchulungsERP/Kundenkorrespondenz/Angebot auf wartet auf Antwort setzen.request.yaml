@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{dbBaseUrl}}/angebote/{{angebotId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "wartet auf antwort"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', function () {
+        pm.response.to.have.status(200);
+      });
+      const data = pm.response.json();
+      pm.test('Angebotsstatus aktualisiert', function () {
+        pm.expect(data.item.status).to.eql('wartet auf antwort');
+      });
+    language: text/javascript
+order: 6000

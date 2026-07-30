@@ -7,11 +7,15 @@ import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import kundenService from "../../services/verkauf/customerService";
 import { getCustomerName } from "../../utils/customerReferences";
 import { isOpenItem, isOverdueOpenItem } from "../../utils/openItems";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-28";
 
 export default function Mahnungen() {
-    const [mahnungen, setMahnungen] = useState(mahnungenService.list());
+    const [mahnungen, setMahnungen] = useSyncedServiceData(
+        ["mahnungen", "auftraege", "bestellungen", "zahlungen", "kunden"],
+        () => mahnungenService.list()
+    );
     const kunden = kundenService.list();
 
     const resolveKundenLink = (row) => {

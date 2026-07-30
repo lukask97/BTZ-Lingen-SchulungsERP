@@ -8,6 +8,7 @@ import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import freigabenService from "../../services/gf/freigabenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 
@@ -30,7 +31,7 @@ const bereichLinks = {
 };
 
 export default function Freigaben() {
-    const [freigaben, setFreigaben] = useState(freigabenService.list());
+    const [freigaben, setFreigaben] = useSyncedServiceData(["freigaben"], () => freigabenService.list());
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [current, setCurrent] = useState({

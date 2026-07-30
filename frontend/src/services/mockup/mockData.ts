@@ -210,24 +210,27 @@ export let services = [
 export let benutzer = [
 
     {
-        id: 1, username: "admin", email: "admin@test.de", password: "admin", rolle: "Admin"
+        id: 1, username: "admin", email: "admin@test.de", password: "admin", rolle: "Admin", name: "Administrator", permissions: ["*"]
     },
 
     {
-        id: 2, username: "lager", email: "lager@test.de", password: "lager", rolle: "Lager"
+        id: 2, username: "lager", email: "lager@test.de", password: "lager", rolle: "Lager", name: "Lager Mitarbeiter", permissions: ["artikel.lesen", "lager.buchen", "lager.lesen", "einkauf.lesen", "einkauf.bearbeiten"]
     },
 
     {
-        id: 3, username: "buchhaltung", email: "buchhaltung@test.de", password: "buchhaltung", rolle: "Buchhaltung"
+        id: 3, username: "buchhaltung", email: "buchhaltung@test.de", password: "buchhaltung", rolle: "Buchhaltung", name: "Buchhaltung", permissions: ["kunde.lesen", "kunde.anlegen", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
     },
     {
-        id: 4, username: "marketing", email: "marketing@test.de", password: "marketing", rolle: "Marketing"
+        id: 4, username: "marketing", email: "marketing@test.de", password: "marketing", rolle: "Marketing", name: "Marketing Mitarbeiter", permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
     },
     {
-        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi"
+        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi", name: "Verkauf Azubi", permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
     },
     {
-        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior"
+        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior", name: "Verkauf Senior", permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+    },
+    {
+        id: 7, username: "gf", email: "gf@test.de", password: "gf", rolle: "Geschäftsführung", name: "Geschäftsführung", permissions: ["*"]
     }
 
 ];
@@ -349,6 +352,14 @@ export let users = [
         name: "Verkauf Senior",
         rolle: "Verkauf Senior",
         permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+    },
+    {
+        id: 7,
+        username: "gf",
+        password: "gf",
+        name: "Geschäftsführung",
+        rolle: "Geschäftsführung",
+        permissions: ["*"]
     }
 
 ];

@@ -228,7 +228,7 @@ export default function LehrkraftKundenkorrespondenz() {
         { key: "warenannahme", label: "Offene Warenannahme", value: offeneWarenannahmen.filter(item => item.statusNormalized !== "versendet").length }
     ];
 
-    useEffect(() => subscribeToStorageSync(["kundenanfragen", "nachrichten", "angebote", "auftraege", "vertriebsdokumente"], () => {
+    useEffect(() => subscribeToStorageSync(["kundenanfragen", "nachrichten", "angebote", "auftraege", "vertriebsdokumente", "zahlungen", "kunden"], () => {
         setAnfragen(customerInquiryService.list());
         setAngebote(angeboteService.getAll());
         setDokumente(vertriebsdokumenteService.list());

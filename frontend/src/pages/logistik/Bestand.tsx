@@ -8,6 +8,7 @@ import NumberField from "../../components/form/NumberField";
 import artikelService from "../../services/logistik/artikelService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import bestellungenService, { naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const heute = "2026-07-29";
 const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
@@ -41,6 +42,7 @@ function getBestellvorschlag(artikel, verplant, kritischerBestand) {
 }
 
 export default function Bestand() {
+    const syncTick = useStorageSyncRefresh(["artikel", "auftraege", "bestellungen"]);
     const [searchParams] = useSearchParams();
     const [refreshKey, setRefreshKey] = useState(0);
     const [suchbegriff, setSuchbegriff] = useState("");
@@ -55,8 +57,8 @@ export default function Bestand() {
     const [positionen, setPositionen] = useState([]);
     const [fehler, setFehler] = useState("");
 
-    const artikel = useMemo(() => artikelService.getAll(), [refreshKey]);
-    const auftraege = useMemo(() => auftraegeService.getAll(), [refreshKey]);
+    const artikel = useMemo(() => artikelService.getAll(), [refreshKey, syncTick]);
+    const auftraege = useMemo(() => auftraegeService.getAll(), [refreshKey, syncTick]);
     const verplanteMengen = useMemo(() => getVerplanteMengen(auftraege), [auftraege]);
     const einkaufbareArtikel = useMemo(() => artikel.filter(item => item.istEinkaufbar), [artikel]);
 

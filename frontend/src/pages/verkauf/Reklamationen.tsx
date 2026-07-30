@@ -8,11 +8,12 @@ import TextArea from "../../components/form/TextArea";
 import reklamationenService, { naechsteReklamationsnummer } from "../../services/verkauf/reklamationenService";
 import kundenService from "../../services/verkauf/customerService";
 import OverviewCards from "../../components/OverviewCards";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const heute = () => new Date().toISOString().slice(0, 10);
 
 export default function Reklamationen() {
-    const [reklamationen, setReklamationen] = useState(reklamationenService.getAll());
+    const [reklamationen, setReklamationen] = useSyncedServiceData(["reklamationen", "kunden"], () => reklamationenService.getAll());
     const [offen, setOffen] = useState(false);
     const [kundeId, setKundeId] = useState("");
     const [beschreibung, setBeschreibung] = useState("");

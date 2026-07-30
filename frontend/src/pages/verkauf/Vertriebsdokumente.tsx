@@ -16,6 +16,7 @@ import angeboteService from "../../services/verkauf/angeboteService";
 import { openDocumentPdf } from "../../utils/documentPdf";
 import { getCustomerName } from "../../utils/customerReferences";
 import { getConfirmationDocument } from "../../utils/processFlow";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 const dokumentTypen = ["Angebot", "Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
@@ -38,7 +39,10 @@ export default function Vertriebsdokumente() {
     const angebote = angeboteService.getAll();
     const initialAuftragId = searchParams.get("auftrag") || String(auftraege[0]?.id || "");
     const [selectedAuftragId, setSelectedAuftragId] = useState(initialAuftragId);
-    const [dokumente, setDokumente] = useState(vertriebsdokumenteService.list());
+    const [dokumente, setDokumente] = useSyncedServiceData(
+        ["vertriebsdokumente", "auftraege", "angebote", "kundenanfragen", "nachrichten"],
+        () => vertriebsdokumenteService.list()
+    );
     const [open, setOpen] = useState(false);
     const [calculator, setCalculator] = useState({ einkaufspreis: 0, aufschlag: 25, rabatt: 0, mwst: 19 });
     const [current, setCurrent] = useState({

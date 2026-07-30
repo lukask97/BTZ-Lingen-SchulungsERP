@@ -5,9 +5,10 @@ import Label from "../../components/form/Label";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import schulungenService from "../../services/personalwesen/schulungenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 export default function Schulungen() {
-    const [schulungen, setSchulungen] = useState(schulungenService.list());
+    const [schulungen, setSchulungen] = useSyncedServiceData(["schulungen"], () => schulungenService.list());
     const [open, setOpen] = useState(false);
     const [current, setCurrent] = useState({ titel: "", zielgruppe: "", datum: "2026-08-20", status: "geplant", ort: "" });
 

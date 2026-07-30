@@ -11,13 +11,17 @@ import auftraegeService from "../../services/verkauf/auftraegeService";
 import versandService from "../../services/logistik/versandService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import { canStartShipping } from "../../utils/processFlow";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 
 export default function Versand() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const [versand, setVersand] = useState(versandService.list());
+    const [versand, setVersand] = useSyncedServiceData(
+        ["versandauftraege", "auftraege", "vertriebsdokumente"],
+        () => versandService.list()
+    );
     const [open, setOpen] = useState(false);
     const [current, setCurrent] = useState({ versandNr: "", auftragId: "", auftrag: "", kunde: "", datum: today, status: "in Vorbereitung", transport: "" });
     const auftraege = auftraegeService.list();

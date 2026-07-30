@@ -25,6 +25,7 @@ import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/ver
 import { formatTimestampForDisplay, getBerlinDate } from "../../utils/dateTime";
 import { getSalesStep, getSalesStepLabel } from "../../utils/processFlow";
 import { openDocumentPdf } from "../../utils/documentPdf";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const heute = getBerlinDate();
 const gesamtNachAbzug = (positionen, rabattBetrag = 0) => Math.max(
@@ -93,6 +94,10 @@ function MultiStatusFilter({ options, selectedValues, onToggle }) {
 }
 
 export default function Angebote() {
+    const syncTick = useStorageSyncRefresh([
+        "angebote", "auftraege", "vertriebsdokumente", "versandauftraege",
+        "kundenanfragen", "kunden", "benutzer", "artikel", "services", "nachrichten"
+    ]);
     const { user } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -114,7 +119,7 @@ export default function Angebote() {
     const [selectedTemplateOfferId, setSelectedTemplateOfferId] = useState("");
     const [direktSenden, setDirektSenden] = useState(false);
 
-    const angebote = useMemo(() => angeboteService.getAll(), [refreshKey]);
+    const angebote = useMemo(() => angeboteService.getAll(), [refreshKey, syncTick]);
     const auftraege = auftraegeService.getAll();
     const vertriebsdokumente = vertriebsdokumenteService.list();
     const versandauftraege = versandService.list();

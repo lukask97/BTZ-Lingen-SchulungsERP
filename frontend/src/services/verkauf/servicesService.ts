@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { services, artikel } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
+import { isDatabaseModeEnabled } from "../core/api";
 
 const legacyServices = artikel
     .filter(item => item.artikelTyp === "Dienstleistung")
@@ -35,6 +36,7 @@ function normalizeService(item = {}) {
 function withFallback(items = []) {
     const normalized = items.map(normalizeService);
     if (normalized.length > 0) return normalized;
+    if (isDatabaseModeEnabled()) return normalized;
     return fallbackServices.map(normalizeService);
 }
 

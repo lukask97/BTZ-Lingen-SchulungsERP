@@ -10,10 +10,14 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import urlaubsantraegeService from "../../services/personalwesen/urlaubsantraegeService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 export default function Urlaubsantraege() {
     const navigate = useNavigate();
-    const [antraege, setAntraege] = useState(urlaubsantraegeService.list());
+    const [antraege, setAntraege] = useSyncedServiceData(
+        ["urlaubsantraege", "mitarbeiter", "personalakten"],
+        () => urlaubsantraegeService.list()
+    );
     const [open, setOpen] = useState(false);
     const mitarbeiter = mitarbeiterService.list();
     const mitarbeiterOptionen = mitarbeiter.map(item => ({ value: String(item.id), label: `${item.name} - ${item.abteilung}` }));

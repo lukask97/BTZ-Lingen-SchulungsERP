@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-29";
 
@@ -13,7 +14,10 @@ function getInvoiceViewStatus(rechnung: any) {
 }
 
 export default function LehrkraftLieferantenkorrespondenz() {
-    const [bestellungen, setBestellungen] = useState(bestellungenService.list());
+    const [bestellungen, setBestellungen] = useSyncedServiceData(
+        ["bestellungen", "auftraege"],
+        () => bestellungenService.list()
+    );
     const [activeTab, setActiveTab] = useState("anfragen");
     const rechnungen = rechnungenService.list();
     const offeneRechnungen = rechnungen.filter(item => item.rechnungstyp === "Eingangsrechnung" && item.status !== "bezahlt");

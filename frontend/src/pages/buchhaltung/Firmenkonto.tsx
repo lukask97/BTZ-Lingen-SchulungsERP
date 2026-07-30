@@ -5,6 +5,7 @@ import NumberField from "../../components/form/NumberField";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import firmenkontoService from "../../services/buchhaltung/firmenkontoService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const euro = (betrag) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(betrag || 0));
 const today = "2026-07-26";
@@ -18,7 +19,7 @@ function withSaldo(rows) {
 }
 
 export default function Firmenkonto() {
-    const [rows, setRows] = useState(firmenkontoService.list());
+    const [rows, setRows] = useSyncedServiceData(["firmenkonto"], () => firmenkontoService.list());
     const [open, setOpen] = useState(false);
     const [editId, setEditId] = useState(null);
     const [current, setCurrent] = useState({ datum: today, betreff: "", info: "", soll: 0, haben: 0 });

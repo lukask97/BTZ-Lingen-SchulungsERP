@@ -4,9 +4,8 @@ import TextField from "../../components/form/TextField";
 import NumberField from "../../components/form/NumberField";
 import Label from "../../components/form/Label";
 import TextArea from "../../components/form/TextArea";
-import { getAllColumns, getColumns } from "../../services/core/metadataService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
-import { INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import useAuth from "../../auth/useAuth";
 import OverviewCards from "../../components/OverviewCards";
@@ -33,8 +32,8 @@ export default function Lieferanten() {
             title={config.title}
             tableName={config.tableName}
             username={user.username}
-            columns={getColumns(config.tableName, user.username)}
-            allColumns={getAllColumns(config.tableName)}
+            columns={getVisibleTableColumns(config.tableName)}
+            allColumns={getAllTableColumns(config.tableName)}
             data={crud.data}
             searchable
             onSearch={crud.setSearch}

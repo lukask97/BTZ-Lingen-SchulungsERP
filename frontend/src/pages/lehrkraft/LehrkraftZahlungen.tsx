@@ -10,12 +10,16 @@ import bestellungenService from "../../services/einkauf/bestellungenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { getPaymentOpenItemStatus, isPendingPayment } from "../../utils/openItems";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-28";
 
 export default function LehrkraftZahlungen() {
     const [searchParams] = useSearchParams();
-    const [zahlungen, setZahlungen] = useState(zahlungenService.list());
+    const [zahlungen, setZahlungen] = useSyncedServiceData(
+        ["zahlungen", "auftraege", "bestellungen"],
+        () => zahlungenService.list()
+    );
     const [open, setOpen] = useState(false);
     const [bezugTyp, setBezugTyp] = useState("Rechnung");
     const [rechnungId, setRechnungId] = useState("");

@@ -9,12 +9,16 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import arbeitszeitenService from "../../services/personalwesen/arbeitszeitenService";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 
 export default function Arbeitszeiten() {
     const navigate = useNavigate();
-    const [eintraege, setEintraege] = useState(arbeitszeitenService.list());
+    const [eintraege, setEintraege] = useSyncedServiceData(
+        ["arbeitszeiten", "mitarbeiter", "personalakten"],
+        () => arbeitszeitenService.list()
+    );
     const [open, setOpen] = useState(false);
     const mitarbeiter = mitarbeiterService.list();
     const mitarbeiterOptionen = mitarbeiter.map(item => ({ value: String(item.id), label: `${item.name} - ${item.abteilung}` }));

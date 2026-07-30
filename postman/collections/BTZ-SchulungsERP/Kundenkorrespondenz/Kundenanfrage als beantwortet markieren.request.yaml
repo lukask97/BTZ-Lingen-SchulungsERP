@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{dbBaseUrl}}/kundenanfragen/{{anfrageId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "status": "beantwortet",
+      "angebotId": {{angebotId}},
+      "antwort": "Wir haben ein Angebot vorbereitet und an den Kunden versendet.",
+      "beantwortetAm": "{{requestDate}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', function () {
+        pm.response.to.have.status(200);
+      });
+      const data = pm.response.json();
+      pm.test('Anfrage aktualisiert', function () {
+        pm.expect(data.item.status).to.eql('beantwortet');
+        pm.expect(String(data.item.angebotId)).to.eql(pm.environment.get('angebotId'));
+      });
+    language: text/javascript
+order: 7000

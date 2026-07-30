@@ -11,10 +11,14 @@ import OverviewCards from "../../components/OverviewCards";
 import krankmeldungenService from "../../services/personalwesen/krankmeldungenService";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import personalaktenService from "../../services/personalwesen/personalaktenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 export default function Krankmeldungen() {
     const navigate = useNavigate();
-    const [meldungen, setMeldungen] = useState(krankmeldungenService.list());
+    const [meldungen, setMeldungen] = useSyncedServiceData(
+        ["krankmeldungen", "mitarbeiter", "personalakten"],
+        () => krankmeldungenService.list()
+    );
     const [open, setOpen] = useState(false);
     const mitarbeiter = mitarbeiterService.list();
     const mitarbeiterOptionen = mitarbeiter.map(item => ({ value: String(item.id), label: `${item.name} - ${item.abteilung}` }));

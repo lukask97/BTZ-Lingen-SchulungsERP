@@ -3,11 +3,10 @@ import Dialog from "../../components/Dialog";
 import TextField from "../../components/form/TextField";
 import Label from "../../components/form/Label";
 
-import { getColumns, getAllColumns } from "../../services/core/metadataService";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import benutzerService from "../../services/verwaltung/benutzerService";
-import { INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useState, useMemo } from "react";
 
 export default function Benutzer() {
@@ -31,8 +30,8 @@ export default function Benutzer() {
         handleClose
     } = useCRUDPage(config.tableName, INITIAL_DATA.benutzer, benutzerService);
 
-    const columns = getColumns(config.tableName, user.username);
-    const allColumns = getAllColumns(config.tableName);
+    const columns = getVisibleTableColumns(config.tableName);
+    const allColumns = getAllTableColumns(config.tableName);
 
     const [roleFilter, setRoleFilter] = useState("");
 

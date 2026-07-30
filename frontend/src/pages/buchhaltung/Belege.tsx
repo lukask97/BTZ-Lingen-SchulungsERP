@@ -9,12 +9,13 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import belegeService from "../../services/buchhaltung/belegeService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 
 export default function Belege() {
     const [searchParams] = useSearchParams();
-    const [belege, setBelege] = useState(belegeService.list());
+    const [belege, setBelege] = useSyncedServiceData(["belege", "auftraege", "bestellungen"], () => belegeService.list());
     const [open, setOpen] = useState(false);
     const [current, setCurrent] = useState({ typ: "Rechnungskopie", bezugTyp: "Rechnung", bezug: "", beschreibung: "" });
     const [editMode, setEditMode] = useState(false);

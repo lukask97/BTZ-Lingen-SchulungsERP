@@ -2,6 +2,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const today = "2026-07-27";
 
@@ -12,6 +13,8 @@ function ampelStatus(rechnung: any) {
 }
 
 export default function Rechnungen() {
+    useStorageSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen"]);
+
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const rechnungen = rechnungenService.list().map(item => ({ ...item, ampel: ampelStatus(item) }));

@@ -64,6 +64,22 @@ function normalizeSortValue(value) {
   return String(value ?? "").toLowerCase();
 }
 
+function haveSameColumns(
+  currentColumns: DataTableColumn[],
+  nextColumns: DataTableColumn[]
+) {
+  if (currentColumns.length !== nextColumns.length) return false;
+
+  return currentColumns.every((column, index) => {
+    const nextColumn = nextColumns[index];
+    return (
+      column.field === nextColumn.field &&
+      column.title === nextColumn.title &&
+      column.visible === nextColumn.visible
+    );
+  });
+}
+
 export default function DataTable({
   title = "",
   toolbarContent,
@@ -117,29 +133,43 @@ export default function DataTable({
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailData, setDetailData] = useState<any>(null);
 
+  const sourceColumns = useMemo(
+    () => (allColumns.length > 0 ? allColumns : columns),
+    [allColumns, columns]
+  );
+  const sourceColumnsSignature = useMemo(
+    () =>
+      sourceColumns
+        .map((column) => `${column.field}:${column.title}:${column.visible !== false}`)
+        .join("|"),
+    [sourceColumns]
+  );
+
   /*
         Initialisierung der Spalten
     */
 
   useEffect(() => {
-    if (!columns.length) return;
+    if (!sourceColumns.length) return;
+
+    let nextVisibleColumns = sourceColumns.filter((c) => c.visible !== false);
 
     if (username && tableName) {
       const saved = getUserColumns(username, tableName);
 
       if (saved) {
-        const savedColumns = columns.filter((c) =>
+        nextVisibleColumns = sourceColumns.filter((c) =>
           saved.sichtbareFelder.includes(c.field)
         );
-
-        setVisibleColumns(savedColumns);
-
-        return;
       }
     }
 
-    setVisibleColumns(columns.filter((c) => c.visible !== false));
-  }, [columns, username, tableName]);
+    setVisibleColumns((currentColumns) =>
+      haveSameColumns(currentColumns, nextVisibleColumns)
+        ? currentColumns
+        : nextVisibleColumns
+    );
+  }, [sourceColumnsSignature, username, tableName]);
 
   function searchChange(e) {
     const value = e.target.value;
@@ -184,6 +214,12 @@ export default function DataTable({
       return aValue < bValue ? 1 : -1;
     });
   }, [data, sortField, sortOrder]);
+
+  const columnLabelMap = useMemo(() => {
+    return Object.fromEntries(
+      sourceColumns.map((column) => [column.field, column.title])
+    );
+  }, [sourceColumns]);
 
   function toggleColumn(column) {
     let result;
@@ -479,7 +515,9 @@ export default function DataTable({
         {detailData &&
           Object.entries(detailData).map(([key, value]) => (
             <div className="detail-field" key={key}>
-              <span className="detail-label">{formatDetailLabel(key)}</span>
+              <span className="detail-label">
+                {columnLabelMap[key] || formatDetailLabel(key)}
+              </span>
               <div className="detail-value">
                 {renderDetailValue(key, detailData, value)}
               </div>

@@ -17,17 +17,28 @@ export default function Login(){
     const navigate=useNavigate();
 
 
-    function anmelden(e){
+    async function anmelden(e){
 
         e.preventDefault();
 
         setError("");
 
+        let user = null;
 
-        const user=loginService(
-            username,
-            password
-        );
+        try {
+            user = await loginService(
+                username,
+                password
+            );
+        } catch (loginError) {
+            setError(
+                loginError instanceof Error
+                    ? loginError.message
+                    : "Anmeldung derzeit nicht möglich"
+            );
+            setPassword("");
+            return;
+        }
 
 
         if(user){
@@ -36,8 +47,7 @@ export default function Login(){
 
             navigate("/");
 
-        }
-        else{
+        } else {
 
             setError(
                 "Benutzername oder Passwort falsch"

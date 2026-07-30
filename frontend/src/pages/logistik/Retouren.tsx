@@ -3,9 +3,10 @@ import { useState } from "react";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
 import retourenService from "../../services/logistik/retourenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 export default function Retouren() {
-    const [retouren, setRetouren] = useState(retourenService.list());
+    const [retouren, setRetouren] = useSyncedServiceData(["retouren"], () => retourenService.list());
 
     const abschliessen = (retoure) => {
         retourenService.update({ ...retoure, status: "abgeschlossen" });

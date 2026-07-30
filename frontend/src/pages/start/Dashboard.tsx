@@ -19,6 +19,7 @@ import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { resetTestData } from "../../services/mockup/mockStorage";
 import useAuth from "../../auth/useAuth";
 import { getUnifiedOpenItems, isOpenItem, isOverdueOpenItem, isPendingPayment, isOverduePayment } from "../../utils/openItems";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const today = "2026-07-28";
 
@@ -26,7 +27,32 @@ function dateScore(dateValue = "") {
     return Number(String(dateValue).replaceAll("-", "")) || 0;
 }
 
+function buildUniqueActivityKeys(items) {
+    const seenKeys = new Map();
+
+    return items.map((item, index) => {
+        const baseKey = String(
+            item.key
+            || [item.title, item.date, item.text, item.to].filter(Boolean).join("-")
+            || `activity-${index}`
+        );
+        const occurrence = seenKeys.get(baseKey) || 0;
+        seenKeys.set(baseKey, occurrence + 1);
+
+        return {
+            ...item,
+            key: occurrence === 0 ? baseKey : `${baseKey}-${occurrence + 1}`
+        };
+    });
+}
+
 function Dashboard() {
+    useStorageSyncRefresh([
+        "auftraege", "angebote", "bestellungen", "kundenanfragen", "vertriebsdokumente",
+        "zahlungen", "mahnungen", "freigaben", "artikel", "urlaubsantraege",
+        "krankmeldungen", "arbeitszeiten", "schulungen", "bewerber", "mitarbeiter"
+    ]);
+
     const { user, hasAccess, hasPermission } = useAuth();
     const isTeacherView = hasPermission("*");
     const auftraege = auftraegeService.getAll();
@@ -96,15 +122,15 @@ function Dashboard() {
         offeneFreigaben > 0 && { title: "Freigaben nachvollziehen", text: `${offeneFreigaben} Freigaben können als Führungsentscheidung betrachtet werden.`, to: "/freigaben", action: "Freigaben öffnen" }
     ].filter(Boolean);
 
-    const letzteAktivitaeten = [
-        ...auftraege.map(item => ({ date: item.datum, title: `Auftrag ${item.auftragNr}`, text: `${item.kunde} · Status ${item.status}`, to: "/auftraege" })),
-        ...rechnungen.map(item => ({ date: item.datum, title: `Offener Posten ${item.rechnungsnr}`, text: `${item.kunde} · ${isOpenItem(item) ? "offen" : item.status}`, to: "/rechnungen" })),
-        ...zahlungen.filter(isPendingPayment).map(item => ({ date: item.ausfuehrenAm || item.datum, title: `Geplante Zahlung ${item.rechnungsnr}`, text: `${item.kunde} · ${item.status}`, to: "/zahlungen" })),
-        ...bestellungen.map(item => ({ date: item.datum, title: `Bestellung ${item.bestellNr}`, text: `${item.lieferant} · ${item.status}`, to: "/bestellungen" })),
-        ...versandauftraege.map(item => ({ date: item.datum, title: `Versand ${item.versandNr}`, text: `${item.auftrag} · ${item.status}`, to: "/versand" })),
-        ...anfragen.map(item => ({ date: item.datum, title: `Kundenanfrage ${item.typ}`, text: `${item.kunde} · ${item.status}`, to: "/kundenanfragen" })),
-        ...mahnungen.map(item => ({ date: item.datum, title: `Mahnung ${item.rechnungsnr}`, text: `${item.kunde} · ${item.stufe}`, to: "/mahnungen" }))
-    ].sort((a, b) => dateScore(b.date) - dateScore(a.date)).slice(0, 6);
+    const letzteAktivitaeten = buildUniqueActivityKeys([
+        ...auftraege.map(item => ({ key: `auftrag-${item.id || item.auftragNr || item.datum}`, date: item.datum, title: `Auftrag ${item.auftragNr}`, text: `${item.kunde} · Status ${item.status}`, to: "/auftraege" })),
+        ...rechnungen.map(item => ({ key: `rechnung-${item.id || item.rechnungsnr || item.datum}`, date: item.datum, title: `Offener Posten ${item.rechnungsnr}`, text: `${item.kunde} · ${isOpenItem(item) ? "offen" : item.status}`, to: "/rechnungen" })),
+        ...zahlungen.filter(isPendingPayment).map(item => ({ key: `zahlung-${item.id || item.rechnungsnr || item.datum}`, date: item.ausfuehrenAm || item.datum, title: `Geplante Zahlung ${item.rechnungsnr}`, text: `${item.kunde} · ${item.status}`, to: "/zahlungen" })),
+        ...bestellungen.map(item => ({ key: `bestellung-${item.id || item.bestellNr || item.datum}`, date: item.datum, title: `Bestellung ${item.bestellNr}`, text: `${item.lieferant} · ${item.status}`, to: "/bestellungen" })),
+        ...versandauftraege.map(item => ({ key: `versand-${item.id || item.versandNr || item.datum}`, date: item.datum, title: `Versand ${item.versandNr}`, text: `${item.auftrag} · ${item.status}`, to: "/versand" })),
+        ...anfragen.map(item => ({ key: `anfrage-${item.id || item.vorgangId || item.kunde || item.typ || "unbekannt"}-${item.datum || "ohne-datum"}`, date: item.datum, title: `Kundenanfrage ${item.typ}`, text: `${item.kunde} · ${item.status}`, to: "/kundenanfragen" })),
+        ...mahnungen.map(item => ({ key: `mahnung-${item.id || item.rechnungsnr || item.datum}`, date: item.datum, title: `Mahnung ${item.rechnungsnr}`, text: `${item.kunde} · ${item.stufe}`, to: "/mahnungen" }))
+    ].sort((a, b) => dateScore(b.date) - dateScore(a.date)).slice(0, 6));
 
     const hinweise = isTeacherView ? [
         "Nutze die Fallakten als Arbeitsauftrag und lasse die Ergebnisse auf den Kernseiten dokumentieren.",
@@ -185,7 +211,7 @@ function Dashboard() {
                     <span>{schuelerAufgaben.length} relevant</span>
                 </div>
                 <div className="task-list">
-                    {schuelerAufgaben.map(task => <div key={task.title} className="task-card">
+                    {schuelerAufgaben.map((task, index) => <div key={`${task.title}-${task.to}-${index}`} className="task-card">
                         <strong>{task.title}</strong>
                         <p>{task.text}</p>
                         <Link to={task.to}>{task.action}</Link>
@@ -215,7 +241,7 @@ function Dashboard() {
                     <span>{letzteAktivitaeten.length} Einträge</span>
                 </div>
                 <div className="activity-list">
-                    {letzteAktivitaeten.map(item => <Link key={`${item.title}-${item.date}`} className="activity-row" to={item.to}>
+                    {letzteAktivitaeten.map(item => <Link key={item.key} className="activity-row" to={item.to}>
                         <span className="activity-date">{item.date}</span>
                         <div>
                             <strong>{item.title}</strong>
@@ -305,7 +331,7 @@ function Dashboard() {
                         </div>
                     </div>
                     <div className="task-list">
-                        {lehrkraftAufgaben.length === 0 ? <p>Aktuell gibt es keine offenen Lehrkraft-Aufgaben in den Demo-Daten.</p> : lehrkraftAufgaben.map(task => <div key={task.title} className="task-card">
+                        {lehrkraftAufgaben.length === 0 ? <p>Aktuell gibt es keine offenen Lehrkraft-Aufgaben in den Demo-Daten.</p> : lehrkraftAufgaben.map((task, index) => <div key={`${task.title}-${task.to}-${index}`} className="task-card">
                             <strong>{task.title}</strong>
                             <p>{task.text}</p>
                             <Link to={task.to}>{task.action}</Link>

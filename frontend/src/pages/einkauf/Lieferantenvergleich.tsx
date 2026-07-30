@@ -1,8 +1,10 @@
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
 import lieferantenService from "../../services/einkauf/lieferantenService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function Lieferantenvergleich() {
+    useStorageSyncRefresh(["lieferanten"]);
     const lieferanten = lieferantenService.list();
 
     const alsAMarkieren = (lieferant) => {

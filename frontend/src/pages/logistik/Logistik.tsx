@@ -4,8 +4,11 @@ import bestellungenService from "../../services/einkauf/bestellungenService";
 import retourenService from "../../services/logistik/retourenService";
 import versandService from "../../services/logistik/versandService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function Logistik() {
+    useStorageSyncRefresh(["artikel", "bestellungen", "versandauftraege", "retouren", "auftraege"]);
+
     const artikel = artikelService.list();
     const bestellungen = bestellungenService.list();
     const versandauftraege = versandService.list();

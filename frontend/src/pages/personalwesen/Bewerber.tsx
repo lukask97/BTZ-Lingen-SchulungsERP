@@ -9,6 +9,7 @@ import OverviewCards from "../../components/OverviewCards";
 import bewerberService from "../../services/personalwesen/bewerberService";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import personalaktenService from "../../services/personalwesen/personalaktenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 
@@ -23,7 +24,10 @@ function ableitungAusStelle(stelle = "") {
 
 export default function Bewerber() {
     const navigate = useNavigate();
-    const [bewerber, setBewerber] = useState(bewerberService.list());
+    const [bewerber, setBewerber] = useSyncedServiceData(
+        ["bewerber", "mitarbeiter", "personalakten"],
+        () => bewerberService.list()
+    );
     const [open, setOpen] = useState(false);
     const [current, setCurrent] = useState({ name: "", stelle: "", datum: today, status: "eingegangen", notiz: "" });
 

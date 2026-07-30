@@ -7,15 +7,16 @@ import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
 
-import { getColumns, getAllColumns } from "../../services/core/metadataService";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import artikelService from "../../services/logistik/artikelService";
 import kategorienService from "../../services/logistik/kategorienService";
-import { INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useState, useMemo } from "react";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function Artikel() {
+    const syncTick = useStorageSyncRefresh(["artikel", "kategorien"]);
     const { user } = useAuth();
     const config = PAGE_CONFIG.artikel;
     
@@ -36,9 +37,9 @@ export default function Artikel() {
         handleClose
     } = useCRUDPage(config.tableName, INITIAL_DATA.artikel, artikelService);
 
-    const columns = getColumns(config.tableName, user.username);
-    const allColumns = getAllColumns(config.tableName);
-    const kategorien = useMemo(() => kategorienService.list(), []);
+    const columns = getVisibleTableColumns(config.tableName);
+    const allColumns = getAllTableColumns(config.tableName);
+    const kategorien = useMemo(() => kategorienService.list(), [syncTick]);
 
     const [categoryFilter, setCategoryFilter] = useState("");
     const [komponenteId, setKomponenteId] = useState("");

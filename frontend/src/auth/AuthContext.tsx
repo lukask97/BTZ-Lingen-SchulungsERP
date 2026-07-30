@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from "./authStore";
 import type { AuthProviderProps, AuthUser } from "../types/auth";
+import { getCurrentBackendUser, logoutPreviewSession } from "../services/auth/authService";
 
+const AUTH_STORAGE_KEY = "session-user";
 
 function readInitialUser(): AuthUser | null {
-    const rawUser = localStorage.getItem("user");
+    const rawUser = sessionStorage.getItem(AUTH_STORAGE_KEY);
     if (!rawUser) return null;
     try {
         return JSON.parse(rawUser) as AuthUser;
     } catch {
-        localStorage.removeItem("user");
+        sessionStorage.removeItem(AUTH_STORAGE_KEY);
         return null;
     }
 }
@@ -17,22 +19,51 @@ function readInitialUser(): AuthUser | null {
 export function AuthProvider({ children }: AuthProviderProps) {
 
     const [user, setUser] = useState<AuthUser | null>(readInitialUser);
+    const [isAuthReady, setIsAuthReady] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function syncUserWithBackend() {
+            const backendUser = await getCurrentBackendUser();
+            if (!isMounted) return;
+
+            setUser(backendUser);
+
+            if (backendUser) {
+                sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(backendUser));
+            } else {
+                sessionStorage.removeItem(AUTH_STORAGE_KEY);
+            }
+
+            setIsAuthReady(true);
+        }
+
+        syncUserWithBackend();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
 
     function login(userData: AuthUser) {
 
         setUser(userData);
+        setIsAuthReady(true);
 
-        localStorage.setItem("user", JSON.stringify(userData));
+        sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
 
     }
 
 
-    function logout() {
+    async function logout() {
 
         setUser(null);
+        setIsAuthReady(true);
 
-        localStorage.removeItem("user");
+        sessionStorage.removeItem(AUTH_STORAGE_KEY);
+        await logoutPreviewSession();
 
     }
 
@@ -63,7 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return (<AuthContext.Provider
         value={{
-            user, login, logout, hasPermission, hasAccess
+            user, isAuthReady, login, logout, hasPermission, hasAccess
         }}
     >
         {children}

@@ -11,6 +11,7 @@ import OverviewCards from "../../components/OverviewCards";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import einkaufsdokumenteService from "../../services/einkauf/einkaufsdokumenteService";
 import { openDocumentPdf } from "../../utils/documentPdf";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 const dokumentTypen = ["Bedarfsmeldung", "Anfrage", "Angebotsvergleich", "Bestellung", "Warenannahmeprotokoll", "Reklamationsschreiben"];
@@ -26,7 +27,10 @@ export default function Einkaufsdokumente() {
     const bestellungen = bestellungenService.list();
     const initialBestellungId = searchParams.get("bestellung") || String(bestellungen[0]?.id || "");
     const [selectedBestellungId, setSelectedBestellungId] = useState(initialBestellungId);
-    const [dokumente, setDokumente] = useState(einkaufsdokumenteService.list());
+    const [dokumente, setDokumente] = useSyncedServiceData(
+        ["einkaufsdokumente", "bestellungen"],
+        () => einkaufsdokumenteService.list()
+    );
     const [open, setOpen] = useState(false);
     const [bedarf, setBedarf] = useState({ aktuellerBestand: 5, meldebestand: 10, bestellmenge: 3, einzelpreis: 3499 });
     const [current, setCurrent] = useState({

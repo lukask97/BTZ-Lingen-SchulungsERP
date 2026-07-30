@@ -1,8 +1,11 @@
 import PlaceholderModule from "../../components/PlaceholderModule";
 import benutzerService from "../../services/verwaltung/benutzerService";
 import rollenService from "../../services/verwaltung/rollenService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function VerwaltungOverview() {
+    useStorageSyncRefresh(["benutzer", "rollen"]);
+
     return <PlaceholderModule
         title="Verwaltung"
         intro="Kurze Übersicht über die administrativen Bereiche Benutzer, Rollen und Berechtigungssteuerung."

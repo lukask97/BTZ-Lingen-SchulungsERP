@@ -5,11 +5,12 @@ import bestellungenService from "../../services/einkauf/bestellungenService";
 import { bucheWareneingang } from "../../services/einkauf/wareneingangService";
 import OverviewCards from "../../components/OverviewCards";
 import { canBookGoodsReceipt, getPurchaseStep, getPurchaseStepLabel } from "../../utils/processFlow";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 export default function Wareneingaenge() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const [bestellungen, setBestellungen] = useState(bestellungenService.getAll());
+    const [bestellungen, setBestellungen] = useSyncedServiceData(["bestellungen"], () => bestellungenService.getAll());
     const offeneBestellungen = bestellungen.filter(item => item.status === "versendet");
     const offenePositionen = offeneBestellungen.reduce((summe, bestellung) => summe + bestellung.positionen.length, 0);
 

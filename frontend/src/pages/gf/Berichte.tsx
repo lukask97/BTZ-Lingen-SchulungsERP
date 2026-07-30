@@ -14,6 +14,7 @@ import bestellungenService from "../../services/einkauf/bestellungenService";
 import freigabenService from "../../services/gf/freigabenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import reklamationenService from "../../services/verkauf/reklamationenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 
@@ -55,7 +56,10 @@ function generiereZusammenfassung(bereich) {
 }
 
 export default function Berichte() {
-    const [berichte, setBerichte] = useState(berichteService.list());
+    const [berichte, setBerichte] = useSyncedServiceData(
+        ["berichte", "angebote", "auftraege", "bestellungen", "freigaben", "reklamationen"],
+        () => berichteService.list()
+    );
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [current, setCurrent] = useState({

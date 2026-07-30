@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{dbBaseUrl}}/nachrichten"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', function () {
+        pm.response.to.have.status(200);
+      });
+      const data = pm.response.json();
+      pm.test('Nachrichtenliste geladen', function () {
+        pm.expect(Array.isArray(data.items)).to.eql(true);
+      });
+    language: text/javascript
+order: 4000

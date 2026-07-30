@@ -7,12 +7,13 @@ import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
 import marketingService from "../../services/marketing/marketingService";
 import { Link } from "react-router-dom";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const heute = () => new Date().toISOString().slice(0, 10);
 const leer = { typ: "Kampagne", titel: "", datum: "", status: "geplant", beschreibung: "" };
 
 export default function Marketing() {
-    const [aktionen, setAktionen] = useState(marketingService.getAll());
+    const [aktionen, setAktionen] = useSyncedServiceData(["marketingaktionen"], () => marketingService.getAll());
     const [offen, setOffen] = useState(false);
     const [bearbeiten, setBearbeiten] = useState(false);
     const [aktion, setAktion] = useState(leer);

@@ -7,10 +7,13 @@ import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumente
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import { isPendingPayment } from "../../utils/openItems";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const OFFER_OPEN_STATUSES = ["wartet auf antwort"];
 
 export default function LehrkraftOverview() {
+    useStorageSyncRefresh(["kundenanfragen", "angebote", "vertriebsdokumente", "bestellungen", "zahlungen", "auftraege"]);
+
     const kundenkorrespondenz = customerInquiryService.list();
     const angebote = angeboteService.getAll();
     const vertriebsdokumente = vertriebsdokumenteService.list();

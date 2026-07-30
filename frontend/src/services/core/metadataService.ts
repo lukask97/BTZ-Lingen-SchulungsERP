@@ -1,62 +1,21 @@
-import {
-    feldMetadaten, benutzerSpalten
-} from "../mockup/mockMetaData";
-
+import { benutzerSpalten } from "../mockup/mockMetaData";
 
 import {
     loadData, saveData
 } from "../mockup/mockStorage";
-
-
-export function getColumns(tabelle, username) {
-
-
-    const metaDaten = loadData("feldMetadaten", feldMetadaten);
-
-
-    const spaltenDaten = loadData("benutzerSpalten", benutzerSpalten);
-
-
-    const userSettings = spaltenDaten.find(x => x.username === username && x.tabelle === tabelle);
-
-
-    let fields;
-
-
-    // Benutzer hat eigene Auswahl
-    if (userSettings) {
-
-        fields = userSettings.sichtbareFelder;
-
-    } else {
-
-        // Standard: alles anzeigen
-        fields = metaDaten
-            .filter(x => x.tabelle === tabelle && x.sichtbar)
-            .map(x => x.feld);
-
+import { buildDatabasePath, isDatabaseModeEnabled, syncApiRequest } from "./api";
+function getUserColumnSettings() {
+    if (isDatabaseModeEnabled()) {
+        const result = syncApiRequest(buildDatabasePath("/benutzerSpalten"));
+        return result.items || [];
     }
 
-
-    return metaDaten
-
-        .filter(x => x.tabelle === tabelle && fields.includes(x.feld))
-
-        .sort((a, b) => a.reihenfolge - b.reihenfolge)
-
-        .map(x => ({
-
-            field: x.feld,
-
-            title: x.anzeigename
-
-        }));
-
+    return loadData("benutzerSpalten", benutzerSpalten);
 }
 
 export function getUserColumns(username, tabelle) {
 
-    const daten = loadData("benutzerSpalten", []);
+    const daten = getUserColumnSettings();
 
 
     return daten.find(x => x.username === username && x.tabelle === tabelle);
@@ -66,13 +25,15 @@ export function getUserColumns(username, tabelle) {
 
 export function saveUserColumns(username, tabelle, fields) {
 
-    let daten = loadData("benutzerSpalten", []);
+    let daten = getUserColumnSettings();
 
 
+    const bisher = daten.find(x => x.username === username && x.tabelle === tabelle);
     daten = daten.filter(x => !(x.username === username && x.tabelle === tabelle));
 
 
-    daten.push({
+    const payload = {
+        ...(bisher || {}),
 
         username,
 
@@ -80,31 +41,27 @@ export function saveUserColumns(username, tabelle, fields) {
 
         sichtbareFelder: fields
 
-    });
+    };
+
+    if (isDatabaseModeEnabled()) {
+        if (bisher?.id) {
+            syncApiRequest(buildDatabasePath(`/benutzerSpalten/${bisher.id}`), {
+                method: "PATCH",
+                body: payload
+            });
+            return;
+        }
+
+        syncApiRequest(buildDatabasePath("/benutzerSpalten"), {
+            method: "POST",
+            body: payload
+        });
+        return;
+    }
+
+    daten.push(payload);
 
 
     saveData("benutzerSpalten", daten);
-
-}
-
-export function getAllColumns(tabelle) {
-
-
-    const metaDaten = loadData("feldMetadaten", feldMetadaten);
-
-
-    return metaDaten
-
-        .filter(x => x.tabelle === tabelle && x.sichtbar)
-
-        .sort((a, b) => a.reihenfolge - b.reihenfolge)
-
-        .map(x => ({
-
-            field: x.feld,
-
-            title: x.anzeigename
-
-        }));
 
 }

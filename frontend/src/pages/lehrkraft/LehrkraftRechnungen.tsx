@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const today = "2026-07-28";
 
@@ -12,6 +13,8 @@ function getInvoiceViewStatus(rechnung: any) {
 }
 
 export default function LehrkraftRechnungen() {
+    useStorageSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen"]);
+
     const navigate = useNavigate();
     const rechnungen = rechnungenService.list().map(item => ({
         ...item,

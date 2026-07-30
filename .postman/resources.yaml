@@ -1,0 +1,17 @@
+# Use this workspace to collaborate
+workspace:
+  id: 40948c6e-b37f-45e2-8b00-3e956ddaa075
+
+localResources:
+  collections:
+    - ../docs/BTZ-SchulungsERP.postman_collection.json
+  environments:
+    - ../docs/BTZ-SchulungsERP.local.postman_environment.json
+  documents:
+    - ../README.md
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/BTZ-SchulungsERP: 2bb5ca31-06a9-4e6c-a546-7c5fa6bc6efd

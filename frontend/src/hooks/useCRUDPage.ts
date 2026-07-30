@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CrudService, EntityWithId, UseCrudPageResult } from "../types/crud";
+import { subscribeToStorageSync } from "../services/mockup/mockStorage";
 
 /**
  * Generischer Hook für alle CRUD-Seiten
@@ -16,6 +17,14 @@ export function useCRUDPage<T extends EntityWithId>(
     const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState("");
     const [currentItem, setCurrentItem] = useState(initialData);
+
+    useEffect(() => {
+        setData(services.list());
+
+        return subscribeToStorageSync([tableName], () => {
+            setData(services.list());
+        });
+    }, [services, tableName]);
 
     // Filterung nach Suchtext
     const filteredData = data.filter(item =>

@@ -1,0 +1,33 @@
+$kind: http-request
+url: "{{dbBaseUrl}}/kundenanfragen"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "typ": "Produktanfrage",
+      "kundeId": {{kundeId}},
+      "kunde": "{{kundeName}}",
+      "kanal": "E-Mail",
+      "status": "offen",
+      "datum": "{{requestDate}}",
+      "anliegen": "Postman-Testanfrage fuer die Kundenkorrespondenz",
+      "vorgangId": "VK-POSTMAN-{{requestDateCompact}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', function () {
+        pm.response.to.have.status(201);
+      });
+      const data = pm.response.json();
+      pm.test('Anfrage angelegt', function () {
+        pm.expect(data.ok).to.eql(true);
+        pm.expect(data.item.kundeId).to.eql(Number(pm.environment.get('kundeId')));
+      });
+      pm.environment.set('anfrageId', String(data.item.id));
+      pm.environment.set('vorgangId', String(data.item.vorgangId || ''));
+    language: text/javascript
+order: 2000

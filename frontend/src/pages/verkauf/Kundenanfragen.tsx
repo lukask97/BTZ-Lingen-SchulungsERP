@@ -208,7 +208,7 @@ export default function Kundenanfragen() {
     const kannAngebotErstellen = !!threadItem?.kundeId && (vorgangAngebote.length === 0 || aktuellesAngebot?.status === "abgelehnt");
     const kannAngebotSenden = !!aktuellesAngebot && !angebotWurdeBereitsGesendet(aktuellesAngebot);
 
-    useEffect(() => subscribeToStorageSync(["kundenanfragen", "nachrichten", "angebote"], () => {
+    useEffect(() => subscribeToStorageSync(["kundenanfragen", "nachrichten", "angebote", "auftraege", "kunden"], () => {
         setAnfragen(customerInquiryService.list());
         if (threadItem) {
             const aktuelleAnfrage = customerInquiryService.list().find(item => String(item.id) === String(threadItem.id));

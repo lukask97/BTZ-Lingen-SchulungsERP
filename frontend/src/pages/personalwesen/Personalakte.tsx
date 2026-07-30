@@ -10,6 +10,7 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import personalaktenService from "../../services/personalwesen/personalaktenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-26";
 const dokumentOptionen = [
@@ -36,7 +37,10 @@ export default function Personalakte() {
     const mitarbeiterOptionen = mitarbeiter.map(item => ({ value: String(item.id), label: `${item.name} - ${item.abteilung}` }));
     const initialMitarbeiterId = searchParams.get("mitarbeiter") || String(mitarbeiter[0]?.id || "");
     const [selectedMitarbeiterId, setSelectedMitarbeiterId] = useState(initialMitarbeiterId);
-    const [akteneintraege, setAkteneintraege] = useState(personalaktenService.list());
+    const [akteneintraege, setAkteneintraege] = useSyncedServiceData(
+        ["personalakten", "mitarbeiter", "urlaubsantraege", "krankmeldungen", "schulungen"],
+        () => personalaktenService.list()
+    );
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [current, setCurrent] = useState({

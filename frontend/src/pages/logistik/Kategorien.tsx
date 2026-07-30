@@ -7,17 +7,19 @@ import LookupField from "../../components/form/LookupField";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import kategorienService from "../../services/logistik/kategorienService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const INITIAL = { id: null, name: "", parentId: "", beschreibung: "" };
 
 export default function Kategorien() {
+    const syncTick = useStorageSyncRefresh(["kategorien"]);
     const [refreshKey, setRefreshKey] = useState(0);
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [search, setSearch] = useState("");
     const [currentItem, setCurrentItem] = useState(INITIAL);
 
-    const kategorien = useMemo(() => kategorienService.list(), [refreshKey]);
+    const kategorien = useMemo(() => kategorienService.list(), [refreshKey, syncTick]);
     const oberkategorien = kategorien.filter(item => String(item.id) !== String(currentItem.id));
     const parentOptions = oberkategorien.map(item => ({
         value: String(item.id),

@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{dbBaseUrl}}/kunden/{{kundeId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "notiz": "Postman 401 Test {{requestTimestamp}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 401', function () {
+        pm.response.to.have.status(401);
+      });
+      const data = pm.response.json();
+      pm.test('Bearbeiten ohne Login ist gesperrt', function () {
+        pm.expect(data.ok).to.eql(false);
+        pm.expect(data.message).to.include('Nicht angemeldet');
+      });
+    language: text/javascript
+order: 2500

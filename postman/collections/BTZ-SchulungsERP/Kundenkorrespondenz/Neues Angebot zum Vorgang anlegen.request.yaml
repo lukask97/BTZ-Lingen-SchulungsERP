@@ -1,0 +1,42 @@
+$kind: http-request
+url: "{{dbBaseUrl}}/angebote"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "angebotsNr": "ANG-POSTMAN-{{requestDateCompact}}",
+      "anfrageId": {{anfrageId}},
+      "vorgangId": "{{vorgangId}}",
+      "kundeId": {{kundeId}},
+      "kunde": "{{kundeName}}",
+      "datum": "{{requestDate}}",
+      "status": "in vorbereitung",
+      "revision": 1,
+      "positionen": [
+        {
+          "artikelId": 1,
+          "artikel": "Schulungsfahrrad City",
+          "menge": 1,
+          "preis": 799
+        }
+      ],
+      "rabattBetrag": 0,
+      "gesamtbetrag": 799
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', function () {
+        pm.response.to.have.status(201);
+      });
+      const data = pm.response.json();
+      pm.test('Angebot angelegt', function () {
+        pm.expect(data.ok).to.eql(true);
+        pm.expect(data.item.vorgangId).to.eql(pm.environment.get('vorgangId'));
+      });
+      pm.environment.set('angebotId', String(data.item.id));
+    language: text/javascript
+order: 5000

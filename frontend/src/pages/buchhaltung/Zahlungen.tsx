@@ -13,11 +13,12 @@ import kundenService from "../../services/verkauf/customerService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
 import { getCustomerName } from "../../utils/customerReferences";
 import { getPaymentOpenItemStatus, isOpenItem, isPendingPayment } from "../../utils/openItems";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 const today = "2026-07-28";
 
 export default function Zahlungen() {
-    const [zahlungen, setZahlungen] = useState(zahlungenService.list());
+    const [zahlungen, setZahlungen] = useSyncedServiceData(["zahlungen", "auftraege", "bestellungen"], () => zahlungenService.list());
     const [open, setOpen] = useState(false);
     const [rechnungId, setRechnungId] = useState("");
     const [betrag, setBetrag] = useState(0);
