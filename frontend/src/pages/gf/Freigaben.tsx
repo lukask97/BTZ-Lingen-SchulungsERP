@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
@@ -9,8 +8,8 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import freigabenService from "../../services/gf/freigabenService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
-
-const today = "2026-07-26";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 
 const bereichOptionen = [
     { value: "verkauf", label: "Verkauf" },
@@ -30,11 +29,8 @@ const bereichLinks = {
     personalwesen: "/personalwesen"
 };
 
-export default function Freigaben() {
-    const [freigaben, setFreigaben] = useSyncedServiceData(["freigaben"], () => freigabenService.list());
-    const [open, setOpen] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [current, setCurrent] = useState({
+function createEmptyFreigabe(today: string) {
+    return {
         titel: "",
         bereich: "verkauf",
         verantwortung: "Geschäftsführung",
@@ -42,18 +38,18 @@ export default function Freigaben() {
         datum: today,
         bezug: "",
         notiz: ""
-    });
+    };
+}
+
+export default function Freigaben() {
+    const today = getBerlinDate();
+    const [freigaben, setFreigaben] = useSyncedServiceData(["freigaben"], () => freigabenService.list());
+    const [open, setOpen] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [current, setCurrent] = useState(createEmptyFreigabe(today));
 
     const neu = () => {
-        setCurrent({
-            titel: "",
-            bereich: "verkauf",
-            verantwortung: "Geschäftsführung",
-            status: "offen",
-            datum: today,
-            bezug: "",
-            notiz: ""
-        });
+        setCurrent(createEmptyFreigabe(today));
         setEditMode(false);
         setOpen(true);
     };
@@ -142,12 +138,12 @@ export default function Freigaben() {
                 { field: "notiz", title: "Notiz" }
             ]}
             detailLinkResolver={({ field, row }) => field === "bereich" ? bereichLinks[row.bereich] || null : null}
-            toolbarActions={[{ name: "new", label: "Freigabe anlegen", permission: "gf.bearbeiten", onClick: neu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Freigabe anlegen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "edit", label: "Bearbeiten", permission: "gf.bearbeiten", onClick: bearbeiten, variant: "secondary" },
-                { name: "approve", label: "Freigeben", permission: "gf.bearbeiten", onClick: freigeben, variant: "success", isVisible: row => row.status === "offen" },
-                { name: "reject", label: "Ablehnen", permission: "gf.bearbeiten", onClick: ablehnen, variant: "danger", isVisible: row => row.status === "offen" },
-                { name: "delete", label: "Löschen", permission: "gf.bearbeiten", onClick: loeschen, variant: "danger" }
+                { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.GF_BEARBEITEN, onClick: bearbeiten, variant: "secondary" },
+                { name: "approve", label: "Freigeben", permission: PERMISSIONS.GF_BEARBEITEN, onClick: freigeben, variant: "success", isVisible: row => row.status === "offen" },
+                { name: "reject", label: "Ablehnen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: ablehnen, variant: "danger", isVisible: row => row.status === "offen" },
+                { name: "delete", label: "Löschen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: loeschen, variant: "danger" }
             ]}
         />
         <Dialog open={open} title={editMode ? "Freigabe bearbeiten" : "Freigabe anlegen"} onClose={() => setOpen(false)}>

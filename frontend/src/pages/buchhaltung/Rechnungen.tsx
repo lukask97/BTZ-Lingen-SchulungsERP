@@ -1,19 +1,20 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
+import { PERMISSIONS } from "../../constants/permissions";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
-
-const today = "2026-07-27";
+import { getBerlinDate } from "../../utils/dateTime";
 
 function ampelStatus(rechnung: any) {
+    const today = getBerlinDate();
     if (rechnung.status === "bezahlt") return "bezahlt";
     if (rechnung.faelligAm && rechnung.faelligAm < today) return "fällig";
     return "offen";
 }
 
 export default function Rechnungen() {
-    useStorageSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen"]);
+    useStorageSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen", "nummernkreise"]);
 
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -57,8 +58,8 @@ export default function Rechnungen() {
                 return null;
             }}
             rowActions={[
-                { name: "documents", label: "Belege öffnen", permission: "buchhaltung.bearbeiten", onClick: row => navigate(`/belege?bezug=${row.rechnungsnr}`), variant: "secondary" },
-                { name: "payments", label: "Zahlungen", permission: "buchhaltung.bearbeiten", onClick: row => navigate(`/zahlungen?focus=${row.rechnungsnr}`), variant: "secondary" }
+                { name: "documents", label: "Belege öffnen", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: row => navigate(`/belege?bezug=${row.rechnungsnr}`), variant: "secondary" },
+                { name: "payments", label: "Zahlungen", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: row => navigate(`/zahlungen?focus=${row.rechnungsnr}`), variant: "secondary" }
             ]}
         />
     </>;

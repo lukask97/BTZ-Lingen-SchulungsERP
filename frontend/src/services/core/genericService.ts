@@ -50,7 +50,7 @@ export function createCRUDService<T extends EntityWithId>(tableName: string, ini
                 const result = syncApiRequest(buildDatabasePath(`/${tableName}/${id}`));
                 return result.item;
             }
-            return reload().find(item => item.id === id);
+            return reload().find(item => String(item.id) === String(id));
         },
         create: (item: Partial<T> & Record<string, unknown>) => {
             if (useBackend()) {

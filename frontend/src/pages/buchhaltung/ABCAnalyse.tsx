@@ -101,7 +101,7 @@ export default function ABCAnalyse() {
                 { field: "abc", title: "ABC" },
                 { field: "kundenNr", title: "Kundennummer" },
                 { field: "kunde", title: "Kunde" },
-                { field: "segment", title: "Segment" },
+                { field: "segment", title: "Kategorie" },
                 { field: "auftragsAnzahl", title: "Anzahl Auftraege" },
                 { field: "umsatzLabel", title: "Umsatz" },
                 { field: "umsatzAnteilLabel", title: "Umsatzanteil" },

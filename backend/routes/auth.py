@@ -1,4 +1,7 @@
-from flask import Blueprint, current_app, jsonify, request, session
+from flask import Blueprint, current_app, request, session
+
+from api_utils import get_store, json_response
+from security import get_user_permissions
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
@@ -6,29 +9,33 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 def sanitize_user(user):
     if not user:
         return None
-    return {
+    sanitized = {
         key: value
         for key, value in user.items()
         if key != "password"
     }
+    sanitized["permissions"] = get_user_permissions(user)
+    return sanitized
 
-
-def get_store():
-    return current_app.extensions["store"]
+def build_auth_state_response(user=None):
+    return json_response({
+        "authenticated": bool(user),
+        "user": sanitize_user(user)
+    })
 
 
 @auth_bp.get("/me")
 def current_user():
     user_id = session.get("user_id")
     if not user_id:
-        return jsonify({"authenticated": False, "user": None})
+        return build_auth_state_response()
 
     user = get_store().get("benutzer", user_id)
     if not user:
         session.pop("user_id", None)
-        return jsonify({"authenticated": False, "user": None})
+        return build_auth_state_response()
 
-    return jsonify({"authenticated": True, "user": sanitize_user(user)})
+    return build_auth_state_response(user)
 
 
 @auth_bp.post("/login")
@@ -47,13 +54,13 @@ def login():
     )
 
     if not user:
-        return jsonify({
+        return json_response({
             "ok": False,
             "message": "Benutzername oder Passwort falsch."
-        }), 401
+        }, 401)
 
     session["user_id"] = user["id"]
-    return jsonify({
+    return json_response({
         "ok": True,
         "user": sanitize_user(user),
         "mode": current_app.config["DATA_MODE"]
@@ -63,4 +70,4 @@ def login():
 @auth_bp.post("/logout")
 def logout():
     session.pop("user_id", None)
-    return jsonify({"ok": True})
+    return json_response({"ok": True})

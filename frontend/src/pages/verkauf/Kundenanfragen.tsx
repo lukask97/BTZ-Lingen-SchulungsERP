@@ -10,23 +10,29 @@ import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/ver
 import angeboteService from "../../services/verkauf/angeboteService";
 import { subscribeToStorageSync } from "../../services/mockup/mockStorage";
 import auftraegeService from "../../services/verkauf/auftraegeService";
+import { naechsteAuftragsnummer } from "../../services/verkauf/verkaufService";
 import { getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
 import { getCustomerName } from "../../utils/customerReferences";
 import { openDocumentPdf } from "../../utils/documentPdf";
+import useAuth from "../../auth/useAuth";
+import { ACCESS, PERMISSIONS } from "../../constants/permissions";
+import { getOffersForVorgang, getOrderForOffer, getVorgangId } from "../../utils/processFlow";
 
-const today = getBerlinDate();
+function sortByRevisionAscending(a: any, b: any) {
+    return Number(a.revision || 0) - Number(b.revision || 0);
+}
 
-function getThreadMessages(threadItem: any) {
+function getThreadMessages(threadItem: any, fallbackDate: string) {
     if (!threadItem) return [];
-    const vorgangId = threadItem.vorgangId || `anfrage-${threadItem.id}`;
+    const vorgangId = getVorgangId(threadItem);
     const nachrichten = listNachrichtenZuVorgang(vorgangId);
     const hatVerkaufAntwort = nachrichten.some(item => item.senderRolle === "Verkauf");
 
     if (!hatVerkaufAntwort && threadItem.antwort) {
         return [...nachrichten, {
             id: `synthetic-verkauf-${threadItem.id || vorgangId}`,
-            datum: threadItem.beantwortetAm || threadItem.datum || today,
-            zeitpunkt: `${threadItem.beantwortetAm || threadItem.datum || today}T12:00:00`,
+            datum: threadItem.beantwortetAm || threadItem.datum || fallbackDate,
+            zeitpunkt: `${threadItem.beantwortetAm || threadItem.datum || fallbackDate}T12:00:00`,
             senderRolle: "Verkauf",
             senderName: "Schuelerfirma Verkauf",
             betreff: "Antwort der Schuelerfirma",
@@ -38,7 +44,10 @@ function getThreadMessages(threadItem: any) {
 }
 
 export default function Kundenanfragen() {
+    const today = getBerlinDate();
     const navigate = useNavigate();
+    const { hasAccess } = useAuth();
+    const canReadCustomers = hasAccess(ACCESS.KUNDE);
     const [searchParams] = useSearchParams();
     const focusId = searchParams.get("focus") || "";
     const [anfragen, setAnfragen] = useState(customerInquiryService.list());
@@ -47,9 +56,12 @@ export default function Kundenanfragen() {
     const [threadItem, setThreadItem] = useState<any>(null);
     const [selectedOfferId, setSelectedOfferId] = useState<string>("");
     const angebote = angeboteService.getAll();
-    const angeboteZuVorgang = vorgangId => angebote
-        .filter(item => item.vorgangId === vorgangId)
-        .sort((a, b) => Number(a.revision || 0) - Number(b.revision || 0));
+
+    const refreshInquiryState = () => {
+        setAnfragen(customerInquiryService.list());
+    };
+
+    const angeboteZuVorgang = (vorgangId: string) => getOffersForVorgang(vorgangId, angebote).sort(sortByRevisionAscending);
 
     const vorgangOeffnen = (item) => {
         setThreadItem(item);
@@ -101,9 +113,10 @@ export default function Kundenanfragen() {
 
         customerInquiryService.update(aktualisierteAnfrage);
         nachrichtenService.create({
-            vorgangId: threadItem.vorgangId || `anfrage-${threadItem.id}`,
+            vorgangId: getVorgangId(threadItem),
             anfrageId: threadItem.id,
             angebotId: angebot.id,
+            kundeId: threadItem.kundeId || angebot.kundeId || "",
             datum: today,
             zeitpunkt: getBerlinTimestamp(),
             senderRolle: "Verkauf",
@@ -114,7 +127,7 @@ export default function Kundenanfragen() {
             typ: "Angebot"
         });
 
-        setAnfragen(customerInquiryService.list());
+        refreshInquiryState();
         setThreadItem(aktualisierteAnfrage);
     };
 
@@ -123,14 +136,13 @@ export default function Kundenanfragen() {
         let neuerAuftragId = threadItem?.auftragId || "";
 
         if (status === "angenommen") {
-            const bestehenderAuftrag = auftraegeService.list().find(item => String(item.angebotId) === String(angebot.id));
+            const bestehenderAuftrag = getOrderForOffer(angebot.id, auftraegeService.list());
             if (bestehenderAuftrag) {
                 neuerAuftragId = bestehenderAuftrag.id;
             } else {
                 const auftrag = auftraegeService.add({
-                    auftragNr: `VK-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`,
+                    auftragNr: naechsteAuftragsnummer(),
                     kundeId: angebot.kundeId,
-                    kunde: angebot.kunde,
                     datum: today,
                     status: "offen",
                     positionen: angebot.positionen || [],
@@ -163,13 +175,13 @@ export default function Kundenanfragen() {
         };
 
         customerInquiryService.update(aktualisierteAnfrage);
-        setAnfragen(customerInquiryService.list());
+        refreshInquiryState();
         setThreadItem(aktualisierteAnfrage);
     };
 
     const antwortSpeichern = () => {
         if (!threadItem || !replyText.trim()) return;
-        const vorgangId = threadItem.vorgangId || `anfrage-${threadItem.id}`;
+        const vorgangId = getVorgangId(threadItem);
         const aktualisierteAnfrage = {
             ...threadItem,
             status: "beantwortet",
@@ -182,6 +194,8 @@ export default function Kundenanfragen() {
             vorgangId,
             anfrageId: threadItem.id,
             angebotId: threadItem.angebotId || "",
+            kundeId: threadItem.kundeId || "",
+            auftragId: threadItem.auftragId || "",
             datum: today,
             zeitpunkt: getBerlinTimestamp(),
             senderRolle: "Verkauf",
@@ -192,12 +206,17 @@ export default function Kundenanfragen() {
             typ: "Antwort"
         });
 
-        setAnfragen(customerInquiryService.list());
+        refreshInquiryState();
         setThreadItem(aktualisierteAnfrage);
         setReplyText("");
     };
 
     const offene = anfragen.filter(item => item.status === "offen").length;
+    const overviewCards = [
+        { label: "Anfragen gesamt", value: anfragen.length },
+        { label: "Offen", value: offene },
+        { label: "Beantwortet", value: anfragen.filter(item => item.status === "beantwortet").length }
+    ];
 
     const vorgangAngebote = useMemo(
         () => threadItem?.vorgangId ? angeboteZuVorgang(threadItem.vorgangId) : [],
@@ -207,9 +226,21 @@ export default function Kundenanfragen() {
     const ausgewaehltesAngebot = getSelectedOffer(vorgangAngebote);
     const kannAngebotErstellen = !!threadItem?.kundeId && (vorgangAngebote.length === 0 || aktuellesAngebot?.status === "abgelehnt");
     const kannAngebotSenden = !!aktuellesAngebot && !angebotWurdeBereitsGesendet(aktuellesAngebot);
+    const threadActionLinks = [
+        ...(kannAngebotErstellen ? [{
+            id: "prepare-offer",
+            label: aktuellesAngebot?.status === "abgelehnt" ? "Neues Angebot vorbereiten" : "Angebot erstellen",
+            onClick: () => navigate(`/angebote?new=fromInquiry&kundeId=${threadItem.kundeId}&anfrageId=${threadItem.id}`)
+        }] : []),
+        ...(kannAngebotSenden ? [{
+            id: "send-offer",
+            label: "Angebot senden",
+            onClick: angebotSenden
+        }] : [])
+    ];
 
     useEffect(() => subscribeToStorageSync(["kundenanfragen", "nachrichten", "angebote", "auftraege", "kunden"], () => {
-        setAnfragen(customerInquiryService.list());
+        refreshInquiryState();
         if (threadItem) {
             const aktuelleAnfrage = customerInquiryService.list().find(item => String(item.id) === String(threadItem.id));
             if (aktuelleAnfrage) setThreadItem(aktuelleAnfrage);
@@ -242,11 +273,7 @@ export default function Kundenanfragen() {
     }, [threadItem, angebote, selectedOfferId]);
 
     return <>
-        <OverviewCards cards={[
-            { label: "Anfragen gesamt", value: anfragen.length },
-            { label: "Offen", value: offene },
-            { label: "Beantwortet", value: anfragen.filter(item => item.status === "beantwortet").length }
-        ]}/>
+        <OverviewCards cards={overviewCards}/>
         <DataTable
             title="Kundenanfragen"
             selectableColumns={false}
@@ -254,7 +281,18 @@ export default function Kundenanfragen() {
             focusRowId={threadOpen ? "" : focusId}
             columns={[
                 { field: "datum", title: "Datum" },
-                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{getCustomerName(row.kundeId, row.kunde)}</Link> : row.kunde },
+                {
+                    field: "kunde",
+                    title: "Kunde",
+                    render: row => {
+                        const kundenname = getCustomerName(row.kundeId, row.kunde);
+                        if (row.kundeId && canReadCustomers) {
+                            return <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{kundenname}</Link>;
+                        }
+
+                        return kundenname;
+                    }
+                },
                 { field: "typ", title: "Typ" },
                 { field: "kanal", title: "Kanal" },
                 { field: "status", title: "Status" },
@@ -267,10 +305,10 @@ export default function Kundenanfragen() {
                 return null;
             }}
             rowActions={[
-                { name: "openOffer", label: "Angebot oeffnen", permission: "verkauf.bearbeiten", onClick: row => row.angebotId && navigate(`/angebote?focus=${row.angebotId}`), variant: "secondary", isVisible: row => !!row.angebotId },
-                { name: "thread", label: "Nachrichten", permission: "verkauf.bearbeiten", onClick: vorgangOeffnen, variant: "secondary", isVisible: row => !!row.vorgangId },
-                { name: "openOrder", label: "Auftrag oeffnen", permission: "verkauf.bearbeiten", onClick: row => row.auftragId && navigate(`/auftraege?focus=${row.auftragId}`), variant: "secondary", isVisible: row => !!row.auftragId },
-                { name: "threadOrder", label: "Nachrichten", permission: "verkauf.bearbeiten", onClick: vorgangOeffnen, variant: "secondary", isVisible: row => !row.vorgangId && !!row.kundeId }
+                { name: "openOffer", label: "Angebot oeffnen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => row.angebotId && navigate(`/angebote?focus=${row.angebotId}`), variant: "secondary", isVisible: row => !!row.angebotId },
+                { name: "thread", label: "Nachrichten", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: vorgangOeffnen, variant: "secondary", isVisible: row => !!row.vorgangId },
+                { name: "openOrder", label: "Auftrag oeffnen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => row.auftragId && navigate(`/auftraege?focus=${row.auftragId}`), variant: "secondary", isVisible: row => !!row.auftragId },
+                { name: "threadOrder", label: "Nachrichten", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: vorgangOeffnen, variant: "secondary", isVisible: row => !row.vorgangId && !!row.kundeId }
             ]}
         />
         {threadItem && <ChatDialogBoundary
@@ -287,21 +325,10 @@ export default function Kundenanfragen() {
                 statusLabel={threadItem.status}
                 anliegen={threadItem.anliegen}
                 offers={vorgangAngebote}
-                messages={getThreadMessages(threadItem)}
+                messages={getThreadMessages(threadItem, today)}
                 ownRole="Verkauf"
                 offerClickResolver={angebotAlsPdf}
-                actionLinks={[
-                ...(kannAngebotErstellen ? [{
-                    id: "prepare-offer",
-                    label: aktuellesAngebot?.status === "abgelehnt" ? "Neues Angebot vorbereiten" : "Angebot erstellen",
-                    onClick: () => navigate(`/angebote?new=fromInquiry&kundeId=${threadItem.kundeId}&anfrageId=${threadItem.id}`)
-                }] : []),
-                    ...(kannAngebotSenden ? [{
-                        id: "send-offer",
-                        label: "Angebot senden",
-                        onClick: angebotSenden
-                    }] : [])
-                ]}
+                actionLinks={threadActionLinks}
                 customActionSection={vorgangAngebote.length > 0 ? <>
                     <div className="form-row">
                         <Label>Angebotsentscheidung</Label>

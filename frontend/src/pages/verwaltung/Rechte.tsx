@@ -28,8 +28,13 @@ export default function Rechte() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.rechte, rechteService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.rechte, rechteService, {
+        requiredFields: [
+            { field: "name", label: "Name" }
+        ]
+    });
 
     const columns = getVisibleTableColumns(config.tableName);
     const allColumns = getAllTableColumns(config.tableName);
@@ -95,6 +100,7 @@ export default function Rechte() {
                 </div>
 
                 <div className="form-row">
+                    {error && <p className="form-error">{error}</p>}
                     <button onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>

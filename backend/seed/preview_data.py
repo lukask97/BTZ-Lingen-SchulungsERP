@@ -6,7 +6,7 @@ PREVIEW_DATA = {
             "email": "admin@test.de",
             "password": "admin",
             "name": "Admin Demo",
-            "rolle": "admin",
+            "rolle": "Admin",
             "permissions": ["*"]
         },
         {
@@ -15,12 +15,7 @@ PREVIEW_DATA = {
             "email": "verkauf@test.de",
             "password": "verkauf",
             "name": "Verkauf Demo",
-            "rolle": "verkauf",
-            "permissions": [
-                "verkauf.anzeigen",
-                "verkauf.bearbeiten",
-                "kunde"
-            ]
+            "rolle": "Verkauf"
         },
         {
             "id": 3,
@@ -28,13 +23,30 @@ PREVIEW_DATA = {
             "email": "gf@test.de",
             "password": "gf",
             "name": "Lehrkraft Demo",
-            "rolle": "gf",
-            "permissions": [
-                "gf",
-                "verkauf.anzeigen",
-                "buchhaltung.anzeigen"
-            ]
+            "rolle": "Geschäftsführung"
         }
+    ],
+    "rollen": [
+        {"id": 1, "name": "Admin", "beschreibung": "Vollzugriff"},
+        {"id": 2, "name": "Verkauf", "beschreibung": "Verkauf"},
+        {"id": 3, "name": "Geschäftsführung", "beschreibung": "Lehrkraft"}
+    ],
+    "rechte": [
+        {"id": 1, "name": "*", "beschreibung": "Vollzugriff"},
+        {"id": 2, "name": "verkauf.anzeigen", "beschreibung": "Verkauf anzeigen"},
+        {"id": 3, "name": "verkauf.bearbeiten", "beschreibung": "Verkauf bearbeiten"},
+        {"id": 4, "name": "kunde", "beschreibung": "Kundenzugriff"},
+        {"id": 5, "name": "gf", "beschreibung": "Geschäftsführung"},
+        {"id": 6, "name": "buchhaltung.anzeigen", "beschreibung": "Buchhaltung anzeigen"}
+    ],
+    "rollenRechte": [
+        {"id": 1, "rolleId": 1, "rolleName": "Admin", "rechtName": "*"},
+        {"id": 2, "rolleId": 2, "rolleName": "Verkauf", "rechtName": "verkauf.anzeigen"},
+        {"id": 3, "rolleId": 2, "rolleName": "Verkauf", "rechtName": "verkauf.bearbeiten"},
+        {"id": 4, "rolleId": 2, "rolleName": "Verkauf", "rechtName": "kunde"},
+        {"id": 5, "rolleId": 3, "rolleName": "Geschäftsführung", "rechtName": "gf"},
+        {"id": 6, "rolleId": 3, "rolleName": "Geschäftsführung", "rechtName": "verkauf.anzeigen"},
+        {"id": 7, "rolleId": 3, "rolleName": "Geschäftsführung", "rechtName": "buchhaltung.anzeigen"}
     ],
     "kunden": [
         {
@@ -89,6 +101,12 @@ PREVIEW_DATA = {
                 }
             ]
         }
+    ],
+    "nummernkreise": [
+        {"id": 1, "schluessel": "angebot", "bezeichnung": "Angebot", "kuerzel": "ANG"},
+        {"id": 2, "schluessel": "auftrag", "bezeichnung": "Auftrag", "kuerzel": "AU"},
+        {"id": 3, "schluessel": "rechnung", "bezeichnung": "Rechnung", "kuerzel": "RG"},
+        {"id": 4, "schluessel": "lieferschein", "bezeichnung": "Lieferschein", "kuerzel": "LS"}
     ],
     "auftraege": [],
     "vertriebsdokumente": [],

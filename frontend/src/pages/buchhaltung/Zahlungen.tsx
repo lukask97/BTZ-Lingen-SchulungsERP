@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
@@ -9,64 +8,62 @@ import NumberField from "../../components/form/NumberField";
 import OverviewCards from "../../components/OverviewCards";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
-import kundenService from "../../services/verkauf/customerService";
-import lieferantenService from "../../services/einkauf/lieferantenService";
-import { getCustomerName } from "../../utils/customerReferences";
 import { getPaymentOpenItemStatus, isOpenItem, isPendingPayment } from "../../utils/openItems";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 
-const today = "2026-07-28";
+function createZahlungsentwurf(today: string) {
+    return { rechnungId: "", betrag: 0, ausfuehrenAm: today };
+}
 
 export default function Zahlungen() {
+    const today = getBerlinDate();
     const [zahlungen, setZahlungen] = useSyncedServiceData(["zahlungen", "auftraege", "bestellungen"], () => zahlungenService.list());
     const [open, setOpen] = useState(false);
-    const [rechnungId, setRechnungId] = useState("");
-    const [betrag, setBetrag] = useState(0);
-    const [ausfuehrenAm, setAusfuehrenAm] = useState(today);
+    const [draft, setDraft] = useState(createZahlungsentwurf(today));
     const rechnungen = rechnungenService.list().filter(isOpenItem);
-    const kunden = kundenService.list();
-    const lieferanten = lieferantenService.list();
     const rechnungsOptionen = rechnungen.map(item => ({ value: String(item.id), label: `${item.rechnungsnr} - ${item.kunde}` }));
 
     const resolvePartnerLink = (zahlung) => {
-        const rechnung = rechnungenService.list().find(item => item.rechnungsnr === zahlung.rechnungsnr);
+        const rechnung = zahlung.rechnungId ? rechnungenService.getById(zahlung.rechnungId) : null;
         if (!rechnung) return null;
         if (rechnung.rechnungstyp === "Eingangsrechnung") {
-            const lieferantId = rechnung.lieferantId || lieferanten.find(item => item.firma === rechnung.kunde)?.id;
-            return lieferantId ? `/lieferanten?focus=${lieferantId}` : null;
+            return rechnung.lieferantId ? `/lieferanten?focus=${rechnung.lieferantId}` : null;
         }
-        const kundeId = rechnung.kundeId || kunden.find(item => item.firma === rechnung.kunde)?.id;
-        return kundeId ? `/kunden?focus=${kundeId}` : null;
+        return rechnung.kundeId ? `/kunden?focus=${rechnung.kundeId}` : null;
     };
 
     const neu = () => {
         const first = rechnungen[0];
-        setRechnungId(first ? String(first.id) : "");
-        setBetrag(first ? Number(first.betrag) : 0);
-        setAusfuehrenAm(first?.faelligAm || today);
+        setDraft({
+            rechnungId: first ? String(first.id) : "",
+            betrag: first ? Number(first.betrag) : 0,
+            ausfuehrenAm: first?.faelligAm || today
+        });
         setOpen(true);
     };
 
     const speichern = () => {
-        const rechnung = rechnungenService.getById(rechnungId);
+        const rechnung = rechnungenService.getById(draft.rechnungId);
         if (!rechnung) return;
         zahlungenService.create({
-            rechnungsnr: rechnung.rechnungsnr,
+            rechnungId: rechnung.id,
             zahlungsart: rechnung.rechnungstyp === "Eingangsrechnung" ? "Ausgang" : "Eingang",
-            kunde: rechnung.rechnungstyp === "Eingangsrechnung" ? rechnung.kunde : getCustomerName(rechnung.kundeId, rechnung.kunde),
             datum: today,
-            ausfuehrenAm,
-            betrag: Number(betrag),
+            ausfuehrenAm: draft.ausfuehrenAm,
+            betrag: Number(draft.betrag),
             methode: "Überweisung",
             status: "geplant"
         });
         setZahlungen(zahlungenService.list());
         setOpen(false);
+        setDraft(createZahlungsentwurf(today));
     };
 
     const ausfuehren = (zahlung) => {
         if (zahlung.status === "ausgefuehrt") return;
-        const rechnung = rechnungenService.list().find(item => item.rechnungsnr === zahlung.rechnungsnr);
+        const rechnung = zahlung.rechnungId ? rechnungenService.getById(zahlung.rechnungId) : null;
         zahlungenService.update({ ...zahlung, status: "ausgefuehrt", datum: today });
         if (rechnung) {
             rechnungenService.update({ ...rechnung, status: "bezahlt" });
@@ -75,7 +72,7 @@ export default function Zahlungen() {
     };
 
     const stornieren = (zahlung) => {
-        const rechnung = rechnungenService.list().find(item => item.rechnungsnr === zahlung.rechnungsnr);
+        const rechnung = zahlung.rechnungId ? rechnungenService.getById(zahlung.rechnungId) : null;
         if (rechnung && zahlung.status === "ausgefuehrt") {
             rechnungenService.update({ ...rechnung, status: "offen" });
         }
@@ -119,17 +116,17 @@ export default function Zahlungen() {
                 if (field === "kunde") return resolvePartnerLink(row);
                 return null;
             }}
-            toolbarActions={[{ name: "new", label: "Zahlungsvorgang anlegen", permission: "buchhaltung.bearbeiten", onClick: neu, variant: "success" }]}
+            toolbarActions={[{ name: "new", label: "Zahlungsvorgang anlegen", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: neu, variant: "success" }]}
             rowActions={[
-                { name: "execute", label: "Als ausgeführt markieren", permission: "buchhaltung.bearbeiten", onClick: ausfuehren, variant: "success", isVisible: row => row.status !== "ausgefuehrt" },
-                { name: "cancel", label: "Stornieren", permission: "buchhaltung.bearbeiten", onClick: stornieren, variant: "danger" }
+                { name: "execute", label: "Als ausgeführt markieren", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: ausfuehren, variant: "success", isVisible: row => row.status !== "ausgefuehrt" },
+                { name: "cancel", label: "Stornieren", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: stornieren, variant: "danger" }
             ]}
         />
         <Dialog open={open} title="Internen Zahlungsvorgang anlegen" onClose={() => setOpen(false)}>
-            <div><Label>Rechnung</Label><LookupField value={rechnungId} options={rechnungsOptionen} onChange={setRechnungId} placeholder="Rechnung suchen..."/></div>
+            <div><Label>Rechnung</Label><LookupField value={draft.rechnungId} options={rechnungsOptionen} onChange={value => setDraft(item => ({ ...item, rechnungId: value }))} placeholder="Rechnung suchen..."/></div>
             <div className="form-row">
-                <div><Label>Betrag</Label><NumberField value={betrag} min="0" onChange={setBetrag}/></div>
-                <div><Label>Ausführen am</Label><input type="date" value={ausfuehrenAm} onChange={event => setAusfuehrenAm(event.target.value)}/></div>
+                <div><Label>Betrag</Label><NumberField value={draft.betrag} min="0" onChange={value => setDraft(item => ({ ...item, betrag: value }))}/></div>
+                <div><Label>Ausführen am</Label><input type="date" value={draft.ausfuehrenAm} onChange={event => setDraft(item => ({ ...item, ausfuehrenAm: event.target.value }))}/></div>
             </div>
             <div className="form-row"><button onClick={speichern}>Speichern</button></div>
         </Dialog>

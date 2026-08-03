@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
@@ -15,8 +14,8 @@ import freigabenService from "../../services/gf/freigabenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import reklamationenService from "../../services/verkauf/reklamationenService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
-
-const today = "2026-07-26";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 
 const bereichLinks = {
     verkauf: "/themen/verkauf",
@@ -26,6 +25,18 @@ const bereichLinks = {
     marketing: "/marketing",
     personalwesen: "/personalwesen"
 };
+
+function createEmptyBericht(today: string) {
+    return {
+        titel: "",
+        bereich: "verkauf",
+        datum: today,
+        status: "Entwurf",
+        zielgruppe: "Lehrkraft",
+        zusammenfassung: "",
+        empfohlenAktion: ""
+    };
+}
 
 function generiereZusammenfassung(bereich) {
     if (bereich === "verkauf") {
@@ -56,31 +67,19 @@ function generiereZusammenfassung(bereich) {
 }
 
 export default function Berichte() {
+    const today = getBerlinDate();
     const [berichte, setBerichte] = useSyncedServiceData(
         ["berichte", "angebote", "auftraege", "bestellungen", "freigaben", "reklamationen"],
         () => berichteService.list()
     );
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    const [current, setCurrent] = useState({
-        titel: "",
-        bereich: "verkauf",
-        datum: today,
-        status: "Entwurf",
-        zielgruppe: "Lehrkraft",
-        zusammenfassung: "",
-        empfohlenAktion: ""
-    });
+    const [current, setCurrent] = useState(createEmptyBericht(today));
 
     const neu = () => {
         setCurrent({
-            titel: "",
-            bereich: "verkauf",
-            datum: today,
-            status: "Entwurf",
-            zielgruppe: "Lehrkraft",
+            ...createEmptyBericht(today),
             zusammenfassung: generiereZusammenfassung("verkauf"),
-            empfohlenAktion: ""
         });
         setEditMode(false);
         setOpen(true);
@@ -169,11 +168,11 @@ export default function Berichte() {
                 { field: "empfohlenAktion", title: "Empfohlene Aktion" }
             ]}
             detailLinkResolver={({ field, row }) => field === "bereich" ? bereichLinks[row.bereich] || null : null}
-            toolbarActions={[{ name: "new", label: "Bericht anlegen", permission: "gf.bearbeiten", onClick: neu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Bericht anlegen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "edit", label: "Bearbeiten", permission: "gf.bearbeiten", onClick: bearbeiten, variant: "secondary" },
-                { name: "done", label: "Fertigstellen", permission: "gf.bearbeiten", onClick: fertigstellen, variant: "success", isVisible: row => row.status !== "fertig" },
-                { name: "delete", label: "Löschen", permission: "gf.bearbeiten", onClick: loeschen, variant: "danger" }
+                { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.GF_BEARBEITEN, onClick: bearbeiten, variant: "secondary" },
+                { name: "done", label: "Fertigstellen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: fertigstellen, variant: "success", isVisible: row => row.status !== "fertig" },
+                { name: "delete", label: "Löschen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: loeschen, variant: "danger" }
             ]}
         />
         <Dialog open={open} title={editMode ? "Bericht bearbeiten" : "Bericht anlegen"} onClose={() => setOpen(false)}>

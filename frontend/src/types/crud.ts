@@ -18,6 +18,16 @@ export interface CrudService<T extends EntityWithId> {
     sortBy?: (field: keyof T | string, order?: string) => T[];
 }
 
+export interface CrudValidationField {
+    field: string;
+    label: string;
+}
+
+export interface UseCrudPageOptions<T extends EntityWithId> {
+    requiredFields?: CrudValidationField[];
+    createNewItem?: () => T;
+}
+
 export interface UseCrudPageResult<T extends EntityWithId> {
     data: T[];
     allData: T[];
@@ -26,6 +36,7 @@ export interface UseCrudPageResult<T extends EntityWithId> {
     pageSize: number;
     search: string;
     currentItem: T;
+    error: string;
     setOpen: (value: boolean) => void;
     setPageSize: (value: number) => void;
     setSearch: (value: string) => void;

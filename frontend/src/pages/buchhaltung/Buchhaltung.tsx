@@ -24,7 +24,7 @@ export default function Buchhaltung() {
     const ausgeglicheneSumme = sumPaidItems(rechnungen);
     const belegeProRechnung = rechnungen.map(rechnung => ({
         ...rechnung,
-        belege: belege.filter(item => item.bezug === rechnung.rechnungsnr)
+        belege: belege.filter(item => String(item.rechnungId) === String(rechnung.id) || item.bezug === rechnung.rechnungsnr)
     })).slice(0, 4);
     const ampelUebersicht = [
         { label: "Gelb", value: rechnungen.filter(rechnung => getOpenItemStatus(rechnung) === "offen").length, hint: "offen" },

@@ -82,10 +82,41 @@ button:disabled {
 }
 
 .datatable-wrapper {
+    position: relative;
     width: 100%;
     min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
+}
+
+.datatable-wrapper::before,
+.datatable-wrapper::after {
+    content: "";
+    position: sticky;
+    top: 0;
+    bottom: 0;
+    width: 22px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.16s ease;
+    z-index: 4;
+}
+
+.datatable-wrapper::before {
+    left: 0;
+    float: left;
+    background: linear-gradient(90deg, rgba(31, 41, 55, 0.16), rgba(31, 41, 55, 0));
+}
+
+.datatable-wrapper::after {
+    right: 0;
+    float: right;
+    background: linear-gradient(270deg, rgba(31, 41, 55, 0.16), rgba(31, 41, 55, 0));
+}
+
+.datatable-wrapper.has-left-overflow::before,
+.datatable-wrapper.has-right-overflow::after {
+    opacity: 1;
 }
 
 .datatable-wrapper .datatable {
@@ -104,11 +135,40 @@ button:disabled {
     user-select: none;
 }
 
+.datatable .datatable-actions-column {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background: #fff;
+    min-width: 180px;
+    box-shadow: -10px 0 14px -12px rgba(31, 41, 55, 0.45);
+    border-left: 2px solid rgba(53, 80, 112, 0.18);
+}
+
+.datatable thead .datatable-actions-column {
+    z-index: 3;
+    background: #f5f5f5;
+}
+
+.datatable-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .datatable tr:nth-child(even) {
     background: #fafafa;
 }
 
+.datatable tr:nth-child(even) .datatable-actions-column {
+    background: #fafafa;
+}
+
 .datatable tbody tr:hover {
+    background: #eef5ff;
+}
+
+.datatable tbody tr:hover .datatable-actions-column {
     background: #eef5ff;
 }
 
@@ -117,7 +177,16 @@ button:disabled {
     background: #fde8e8;
 }
 
+.datatable tbody tr.datatable-row-critical .datatable-actions-column,
+.datatable tbody tr.datatable-row-critical:nth-child(even) .datatable-actions-column {
+    background: #fde8e8;
+}
+
 .datatable tbody tr.datatable-row-critical:hover {
+    background: #f8caca;
+}
+
+.datatable tbody tr.datatable-row-critical:hover .datatable-actions-column {
     background: #f8caca;
 }
 
@@ -478,6 +547,19 @@ button:disabled {
 
 .positionsliste li {
     margin: 6px 0;
+}
+
+.position-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.position-availability {
+    margin: 4px 0 0;
+    color: #355070;
+    font-size: 0.92rem;
 }
 
 .thread-offer-item {

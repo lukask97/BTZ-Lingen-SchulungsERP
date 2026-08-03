@@ -1,4 +1,7 @@
 import type { DataTableColumn } from "../types/ui";
+import { PERMISSIONS, PERMISSION_GROUPS } from "./permissions";
+
+export { PERMISSIONS, PERMISSION_GROUPS } from "./permissions";
 
 // Initiale Datenstrukturen für alle Tabellen
 export const INITIAL_DATA = {
@@ -12,7 +15,7 @@ export const INITIAL_DATA = {
         segment: "",
         fuerBts: "",
         bewertung: 3,
-        abc: "C"
+        abc: "Unbestimmt"
     },
     kunden: {
         id: null,
@@ -22,7 +25,7 @@ export const INITIAL_DATA = {
         plz: "",
         ort: "",
         segment: "",
-        abc: "C",
+        abc: "Unbestimmt",
         website: "",
         optionen: [],
         notiz: ""
@@ -57,6 +60,12 @@ export const INITIAL_DATA = {
         einkaufspreis: 0,
         verkaufspreis: 0,
         beschreibung: ""
+    },
+    nummernkreise: {
+        id: null,
+        schluessel: "",
+        bezeichnung: "",
+        kuerzel: ""
     },
     benutzer: {
         id: null,
@@ -99,101 +108,13 @@ export const INITIAL_DATA = {
     }
 };
 
-// Berechtigungen für jede Seite
-export const PERMISSIONS = {
-    KUNDE_ANLEGEN: "kunde.anlegen",
-    KUNDE_BEARBEITEN: "kunde.bearbeiten",
-    ARTIKEL_ANLEGEN: "artikel.anlegen",
-    ARTIKEL_BEARBEITEN: "artikel.bearbeiten",
-    BENUTZER_ANLEGEN: "benutzer.anlegen",
-    BENUTZER_BEARBEITEN: "benutzer.bearbeiten",
-    ROLLEN_ANLEGEN: "rollen.anlegen",
-    ROLLEN_BEARBEITEN: "rollen.bearbeiten",
-    RECHTE_ANLEGEN: "rechte.anlegen",
-    RECHTE_BEARBEITEN: "rechte.bearbeiten",
-    LAGER_ANLEGEN: "lager.anlegen",
-    LAGER_BEARBEITEN: "lager.bearbeiten",
-    RECHNUNG_ANLEGEN: "rechnung.anlegen",
-    RECHNUNG_BEARBEITEN: "rechnung.bearbeiten"
-};
-
-// Alle verfügbaren Berechtigungen gruppiert
-export const PERMISSION_GROUPS = {
-    "Einkauf": [
-        { key: "einkauf.lesen", label: "Einkauf lesen" },
-        { key: "einkauf.bearbeiten", label: "Einkauf bearbeiten" }
-    ],
-    "Verkauf": [
-        { key: "verkauf.lesen", label: "Verkauf lesen" },
-        { key: "verkauf.bearbeiten", label: "Verkauf bearbeiten" }
-    ],
-    "Service": [
-        { key: "service.lesen", label: "Service lesen" },
-        { key: "service.bearbeiten", label: "Service bearbeiten" }
-    ],
-    "Marketing": [
-        { key: "marketing.lesen", label: "Marketing lesen" },
-        { key: "marketing.bearbeiten", label: "Marketing bearbeiten" }
-    ],
-    "Buchhaltung": [
-        { key: "buchhaltung.lesen", label: "Buchhaltung lesen" },
-        { key: "buchhaltung.bearbeiten", label: "Buchhaltung bearbeiten" }
-    ],
-    "Geschäftsführung": [
-        { key: "gf.lesen", label: "Geschäftsführung lesen" },
-        { key: "gf.bearbeiten", label: "Geschäftsführung bearbeiten" }
-    ],
-    "Kunden": [
-        { key: "kunde.anlegen", label: "Kunde anlegen" },
-        { key: "kunde.bearbeiten", label: "Kunde bearbeiten" },
-        { key: "kunde.loeschen", label: "Kunde löschen" },
-        { key: "kunde.anzeigen", label: "Kunde anzeigen" }
-    ],
-    "Artikel": [
-        { key: "artikel.anlegen", label: "Artikel anlegen" },
-        { key: "artikel.bearbeiten", label: "Artikel bearbeiten" },
-        { key: "artikel.loeschen", label: "Artikel löschen" },
-        { key: "artikel.anzeigen", label: "Artikel anzeigen" }
-    ],
-    "Benutzer": [
-        { key: "benutzer.anlegen", label: "Benutzer anlegen" },
-        { key: "benutzer.bearbeiten", label: "Benutzer bearbeiten" },
-        { key: "benutzer.loeschen", label: "Benutzer löschen" },
-        { key: "benutzer.anzeigen", label: "Benutzer anzeigen" }
-    ],
-    "Rollen": [
-        { key: "rollen.anlegen", label: "Rolle anlegen" },
-        { key: "rollen.bearbeiten", label: "Rolle bearbeiten" },
-        { key: "rollen.loeschen", label: "Rolle löschen" },
-        { key: "rollen.anzeigen", label: "Rolle anzeigen" }
-    ],
-    "Rechte": [
-        { key: "rechte.anlegen", label: "Recht anlegen" },
-        { key: "rechte.bearbeiten", label: "Recht bearbeiten" },
-        { key: "rechte.loeschen", label: "Recht löschen" },
-        { key: "rechte.anzeigen", label: "Recht anzeigen" }
-    ],
-    "Lager": [
-        { key: "lager.anlegen", label: "Lager anlegen" },
-        { key: "lager.bearbeiten", label: "Lager bearbeiten" },
-        { key: "lager.loeschen", label: "Lager löschen" },
-        { key: "lager.anzeigen", label: "Lager anzeigen" }
-    ],
-    "Rechnungen": [
-        { key: "rechnung.anlegen", label: "Rechnung anlegen" },
-        { key: "rechnung.bearbeiten", label: "Rechnung bearbeiten" },
-        { key: "rechnung.loeschen", label: "Rechnung löschen" },
-        { key: "rechnung.anzeigen", label: "Rechnung anzeigen" }
-    ]
-};
-
 // Page-Konfigurationen
 export const PAGE_CONFIG = {
     lieferanten: {
         title: "Lieferantenverwaltung",
         tableName: "lieferanten",
-        permissionCreate: "einkauf.bearbeiten",
-        permissionEdit: "einkauf.bearbeiten",
+        permissionCreate: PERMISSIONS.EINKAUF_BEARBEITEN,
+        permissionEdit: PERMISSIONS.EINKAUF_BEARBEITEN,
         columns: "lieferanten"
     },
     kunden: {
@@ -220,8 +141,8 @@ export const PAGE_CONFIG = {
     services: {
         title: "Serviceverwaltung",
         tableName: "services",
-        permissionCreate: "service.bearbeiten",
-        permissionEdit: "service.bearbeiten",
+        permissionCreate: PERMISSIONS.SERVICE_BEARBEITEN,
+        permissionEdit: PERMISSIONS.SERVICE_BEARBEITEN,
         columns: "services"
     },
     benutzer: {
@@ -230,6 +151,13 @@ export const PAGE_CONFIG = {
         permissionCreate: PERMISSIONS.BENUTZER_ANLEGEN,
         permissionEdit: PERMISSIONS.BENUTZER_BEARBEITEN,
         columns: "benutzer"
+    },
+    nummernkreise: {
+        title: "Nummernkreise",
+        tableName: "nummernkreise",
+        permissionCreate: PERMISSIONS.BENUTZER_BEARBEITEN,
+        permissionEdit: PERMISSIONS.BENUTZER_BEARBEITEN,
+        columns: "nummernkreise"
     },
     rollen: {
         title: "Rollenverwaltung",
@@ -277,7 +205,7 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "kundenNr", title: "Kundennummer" },
         { field: "firma", title: "Firma" },
         { field: "ort", title: "Ort" },
-        { field: "segment", title: "Segment" },
+        { field: "segment", title: "Kategorie" },
         { field: "abc", title: "ABC" },
         { field: "website", title: "Website" },
         { field: "anschrift", title: "Anschrift", visible: false },
@@ -297,9 +225,10 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "komponenten", title: "Komponenten", visible: false }
     ],
     kategorien: [
-        { field: "name", title: "Name" },
-        { field: "parentId", title: "Oberkategorie" },
-        { field: "beschreibung", title: "Beschreibung" }
+        { field: "name", title: "Kategorie" },
+        { field: "parentName", title: "Oberkategorie" },
+        { field: "pfad", title: "Pfad" },
+        { field: "beschreibung", title: "Beschreibung", visible: false }
     ],
     services: [
         { field: "serviceNr", title: "Servicenummer" },
@@ -316,6 +245,11 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "email", title: "E-Mail" },
         { field: "rolle", title: "Rolle" },
         { field: "password", title: "Passwort", visible: false }
+    ],
+    nummernkreise: [
+        { field: "bezeichnung", title: "Bereich" },
+        { field: "schluessel", title: "Schluessel" },
+        { field: "kuerzel", title: "Kuerzel" }
     ],
     rollen: [
         { field: "name", title: "Name" },

@@ -21,6 +21,14 @@ export function buildDatabasePath(path: string) {
     return `${DATABASE_API_URL}${path}`;
 }
 
+function resolveApiUrl(path: string) {
+    if (/^https?:\/\//.test(path)) {
+        return path;
+    }
+
+    return `${API_URL}${path}`;
+}
+
 export function getDataProvider() {
     if (typeof window !== "undefined") {
         const runtimeProvider = window.localStorage.getItem(DATA_PROVIDER_STORAGE_KEY);
@@ -44,7 +52,7 @@ export function setDataProvider(provider: string) {
 
 export function syncApiRequest(path: string, options: { method?: string; body?: unknown } = {}) {
     const request = new XMLHttpRequest();
-    request.open(options.method || "GET", `${API_URL}${path}`, false);
+    request.open(options.method || "GET", resolveApiUrl(path), false);
     request.withCredentials = true;
     request.setRequestHeader("Content-Type", "application/json");
     request.send(options.body ? JSON.stringify(options.body) : null);
@@ -60,7 +68,7 @@ export function syncApiRequest(path: string, options: { method?: string; body?: 
 }
 
 export async function apiRequest(path: string, options: RequestInit = {}) {
-    const response = await fetch(`${API_URL}${path}`, {
+    const response = await fetch(resolveApiUrl(path), {
         credentials: "include",
         headers: {
             "Content-Type": "application/json",

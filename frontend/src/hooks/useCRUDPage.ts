@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { CrudService, EntityWithId, UseCrudPageResult } from "../types/crud";
+import type { CrudService, EntityWithId, UseCrudPageOptions, UseCrudPageResult } from "../types/crud";
 import { subscribeToStorageSync } from "../services/mockup/mockStorage";
 
 /**
@@ -8,7 +8,8 @@ import { subscribeToStorageSync } from "../services/mockup/mockStorage";
 export function useCRUDPage<T extends EntityWithId>(
     tableName: string,
     initialData: T,
-    services: CrudService<T>
+    services: CrudService<T>,
+    options: UseCrudPageOptions<T> = {}
 ): UseCrudPageResult<T> {
     // States
     const [data, setData] = useState(services.list());
@@ -17,6 +18,7 @@ export function useCRUDPage<T extends EntityWithId>(
     const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState("");
     const [currentItem, setCurrentItem] = useState(initialData);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         setData(services.list());
@@ -37,7 +39,8 @@ export function useCRUDPage<T extends EntityWithId>(
     // Neue Aktion
     const neu = () => {
         setEditMode(false);
-        setCurrentItem(structuredClone(initialData));
+        setCurrentItem(structuredClone(options.createNewItem ? options.createNewItem() : initialData));
+        setError("");
         setOpen(true);
     };
 
@@ -45,6 +48,7 @@ export function useCRUDPage<T extends EntityWithId>(
     const bearbeiten = (item: T) => {
         setEditMode(true);
         setCurrentItem(structuredClone(item));
+        setError("");
         setOpen(true);
     };
 
@@ -58,18 +62,31 @@ export function useCRUDPage<T extends EntityWithId>(
 
     // Speichern-Aktion
     const speichern = () => {
+        const fehlendeFelder = (options.requiredFields || []).filter(({ field }) => {
+            const value = currentItem?.[field];
+            if (Array.isArray(value)) return value.length === 0;
+            return value === null || value === undefined || String(value).trim() === "";
+        });
+
+        if (fehlendeFelder.length > 0) {
+            setError(`Bitte folgende Pflichtfelder ausfuellen: ${fehlendeFelder.map(item => item.label).join(", ")}.`);
+            return;
+        }
+
         if (editMode) {
             services.update(currentItem);
         } else {
             services.create(currentItem);
         }
         setData(services.list());
+        setError("");
         setOpen(false);
     };
 
     // Schließen Dialog
     const handleClose = () => {
         setOpen(false);
+        setError("");
     };
 
     return {
@@ -81,12 +98,16 @@ export function useCRUDPage<T extends EntityWithId>(
         pageSize,
         search,
         currentItem,
+        error,
         
         // Setter
         setOpen,
         setPageSize,
         setSearch,
-        setCurrentItem,
+        setCurrentItem: (value: T) => {
+            setCurrentItem(value);
+            if (error) setError("");
+        },
         
         // Actions
         neu,

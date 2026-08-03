@@ -1,5 +1,6 @@
-import {users} from "../mockup/mockData.js";
+import { benutzer, rollen, rollenRechte } from "../mockup/mockData.js";
 import { apiRequest, isDatabaseModeEnabled } from "../core/api";
+import { resolveUserPermissions } from "../../auth/permissionResolver";
 
 export async function getCurrentBackendUser() {
     if (!isDatabaseModeEnabled()) return null;
@@ -33,7 +34,7 @@ export async function login(username,password){
         }
     }
 
-    const user = users.find(
+    const user = benutzer.find(
         u =>
             u.username === username &&
             u.password === password
@@ -44,7 +45,10 @@ export async function login(username,password){
         return null;
 
 
-    return user;
+    return {
+        ...user,
+        permissions: resolveUserPermissions(user, rollen, rollenRechte)
+    };
 
 }
 

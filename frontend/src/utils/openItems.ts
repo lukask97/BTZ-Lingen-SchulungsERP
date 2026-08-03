@@ -1,10 +1,15 @@
-const TODAY = "2026-07-28";
+import { getBerlinDate } from "./dateTime";
+
+function getToday() {
+    return getBerlinDate();
+}
 
 export function getOpenItemStatus(rechnung: any) {
+    const today = getToday();
     if (!rechnung) return "offen";
     if (rechnung.status === "bezahlt") return "bezahlt";
     if (rechnung.status === "storniert") return "storniert";
-    if (rechnung.faelligAm && rechnung.faelligAm < TODAY) return "ueberfaellig";
+    if (rechnung.faelligAm && rechnung.faelligAm < today) return "ueberfaellig";
     return "offen";
 }
 
@@ -30,10 +35,11 @@ export function sumPaidItems(rechnungen: any[] = []) {
 }
 
 export function getPaymentOpenItemStatus(zahlung: any) {
+    const today = getToday();
     if (!zahlung) return "offen";
     if (zahlung.status === "ausgefuehrt") return "bezahlt";
     if (zahlung.status === "storniert") return "storniert";
-    if ((zahlung.ausfuehrenAm || zahlung.datum) && (zahlung.ausfuehrenAm || zahlung.datum) < TODAY) return "ueberfaellig";
+    if ((zahlung.ausfuehrenAm || zahlung.datum) && (zahlung.ausfuehrenAm || zahlung.datum) < today) return "ueberfaellig";
     return "offen";
 }
 

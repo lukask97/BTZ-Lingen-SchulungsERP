@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
@@ -12,8 +11,15 @@ import krankmeldungenService from "../../services/personalwesen/krankmeldungenSe
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import personalaktenService from "../../services/personalwesen/personalaktenService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
+
+function createKrankmeldung(today: string) {
+    return { mitarbeiterId: "", von: today, bis: today, grund: "", status: "eingegangen" };
+}
 
 export default function Krankmeldungen() {
+    const today = getBerlinDate();
     const navigate = useNavigate();
     const [meldungen, setMeldungen] = useSyncedServiceData(
         ["krankmeldungen", "mitarbeiter", "personalakten"],
@@ -22,28 +28,23 @@ export default function Krankmeldungen() {
     const [open, setOpen] = useState(false);
     const mitarbeiter = mitarbeiterService.list();
     const mitarbeiterOptionen = mitarbeiter.map(item => ({ value: String(item.id), label: `${item.name} - ${item.abteilung}` }));
-    const [current, setCurrent] = useState({ mitarbeiterId: "", mitarbeiter: "", von: "2026-07-26", bis: "2026-07-26", grund: "", status: "eingegangen" });
+    const [current, setCurrent] = useState(createKrankmeldung(today));
 
     const neu = () => {
         const ersterMitarbeiter = mitarbeiter[0];
         setCurrent({
-            mitarbeiterId: ersterMitarbeiter ? String(ersterMitarbeiter.id) : "",
-            mitarbeiter: ersterMitarbeiter?.name || "",
-            von: "2026-07-26",
-            bis: "2026-07-26",
-            grund: "",
-            status: "eingegangen"
+            ...createKrankmeldung(today),
+            mitarbeiterId: ersterMitarbeiter ? String(ersterMitarbeiter.id) : ""
         });
         setOpen(true);
     };
 
     const mitarbeiterAuswaehlen = (value) => {
-        const person = mitarbeiter.find(item => String(item.id) === String(value));
-        setCurrent(item => ({ ...item, mitarbeiterId: value, mitarbeiter: person?.name || "" }));
+        setCurrent(item => ({ ...item, mitarbeiterId: value }));
     };
 
     const speichern = () => {
-        if (!current.mitarbeiter.trim() || !current.grund.trim()) return;
+        if (!current.mitarbeiterId || !current.grund.trim()) return;
 
         const neueMeldung = krankmeldungenService.create({
             ...current,
@@ -53,7 +54,6 @@ export default function Krankmeldungen() {
         if (neueMeldung.mitarbeiterId) {
             personalaktenService.create({
                 mitarbeiterId: Number(neueMeldung.mitarbeiterId),
-                mitarbeiter: neueMeldung.mitarbeiter,
                 dokumentTyp: "Krankmeldung",
                 titel: `Krankmeldung ${neueMeldung.von}`,
                 datum: neueMeldung.von,
@@ -64,6 +64,7 @@ export default function Krankmeldungen() {
 
         setMeldungen(krankmeldungenService.list());
         setOpen(false);
+        setCurrent(createKrankmeldung(today));
     };
 
     const bestaetigen = (meldung) => {
@@ -95,11 +96,11 @@ export default function Krankmeldungen() {
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalakte?mitarbeiter=${row.mitarbeiterId}` : null}
-            toolbarActions={[{ name: "new", label: "Krankmeldung erfassen", permission: "personalwesen.bearbeiten", onClick: neu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Krankmeldung erfassen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "details", label: "Akte öffnen", permission: "personalwesen.bearbeiten", onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
-                { name: "approve", label: "Bestätigen", permission: "personalwesen.bearbeiten", onClick: bestaetigen, variant: "success", isVisible: row => row.status === "eingegangen" },
-                { name: "done", label: "Abschließen", permission: "personalwesen.bearbeiten", onClick: abschliessen, variant: "success", isVisible: row => row.status === "bestätigt" }
+                { name: "details", label: "Akte öffnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
+                { name: "approve", label: "Bestätigen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: bestaetigen, variant: "success", isVisible: row => row.status === "eingegangen" },
+                { name: "done", label: "Abschließen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: abschliessen, variant: "success", isVisible: row => row.status === "bestätigt" }
             ]}
         />
         <Dialog open={open} title="Krankmeldung erfassen" onClose={() => setOpen(false)}>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
@@ -9,9 +8,18 @@ import artikelService from "../../services/logistik/artikelService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import bestellungenService, { naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
-
-const heute = "2026-07-29";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
+
+function createBedarfsmeldungDraft() {
+    return {
+        artikelId: "",
+        menge: 1,
+        positionen: [],
+        fehler: ""
+    };
+}
 
 function getVerplanteMengen(auftraege) {
     return auftraege
@@ -42,6 +50,7 @@ function getBestellvorschlag(artikel, verplant, kritischerBestand) {
 }
 
 export default function Bestand() {
+    const heute = getBerlinDate();
     const syncTick = useStorageSyncRefresh(["artikel", "auftraege", "bestellungen"]);
     const [searchParams] = useSearchParams();
     const [refreshKey, setRefreshKey] = useState(0);
@@ -52,10 +61,7 @@ export default function Bestand() {
     const [bedarfDialogOpen, setBedarfDialogOpen] = useState(false);
     const [ausgewaehlterArtikel, setAusgewaehlterArtikel] = useState(null);
     const [neuerBestand, setNeuerBestand] = useState(0);
-    const [artikelId, setArtikelId] = useState("");
-    const [menge, setMenge] = useState(1);
-    const [positionen, setPositionen] = useState([]);
-    const [fehler, setFehler] = useState("");
+    const [bedarfDraft, setBedarfDraft] = useState(createBedarfsmeldungDraft);
 
     const artikel = useMemo(() => artikelService.getAll(), [refreshKey, syncTick]);
     const auftraege = useMemo(() => auftraegeService.getAll(), [refreshKey, syncTick]);
@@ -102,33 +108,38 @@ export default function Bestand() {
 
     const bedarfsmeldungStarten = (row) => {
         setAusgewaehlterArtikel(row);
-        setArtikelId(String(row.id));
-        setMenge(getBestellvorschlag(row, row.verplant, kritischerBestand));
-        setPositionen([{
-            artikelId: row.id,
-            artikel: row.name,
-            menge: getBestellvorschlag(row, row.verplant, kritischerBestand)
-        }]);
-        setFehler("");
+        const vorgeschlageneMenge = getBestellvorschlag(row, row.verplant, kritischerBestand);
+        setBedarfDraft({
+            artikelId: String(row.id),
+            menge: vorgeschlageneMenge,
+            positionen: [{
+                artikelId: row.id,
+                artikel: row.name,
+                menge: vorgeschlageneMenge
+            }],
+            fehler: ""
+        });
         setBedarfDialogOpen(true);
     };
 
     const positionHinzufuegen = () => {
-        const auswahl = einkaufbareArtikel.find(item => String(item.id) === String(artikelId));
-        if (!auswahl || Number(menge) <= 0) return;
+        const auswahl = einkaufbareArtikel.find(item => String(item.id) === String(bedarfDraft.artikelId));
+        if (!auswahl || Number(bedarfDraft.menge) <= 0) return;
 
-        setPositionen(vorherige => {
-            const vorhanden = vorherige.find(item => String(item.artikelId) === String(auswahl.id));
-            if (vorhanden) {
-                return vorherige.map(item => String(item.artikelId) === String(auswahl.id)
-                    ? { ...item, menge: Number(item.menge || 0) + Number(menge || 0) }
-                    : item);
-            }
-            return [...vorherige, {
-                artikelId: auswahl.id,
-                artikel: auswahl.name,
-                menge: Number(menge || 0)
-            }];
+        setBedarfDraft(vorherige => {
+            const vorhanden = vorherige.positionen.find(item => String(item.artikelId) === String(auswahl.id));
+            return {
+                ...vorherige,
+                positionen: vorhanden
+                    ? vorherige.positionen.map(item => String(item.artikelId) === String(auswahl.id)
+                        ? { ...item, menge: Number(item.menge || 0) + Number(vorherige.menge || 0) }
+                        : item)
+                    : [...vorherige.positionen, {
+                        artikelId: auswahl.id,
+                        artikel: auswahl.name,
+                        menge: Number(vorherige.menge || 0)
+                    }]
+            };
         });
     };
 
@@ -144,8 +155,8 @@ export default function Bestand() {
     };
 
     const bedarfsmeldungSpeichern = () => {
-        if (positionen.length === 0) {
-            setFehler("Bitte mindestens eine Position auswaehlen.");
+        if (bedarfDraft.positionen.length === 0) {
+            setBedarfDraft(current => ({ ...current, fehler: "Bitte mindestens eine Position auswaehlen." }));
             return;
         }
 
@@ -156,14 +167,20 @@ export default function Bestand() {
             datum: heute,
             status: "bedarf gemeldet",
             quelle: "Bestand",
-            positionen
+            anfrageQuelle: "bedarfsmeldung",
+            positionen: bedarfDraft.positionen.map(position => {
+                const artikelInfo = artikel.find(item => String(item.id) === String(position.artikelId));
+                return {
+                    ...position,
+                    artikelNr: artikelInfo?.artikelNr || ""
+                };
+            })
         });
 
         setRefreshKey(value => value + 1);
         setBedarfDialogOpen(false);
         setAusgewaehlterArtikel(null);
-        setPositionen([]);
-        setFehler("");
+        setBedarfDraft(createBedarfsmeldungDraft());
     };
 
     return <>
@@ -202,19 +219,22 @@ export default function Bestand() {
                 { field: "artikelNr", title: "Artikelnummer" },
                 { field: "name", title: "Artikel", render: row => <Link className="detail-link" to={`/artikel?focus=${row.id}`}>{row.name}</Link> },
                 { field: "artikelTyp", title: "Typ" },
-                { field: "bestand", title: "Bestand" },
-                { field: "verplant", title: "Verplant" },
-                { field: "verfuegbar", title: "Verfuegbar" }
+                { field: "bestand", title: "Bestand", helpText: "Aktueller physischer Lagerbestand des Artikels." },
+                { field: "verplant", title: "Verplant", helpText: "Menge, die bereits in aktiven Auftraegen reserviert ist." },
+                { field: "verfuegbar", title: "Verfuegbar", helpText: "Bestand minus bereits verplante Menge. Dieser Wert ist fuer neue Zusagen relevant." }
             ]}
             rowClassName={row => Number(row.verfuegbar || 0) < Number(kritischerBestand || 0) ? "datatable-row-critical" : ""}
             detailLinkResolver={({ field, row }) => field === "name" ? `/artikel?focus=${row.id}` : null}
             rowActions={[
-                { name: "remind", label: "Bedarfsmeldung", permission: "einkauf.bearbeiten", onClick: bedarfsmeldungStarten, variant: "warning", isVisible: row => row.istEinkaufbar },
-                { name: "edit", label: "Bestand anpassen", permission: "lager.bearbeiten", onClick: bestandAnpassen, variant: "secondary" }
+                { name: "remind", label: "Bedarfsmeldung", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: bedarfsmeldungStarten, variant: "warning", isVisible: row => row.istEinkaufbar },
+                { name: "edit", label: "Bestand anpassen", permission: PERMISSIONS.LAGER_BEARBEITEN, onClick: bestandAnpassen, variant: "secondary" }
             ]}
         />
 
-        <Dialog open={bestandDialogOpen} title="Bestand anpassen" onClose={() => setBestandDialogOpen(false)}>
+        <Dialog open={bestandDialogOpen} title="Bestand anpassen" onClose={() => {
+            setBestandDialogOpen(false);
+            setAusgewaehlterArtikel(null);
+        }}>
             <div className="form-row">
                 <div><Label>Artikel</Label><p>{ausgewaehlterArtikel?.artikelNr} - {ausgewaehlterArtikel?.name}</p></div>
                 <div><Label>Verplant</Label><p>{ausgewaehlterArtikel?.verplant ?? 0}</p></div>
@@ -229,7 +249,11 @@ export default function Bestand() {
             <div className="form-row"><button onClick={bestandSpeichern}>Bestand speichern</button></div>
         </Dialog>
 
-        <Dialog open={bedarfDialogOpen} title="Bedarfsmeldung erstellen" onClose={() => setBedarfDialogOpen(false)}>
+        <Dialog open={bedarfDialogOpen} title="Bedarfsmeldung erstellen" onClose={() => {
+            setBedarfDialogOpen(false);
+            setAusgewaehlterArtikel(null);
+            setBedarfDraft(createBedarfsmeldungDraft());
+        }}>
             <div className="form-row">
                 <div><Label>Ausgangspunkt</Label><p>{ausgewaehlterArtikel?.artikelNr} - {ausgewaehlterArtikel?.name}</p></div>
                 <div><Label>Verfuegbar</Label><p>{ausgewaehlterArtikel?.verfuegbar ?? 0}</p></div>
@@ -238,18 +262,18 @@ export default function Bestand() {
                 <div><Label>Artikel</Label>
                     <input value={ausgewaehlterArtikel?.name || ""} disabled />
                 </div>
-                <div><Label>Menge</Label><NumberField value={menge} min="1" step="1" onChange={wert => setMenge(Number(wert || 1))}/></div>
+                <div><Label>Menge</Label><NumberField value={bedarfDraft.menge} min="1" step="1" onChange={wert => setBedarfDraft(item => ({ ...item, menge: Number(wert || 1), fehler: "" }))}/></div>
                 <button type="button" onClick={positionHinzufuegen}>Position hinzufuegen</button>
             </div>
             <div className="form-row">
                 <Label>Bedarfsmeldung</Label>
-                {positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">
-                    {positionen.map(position => <li key={position.artikelId}>
+                {bedarfDraft.positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">
+                    {bedarfDraft.positionen.map(position => <li key={position.artikelId}>
                         {position.artikel}: {position.menge}
-                        <button type="button" className="link-button" onClick={() => setPositionen(items => items.filter(item => String(item.artikelId) !== String(position.artikelId)))}>Entfernen</button>
+                        <button type="button" className="link-button" onClick={() => setBedarfDraft(items => ({ ...items, positionen: items.positionen.filter(item => String(item.artikelId) !== String(position.artikelId)) }))}>Entfernen</button>
                     </li>)}
                 </ul>}
-                {fehler && <p className="form-error">{fehler}</p>}
+                {bedarfDraft.fehler && <p className="form-error">{bedarfDraft.fehler}</p>}
             </div>
             <div className="form-row">
                 <p>Beim Speichern wird nur eine Bedarfsmeldung fuer den Einkauf angelegt. Ein Lieferant wird noch nicht festgelegt und der Einkauf bearbeitet den Vorgang spaeter weiter.</p>

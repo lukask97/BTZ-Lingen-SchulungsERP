@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 export type PermissionKey = string;
+export type AccessKey = string;
 
 export interface AuthUser {
     id?: number | string | null;
@@ -16,8 +17,9 @@ export interface AuthContextValue {
     isAuthReady: boolean;
     login: (userData: AuthUser) => void;
     logout: () => Promise<void>;
+    hasFullAccess: () => boolean;
     hasPermission: (permission: PermissionKey) => boolean;
-    hasAccess: (access: string) => boolean;
+    hasAccess: (access: AccessKey) => boolean;
 }
 
 export interface AuthProviderProps {
@@ -26,11 +28,22 @@ export interface AuthProviderProps {
 
 export interface ProtectedRouteProps {
     children: ReactNode;
-    access?: string;
+    access?: AccessKey;
 }
 
 export interface CanProps {
     children: ReactNode;
-    access?: string;
+    access?: AccessKey;
     permission?: PermissionKey;
+}
+
+export interface PermissionButtonProps {
+    children: ReactNode;
+    permission?: PermissionKey;
+    access?: AccessKey;
+    onClick?: (...args: any[]) => void;
+    disabled?: boolean;
+    variant?: string;
+    className?: string;
+    deniedTitle?: string;
 }

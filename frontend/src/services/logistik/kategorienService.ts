@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { kategorien } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
 

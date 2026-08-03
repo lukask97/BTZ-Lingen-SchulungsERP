@@ -58,6 +58,7 @@ export interface DataTableAction {
     name?: string;
     label: string;
     permission?: string;
+    access?: string;
     onClick?: (...args: any[]) => void;
     isVisible?: (...args: any[]) => boolean;
     isDisabled?: (...args: any[]) => boolean;
@@ -68,6 +69,7 @@ export interface DataTableAction {
 export interface DataTableColumn {
     field: string;
     title: string;
+    helpText?: string;
     visible?: boolean;
     render?: (row: any, value?: any) => ReactNode;
 }

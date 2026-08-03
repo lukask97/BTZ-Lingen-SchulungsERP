@@ -6,17 +6,25 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import schulungenService from "../../services/personalwesen/schulungenService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { addDaysToIsoDate, getBerlinDate } from "../../utils/dateTime";
+
+function createSchulung(today: string) {
+    return { titel: "", zielgruppe: "", datum: addDaysToIsoDate(today, 18), status: "geplant", ort: "" };
+}
 
 export default function Schulungen() {
+    const today = getBerlinDate();
     const [schulungen, setSchulungen] = useSyncedServiceData(["schulungen"], () => schulungenService.list());
     const [open, setOpen] = useState(false);
-    const [current, setCurrent] = useState({ titel: "", zielgruppe: "", datum: "2026-08-20", status: "geplant", ort: "" });
+    const [current, setCurrent] = useState(createSchulung(today));
 
     const speichern = () => {
         if (!current.titel.trim()) return;
         schulungenService.create(current);
         setSchulungen(schulungenService.list());
         setOpen(false);
+        setCurrent(createSchulung(today));
     };
 
     const starten = (schulung) => {
@@ -41,8 +49,8 @@ export default function Schulungen() {
                 { field: "ort", title: "Ort" },
                 { field: "status", title: "Status" }
             ]}
-            toolbarActions={[{ name: "new", label: "Schulung planen", permission: "personalwesen.bearbeiten", onClick: () => setOpen(true), variant: "secondary" }]}
-            rowActions={[{ name: "start", label: "Als laufend markieren", permission: "personalwesen.bearbeiten", onClick: starten, variant: "success", isVisible: row => row.status === "geplant" }]}
+            toolbarActions={[{ name: "new", label: "Schulung planen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: () => { setCurrent(createSchulung(today)); setOpen(true); }, variant: "secondary" }]}
+            rowActions={[{ name: "start", label: "Als laufend markieren", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: starten, variant: "success", isVisible: row => row.status === "geplant" }]}
         />
         <Dialog open={open} title="Schulung planen" onClose={() => setOpen(false)}>
             <div><Label>Titel</Label><TextField value={current.titel} onChange={value => setCurrent(item => ({ ...item, titel: value }))}/></div>

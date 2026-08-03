@@ -20,16 +20,94 @@ function normalize(value) {
     return String(value ?? "");
 }
 
+export function getVorgangId(item) {
+    return normalize(item?.vorgangId || (item?.anfrageId ? `anfrage-${item.anfrageId}` : item?.id ? `anfrage-${item.id}` : ""));
+}
+
+export function getOffersForVorgang(vorgangId, angebote = []) {
+    return angebote.filter(item => normalize(item.vorgangId) === normalize(vorgangId));
+}
+
 export function getOrderForOffer(angebotId, auftraege = []) {
     return auftraege.find(item => normalize(item.angebotId) === normalize(angebotId));
+}
+
+export function getOrdersForVorgang(vorgangId, auftraege = [], angebote = []) {
+    const angebotIds = new Set(getOffersForVorgang(vorgangId, angebote).map(item => normalize(item.id)));
+    return auftraege.filter(item =>
+        normalize(item.vorgangId) === normalize(vorgangId)
+        || angebotIds.has(normalize(item.angebotId))
+    );
 }
 
 export function getSalesDocumentsForOrder(auftragId, dokumente = []) {
     return dokumente.filter(item => normalize(item.auftragId) === normalize(auftragId));
 }
 
+export function getOfferForOrder(auftrag, angebote = []) {
+    if (!auftrag) return null;
+    if (auftrag.angebotId) {
+        return angebote.find(item => normalize(item.id) === normalize(auftrag.angebotId)) || null;
+    }
+    if (auftrag.vorgangId) {
+        return getOffersForVorgang(auftrag.vorgangId, angebote).slice().sort((a, b) => Number(b.revision || 0) - Number(a.revision || 0))[0] || null;
+    }
+    return null;
+}
+
+export function getInquiryForOffer(angebot, anfragen = []) {
+    if (!angebot) return null;
+    if (angebot.anfrageId) {
+        return anfragen.find(item => normalize(item.id) === normalize(angebot.anfrageId)) || null;
+    }
+    if (angebot.vorgangId) {
+        return anfragen.find(item => normalize(item.vorgangId) === normalize(angebot.vorgangId)) || null;
+    }
+    return null;
+}
+
+export function getInquiryForOrder(auftrag, angebote = [], anfragen = []) {
+    if (!auftrag) return null;
+    if (auftrag.anfrageId) {
+        return anfragen.find(item => normalize(item.id) === normalize(auftrag.anfrageId)) || null;
+    }
+    const angebot = getOfferForOrder(auftrag, angebote);
+    return getInquiryForOffer(angebot, anfragen);
+}
+
+export function getProcessContextForDocument(dokument, auftraege = [], angebote = [], anfragen = []) {
+    const auftrag = dokument?.auftragId
+        ? auftraege.find(item => normalize(item.id) === normalize(dokument.auftragId)) || null
+        : null;
+    const angebot = getOfferForOrder(auftrag, angebote);
+    const anfrage = getInquiryForOrder(auftrag, angebote, anfragen);
+    const vorgangId = normalize(dokument?.vorgangId || auftrag?.vorgangId || angebot?.vorgangId || anfrage?.vorgangId);
+
+    return { auftrag, angebot, anfrage, vorgangId };
+}
+
+export function getSalesDocumentsForVorgang(vorgangId, dokumente = [], auftraege = [], angebote = []) {
+    const auftragIds = new Set(getOrdersForVorgang(vorgangId, auftraege, angebote).map(item => normalize(item.id)));
+    return dokumente.filter(item =>
+        normalize(item.vorgangId) === normalize(vorgangId)
+        || auftragIds.has(normalize(item.auftragId))
+    );
+}
+
 export function getConfirmationDocument(auftragId, dokumente = []) {
     return getSalesDocumentsForOrder(auftragId, dokumente).find(item => item.dokumentTyp === "Auftragsbestätigung");
+}
+
+export function getSalesStepForOrder(auftrag, dokumente = [], versandauftraege = []) {
+    if (!auftrag) return SALES_STEPS.ANGEBOT_ANGENOMMEN;
+    const bestaetigung = getConfirmationDocument(auftrag.id, dokumente);
+    if (!bestaetigung) return SALES_STEPS.ANGEBOT_ANGENOMMEN;
+    if (bestaetigung.status !== "versendet") return SALES_STEPS.AUFTRAGSBESTAETIGUNG_ERSTELLT;
+
+    const versand = versandauftraege.find(item => normalize(item.auftragId) === normalize(auftrag.id));
+    if (!versand) return SALES_STEPS.AUFTRAGSBESTAETIGUNG_GESENDET;
+    if (versand.status !== "versendet") return SALES_STEPS.VERSAND_ERSTELLT;
+    return SALES_STEPS.VERSAND_VERSENDET;
 }
 
 export function getSalesStep(angebot, auftraege = [], dokumente = [], versandauftraege = []) {
@@ -39,15 +117,7 @@ export function getSalesStep(angebot, auftraege = [], dokumente = [], versandauf
 
     const auftrag = getOrderForOffer(angebot.id, auftraege);
     if (!auftrag) return SALES_STEPS.ANGEBOT_OFFEN;
-
-    const bestaetigung = getConfirmationDocument(auftrag.id, dokumente);
-    if (!bestaetigung) return SALES_STEPS.ANGEBOT_ANGENOMMEN;
-    if (bestaetigung.status !== "versendet") return SALES_STEPS.AUFTRAGSBESTAETIGUNG_ERSTELLT;
-
-    const versand = versandauftraege.find(item => normalize(item.auftragId) === normalize(auftrag.id));
-    if (!versand) return SALES_STEPS.AUFTRAGSBESTAETIGUNG_GESENDET;
-    if (versand.status !== "versendet") return SALES_STEPS.VERSAND_ERSTELLT;
-    return SALES_STEPS.VERSAND_VERSENDET;
+    return getSalesStepForOrder(auftrag, dokumente, versandauftraege);
 }
 
 export function getSalesStepLabel(step) {
@@ -78,15 +148,44 @@ export function canStartShipping(auftragId, dokumente = []) {
     return Boolean(bestaetigung && bestaetigung.status === "versendet");
 }
 
+export function getReadyForShippingOrders(auftraege = [], dokumente = []) {
+    return auftraege.filter(item => canStartShipping(item.id, dokumente));
+}
+
+export function getShipmentForOrder(auftragId, versandauftraege = []) {
+    return versandauftraege.find(item => normalize(item.auftragId) === normalize(auftragId)) || null;
+}
+
+export function getOrdersWithoutShipment(auftraege = [], dokumente = [], versandauftraege = []) {
+    return getReadyForShippingOrders(auftraege, dokumente)
+        .filter(item => !getShipmentForOrder(item.id, versandauftraege));
+}
+
 export function getPurchaseDocuments(bestellungId, dokumente = []) {
     return dokumente.filter(item => normalize(item.bestellungId) === normalize(bestellungId));
 }
 
+export function isPurchaseRequestOpen(bestellung) {
+    return normalize(bestellung?.status) === "angefragt";
+}
+
+export function isPurchaseConfirmed(bestellung) {
+    return normalize(bestellung?.status) === "bestaetigt";
+}
+
+export function isPurchaseSent(bestellung) {
+    return normalize(bestellung?.status) === "versendet";
+}
+
+export function getPurchaseOrdersByStatus(bestellungen = [], status) {
+    return bestellungen.filter(item => normalize(item.status) === normalize(status));
+}
+
 export function getPurchaseStep(bestellung) {
     if (!bestellung) return PURCHASE_STEPS.ANFRAGE_ERFASST;
-    if (bestellung.status === "eingegangen") return PURCHASE_STEPS.WARENEINGANG_GEBUCHT;
-    if (bestellung.status === "versendet") return PURCHASE_STEPS.AN_LIEFERANTEN_VERSENDET;
-    if (bestellung.status === "bestaetigt") return PURCHASE_STEPS.DURCH_LEHRKRAFT_BESTAETIGT;
+    if (normalize(bestellung.status) === "eingegangen") return PURCHASE_STEPS.WARENEINGANG_GEBUCHT;
+    if (isPurchaseSent(bestellung)) return PURCHASE_STEPS.AN_LIEFERANTEN_VERSENDET;
+    if (isPurchaseConfirmed(bestellung)) return PURCHASE_STEPS.DURCH_LEHRKRAFT_BESTAETIGT;
     return PURCHASE_STEPS.ANFRAGE_ERFASST;
 }
 
@@ -106,9 +205,21 @@ export function getPurchaseStepLabel(step) {
 }
 
 export function canBookGoodsReceipt(bestellung) {
-    return bestellung?.status === "versendet";
+    return isPurchaseSent(bestellung);
+}
+
+export function getOpenGoodsReceiptOrders(bestellungen = []) {
+    return bestellungen.filter(item => canBookGoodsReceipt(item));
+}
+
+export function canConfirmPurchaseOrder(bestellung) {
+    return isPurchaseRequestOpen(bestellung);
+}
+
+export function canSendPurchaseOrder(bestellung) {
+    return isPurchaseConfirmed(bestellung);
 }
 
 export function canCreateIncomingInvoice(bestellung) {
-    return bestellung?.status === "eingegangen";
+    return normalize(bestellung?.status) === "eingegangen";
 }

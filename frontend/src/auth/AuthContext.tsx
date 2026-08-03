@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AuthContext } from "./authStore";
 import type { AuthProviderProps, AuthUser } from "../types/auth";
 import { getCurrentBackendUser, logoutPreviewSession } from "../services/auth/authService";
+import { userHasAccess, userHasFullAccess, userHasPermission } from "./permissions";
 
 const AUTH_STORAGE_KEY = "session-user";
 
@@ -69,32 +70,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 
     function hasPermission(permission: string) {
-
-        if (!user || !user.permissions) return false;
-
-
-        if (user.permissions.includes("*")) return true;
-
-
-        return user.permissions.includes(permission);
+        return userHasPermission(user, permission);
     }
 
 
     function hasAccess(access: string) {
-
-        if (!user || !user.permissions) return false;
-
-
-        if (user.permissions.includes("*")) return true;
+        return userHasAccess(user, access);
+    }
 
 
-        return user.permissions.some(permission => permission === access || permission.startsWith(access + "."));
+    function hasFullAccess() {
+        return userHasFullAccess(user);
     }
 
 
     return (<AuthContext.Provider
         value={{
-            user, isAuthReady, login, logout, hasPermission, hasAccess
+            user, isAuthReady, login, logout, hasFullAccess, hasPermission, hasAccess
         }}
     >
         {children}

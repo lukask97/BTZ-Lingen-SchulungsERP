@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
@@ -11,8 +10,21 @@ import OverviewCards from "../../components/OverviewCards";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import urlaubsantraegeService from "../../services/personalwesen/urlaubsantraegeService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { addDaysToIsoDate, getBerlinDate } from "../../utils/dateTime";
+
+function createUrlaubsantrag(today: string) {
+    return {
+        mitarbeiterId: "",
+        von: addDaysToIsoDate(today, 14),
+        bis: addDaysToIsoDate(today, 18),
+        tage: 5,
+        status: "offen"
+    };
+}
 
 export default function Urlaubsantraege() {
+    const today = getBerlinDate();
     const navigate = useNavigate();
     const [antraege, setAntraege] = useSyncedServiceData(
         ["urlaubsantraege", "mitarbeiter", "personalakten"],
@@ -21,31 +33,27 @@ export default function Urlaubsantraege() {
     const [open, setOpen] = useState(false);
     const mitarbeiter = mitarbeiterService.list();
     const mitarbeiterOptionen = mitarbeiter.map(item => ({ value: String(item.id), label: `${item.name} - ${item.abteilung}` }));
-    const [current, setCurrent] = useState({ mitarbeiterId: "", mitarbeiter: "", von: "2026-08-17", bis: "2026-08-21", tage: 5, status: "offen" });
+    const [current, setCurrent] = useState(createUrlaubsantrag(today));
 
     const neu = () => {
         const ersterMitarbeiter = mitarbeiter[0];
         setCurrent({
-            mitarbeiterId: ersterMitarbeiter ? String(ersterMitarbeiter.id) : "",
-            mitarbeiter: ersterMitarbeiter?.name || "",
-            von: "2026-08-17",
-            bis: "2026-08-21",
-            tage: 5,
-            status: "offen"
+            ...createUrlaubsantrag(today),
+            mitarbeiterId: ersterMitarbeiter ? String(ersterMitarbeiter.id) : ""
         });
         setOpen(true);
     };
 
     const mitarbeiterAuswaehlen = (value) => {
-        const person = mitarbeiter.find(item => String(item.id) === String(value));
-        setCurrent(item => ({ ...item, mitarbeiterId: value, mitarbeiter: person?.name || "" }));
+        setCurrent(item => ({ ...item, mitarbeiterId: value }));
     };
 
     const speichern = () => {
-        if (!current.mitarbeiter.trim()) return;
+        if (!current.mitarbeiterId) return;
         urlaubsantraegeService.create(current);
         setAntraege(urlaubsantraegeService.list());
         setOpen(false);
+        setCurrent(createUrlaubsantrag(today));
     };
 
     const genehmigen = (antrag) => {
@@ -76,11 +84,11 @@ export default function Urlaubsantraege() {
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalakte?mitarbeiter=${row.mitarbeiterId}` : null}
-            toolbarActions={[{ name: "new", label: "Antrag anlegen", permission: "personalwesen.bearbeiten", onClick: neu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Antrag anlegen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "details", label: "Akte öffnen", permission: "personalwesen.bearbeiten", onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
-                { name: "approve", label: "Genehmigen", permission: "personalwesen.bearbeiten", onClick: genehmigen, variant: "success", isVisible: row => row.status === "offen" },
-                { name: "reject", label: "Ablehnen", permission: "personalwesen.bearbeiten", onClick: ablehnen, variant: "danger", isVisible: row => row.status === "offen" }
+                { name: "details", label: "Akte öffnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
+                { name: "approve", label: "Genehmigen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: genehmigen, variant: "success", isVisible: row => row.status === "offen" },
+                { name: "reject", label: "Ablehnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: ablehnen, variant: "danger", isVisible: row => row.status === "offen" }
             ]}
         />
         <Dialog open={open} title="Urlaubsantrag anlegen" onClose={() => setOpen(false)}>

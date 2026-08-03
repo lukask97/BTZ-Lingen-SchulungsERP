@@ -2,11 +2,18 @@ from flask import Flask
 from flask_cors import CORS
 
 from config import PreviewConfig
+from events import events_bp
 from repositories.memory_store import MemoryStore
 from repositories.postgres_store import PostgresStore
 from routes.auth import auth_bp
 from routes.meta import meta_bp
 from routes.resources import resources_bp
+
+
+def create_store(app):
+    if app.config["DATA_MODE"] == "postgres":
+        return PostgresStore(app.config["DATABASE_DSN"])
+    return MemoryStore()
 
 
 def create_app():
@@ -25,13 +32,11 @@ def create_app():
         supports_credentials=True
     )
 
-    if app.config["DATA_MODE"] == "postgres":
-        app.extensions["store"] = PostgresStore(app.config["DATABASE_DSN"])
-    else:
-        app.extensions["store"] = MemoryStore()
+    app.extensions["store"] = create_store(app)
 
     app.register_blueprint(meta_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(resources_bp)
+    app.register_blueprint(events_bp)
 
     return app

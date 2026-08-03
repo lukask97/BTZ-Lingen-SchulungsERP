@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { services, artikel } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
 import { isDatabaseModeEnabled } from "../core/api";

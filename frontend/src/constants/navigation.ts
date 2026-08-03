@@ -1,3 +1,5 @@
+import { ACCESS } from "./permissions";
+
 export const NAVIGATION_GROUPS = [
     {
         key: "start",
@@ -6,133 +8,134 @@ export const NAVIGATION_GROUPS = [
         access: null,
         items: [
             { title: "Dashboard", path: "/", access: null },
-            { title: "Organisation", path: "/organisation", access: "organisation" }
+            { title: "Organisation", path: "/organisation", access: ACCESS.ORGANISATION }
         ]
     },
     {
         key: "lehrkraft",
         title: "Lehrkraft",
         overviewPath: "/lehrkraft",
-        access: "gf",
+        access: ACCESS.GESCHAEFTSFUEHRUNG,
         adminOnly: true,
         items: [
-            { title: "Lehrkraft-Übersicht", path: "/lehrkraft", access: "gf" },
-            { title: "Kundenkorrespondenz", path: "/lehrkraft/kundenkorrespondenz", access: "gf" },
-            { title: "Lieferantenkorrespondenz", path: "/lehrkraft/lieferantenkorrespondenz", access: "gf" }
+            { title: "Lehrkraft-Übersicht", path: "/lehrkraft", access: ACCESS.GESCHAEFTSFUEHRUNG },
+            { title: "Kundenkorrespondenz", path: "/lehrkraft/kundenkorrespondenz", access: ACCESS.GESCHAEFTSFUEHRUNG },
+            { title: "Lieferantenkorrespondenz", path: "/lehrkraft/lieferantenkorrespondenz", access: ACCESS.GESCHAEFTSFUEHRUNG }
         ]
     },
     {
         key: "einkauf",
         title: "Einkauf (EK)",
         overviewPath: "/themen/einkauf",
-        access: "einkauf",
+        access: ACCESS.EINKAUF,
         items: [
-            { title: "Lieferanten", path: "/lieferanten", access: "einkauf" },
-            { title: "Lieferantenvergleich", path: "/lieferantenvergleich", access: "einkauf" },
-            { title: "Bestellungen", path: "/bestellungen", access: "einkauf" },
-            { title: "Wareneingänge", path: "/wareneingaenge", access: "lager" }
+            { title: "Lieferanten", path: "/lieferanten", access: ACCESS.EINKAUF },
+            { title: "Lieferantenvergleich", path: "/lieferantenvergleich", access: ACCESS.EINKAUF },
+            { title: "Bestellungen", path: "/bestellungen", access: ACCESS.EINKAUF },
+            { title: "Wareneingänge", path: "/wareneingaenge", access: ACCESS.LAGER }
         ]
     },
     {
         key: "verkauf",
         title: "Verkauf (VK)",
         overviewPath: "/themen/verkauf",
-        access: "verkauf",
+        access: ACCESS.VERKAUF,
         items: [
-            { title: "Kunden", path: "/kunden", access: "kunde" },
-            { title: "Kundenanfragen", path: "/kundenanfragen", access: "verkauf" },
-            { title: "Angebote", path: "/angebote", access: "verkauf" },
-            { title: "Aufträge", path: "/auftraege", access: "verkauf" },
-            { title: "Services", path: "/services", access: "service" },
-            { title: "Vertriebsdokumente", path: "/vertriebsdokumente", access: "verkauf" },
-            { title: "Reklamationen", path: "/reklamationen", access: "service" }
+            { title: "Kunden", path: "/kunden", access: ACCESS.KUNDE },
+            { title: "Kundenanfragen", path: "/kundenanfragen", access: ACCESS.VERKAUF },
+            { title: "Angebote", path: "/angebote", access: ACCESS.VERKAUF },
+            { title: "Aufträge", path: "/auftraege", access: ACCESS.VERKAUF },
+            { title: "Services", path: "/services", access: ACCESS.SERVICE },
+            { title: "Vertriebsdokumente", path: "/vertriebsdokumente", access: ACCESS.VERKAUF },
+            { title: "Reklamationen", path: "/reklamationen", access: ACCESS.SERVICE }
         ]
     },
     {
         key: "marketing",
         title: "Marketing (MA)",
         overviewPath: "/marketing",
-        access: "marketing",
+        access: ACCESS.MARKETING,
         items: [
-            { title: "Marketing", path: "/marketing", access: "marketing" }
+            { title: "Marketing", path: "/marketing", access: ACCESS.MARKETING }
         ]
     },
     {
         key: "logistik",
         title: "Logistik (LOG)",
         overviewPath: "/logistik",
-        access: "logistik",
+        access: ACCESS.LOGISTIK,
         items: [
-            { title: "Logistik", path: "/logistik", access: "logistik" },
-            { title: "Bestand", path: "/bestand", access: "lager" },
-            { title: "Artikel", path: "/artikel", access: "artikel" },
-            { title: "Kategorien", path: "/kategorien", access: "artikel" },
-            { title: "Versand", path: "/versand", access: "logistik" },
-            { title: "Retouren", path: "/retouren", access: "logistik" }
+            { title: "Logistik", path: "/logistik", access: ACCESS.LOGISTIK },
+            { title: "Bestand", path: "/bestand", access: ACCESS.LAGER },
+            { title: "Artikel", path: "/artikel", access: ACCESS.ARTIKEL },
+            { title: "Kategorien", path: "/kategorien", access: ACCESS.ARTIKEL },
+            { title: "Versand", path: "/versand", access: ACCESS.LOGISTIK },
+            { title: "Retouren", path: "/retouren", access: ACCESS.LOGISTIK }
         ]
     },
     {
         key: "personalwesen",
         title: "Personalwesen (PW)",
         overviewPath: "/personalwesen",
-        access: "personalwesen",
+        access: ACCESS.PERSONALWESEN,
         items: [
-            { title: "Personalwesen", path: "/personalwesen", access: "personalwesen" },
-            { title: "Bewerber", path: "/bewerber", access: "personalwesen" },
-            { title: "Mitarbeiter", path: "/mitarbeiter", access: "personalwesen" },
-            { title: "Personalakte", path: "/personalakte", access: "personalwesen" },
-            { title: "Arbeitszeiten", path: "/arbeitszeiten", access: "personalwesen" },
-            { title: "Urlaubsanträge", path: "/urlaubsantraege", access: "personalwesen" },
-            { title: "Krankmeldungen", path: "/krankmeldungen", access: "personalwesen" },
-            { title: "Schulungen", path: "/schulungen", access: "personalwesen" }
+            { title: "Personalwesen", path: "/personalwesen", access: ACCESS.PERSONALWESEN },
+            { title: "Bewerber", path: "/bewerber", access: ACCESS.PERSONALWESEN },
+            { title: "Mitarbeiter", path: "/mitarbeiter", access: ACCESS.PERSONALWESEN },
+            { title: "Personalakte", path: "/personalakte", access: ACCESS.PERSONALWESEN },
+            { title: "Arbeitszeiten", path: "/arbeitszeiten", access: ACCESS.PERSONALWESEN },
+            { title: "Urlaubsanträge", path: "/urlaubsantraege", access: ACCESS.PERSONALWESEN },
+            { title: "Krankmeldungen", path: "/krankmeldungen", access: ACCESS.PERSONALWESEN },
+            { title: "Schulungen", path: "/schulungen", access: ACCESS.PERSONALWESEN }
         ]
     },
     {
         key: "buchhaltung",
         title: "Buchhaltung (BuHa)",
         overviewPath: "/buchhaltung",
-        access: "buchhaltung",
+        access: ACCESS.BUCHHALTUNG,
         items: [
-            { title: "Buchhaltung", path: "/buchhaltung", access: "buchhaltung" },
-            { title: "ABC-Analyse", path: "/abc-analyse", access: "buchhaltung" },
-            { title: "Firmenkonto", path: "/firmenkonto", access: "buchhaltung" },
-            { title: "Rechnungen", path: "/rechnungen", access: "rechnung" },
-            { title: "Zahlungen", path: "/zahlungen", access: "buchhaltung" },
-            { title: "Mahnungen", path: "/mahnungen", access: "buchhaltung" },
-            { title: "Belege", path: "/belege", access: "buchhaltung" }
+            { title: "Buchhaltung", path: "/buchhaltung", access: ACCESS.BUCHHALTUNG },
+            { title: "ABC-Analyse", path: "/abc-analyse", access: ACCESS.BUCHHALTUNG },
+            { title: "Firmenkonto", path: "/firmenkonto", access: ACCESS.BUCHHALTUNG },
+            { title: "Rechnungen", path: "/rechnungen", access: ACCESS.RECHNUNG },
+            { title: "Zahlungen", path: "/zahlungen", access: ACCESS.BUCHHALTUNG },
+            { title: "Mahnungen", path: "/mahnungen", access: ACCESS.BUCHHALTUNG },
+            { title: "Belege", path: "/belege", access: ACCESS.BUCHHALTUNG }
         ]
     },
     {
         key: "gf",
         title: "Geschäftsführung (GF)",
         overviewPath: "/geschaeftsfuehrung",
-        access: "gf",
+        access: ACCESS.GESCHAEFTSFUEHRUNG,
         items: [
-            { title: "Geschäftsführung", path: "/geschaeftsfuehrung", access: "gf" },
-            { title: "Berichte", path: "/berichte", access: "gf" },
-            { title: "Freigaben", path: "/freigaben", access: "gf" }
+            { title: "Geschäftsführung", path: "/geschaeftsfuehrung", access: ACCESS.GESCHAEFTSFUEHRUNG },
+            { title: "Berichte", path: "/berichte", access: ACCESS.GESCHAEFTSFUEHRUNG },
+            { title: "Freigaben", path: "/freigaben", access: ACCESS.GESCHAEFTSFUEHRUNG }
         ]
     },
     {
         key: "verwaltung",
         title: "Verwaltung",
         overviewPath: "/themen/verwaltung",
-        access: "benutzer",
+        access: ACCESS.BENUTZER,
         items: [
-            { title: "Benutzer", path: "/benutzer", access: "benutzer" },
-            { title: "Rollen", path: "/rollen", access: "rollen" }
+            { title: "Benutzer", path: "/benutzer", access: ACCESS.BENUTZER },
+            { title: "Nummernkreise", path: "/nummernkreise", access: ACCESS.BENUTZER },
+            { title: "Rollen", path: "/rollen", access: ACCESS.ROLLEN }
         ]
     }
 ];
 
 export const SCENARIO_MENU = [
-    { title: "Regionale Bestellung", path: "/szenarien/regionale-bestellung", access: "verkauf" },
-    { title: "Großbestellung", path: "/szenarien/grossbestellung", access: "verkauf" },
-    { title: "Firmenauftrag", path: "/szenarien/firmenauftrag", access: "verkauf" },
-    { title: "Eventbestellung", path: "/szenarien/eventbestellung", access: "verkauf" },
-    { title: "Service", path: "/szenarien/service", access: "service" },
-    { title: "Transportverzögerung", path: "/szenarien/transportverzoegerung", access: "verkauf" },
-    { title: "Kooperation", path: "/szenarien/kooperation", access: "marketing" }
+    { title: "Regionale Bestellung", path: "/szenarien/regionale-bestellung", access: ACCESS.VERKAUF },
+    { title: "Großbestellung", path: "/szenarien/grossbestellung", access: ACCESS.VERKAUF },
+    { title: "Firmenauftrag", path: "/szenarien/firmenauftrag", access: ACCESS.VERKAUF },
+    { title: "Eventbestellung", path: "/szenarien/eventbestellung", access: ACCESS.VERKAUF },
+    { title: "Service", path: "/szenarien/service", access: ACCESS.SERVICE },
+    { title: "Transportverzögerung", path: "/szenarien/transportverzoegerung", access: ACCESS.VERKAUF },
+    { title: "Kooperation", path: "/szenarien/kooperation", access: ACCESS.MARKETING }
 ];
 
 export const SCENARIO_OVERVIEW = {

@@ -1,13 +1,18 @@
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app
 
+from api_utils import get_store, json_response
+from events import publish_event
 from security import require_explicit_permission
 
 meta_bp = Blueprint("meta", __name__, url_prefix="/api")
 
+def build_tables_payload(store):
+    return [store.get_meta(table_name) for table_name in store.list_tables()]
+
 
 @meta_bp.get("/health")
 def health():
-    return jsonify({
+    return json_response({
         "status": "ok",
         "mode": current_app.config["DATA_MODE"]
     })
@@ -15,12 +20,12 @@ def health():
 
 @meta_bp.get("/meta")
 def meta():
-    store = current_app.extensions["store"]
-    return jsonify({
+    store = get_store()
+    return json_response({
         "app": "BTZ-SchulungsERP API",
         "mode": current_app.config["DATA_MODE"],
         "databaseConnected": current_app.config["DATA_MODE"] == "postgres",
-        "tables": [store.get_meta(table_name) for table_name in store.list_tables()]
+        "tables": build_tables_payload(store)
     })
 
 
@@ -30,10 +35,14 @@ def reset():
     if permission_error:
         return permission_error
 
-    store = current_app.extensions["store"]
+    store = get_store()
     store.reset()
-    return jsonify({
+    publish_event("data-reset", {
+        "mode": current_app.config["DATA_MODE"],
+        "tables": [table_name for table_name in store.list_tables()]
+    })
+    return json_response({
         "ok": True,
         "mode": current_app.config["DATA_MODE"],
-        "tables": [store.get_meta(table_name) for table_name in store.list_tables()]
+        "tables": build_tables_payload(store)
     })

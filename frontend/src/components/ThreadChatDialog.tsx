@@ -33,6 +33,20 @@ type ThreadActionLink = {
     onClick: () => void;
 };
 
+function toSafeArray<T>(value: T[] | undefined) {
+    return Array.isArray(value) ? value : [];
+}
+
+function getHeaderText(value: string | undefined, fallback = "-") {
+    return String(value || fallback);
+}
+
+function renderActionButton(item: ThreadActionLink | ThreadDocumentLink) {
+    return <button key={item.id} type="button" className="thread-document-link" onClick={item.onClick}>
+        {item.label}
+    </button>;
+}
+
 type ThreadChatDialogProps = {
     open: boolean;
     title: string;
@@ -84,12 +98,12 @@ export default function ThreadChatDialog({
 }: ThreadChatDialogProps) {
     const [chatExpanded, setChatExpanded] = useState(false);
     const chatWrapperRef = useRef<HTMLDivElement | null>(null);
-    const sichereNachrichten = Array.isArray(messages) ? messages : [];
-    const sichereAngebote = Array.isArray(offers) ? offers : [];
-    const sichereAktionslinks = Array.isArray(actionLinks) ? actionLinks : [];
-    const sichereDokumentlinks = Array.isArray(documentLinks) ? documentLinks : [];
-    const kundeText = String(kundeLabel || "-");
-    const vorgangText = String(vorgangId || "-");
+    const sichereNachrichten = toSafeArray(messages);
+    const sichereAngebote = toSafeArray(offers);
+    const sichereAktionslinks = toSafeArray(actionLinks);
+    const sichereDokumentlinks = toSafeArray(documentLinks);
+    const kundeText = getHeaderText(kundeLabel);
+    const vorgangText = getHeaderText(vorgangId);
     const statusText = statusLabel ? String(statusLabel) : "";
     const originalNachricht = String(anliegen || "Keine Originalnachricht hinterlegt.");
     const chatCollapsed = sichereNachrichten.length > 3 && !chatExpanded;
@@ -103,6 +117,32 @@ export default function ThreadChatDialog({
         chatWrapperRef.current.scrollTop = chatWrapperRef.current.scrollHeight;
     }, [open, sichereNachrichten.length, chatExpanded]);
 
+    function renderMessage(item: ThreadMessage) {
+        const eigeneNachricht = item.senderRolle === ownRole;
+
+        return <article key={item.id} className={`thread-message${eigeneNachricht ? " thread-message-own" : " thread-message-remote"}`}>
+            <div className="thread-message-meta">
+                <strong>{String(item.senderName || item.senderRolle || "Nachricht")}</strong>
+                <span>{formatTimestampForDisplay(item.zeitpunkt || item.datum)} | {String(item.betreff || "")}</span>
+            </div>
+            <p className="thread-message-text">{String(item.nachricht || "")}</p>
+        </article>;
+    }
+
+    function renderOfferLink(item: ThreadOffer) {
+        const label = String(item.angebotsNr || "-");
+
+        if (offerClickResolver) {
+            return <button type="button" className="thread-inline-link" onClick={() => offerClickResolver(item)}>{label}</button>;
+        }
+
+        if (offerHrefResolver) {
+            return <Link className="detail-link" to={offerHrefResolver(item)}>{label}</Link>;
+        }
+
+        return label;
+    }
+
     return <Dialog open={open} title={title} onClose={onClose}>
         <div className="thread-header-card form-row">
             <div className="thread-header-top">
@@ -110,9 +150,7 @@ export default function ThreadChatDialog({
                     <Label>Kunde</Label>
                     <strong>{kundeText}</strong>
                 </div>
-                {headerActionLink && <button type="button" className="thread-document-link" onClick={headerActionLink.onClick}>
-                    {headerActionLink.label}
-                </button>}
+                {headerActionLink && renderActionButton(headerActionLink)}
             </div>
             <div className="thread-header-body">
                 <div>
@@ -138,16 +176,7 @@ export default function ThreadChatDialog({
             </div>
             {sichereNachrichten.length === 0 ? <p>Noch keine Nachrichten vorhanden.</p> : <div ref={chatWrapperRef} className={chatSectionClassName}>
                 <div className="thread-chat">
-                    {sichereNachrichten.map(item => {
-                        const eigeneNachricht = item.senderRolle === ownRole;
-                        return <article key={item.id} className={`thread-message${eigeneNachricht ? " thread-message-own" : " thread-message-remote"}`}>
-                            <div className="thread-message-meta">
-                                <strong>{String(item.senderName || item.senderRolle || "Nachricht")}</strong>
-                                <span>{formatTimestampForDisplay(item.zeitpunkt || item.datum)} | {String(item.betreff || "")}</span>
-                            </div>
-                            <p className="thread-message-text">{String(item.nachricht || "")}</p>
-                        </article>;
-                    })}
+                    {sichereNachrichten.map(renderMessage)}
                 </div>
             </div>}
         </div>
@@ -157,28 +186,20 @@ export default function ThreadChatDialog({
                 {sichereAngebote.map(item => <li key={item.id} className="thread-offer-item">
                     <div className="thread-offer-row">
                         <span>
-                            {offerClickResolver
-                                ? <button type="button" className="thread-inline-link" onClick={() => offerClickResolver(item)}>{String(item.angebotsNr || "-")}</button>
-                                : offerHrefResolver
-                                    ? <Link className="detail-link" to={offerHrefResolver(item)}>{String(item.angebotsNr || "-")}</Link>
-                                    : String(item.angebotsNr || "-")} - {String(item.status || "")}
+                            {renderOfferLink(item)} - {String(item.status || "")}
                         </span>
                     </div>
                 </li>)}
             </ul>}
             {sichereDokumentlinks.length > 0 && <div className="thread-document-links thread-offer-documents">
-                {sichereDokumentlinks.map(item => <button key={item.id} type="button" className="thread-document-link" onClick={item.onClick}>
-                    {item.label}
-                </button>)}
+                {sichereDokumentlinks.map(renderActionButton)}
             </div>}
         </div>
         {customActionSection}
         {sichereAktionslinks.length > 0 && <div className="form-row thread-section">
             <Label>Aktionen</Label>
             <div className="thread-document-links">
-                {sichereAktionslinks.map(item => <button key={item.id} type="button" className="thread-document-link" onClick={item.onClick}>
-                    {item.label}
-                </button>)}
+                {sichereAktionslinks.map(renderActionButton)}
             </div>
         </div>}
         {showReplyBox && onReplyChange && onReplySend && <div className="form-row thread-section">

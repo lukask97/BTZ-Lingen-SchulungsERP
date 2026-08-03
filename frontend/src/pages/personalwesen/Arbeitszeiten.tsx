@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
@@ -10,10 +9,15 @@ import OverviewCards from "../../components/OverviewCards";
 import arbeitszeitenService from "../../services/personalwesen/arbeitszeitenService";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 
-const today = "2026-07-26";
+function createArbeitszeitEintrag(today: string) {
+    return { mitarbeiterId: "", datum: today, von: "08:00", bis: "16:00", status: "erfasst" };
+}
 
 export default function Arbeitszeiten() {
+    const today = getBerlinDate();
     const navigate = useNavigate();
     const [eintraege, setEintraege] = useSyncedServiceData(
         ["arbeitszeiten", "mitarbeiter", "personalakten"],
@@ -22,28 +26,23 @@ export default function Arbeitszeiten() {
     const [open, setOpen] = useState(false);
     const mitarbeiter = mitarbeiterService.list();
     const mitarbeiterOptionen = mitarbeiter.map(item => ({ value: String(item.id), label: `${item.name} - ${item.abteilung}` }));
-    const [current, setCurrent] = useState({ mitarbeiterId: "", mitarbeiter: "", datum: today, von: "08:00", bis: "16:00", status: "erfasst" });
+    const [current, setCurrent] = useState(createArbeitszeitEintrag(today));
 
     const neu = () => {
         const ersterMitarbeiter = mitarbeiter[0];
         setCurrent({
-            mitarbeiterId: ersterMitarbeiter ? String(ersterMitarbeiter.id) : "",
-            mitarbeiter: ersterMitarbeiter?.name || "",
-            datum: today,
-            von: "08:00",
-            bis: "16:00",
-            status: "erfasst"
+            ...createArbeitszeitEintrag(today),
+            mitarbeiterId: ersterMitarbeiter ? String(ersterMitarbeiter.id) : ""
         });
         setOpen(true);
     };
 
     const mitarbeiterAuswaehlen = (value) => {
-        const person = mitarbeiter.find(item => String(item.id) === String(value));
-        setCurrent(item => ({ ...item, mitarbeiterId: value, mitarbeiter: person?.name || "" }));
+        setCurrent(item => ({ ...item, mitarbeiterId: value }));
     };
 
     const speichern = () => {
-        if (!current.mitarbeiter.trim()) return;
+        if (!current.mitarbeiterId) return;
         arbeitszeitenService.create(current);
         setEintraege(arbeitszeitenService.list());
         setOpen(false);
@@ -72,10 +71,10 @@ export default function Arbeitszeiten() {
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalakte?mitarbeiter=${row.mitarbeiterId}` : null}
-            toolbarActions={[{ name: "new", label: "Zeit buchen", permission: "personalwesen.bearbeiten", onClick: neu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Zeit buchen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "details", label: "Akte öffnen", permission: "personalwesen.bearbeiten", onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
-                { name: "approve", label: "Freigeben", permission: "personalwesen.bearbeiten", onClick: freigeben, variant: "success", isVisible: row => row.status !== "freigegeben" }
+                { name: "details", label: "Akte öffnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
+                { name: "approve", label: "Freigeben", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: freigeben, variant: "success", isVisible: row => row.status !== "freigegeben" }
             ]}
         />
         <Dialog open={open} title="Arbeitszeit erfassen" onClose={() => setOpen(false)}>

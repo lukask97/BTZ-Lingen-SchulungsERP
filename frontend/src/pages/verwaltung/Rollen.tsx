@@ -28,8 +28,13 @@ export default function Rollen() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.rollen, rollenService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.rollen, rollenService, {
+        requiredFields: [
+            { field: "name", label: "Name" }
+        ]
+    });
 
     const columns = getVisibleTableColumns(config.tableName);
     const allColumns = getAllTableColumns(config.tableName);
@@ -148,6 +153,7 @@ export default function Rollen() {
                 </div>
 
                 <div className="form-row">
+                    {error && <p className="form-error">{error}</p>}
                     <button onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>

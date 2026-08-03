@@ -3,6 +3,7 @@ import artikelService from "../../services/logistik/artikelService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { getOpenGoodsReceiptOrders, getPurchaseOrdersByStatus } from "../../utils/processFlow";
 
 export default function EinkaufOverview() {
     useStorageSyncRefresh(["lieferanten", "bestellungen", "artikel"]);
@@ -11,16 +12,16 @@ export default function EinkaufOverview() {
     const bestellungen = bestellungenService.list();
     const artikel = artikelService.list();
 
-    const offeneAnfragen = bestellungen.filter(item => item.status === "angefragt").length;
-    const bestaetigteAnfragen = bestellungen.filter(item => item.status === "bestaetigt").length;
-    const versendeteBestellungen = bestellungen.filter(item => item.status === "versendet").length;
+    const offeneAnfragen = getPurchaseOrdersByStatus(bestellungen, "angefragt").length;
+    const bestaetigteAnfragen = getPurchaseOrdersByStatus(bestellungen, "bestaetigt").length;
+    const versendeteBestellungen = getOpenGoodsReceiptOrders(bestellungen).length;
     const bewerteteLieferanten = lieferanten.filter(item => Number(item.bewertung || 0) > 0).length;
     const kritischeBestaende = artikel.filter(item => Number(item.bestand) < 10).length;
     const eingegangeneBestellungen = bestellungen.filter(item => item.status === "eingegangen").length;
 
     return <>
         <h1>Einkauf</h1>
-        <p>Der Einkauf bleibt bewusst einfach: Die Schuelerfirma fragt benoetigte Artikel an, die Lehrkraft bestaetigt und versendet die Bestellung, danach buchen die Schueler den Wareneingang. Mit dem bestaetigten Wareneingang erscheint anschliessend die Eingangsrechnung in der Buchhaltung.</p>
+        <p>Der Einkauf bleibt bewusst einfach: Die Schuelerfirma erfasst Artikelnummern und benoetigte Mengen in einer Anfrage. Dabei kann zwischen Bedarfsmeldung und Lieferantenvergleich unterschieden werden. Die Lehrkraft erstellt darauf aufbauend ein Angebot, bestaetigt die Bestellung und markiert sie anschliessend als versendet.</p>
 
         <div className="kennzahlen">
             <div className="kennzahl"><span>Lieferanten</span><strong>{lieferanten.length}</strong><small>{bewerteteLieferanten} bewertet</small></div>
@@ -33,9 +34,9 @@ export default function EinkaufOverview() {
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header"><h2>Einfache Reihenfolge</h2><span>Ablauf</span></div>
                 <ul className="dashboard-note-list">
-                    <li>Artikelbedarf feststellen und passenden Lieferanten auswaehlen.</li>
-                    <li>Einkaufsanfrage mit einem oder mehreren Artikeln anlegen.</li>
-                    <li>Lehrkraft bestaetigt und versendet die Bestellung.</li>
+                    <li>Artikelbedarf feststellen oder einen Lieferantenvergleich auswerten.</li>
+                    <li>Einkaufsanfrage mit Artikelnummer und benoetigter Menge anlegen.</li>
+                    <li>Lehrkraft erstellt ein Angebot und bestaetigt anschliessend die Bestellung.</li>
                     <li>Wareneingang buchen und Bestand automatisch erhoehen.</li>
                     <li>Danach erscheint die Eingangsrechnung in der Buchhaltung.</li>
                 </ul>
@@ -43,9 +44,9 @@ export default function EinkaufOverview() {
 
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header"><h2>Lehrkraft im Prozess</h2><span>Externe Seite</span></div>
-                <p>Die Lehrkraft ist der Gegenpart zum Einkauf. Sie prueft offene Anfragen, bestaetigt sie und markiert sie anschliessend als versendet.</p>
+                <p>Die Lehrkraft ist der Gegenpart zum Einkauf. Sie sieht die Artikelnummern aus der Anfrage, erstellt darauf ein Angebot und bestaetigt die Bestellung erst danach.</p>
                 <ul className="dashboard-note-list">
-                    <li>{offeneAnfragen} Anfragen warten noch auf Bestaetigung.</li>
+                    <li>{offeneAnfragen} Anfragen warten noch auf ein Angebot oder eine Bestaetigung.</li>
                     <li>{bestaetigteAnfragen} bestaetigte Bestellungen koennen versendet werden.</li>
                     <li>{versendeteBestellungen} versendete Bestellungen warten auf Wareneingang.</li>
                 </ul>

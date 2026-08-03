@@ -27,8 +27,16 @@ export default function Benutzer() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.benutzer, benutzerService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.benutzer, benutzerService, {
+        requiredFields: [
+            { field: "username", label: "Benutzername" },
+            { field: "email", label: "Email" },
+            { field: "password", label: "Passwort" },
+            { field: "rolle", label: "Rolle" }
+        ]
+    });
 
     const columns = getVisibleTableColumns(config.tableName);
     const allColumns = getAllTableColumns(config.tableName);
@@ -110,10 +118,11 @@ export default function Benutzer() {
                 <Label required>Passwort</Label>
                 <TextField value={currentItem.password} onChange={v => handleFieldChange("password", v)} type="password" />
 
-                <Label>Rolle</Label>
+                <Label required>Rolle</Label>
                 <TextField value={currentItem.rolle} onChange={v => handleFieldChange("rolle", v)} />
 
                 <div className="form-row">
+                    {error && <p className="form-error">{error}</p>}
                     <button onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>

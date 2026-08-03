@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import useAuth from "../../auth/useAuth";
@@ -22,10 +21,11 @@ import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumente
 import versandService from "../../services/logistik/versandService";
 import { getCustomerName } from "../../utils/customerReferences";
 import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
-import { formatTimestampForDisplay, getBerlinDate } from "../../utils/dateTime";
-import { getSalesStep, getSalesStepLabel } from "../../utils/processFlow";
+import { addDaysToIsoDate, formatTimestampForDisplay, getBerlinDate } from "../../utils/dateTime";
+import { getInquiryForOffer, getOffersForVorgang, getSalesStep, getSalesStepLabel, getVorgangId } from "../../utils/processFlow";
 import { openDocumentPdf } from "../../utils/documentPdf";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 
 const heute = getBerlinDate();
 const gesamtNachAbzug = (positionen, rabattBetrag = 0) => Math.max(
@@ -47,11 +47,8 @@ const STATUS_HELP = [
     { label: "Abgelehnt", text: "Der Kunde hat das Angebot nicht angenommen." },
     { label: "Beendet", text: "Das Angebot ist abgeschlossen und fuer die weitere Bearbeitung nicht mehr aktiv." }
 ];
-const plusTage = tage => {
-    const basis = new Date(`${heute}T12:00:00`);
-    basis.setDate(basis.getDate() + tage);
-    return basis.toISOString().slice(0, 10);
-};
+const plusTage = tage => addDaysToIsoDate(heute, tage);
+const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
 const toLeistung = (item, typ) => ({
     id: item.id,
     leistungTyp: typ,
@@ -65,8 +62,81 @@ function normalizeText(value = "") {
     return String(value || "").toLowerCase();
 }
 
+function getVerplanteMengen(auftraege) {
+    return auftraege
+        .filter(auftrag => AKTIVE_AUFTRAGSSTATUS.includes(String(auftrag.status || "").toLowerCase()))
+        .reduce((map, auftrag) => {
+            (auftrag.positionen || [])
+                .filter(position => position.leistungTyp !== "Service" && position.artikelId)
+                .forEach(position => {
+                    const key = String(position.artikelId);
+                    map[key] = Number(map[key] || 0) + Number(position.menge || 0);
+                });
+            return map;
+        }, {});
+}
+
 function getDefaultStatusFilter() {
     return STATUS_FILTER_OPTIONS.filter(option => option.defaultSelected).map(option => option.value);
+}
+
+function createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigabe) {
+    return {
+        sourceInquiryId: "",
+        kundeId: "",
+        leistungId: defaultLeistungId,
+        menge: 1,
+        positionenDraft: [],
+        gueltigBis: plusTage(14),
+        rabattBetrag: 0,
+        verguenstigungsGrund: "",
+        fehler: "",
+        angebotsNrDraft: "",
+        bearbeiter: defaultBearbeiter,
+        selectedTemplateOfferId: "",
+        direktSenden: brauchtFreigabe
+    };
+}
+
+function createAngebotPositionDraft(auswahl, menge) {
+    return {
+        artikelId: auswahl.id,
+        artikel: auswahl.name,
+        artikelTyp: auswahl.artikelTyp,
+        leistungTyp: auswahl.leistungTyp,
+        serviceId: auswahl.leistungTyp === "Service" ? auswahl.id : "",
+        menge: Number(menge),
+        einzelpreis: auswahl.preis
+    };
+}
+
+function normalizeVorlagenPosition(position, leistungen = []) {
+    const artikelId = position?.artikelId ?? position?.serviceId ?? position?.id ?? "";
+    const auswahl = leistungen.find(item =>
+        String(item.id) === String(artikelId)
+        || String(item.name) === String(position?.artikel || position?.name || "")
+    );
+
+    if (auswahl) {
+        return {
+            ...createAngebotPositionDraft(auswahl, Number(position?.menge || 1)),
+            einzelpreis: Number(position?.einzelpreis ?? auswahl.preis ?? 0)
+        };
+    }
+
+    return {
+        artikelId: artikelId || "",
+        artikel: position?.artikel || position?.name || "Unbekannte Position",
+        artikelTyp: position?.artikelTyp || "Einzelartikel",
+        leistungTyp: position?.leistungTyp || "Artikel",
+        serviceId: position?.serviceId || "",
+        menge: Number(position?.menge || 1),
+        einzelpreis: Number(position?.einzelpreis || 0)
+    };
+}
+
+function cloneAngebotspositionen(positionen = [], leistungen = []) {
+    return positionen.map(position => normalizeVorlagenPosition(position, leistungen));
 }
 
 function MultiStatusFilter({ options, selectedValues, onToggle }) {
@@ -98,36 +168,26 @@ export default function Angebote() {
         "angebote", "auftraege", "vertriebsdokumente", "versandauftraege",
         "kundenanfragen", "kunden", "benutzer", "artikel", "services", "nachrichten"
     ]);
-    const { user } = useAuth();
+    const { user, hasAccess, hasFullAccess } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [refreshKey, setRefreshKey] = useState(0);
     const [activeTab, setActiveTab] = useState("laufend");
     const [open, setOpen] = useState(false);
     const [selectedStatuses, setSelectedStatuses] = useState(getDefaultStatusFilter);
-    const [sourceInquiryId, setSourceInquiryId] = useState("");
-    const [kundeId, setKundeId] = useState("");
-    const [leistungId, setLeistungId] = useState("");
-    const [menge, setMenge] = useState(1);
-    const [positionenDraft, setPositionenDraft] = useState([]);
-    const [gueltigBis, setGueltigBis] = useState(plusTage(14));
-    const [rabattBetrag, setRabattBetrag] = useState(0);
-    const [verguenstigungsGrund, setVerguenstigungsGrund] = useState("");
-    const [fehler, setFehler] = useState("");
-    const [angebotsNrDraft, setAngebotsNrDraft] = useState("");
-    const [bearbeiter, setBearbeiter] = useState("");
-    const [selectedTemplateOfferId, setSelectedTemplateOfferId] = useState("");
-    const [direktSenden, setDirektSenden] = useState(false);
+
+    const canReadLogistik = hasAccess(ACCESS.LOGISTIK);
 
     const angebote = useMemo(() => angeboteService.getAll(), [refreshKey, syncTick]);
     const auftraege = auftraegeService.getAll();
     const vertriebsdokumente = vertriebsdokumenteService.list();
-    const versandauftraege = versandService.list();
+    const versandauftraege = canReadLogistik ? versandService.list() : [];
     const anfragen = customerInquiryService.list();
     const kunden = kundenService.list();
     const benutzer = benutzerService.list();
     const artikel = artikelService.getAll().filter(item => item.istVerkaeuflich);
     const services = servicesService.getAll();
+    const verplanteMengen = useMemo(() => getVerplanteMengen(auftraege), [auftraege]);
     const leistungen = [
         ...artikel.map(item => toLeistung(item, "Artikel")),
         ...services.map(item => toLeistung(item, "Service"))
@@ -138,7 +198,6 @@ export default function Angebote() {
         value: `${item.leistungTyp}:${item.id}`,
         label: `${item.nummer} - ${item.name} (${item.preis.toFixed(2)} EUR)`
     }));
-    const findeAnfrage = anfrageId => anfragen.find(item => String(item.id) === String(anfrageId));
     const newMode = searchParams.get("new");
     const inquiryIdFromQuery = searchParams.get("anfrageId") || "";
     const kundeIdFromQuery = searchParams.get("kundeId") || "";
@@ -148,25 +207,28 @@ export default function Angebote() {
     const istErfahrenerVerkaeufer = useMemo(() => {
         const rolle = normalizeText(user?.rolle || user?.username || user?.name || "");
         return Boolean(
-            user?.permissions?.includes("*")
+            hasFullAccess()
             || rolle.includes("admin")
             || rolle.includes("senior")
             || rolle.includes("leitung")
             || rolle.includes("erfahren")
         );
-    }, [user]);
+    }, [hasFullAccess, user]);
     const brauchtFreigabe = !istErfahrenerVerkaeufer;
+    const defaultBearbeiter = String(benutzer[0]?.username || benutzer[0]?.id || "");
+    const [draft, setDraft] = useState(() => createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigabe));
 
     const sendeAngebotAnKunden = (angebot) => {
         if (!angebot?.anfrageId) return;
-        const anfrage = findeAnfrage(angebot.anfrageId);
+        const anfrage = getInquiryForOffer(angebot, anfragen);
         if (!anfrage) return;
         const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Pruefung zu.`;
 
         nachrichtenService.create({
-            vorgangId: angebot.vorgangId || anfrage.vorgangId || `anfrage-${anfrage.id}`,
+            vorgangId: getVorgangId(angebot) || getVorgangId(anfrage),
             anfrageId: anfrage.id,
             angebotId: angebot.id,
+            kundeId: angebot.kundeId || anfrage.kundeId || "",
             datum: heute,
             zeitpunkt: `${heute}T12:00:00`,
             senderRolle: "Verkauf",
@@ -187,26 +249,49 @@ export default function Angebote() {
     };
 
     const initialisiereDialog = (anfrageId = "", kunde = "", templateOfferId = "") => {
-        const inquiry = findeAnfrage(anfrageId);
-        const vorgangId = inquiry?.vorgangId || (anfrageId ? `anfrage-${anfrageId}` : "");
+        const inquiry = anfragen.find(item => String(item.id) === String(anfrageId));
+        const vorgangId = getVorgangId(inquiry) || (anfrageId ? `anfrage-${anfrageId}` : "");
         const revisionInfo = naechsteAngebotsrevision(vorgangId || `angebot-${Date.now()}`);
         const templateOffer = templateOfferId ? angeboteService.getById(templateOfferId) : null;
-        const templatePositionen = (templateOffer?.positionen || []).map(position => ({ ...position }));
+        const templatePositionen = cloneAngebotspositionen(templateOffer?.positionen || [], leistungen);
 
-        setSourceInquiryId(anfrageId);
-        setKundeId(kunde || inquiry?.kundeId ? String(kunde || inquiry?.kundeId) : defaultKundeId);
-        setLeistungId(defaultLeistungId);
-        setMenge(1);
-        setPositionenDraft(templatePositionen);
-        setGueltigBis(templateOffer?.gueltigBis || plusTage(14));
-        setRabattBetrag(Number(templateOffer?.rabattBetrag || 0));
-        setVerguenstigungsGrund(templateOffer?.verguenstigungsGrund || "");
-        setFehler("");
-        setAngebotsNrDraft(`${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`);
-        setBearbeiter(String(benutzer[0]?.username || benutzer[0]?.id || ""));
-        setSelectedTemplateOfferId(String(templateOfferId || ""));
-        setDirektSenden(brauchtFreigabe);
+        setDraft({
+            sourceInquiryId: anfrageId,
+            kundeId: String(kunde || inquiry?.kundeId || defaultKundeId),
+            leistungId: defaultLeistungId,
+            menge: 1,
+            positionenDraft: templatePositionen,
+            gueltigBis: templateOffer?.gueltigBis || plusTage(14),
+            rabattBetrag: Number(templateOffer?.rabattBetrag || 0),
+            verguenstigungsGrund: templateOffer?.verguenstigungsGrund || "",
+            fehler: "",
+            angebotsNrDraft: `${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`,
+            bearbeiter: defaultBearbeiter,
+            selectedTemplateOfferId: String(templateOfferId || ""),
+            direktSenden: brauchtFreigabe
+        });
         setOpen(true);
+    };
+
+    const angebotAlsVorlageUebernehmen = (templateOfferId: string) => {
+        const templateOffer = angeboteService.getById(templateOfferId);
+        if (!templateOffer) return;
+        const templatePositionen = cloneAngebotspositionen(templateOffer.positionen || [], leistungen);
+        const ersteVorlagenPosition = templatePositionen[0];
+        const leistungId = ersteVorlagenPosition
+            ? `${ersteVorlagenPosition.leistungTyp}:${ersteVorlagenPosition.serviceId || ersteVorlagenPosition.artikelId}`
+            : draft.leistungId;
+
+        setDraft(current => ({
+            ...current,
+            leistungId,
+            positionenDraft: templatePositionen,
+            gueltigBis: templateOffer.gueltigBis || current.gueltigBis,
+            rabattBetrag: Number(templateOffer.rabattBetrag || 0),
+            verguenstigungsGrund: templateOffer.verguenstigungsGrund || "",
+            fehler: "",
+            selectedTemplateOfferId: String(templateOfferId)
+        }));
     };
 
     useEffect(() => {
@@ -219,10 +304,10 @@ export default function Angebote() {
         { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
         { field: "datum", title: "Datum" },
         { field: "gueltigBis", title: "Gueltig bis", render: row => row.gueltigBis || "-" },
-        { field: "status", title: "Status" },
-        { field: "freigabeText", title: "Freigabe" },
-        { field: "anliegenText", title: "Anliegen" },
-        { field: "prozess", title: "Prozess" },
+        { field: "status", title: "Status", helpText: "Zeigt, ob das Angebot intern vorbereitet wird, beim Kunden liegt oder bereits abgeschlossen ist." },
+        { field: "freigabeText", title: "Freigabe", helpText: "Zeigt, ob fuer das Angebot noch eine Freigabe durch eine hoehere Rolle noetig ist." },
+        { field: "anliegenText", title: "Anliegen", helpText: "Kurzbeschreibung der urspruenglichen Kundenanfrage." },
+        { field: "prozess", title: "Prozess", helpText: "Ordnet das Angebot in den gesamten Verkaufsablauf ein." },
         { field: "gesamt", title: "Gesamt" },
         { field: "positionenText", title: "Positionen" }
     ];
@@ -245,7 +330,7 @@ export default function Angebote() {
                 freigabeStatus: angebot.freigabeStatus || "keine",
                 freigabeText: angebot.freigabeStatus === "angefragt" ? "Freigabe offen" : (angebot.freigabeStatus === "freigegeben" ? "Freigegeben" : "-"),
                 kunde: getCustomerName(angebot.kundeId, angebot.kunde),
-                anliegenText: findeAnfrage(angebot.anfrageId)?.anliegen || "-",
+                anliegenText: getInquiryForOffer(angebot, anfragen)?.anliegen || "-",
                 positionenText: (angebot.positionen || []).map(position => `${position.artikel} (${position.menge})`).join(", "),
                 gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag).toFixed(2)} EUR`,
                 prozess: getSalesStepLabel(getSalesStep(angebot, auftraege, vertriebsdokumente, versandauftraege))
@@ -269,50 +354,62 @@ export default function Angebote() {
         });
     };
 
-    const anfrageImDialog = findeAnfrage(sourceInquiryId);
+    const anfrageImDialog = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId));
     const chatNachrichten = anfrageImDialog?.vorgangId ? listNachrichtenZuVorgang(anfrageImDialog.vorgangId) : [];
     const weiterleitungsAusschnitt = chatNachrichten.slice(-3);
-    const bearbeiterLabel = bearbeiterOptionen.find(item => item.value === String(bearbeiter))?.label || "Noch nicht zugewiesen";
+    const bearbeiterLabel = bearbeiterOptionen.find(item => item.value === String(draft.bearbeiter))?.label || "Noch nicht zugewiesen";
     const bisherigeAngeboteImDialog = anfrageImDialog?.vorgangId
-        ? angebote
-            .filter(item => item.vorgangId === anfrageImDialog.vorgangId)
+        ? getOffersForVorgang(anfrageImDialog.vorgangId, angebote)
             .sort((a, b) => Number(a.revision || 0) - Number(b.revision || 0))
         : [];
 
+    const getVerfuegbarkeitFuerPosition = position => {
+        if (position.leistungTyp === "Service") {
+            return {
+                text: "Service ohne Lagerbestand",
+                istKritisch: false
+            };
+        }
+
+        const artikelEintrag = artikel.find(item => String(item.id) === String(position.artikelId));
+        const bestand = Number(artikelEintrag?.bestand || 0);
+        const verplant = Number(verplanteMengen[String(position.artikelId)] || 0);
+        const verfuegbar = bestand - verplant;
+
+        return {
+            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Verplant: ${verplant}`,
+            istKritisch: Number(position.menge || 0) > verfuegbar
+        };
+    };
+
     const positionHinzufuegen = () => {
-        const auswahl = leistungen.find(item => `${item.leistungTyp}:${item.id}` === String(leistungId));
-        if (!auswahl || Number(menge) <= 0) return;
-        setPositionenDraft(vorherige => {
-            const vorhanden = vorherige.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp);
-            if (vorhanden) {
-                return vorherige.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp
-                    ? { ...item, menge: Number(item.menge) + Number(menge) }
-                    : item);
-            }
-            return [...vorherige, {
-                artikelId: auswahl.id,
-                artikel: auswahl.name,
-                artikelTyp: auswahl.artikelTyp,
-                leistungTyp: auswahl.leistungTyp,
-                serviceId: auswahl.leistungTyp === "Service" ? auswahl.id : "",
-                menge: Number(menge),
-                einzelpreis: auswahl.preis
-            }];
+        const auswahl = leistungen.find(item => `${item.leistungTyp}:${item.id}` === String(draft.leistungId));
+        if (!auswahl || Number(draft.menge) <= 0) return;
+        setDraft(vorherige => {
+            const vorhanden = vorherige.positionenDraft.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp);
+            return {
+                ...vorherige,
+                positionenDraft: vorhanden
+                    ? vorherige.positionenDraft.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp
+                        ? { ...item, menge: Number(item.menge) + Number(vorherige.menge) }
+                        : item)
+                    : [...vorherige.positionenDraft, createAngebotPositionDraft(auswahl, vorherige.menge)]
+            };
         });
     };
 
     const speichern = () => {
-        const kunde = kunden.find(item => String(item.id) === String(kundeId));
-        const anfrage = findeAnfrage(sourceInquiryId);
-        const vorgangId = anfrage?.vorgangId || (sourceInquiryId ? `anfrage-${sourceInquiryId}` : `angebot-${Date.now()}`);
+        const kunde = kunden.find(item => String(item.id) === String(draft.kundeId));
+        const anfrage = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId));
+        const vorgangId = getVorgangId(anfrage) || (draft.sourceInquiryId ? `anfrage-${draft.sourceInquiryId}` : `angebot-${Date.now()}`);
 
-        if (!kunde || positionenDraft.length === 0) {
-            setFehler("Bitte einen Kunden und mindestens eine Position auswaehlen.");
+        if (!kunde || draft.positionenDraft.length === 0) {
+            setDraft(current => ({ ...current, fehler: "Bitte einen Kunden und mindestens eine Position auswaehlen." }));
             return;
         }
 
         const revisionInfo = naechsteAngebotsrevision(vorgangId);
-        const sollDirektSenden = brauchtFreigabe ? true : direktSenden;
+        const sollDirektSenden = brauchtFreigabe ? true : draft.direktSenden;
         const freigabeNoetig = brauchtFreigabe;
         const status = sollDirektSenden && !freigabeNoetig ? "wartet auf Antwort" : "in Vorbereitung";
         const neuesAngebot = angeboteService.add({
@@ -320,20 +417,19 @@ export default function Angebote() {
             angebotsBasisNr: revisionInfo.angebotsBasisNr,
             revision: revisionInfo.revision,
             vorgangId,
-            anfrageId: sourceInquiryId || "",
+            anfrageId: draft.sourceInquiryId || "",
             kundeId: kunde.id,
-            kunde: kunde.firma,
             datum: heute,
-            gueltigBis,
-            rabattBetrag: Number(rabattBetrag || 0),
-            verguenstigungsGrund: verguenstigungsGrund.trim(),
-            gesamtbetrag: gesamtNachAbzug(positionenDraft, rabattBetrag),
+            gueltigBis: draft.gueltigBis,
+            rabattBetrag: Number(draft.rabattBetrag || 0),
+            verguenstigungsGrund: draft.verguenstigungsGrund.trim(),
+            gesamtbetrag: gesamtNachAbzug(draft.positionenDraft, draft.rabattBetrag),
             status,
-            positionen: positionenDraft,
-            bearbeiter,
+            positionen: draft.positionenDraft,
+            bearbeiter: draft.bearbeiter,
             direktSendenGewuenscht: sollDirektSenden,
             freigabeStatus: freigabeNoetig ? "angefragt" : (sollDirektSenden ? "freigegeben" : "keine"),
-            freigabeAngefragtVon: user?.username || bearbeiter,
+            freigabeAngefragtVon: user?.username || draft.bearbeiter,
             freigegebenVon: sollDirektSenden && !freigabeNoetig ? (user?.username || "") : ""
         });
 
@@ -341,7 +437,6 @@ export default function Angebote() {
             customerInquiryService.update({
                 ...anfrage,
                 kundeId: kunde.id,
-                kunde: kunde.firma,
                 vorgangId
             });
         }
@@ -350,11 +445,12 @@ export default function Angebote() {
             sendeAngebotAnKunden(neuesAngebot);
         }
 
-        if (sourceInquiryId && anfrage?.vorgangId) {
+        if (draft.sourceInquiryId && anfrage?.vorgangId) {
             nachrichtenService.create({
                 vorgangId: anfrage.vorgangId,
                 anfrageId: anfrage.id,
                 angebotId: "",
+                kundeId: anfrage.kundeId || kunde.id,
                 datum: heute,
                 senderRolle: "Verkauf",
                 senderName: "Schuelerfirma Verkauf",
@@ -370,9 +466,7 @@ export default function Angebote() {
 
     const handleClose = () => {
         setOpen(false);
-        setFehler("");
-        setSelectedTemplateOfferId("");
-        setDirektSenden(brauchtFreigabe);
+        setDraft(current => ({ ...current, fehler: "", selectedTemplateOfferId: "", direktSenden: brauchtFreigabe }));
         if (newMode) {
             navigate("/angebote", { replace: true });
         }
@@ -390,7 +484,7 @@ export default function Angebote() {
     const freizugebendeAngebote = neuesteAngebote.filter(item => item.statusNormalized === "in vorbereitung");
     const alleAngebote = neuesteAngebote.filter(item => selectedStatuses.includes(item.statusNormalized));
     const zumChatNavigieren = row => {
-        const anfrage = findeAnfrage(row.anfrageId);
+        const anfrage = getInquiryForOffer(row, anfragen);
         if (!anfrage) {
             navigate("/kundenanfragen");
             return;
@@ -452,10 +546,10 @@ export default function Angebote() {
                 selectedValues={selectedStatuses}
                 onToggle={toggleStatus}
             /> : null}
-            toolbarActions={[{ name: "new", label: "Neues Angebot", permission: "verkauf.bearbeiten", onClick: () => initialisiereDialog() }]}
+            toolbarActions={[{ name: "new", label: "Neues Angebot", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: () => initialisiereDialog() }]}
             rowActions={[
-                { name: "thread", label: "Zum Chat", permission: "verkauf.bearbeiten", onClick: zumChatNavigieren, variant: "secondary", isVisible: row => !!row.anfrageId },
-                { name: "pdf", label: "PDF", permission: "verkauf.bearbeiten", onClick: angebotAlsPdf, variant: "secondary" },
+                { name: "thread", label: "Zum Chat", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: zumChatNavigieren, variant: "secondary", isVisible: row => !!row.anfrageId },
+                { name: "pdf", label: "PDF", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotAlsPdf, variant: "secondary" },
                 { name: "approve", label: "Freigabe", onClick: angebotFreigeben, variant: "success", isVisible: row => row.freigabeStatus === "angefragt" && istErfahrenerVerkaeufer }
             ]}
             detailLinkResolver={({ field, row, value }) => {
@@ -464,8 +558,8 @@ export default function Angebote() {
                 return null;
             }}
         />
-        <Dialog open={open} title={sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot"} onClose={handleClose}>
-            {sourceInquiryId && anfrageImDialog && <div className="offer-forward-panel form-row">
+        <Dialog open={open} title={draft.sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot"} onClose={handleClose}>
+            {draft.sourceInquiryId && anfrageImDialog && <div className="offer-forward-panel form-row">
                 <div className="offer-forward-grid">
                     <div className="offer-forward-card">
                         <Label>Kunde</Label>
@@ -477,7 +571,7 @@ export default function Angebote() {
                     </div>
                     <div className="offer-forward-card">
                         <Label>Bearbeitet von</Label>
-                        <LookupField value={bearbeiter} options={bearbeiterOptionen} onChange={setBearbeiter} placeholder="Bearbeiter auswaehlen..."/>
+                        <LookupField value={draft.bearbeiter} options={bearbeiterOptionen} onChange={value => setDraft(item => ({ ...item, bearbeiter: value }))} placeholder="Bearbeiter auswaehlen..."/>
                     </div>
                 </div>
                 <div className="offer-forward-card">
@@ -493,16 +587,18 @@ export default function Angebote() {
                     </div>}
                 </div>
             </div>}
-            {sourceInquiryId && bisherigeAngeboteImDialog.length > 0 && <div className="form-row thread-template-section">
-                <Label>Fruehere Angebote als Vorlage</Label>
-                <p className="thread-template-hint">Bei Bedarf kann ein bisheriger Angebotsstand uebernommen und anschliessend geaendert werden.</p>
+            {draft.sourceInquiryId && bisherigeAngeboteImDialog.length > 0 && <div className="form-row thread-template-section">
                 <div className="thread-template-panel">
+                    <div className="offer-forward-card">
+                        <Label glossaryKey="lieferantenvergleich">Fruehere Angebote als Vorlage</Label>
+                        <p>Bei Bedarf kann ein bisheriger Angebotsstand uebernommen und anschliessend geaendert werden.</p>
+                    </div>
                     <div className="thread-document-links">
                         {bisherigeAngeboteImDialog.map(item => <button
                             key={`dialog-template-${item.id}`}
                             type="button"
-                            className={`thread-document-link${String(selectedTemplateOfferId) === String(item.id) ? " is-active" : ""}`}
-                            onClick={() => initialisiereDialog(sourceInquiryId, String(kundeId || anfrageImDialog.kundeId || ""), String(item.id))}
+                            className={`thread-document-link${String(draft.selectedTemplateOfferId) === String(item.id) ? " is-active" : ""}`}
+                            onClick={() => angebotAlsVorlageUebernehmen(String(item.id))}
                         >
                             {item.angebotsNr} uebernehmen
                         </button>)}
@@ -510,36 +606,45 @@ export default function Angebote() {
                 </div>
             </div>}
             <div className="form-row">
-                <div><Label>Angebotsnummer</Label><input type="text" value={angebotsNrDraft} disabled/></div>
-                <div><Label>Gueltig bis</Label><input type="date" value={gueltigBis} onChange={event => setGueltigBis(event.target.value)}/></div>
+                <div><Label>Angebotsnummer</Label><input type="text" value={draft.angebotsNrDraft} disabled/></div>
+                <div><Label glossaryKey="gueltigbis">Gueltig bis</Label><input type="date" value={draft.gueltigBis} onChange={event => setDraft(item => ({ ...item, gueltigBis: event.target.value }))}/></div>
             </div>
             <div className="form-row bestellposition-hinzufuegen">
-                <div><Label>Artikel / Service</Label><LookupField value={leistungId} options={leistungsOptionen} onChange={setLeistungId} placeholder="Artikel oder Service suchen..."/></div>
-                <div><Label>Menge</Label><NumberField value={menge} min="1" onChange={wert => setMenge(Number(wert))}/></div>
+                <div><Label>Artikel / Service</Label><LookupField value={draft.leistungId} options={leistungsOptionen} onChange={value => setDraft(item => ({ ...item, leistungId: value }))} placeholder="Artikel oder Service suchen..."/></div>
+                <div><Label glossaryKey="angebotspositionen">Menge</Label><NumberField value={draft.menge} min="1" onChange={wert => setDraft(item => ({ ...item, menge: Number(wert) }))}/></div>
                 <button type="button" onClick={positionHinzufuegen}>Position hinzufuegen</button>
             </div>
             <div className="form-row">
-                <Label>Angebotspositionen</Label>
-                {positionenDraft.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">
-                    {positionenDraft.map(position => <li key={`${position.leistungTyp}-${position.artikelId}`}>{position.artikel}: {position.menge} x {position.einzelpreis.toFixed(2)} EUR
-                        <button type="button" className="link-button" onClick={() => setPositionenDraft(items => items.filter(item => !(item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp)))}>Entfernen</button>
-                    </li>)}
+                <Label glossaryKey="angebotspositionen">Angebotspositionen</Label>
+                {draft.positionenDraft.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">
+                    {draft.positionenDraft.map(position => {
+                        const verfuegbarkeit = getVerfuegbarkeitFuerPosition(position);
+                        return <li key={`${position.leistungTyp}-${position.artikelId}`} className="position-entry">
+                            <div>
+                                <div>{position.artikel}: {position.menge} x {position.einzelpreis.toFixed(2)} EUR</div>
+                                <p className={verfuegbarkeit.istKritisch ? "form-error" : "position-availability"}>
+                                    {verfuegbarkeit.text}
+                                </p>
+                            </div>
+                            <button type="button" className="link-button" onClick={() => setDraft(items => ({ ...items, positionenDraft: items.positionenDraft.filter(item => !(item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp)) }))}>Entfernen</button>
+                        </li>;
+                    })}
                 </ul>}
             </div>
             <div className="form-row">
-                <div><Label>Verguenstigung</Label><NumberField value={rabattBetrag} min="0" step="0.01" format="currency" onChange={wert => setRabattBetrag(Number(wert || 0))}/></div>
+                <div><Label glossaryKey="rabatt">Verguenstigung</Label><NumberField value={draft.rabattBetrag} min="0" step="0.01" format="currency" onChange={wert => setDraft(item => ({ ...item, rabattBetrag: Number(wert || 0) }))}/></div>
             </div>
             <div className="form-row">
-                <div><Label>Grund fuer Verguenstigung</Label><TextArea rows={2} value={verguenstigungsGrund} onChange={setVerguenstigungsGrund}/></div>
+                <div><Label glossaryKey="rabatt">Grund fuer Verguenstigung</Label><TextArea rows={2} value={draft.verguenstigungsGrund} onChange={value => setDraft(item => ({ ...item, verguenstigungsGrund: value }))}/></div>
             </div>
             <div className="form-row offer-send-checkbox-row">
-                <Checkbox checked={brauchtFreigabe ? true : direktSenden} onChange={setDirektSenden} disabled={brauchtFreigabe}>
+                <Checkbox checked={brauchtFreigabe ? true : draft.direktSenden} onChange={value => setDraft(item => ({ ...item, direktSenden: value }))} disabled={brauchtFreigabe}>
                     direkt senden
                 </Checkbox>
                 <HelpHint text={istErfahrenerVerkaeufer ? "Das Angebot wird nach dem Speichern sofort an den Kunden gesendet." : "Vor dem Senden muss ein Verkauf Senior oder eine hoehere Rolle die Freigabe erteilen."} />
             </div>
-            <div className="form-row"><strong>Gesamt: {gesamtNachAbzug(positionenDraft, rabattBetrag).toFixed(2)} EUR</strong></div>
-            {fehler && <p className="form-error">{fehler}</p>}
+            <div className="form-row"><strong>Gesamt: {gesamtNachAbzug(draft.positionenDraft, draft.rabattBetrag).toFixed(2)} EUR</strong></div>
+            {draft.fehler && <p className="form-error">{draft.fehler}</p>}
             <div className="form-row"><button onClick={speichern}>Angebot speichern</button></div>
         </Dialog>
     </>;

@@ -28,8 +28,13 @@ export default function Lager() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.lager, lagerService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.lager, lagerService, {
+        requiredFields: [
+            { field: "name", label: "Name" }
+        ]
+    });
 
     const columns = getVisibleTableColumns(config.tableName);
     const allColumns = getAllTableColumns(config.tableName);
@@ -97,6 +102,7 @@ export default function Lager() {
                 <TextField value={currentItem.kapazitaet} onChange={v => handleFieldChange("kapazitaet", v)} />
 
                 <div className="form-row">
+                    {error && <p className="form-error">{error}</p>}
                     <button onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>

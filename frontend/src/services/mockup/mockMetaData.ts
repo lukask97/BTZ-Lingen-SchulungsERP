@@ -61,8 +61,8 @@ export const feldMetadaten = [
     {
         tabelle: "kunden",
         feld: "segment",
-        anzeigename: "Segment",
-        beschreibung: "Kundengruppe",
+        anzeigename: "Kategorie",
+        beschreibung: "Kundenkategorie",
         reihenfolge: 6,
         sichtbar: true
     },

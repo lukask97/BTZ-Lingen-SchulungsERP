@@ -5,6 +5,29 @@ from pathlib import Path
 import psycopg2
 from psycopg2.extras import Json, RealDictCursor
 
+LIST_RECORDS_QUERY = """
+select data
+from app_records
+where table_name = %s
+order by sort_id asc, entity_id asc
+"""
+
+GET_RECORD_QUERY = """
+select data
+from app_records
+where table_name = %s and entity_id = %s
+"""
+
+UPSERT_RECORD_QUERY = """
+insert into app_records (table_name, entity_id, sort_id, data)
+values (%s, %s, %s, %s)
+on conflict (table_name, entity_id)
+do update set
+    sort_id = excluded.sort_id,
+    data = excluded.data,
+    updated_at = now()
+"""
+
 
 class PostgresStore:
     def __init__(self, dsn):
@@ -25,31 +48,11 @@ class PostgresStore:
 
     def list(self, table_name):
         self._require_table(table_name)
-        with self._connect() as connection, connection.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(
-                """
-                select data
-                from app_records
-                where table_name = %s
-                order by sort_id asc, entity_id asc
-                """,
-                (table_name,)
-            )
-            return [row["data"] for row in cursor.fetchall()]
+        return self._list_records(table_name)
 
     def get(self, table_name, entity_id):
         self._require_table(table_name)
-        with self._connect() as connection, connection.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute(
-                """
-                select data
-                from app_records
-                where table_name = %s and entity_id = %s
-                """,
-                (table_name, str(entity_id))
-            )
-            row = cursor.fetchone()
-            return row["data"] if row else None
+        return self._get_record(table_name, entity_id)
 
     def create(self, table_name, payload):
         self._require_table(table_name)
@@ -60,25 +63,14 @@ class PostgresStore:
         }
 
         with self._connect() as connection, connection.cursor() as cursor:
-            cursor.execute(
-                """
-                insert into app_records (table_name, entity_id, sort_id, data)
-                values (%s, %s, %s, %s)
-                on conflict (table_name, entity_id)
-                do update set
-                    sort_id = excluded.sort_id,
-                    data = excluded.data,
-                    updated_at = now()
-                """,
-                (table_name, str(entity_id), self._sort_id(entity_id), Json(item))
-            )
+            self._save_record(cursor, table_name, entity_id, item)
             connection.commit()
 
         return item
 
     def update(self, table_name, entity_id, payload):
         self._require_table(table_name)
-        current = self.get(table_name, entity_id)
+        current = self._get_record(table_name, entity_id)
         if not current:
             return None
 
@@ -138,17 +130,7 @@ class PostgresStore:
 
         with self._connect() as connection, connection.cursor() as cursor:
             cursor.execute("truncate table app_records")
-
-            for table_name, items in self.seed_data.items():
-                for item in items:
-                    entity_id = item.get("id")
-                    cursor.execute(
-                        """
-                        insert into app_records (table_name, entity_id, sort_id, data)
-                        values (%s, %s, %s, %s)
-                        """,
-                        (table_name, str(entity_id), self._sort_id(entity_id), Json(item))
-                    )
+            self._insert_seed_records(cursor)
 
             connection.commit()
 
@@ -174,16 +156,7 @@ class PostgresStore:
             has_data = cursor.fetchone()[0]
 
             if not has_data:
-                for table_name, items in self.seed_data.items():
-                    for item in items:
-                        entity_id = item.get("id")
-                        cursor.execute(
-                            """
-                            insert into app_records (table_name, entity_id, sort_id, data)
-                            values (%s, %s, %s, %s)
-                            """,
-                            (table_name, str(entity_id), self._sort_id(entity_id), Json(item))
-                        )
+                self._insert_seed_records(cursor)
 
             connection.commit()
 
@@ -204,6 +177,37 @@ class PostgresStore:
                 (table_name,)
             )
             return cursor.fetchone()[0]
+
+    def _insert_seed_records(self, cursor):
+        for table_name, items in self.seed_data.items():
+            for item in items:
+                self._insert_record(cursor, table_name, item.get("id"), item)
+
+    def _list_records(self, table_name):
+        with self._connect() as connection, connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(LIST_RECORDS_QUERY, (table_name,))
+            return [row["data"] for row in cursor.fetchall()]
+
+    def _get_record(self, table_name, entity_id):
+        with self._connect() as connection, connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(GET_RECORD_QUERY, (table_name, str(entity_id)))
+            row = cursor.fetchone()
+            return row["data"] if row else None
+
+    def _insert_record(self, cursor, table_name, entity_id, item):
+        cursor.execute(
+            """
+            insert into app_records (table_name, entity_id, sort_id, data)
+            values (%s, %s, %s, %s)
+            """,
+            (table_name, str(entity_id), self._sort_id(entity_id), Json(item))
+        )
+
+    def _save_record(self, cursor, table_name, entity_id, item):
+        cursor.execute(
+            UPSERT_RECORD_QUERY,
+            (table_name, str(entity_id), self._sort_id(entity_id), Json(item))
+        )
 
     def _sort_id(self, entity_id):
         return int(entity_id) if str(entity_id).isdigit() else 0

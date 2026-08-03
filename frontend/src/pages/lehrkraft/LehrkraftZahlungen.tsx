@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
+import { PERMISSIONS } from "../../constants/permissions";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
@@ -9,12 +10,12 @@ import OverviewCards from "../../components/OverviewCards";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
+import { getBerlinDate } from "../../utils/dateTime";
 import { getPaymentOpenItemStatus, isPendingPayment } from "../../utils/openItems";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
-const today = "2026-07-28";
-
 export default function LehrkraftZahlungen() {
+    const today = getBerlinDate();
     const [searchParams] = useSearchParams();
     const [zahlungen, setZahlungen] = useSyncedServiceData(
         ["zahlungen", "auftraege", "bestellungen"],
@@ -26,6 +27,7 @@ export default function LehrkraftZahlungen() {
     const [bestellungId, setBestellungId] = useState("");
     const [betrag, setBetrag] = useState(0);
     const [ausfuehrenAm, setAusfuehrenAm] = useState(today);
+    const [fehler, setFehler] = useState("");
 
     const rechnungen = rechnungenService.list();
     const bestellungen = bestellungenService.list();
@@ -37,6 +39,7 @@ export default function LehrkraftZahlungen() {
     const neu = () => {
         const ersteRechnung = rechnungen[0];
         const ersteBestellung = bestellungen[0];
+        setFehler("");
         setBezugTyp("Rechnung");
         setRechnungId(ersteRechnung ? String(ersteRechnung.id) : "");
         setBestellungId(ersteBestellung ? String(ersteBestellung.id) : "");
@@ -48,12 +51,13 @@ export default function LehrkraftZahlungen() {
     const speichern = () => {
         if (bezugTyp === "Rechnung") {
             const rechnung = rechnungenService.getById(Number(rechnungId));
-            if (!rechnung) return;
+            if (!rechnung || Number(betrag) <= 0 || !ausfuehrenAm) {
+                setFehler("Bitte Bezug, Betrag und Ausfuehrungsdatum ausfuellen.");
+                return;
+            }
             zahlungenService.create({
                 rechnungId: rechnung.id,
-                rechnungsnr: rechnung.rechnungsnr,
                 zahlungsart: rechnung.rechnungstyp === "Eingangsrechnung" ? "Ausgang" : "Eingang",
-                kunde: rechnung.kunde,
                 datum: today,
                 ausfuehrenAm,
                 betrag: Number(betrag),
@@ -62,13 +66,13 @@ export default function LehrkraftZahlungen() {
             });
         } else {
             const bestellung = bestellungen.find(item => String(item.id) === String(bestellungId));
-            if (!bestellung) return;
+            if (!bestellung || Number(betrag) <= 0 || !ausfuehrenAm) {
+                setFehler("Bitte Bezug, Betrag und Ausfuehrungsdatum ausfuellen.");
+                return;
+            }
             zahlungenService.create({
                 bestellungId: bestellung.id,
-                bestellNr: bestellung.bestellNr,
-                rechnungsnr: "",
                 zahlungsart: "Ausgang",
-                kunde: bestellung.lieferant,
                 datum: today,
                 ausfuehrenAm,
                 betrag: Number(betrag),
@@ -76,6 +80,7 @@ export default function LehrkraftZahlungen() {
                 status: "geplant"
             });
         }
+        setFehler("");
         setZahlungen(zahlungenService.list());
         setOpen(false);
     };
@@ -101,7 +106,7 @@ export default function LehrkraftZahlungen() {
     const daten = zahlungen.map(item => ({
         ...item,
         referenz: item.rechnungsnr || item.bestellNr || "-",
-        bezugTyp: item.rechnungsnr ? "Rechnung" : item.bestellNr ? "Bestellung" : "-",
+        bezugTyp: item.rechnungId ? "Rechnung" : item.bestellungId ? "Bestellung" : "-",
         statusSicht: getPaymentOpenItemStatus(item) === "bezahlt" ? "ausgeführt" : getPaymentOpenItemStatus(item)
     }));
 
@@ -111,8 +116,8 @@ export default function LehrkraftZahlungen() {
         <OverviewCards cards={[
             { label: "Zahlungen gesamt", value: zahlungen.length },
             { label: "Geplant / offen", value: zahlungen.filter(isPendingPayment).length },
-            { label: "Zu Rechnungen", value: zahlungen.filter(item => !!item.rechnungsnr).length },
-            { label: "Zu Bestellungen", value: zahlungen.filter(item => !!item.bestellNr).length }
+            { label: "Zu Rechnungen", value: zahlungen.filter(item => !!item.rechnungId).length },
+            { label: "Zu Bestellungen", value: zahlungen.filter(item => !!item.bestellungId).length }
         ]}/>
         <DataTable
             title="Externe Zahlungen"
@@ -139,29 +144,46 @@ export default function LehrkraftZahlungen() {
                 if (field === "referenz" && row.bestellungId) return `/bestellungen?focus=${row.bestellungId}`;
                 return null;
             }}
-            toolbarActions={[{ name: "new", label: "Zahlung anlegen", permission: "gf", onClick: neu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Zahlung anlegen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "execute", label: "Ausführen", permission: "gf", onClick: ausfuehren, variant: "success", isVisible: row => row.status !== "ausgefuehrt" },
-                { name: "cancel", label: "Stornieren", permission: "gf", onClick: stornieren, variant: "danger" }
+                { name: "execute", label: "Ausführen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: ausfuehren, variant: "success", isVisible: row => row.status !== "ausgefuehrt" },
+                { name: "cancel", label: "Stornieren", permission: PERMISSIONS.GF_BEARBEITEN, onClick: stornieren, variant: "danger" }
             ]}
         />
-        <Dialog open={open} title="Externe Zahlung anlegen" onClose={() => setOpen(false)}>
-            <div><Label>Bezug</Label><select value={bezugTyp} onChange={event => setBezugTyp(event.target.value)}><option>Rechnung</option><option>Bestellung</option></select></div>
-            {bezugTyp === "Rechnung" ? <div><Label>Rechnung</Label><LookupField value={rechnungId} options={rechnungsOptionen} onChange={value => {
+        <Dialog open={open} title="Externe Zahlung anlegen" onClose={() => {
+            setFehler("");
+            setOpen(false);
+        }}>
+            <div><Label required>Bezug</Label><select value={bezugTyp} onChange={event => {
+                setFehler("");
+                setBezugTyp(event.target.value);
+            }}><option>Rechnung</option><option>Bestellung</option></select></div>
+            {bezugTyp === "Rechnung" ? <div><Label required>Rechnung</Label><LookupField value={rechnungId} options={rechnungsOptionen} onChange={value => {
+                setFehler("");
                 setRechnungId(value);
                 const rechnung = rechnungenService.getById(Number(value));
                 setBetrag(Number(rechnung?.betrag || 0));
                 setAusfuehrenAm(rechnung?.faelligAm || today);
-            }} placeholder="Rechnung suchen..."/></div> : <div><Label>Bestellung</Label><LookupField value={bestellungId} options={bestellOptionen} onChange={value => {
+            }} placeholder="Rechnung suchen..."/></div> : <div><Label required>Bestellung</Label><LookupField value={bestellungId} options={bestellOptionen} onChange={value => {
+                setFehler("");
                 setBestellungId(value);
                 setBetrag(0);
                 setAusfuehrenAm(today);
             }} placeholder="Bestellung suchen..."/></div>}
             <div className="form-row">
-                <div><Label>Betrag</Label><NumberField value={betrag} min="0" onChange={wert => setBetrag(Number(wert || 0))}/></div>
-                <div><Label>Ausführen am</Label><input type="date" value={ausfuehrenAm} onChange={event => setAusfuehrenAm(event.target.value)}/></div>
+                <div><Label required>Betrag</Label><NumberField value={betrag} min="0" onChange={wert => {
+                    setFehler("");
+                    setBetrag(Number(wert || 0));
+                }}/></div>
+                <div><Label required>Ausführen am</Label><input type="date" value={ausfuehrenAm} onChange={event => {
+                    setFehler("");
+                    setAusfuehrenAm(event.target.value);
+                }}/></div>
             </div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row">
+                {fehler && <p className="form-error">{fehler}</p>}
+                <button onClick={speichern}>Speichern</button>
+            </div>
         </Dialog>
     </>;
 }

@@ -6,9 +6,9 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import firmenkontoService from "../../services/buchhaltung/firmenkontoService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { getBerlinDate } from "../../utils/dateTime";
 
 const euro = (betrag) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(betrag || 0));
-const today = "2026-07-26";
 
 function withSaldo(rows) {
     let saldo = 0;
@@ -19,6 +19,7 @@ function withSaldo(rows) {
 }
 
 export default function Firmenkonto() {
+    const today = getBerlinDate();
     const [rows, setRows] = useSyncedServiceData(["firmenkonto"], () => firmenkontoService.list());
     const [open, setOpen] = useState(false);
     const [editId, setEditId] = useState(null);

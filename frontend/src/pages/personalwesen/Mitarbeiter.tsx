@@ -7,23 +7,29 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 
-const today = "2026-07-26";
+function createMitarbeiter(today: string) {
+    return { name: "", abteilung: "", rolle: "", eintritt: today, status: "im Einsatz" };
+}
 
 export default function Mitarbeiter() {
+    const today = getBerlinDate();
     const navigate = useNavigate();
     const [mitarbeiter, setMitarbeiter] = useSyncedServiceData(
         ["mitarbeiter", "bewerber", "personalakten"],
         () => mitarbeiterService.list()
     );
     const [open, setOpen] = useState(false);
-    const [current, setCurrent] = useState({ name: "", abteilung: "", rolle: "", eintritt: today, status: "im Einsatz" });
+    const [current, setCurrent] = useState(createMitarbeiter(today));
 
     const speichern = () => {
         if (!current.name.trim()) return;
         mitarbeiterService.create(current);
         setMitarbeiter(mitarbeiterService.list());
         setOpen(false);
+        setCurrent(createMitarbeiter(today));
     };
 
     return <>
@@ -43,8 +49,8 @@ export default function Mitarbeiter() {
                 { field: "eintritt", title: "Eintritt" },
                 { field: "status", title: "Status" }
             ]}
-            toolbarActions={[{ name: "new", label: "Mitarbeiter anlegen", permission: "personalwesen.bearbeiten", onClick: () => setOpen(true), variant: "secondary" }]}
-            rowActions={[{ name: "details", label: "Akte öffnen", permission: "personalwesen.bearbeiten", onClick: item => navigate(`/personalakte?mitarbeiter=${item.id}`), variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Mitarbeiter anlegen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: () => setOpen(true), variant: "secondary" }]}
+            rowActions={[{ name: "details", label: "Akte öffnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: item => navigate(`/personalakte?mitarbeiter=${item.id}`), variant: "secondary" }]}
         />
         <Dialog open={open} title="Mitarbeiter anlegen" onClose={() => setOpen(false)}>
             <div><Label>Name</Label><TextField value={current.name} onChange={value => setCurrent(item => ({ ...item, name: value }))}/></div>

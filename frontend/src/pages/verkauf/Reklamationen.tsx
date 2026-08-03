@@ -9,6 +9,7 @@ import reklamationenService, { naechsteReklamationsnummer } from "../../services
 import kundenService from "../../services/verkauf/customerService";
 import OverviewCards from "../../components/OverviewCards";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
 
 const heute = () => new Date().toISOString().slice(0, 10);
 
@@ -38,7 +39,6 @@ export default function Reklamationen() {
         reklamationenService.add({
             reklamationsNr: naechsteReklamationsnummer(),
             kundeId: kunde.id,
-            kunde: kunde.firma,
             datum: heute(),
             beschreibung: beschreibung.trim(),
             status: "neu"
@@ -69,8 +69,8 @@ export default function Reklamationen() {
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kunden?focus=${row.kundeId}` : null}
-            toolbarActions={[{ name: "new", label: "Reklamation erfassen", permission: "service.bearbeiten", onClick: neu }]}
-            rowActions={[{ name: "replacement", label: "Ersatzlieferung planen", permission: "service.bearbeiten", onClick: ersatzlieferungPlanen }]}
+            toolbarActions={[{ name: "new", label: "Reklamation erfassen", permission: PERMISSIONS.SERVICE_BEARBEITEN, onClick: neu }]}
+            rowActions={[{ name: "replacement", label: "Ersatzlieferung planen", permission: PERMISSIONS.SERVICE_BEARBEITEN, onClick: ersatzlieferungPlanen }]}
             filters={[{ name: "status", label: "Status", options: [{ value: "neu", label: "Neu" }, { value: "Ersatzlieferung geplant", label: "Ersatzlieferung geplant" }] }]}
             onFilter={filters => setStatusFilter(filters.status || "")}
         />

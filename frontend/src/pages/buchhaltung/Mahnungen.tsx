@@ -2,33 +2,29 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
+import { PERMISSIONS } from "../../constants/permissions";
 import mahnungenService from "../../services/buchhaltung/mahnungenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
-import kundenService from "../../services/verkauf/customerService";
-import { getCustomerName } from "../../utils/customerReferences";
 import { isOpenItem, isOverdueOpenItem } from "../../utils/openItems";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
-
-const today = "2026-07-28";
+import { getBerlinDate } from "../../utils/dateTime";
 
 export default function Mahnungen() {
+    const today = getBerlinDate();
     const [mahnungen, setMahnungen] = useSyncedServiceData(
         ["mahnungen", "auftraege", "bestellungen", "zahlungen", "kunden"],
         () => mahnungenService.list()
     );
-    const kunden = kundenService.list();
 
     const resolveKundenLink = (row) => {
-        const rechnung = rechnungenService.list().find(item => item.rechnungsnr === row.rechnungsnr);
+        const rechnung = row.rechnungId ? rechnungenService.getById(row.rechnungId) : null;
         if (rechnung?.kundeId) return `/kunden?focus=${rechnung.kundeId}`;
-        const kunde = kunden.find(item => item.firma === row.kunde);
-        return kunde ? `/kunden?focus=${kunde.id}` : null;
+        return null;
     };
 
     const erzeugen = (rechnung) => {
         mahnungenService.create({
-            rechnungsnr: rechnung.rechnungsnr,
-            kunde: getCustomerName(rechnung.kundeId, rechnung.kunde),
+            rechnungId: rechnung.id,
             datum: today,
             status: "gesendet",
             stufe: "1. Mahnung"
@@ -71,7 +67,7 @@ export default function Mahnungen() {
                 if (field === "kunde") return resolveKundenLink(row);
                 return null;
             }}
-            rowActions={[{ name: "cancel", label: "Stornieren", permission: "buchhaltung.bearbeiten", onClick: stornieren, variant: "danger" }]}
+            rowActions={[{ name: "cancel", label: "Stornieren", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: stornieren, variant: "danger" }]}
         />
         <DataTable
             title="Mahnbare offene Posten"
@@ -89,7 +85,7 @@ export default function Mahnungen() {
                 if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 return null;
             }}
-            rowActions={[{ name: "remind", label: "Mahnung erstellen", permission: "buchhaltung.bearbeiten", onClick: erzeugen, variant: "warning" }]}
+            rowActions={[{ name: "remind", label: "Mahnung erstellen", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: erzeugen, variant: "warning" }]}
         />
     </>;
 }

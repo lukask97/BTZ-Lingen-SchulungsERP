@@ -5,6 +5,8 @@ import retourenService from "../../services/logistik/retourenService";
 import versandService from "../../services/logistik/versandService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
+import { getOpenGoodsReceiptOrders, getOrdersWithoutShipment } from "../../utils/processFlow";
 
 export default function Logistik() {
     useStorageSyncRefresh(["artikel", "bestellungen", "versandauftraege", "retouren", "auftraege"]);
@@ -14,12 +16,13 @@ export default function Logistik() {
     const versandauftraege = versandService.list();
     const retouren = retourenService.list();
     const auftraege = auftraegeService.list();
+    const vertriebsdokumente = vertriebsdokumenteService.list();
 
     const niedrigeBestaende = artikel.filter(item => Number(item.bestand) < 10).length;
-    const offeneWareneingaenge = bestellungen.filter(item => item.status === "versendet").length;
+    const offeneWareneingaenge = getOpenGoodsReceiptOrders(bestellungen).length;
     const vorbereiteteSendungen = versandauftraege.filter(item => item.status === "in Vorbereitung").length;
     const offeneRetouren = retouren.filter(item => item.status !== "abgeschlossen").length;
-    const offeneAuftraegeOhneVersand = auftraege.filter(auftrag => !versandauftraege.some(item => String(item.auftragId) === String(auftrag.id))).length;
+    const offeneAuftraegeOhneVersand = getOrdersWithoutShipment(auftraege, vertriebsdokumente, versandauftraege).length;
 
     return <>
         <h1>Logistik</h1>
