@@ -23,11 +23,16 @@ export default function Sidebar() {
 
     const {user, logout, hasFullAccess, hasAccess} = useAuth();
     const isAdmin = hasFullAccess();
+    const isVerkaufSenior = String(user?.rolle || "").toLowerCase().includes("verkauf senior");
     const location = useLocation();
     const [providerLabel, setProviderLabel] = useState(() => getProviderLabel(getDataProvider()));
     const visibleGroups = useMemo(
         () => NAVIGATION_GROUPS
-            .filter(group => (isAdmin || group.key !== "verwaltung") && (!group.adminOnly || isAdmin))
+            .filter(group =>
+                (isAdmin || group.key !== "verwaltung")
+                && (!group.adminOnly || isAdmin)
+                && !(isVerkaufSenior && group.key === "gf")
+            )
             .map(group => {
                 const visibleItems = group.items.filter(item => !item.access || hasAccess(item.access));
                 const canOpenOverview = !group.access || hasAccess(group.access);
@@ -39,7 +44,7 @@ export default function Sidebar() {
                 };
             })
             .filter(group => group.canOpenOverview || group.visibleItems.length > 0),
-        [hasAccess, isAdmin]
+        [hasAccess, isAdmin, isVerkaufSenior]
     );
     const [collapsedGroups, setCollapsedGroups] = useState(() => Object.fromEntries(
         NAVIGATION_GROUPS.map(group => {

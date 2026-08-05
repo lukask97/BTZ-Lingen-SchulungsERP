@@ -188,7 +188,7 @@ export default function Kunden() {
 
                 <div className="form-row">
                     {error && <p className="form-error">{error}</p>}
-                    <button onClick={speichern}>Speichern</button>
+                    <button type="button" onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>
         </>

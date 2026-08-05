@@ -128,7 +128,7 @@ export default function Belege() {
                 }} placeholder="Rechnung suchen..."/>
                 : <TextField value={current.bezug} onChange={value => setCurrent(item => ({ ...item, bezug: value }))}/>}</div>
             <div className="form-row"><Label>Beschreibung</Label><TextArea rows={3} value={current.beschreibung} onChange={value => setCurrent(item => ({ ...item, beschreibung: value }))}/></div>
-            <div className="form-row"><button className={editMode ? "button-secondary" : ""} onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
+            <div className="form-row"><button type="button" className={editMode ? "button-secondary" : ""} onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
         </Dialog>
     </>;
 }

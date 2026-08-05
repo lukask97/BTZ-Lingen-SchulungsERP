@@ -6,6 +6,7 @@ import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
+import SalesFlowBar from "../../components/SalesFlowBar";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import versandService from "../../services/logistik/versandService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
@@ -79,6 +80,7 @@ export default function Versand() {
     };
 
     return <>
+        <SalesFlowBar currentStep="versand"/>
         <OverviewCards cards={[
             { label: "Versandaufträge", value: versand.length },
             { label: "In Vorbereitung", value: versand.filter(item => item.status === "in Vorbereitung").length },
@@ -114,7 +116,7 @@ export default function Versand() {
             <div><Label>Auftrag</Label><LookupField value={current.auftragId} options={auftragsOptionen} onChange={auftragAuswaehlen} placeholder="Auftrag suchen..."/></div>
             <div><Label>Kunde</Label><TextField value={versandfaehigeAuftraege.find(item => String(item.id) === String(current.auftragId))?.kunde || ""} disabled/></div>
             <div><Label>Transport</Label><TextField value={current.transport} onChange={value => setCurrent(item => ({ ...item, transport: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

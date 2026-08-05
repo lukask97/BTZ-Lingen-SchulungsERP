@@ -20,6 +20,16 @@ services:
 
       - "5432:5432"
 
+    healthcheck:
+
+      test: ["CMD-SHELL", "pg_isready -U erp -d erp"]
+
+      interval: 5s
+
+      timeout: 5s
+
+      retries: 12
+
     volumes:
 
       - ./database/data:/var/lib/postgresql/data
@@ -72,13 +82,43 @@ services:
 
       - "5000:5000"
 
-    volumes:
+    restart: unless-stopped
 
-      - ./backend:/app
+    develop:
+
+      watch:
+
+        - action: sync+restart
+
+          path: ./backend
+
+          target: /app
+
+          ignore:
+
+            - __pycache__/
+
+            - .pytest_cache/
+
+            - .mypy_cache/
+
+            - venv/
+
+            - .venv/
+
+        - action: rebuild
+
+          path: ./backend/requirements.txt
+
+        - action: rebuild
+
+          path: ./backend/Dockerfile
 
     depends_on:
 
-      - postgres
+      postgres:
+
+        condition: service_healthy
 
 
   frontend:
@@ -93,12 +133,40 @@ services:
 
     volumes:
 
-      - ./frontend:/app
-
       - /app/node_modules
 
-    command: sh -c "npm install && npm run dev -- --host"
+    develop:
 
+      watch:
+
+        - action: sync
+
+          path: ./frontend
+
+          target: /app
+
+          ignore:
+
+            - node_modules/
+
+            - dist/
+
+        - action: rebuild
+
+          path: ./frontend/package.json
+
+        - action: rebuild
+
+          path: ./frontend/package-lock.json
+
+        - action: rebuild
+
+          path: ./frontend/Dockerfile
+
+    command: >
+      sh -c "npm install &&
+         npm run dev -- --host &&
+         echo 'Frontend IP Address: http://$(hostname -I | awk \"{print \$1}\"):5173'"
     depends_on:
 
       - backend

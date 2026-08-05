@@ -220,7 +220,7 @@ export default function Personalakte() {
                 <option value="abgeschlossen">Abgeschlossen</option>
             </select></div>
             <div className="form-row"><Label>Hinweis</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
         </Dialog>
     </>;
 }

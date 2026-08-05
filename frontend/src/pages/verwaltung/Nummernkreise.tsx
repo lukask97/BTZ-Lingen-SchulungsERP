@@ -22,6 +22,18 @@ function createBeispiel(row: any) {
     if (row.schluessel === "lieferschein") {
         return formatDocumentNumber("lieferschein", 1, "2026-08-02");
     }
+    if (row.schluessel === "bestellung") {
+        return formatDocumentNumber("bestellung", 1, "2026-08-02");
+    }
+    if (row.schluessel === "gutschrift") {
+        return formatDocumentNumber("gutschrift", 1, "2026-08-02");
+    }
+    if (row.schluessel === "mahnung") {
+        return formatDocumentNumber("mahnung", 1, "2026-08-02");
+    }
+    if (row.schluessel === "zahlung") {
+        return formatDocumentNumber("zahlung", 1, "2026-08-02");
+    }
     return row.kuerzel || "-";
 }
 
@@ -91,7 +103,7 @@ export default function Nummernkreise() {
 
             <div className="form-row">
                 {error && <p className="form-error">{error}</p>}
-                <button onClick={speichern}>Speichern</button>
+                <button type="button" onClick={speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

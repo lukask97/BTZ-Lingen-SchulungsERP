@@ -6,11 +6,13 @@ import Label from "../../components/form/Label";
 import NumberField from "../../components/form/NumberField";
 import artikelService from "../../services/logistik/artikelService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
+import angeboteService from "../../services/verkauf/angeboteService";
 import bestellungenService, { naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 import { PERMISSIONS } from "../../constants/permissions";
 import { getBerlinDate } from "../../utils/dateTime";
 const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
+const OFFENE_ANGEBOTSSTATUS = ["wartet auf antwort"];
 
 function createBedarfsmeldungDraft() {
     return {
@@ -49,6 +51,21 @@ function getBestellvorschlag(artikel, verplant, kritischerBestand) {
     return 1;
 }
 
+function getOpenOfferCountByArtikel(angebote = []) {
+    return angebote
+        .filter(angebot => OFFENE_ANGEBOTSSTATUS.includes(String(angebot.status || "").toLowerCase()))
+        .reduce((map, angebot) => {
+            (angebot.positionen || [])
+                .filter(position => !position.serviceId && position.artikelId)
+                .forEach(position => {
+                    const artikelId = String(position.artikelId);
+                    map[artikelId] = Number(map[artikelId] || 0) + Number(position.menge || 0);
+                });
+
+            return map;
+        }, {});
+}
+
 export default function Bestand() {
     const heute = getBerlinDate();
     const syncTick = useStorageSyncRefresh(["artikel", "auftraege", "bestellungen"]);
@@ -65,7 +82,9 @@ export default function Bestand() {
 
     const artikel = useMemo(() => artikelService.getAll(), [refreshKey, syncTick]);
     const auftraege = useMemo(() => auftraegeService.getAll(), [refreshKey, syncTick]);
+    const angebote = useMemo(() => angeboteService.getAll(), [refreshKey, syncTick]);
     const verplanteMengen = useMemo(() => getVerplanteMengen(auftraege), [auftraege]);
+    const offeneAngeboteJeArtikel = useMemo(() => getOpenOfferCountByArtikel(angebote), [angebote]);
     const einkaufbareArtikel = useMemo(() => artikel.filter(item => item.istEinkaufbar), [artikel]);
 
     const artikelOptionen = einkaufbareArtikel.map(item => ({
@@ -82,6 +101,7 @@ export default function Bestand() {
                 ...item,
                 lager: "Hauptlager",
                 verplant,
+                inAngeboten: Number(offeneAngeboteJeArtikel[String(item.id)] || 0),
                 verfuegbar: bestand - verplant,
                 anzahlAktiverAuftraege: verplantInfo.auftraege.length,
                 aktiveAuftraege: verplanteMengen[String(item.id)]
@@ -221,6 +241,7 @@ export default function Bestand() {
                 { field: "artikelTyp", title: "Typ" },
                 { field: "bestand", title: "Bestand", helpText: "Aktueller physischer Lagerbestand des Artikels." },
                 { field: "verplant", title: "Verplant", helpText: "Menge, die bereits in aktiven Auftraegen reserviert ist." },
+                { field: "inAngeboten", title: "In Angeboten", helpText: "Summierte Menge aus aktuell offenen Angeboten mit Status 'Wartet auf Antwort', in denen der Artikel verwendet wird." },
                 { field: "verfuegbar", title: "Verfuegbar", helpText: "Bestand minus bereits verplante Menge. Dieser Wert ist fuer neue Zusagen relevant." }
             ]}
             rowClassName={row => Number(row.verfuegbar || 0) < Number(kritischerBestand || 0) ? "datatable-row-critical" : ""}
@@ -246,7 +267,7 @@ export default function Bestand() {
             <div className="form-row">
                 <p>Die Anpassung aendert nur den Lagerbestand. Allgemeine Artikelpflege erfolgt weiterhin auf der Artikelseite.</p>
             </div>
-            <div className="form-row"><button onClick={bestandSpeichern}>Bestand speichern</button></div>
+            <div className="form-row"><button type="button" onClick={bestandSpeichern}>Bestand speichern</button></div>
         </Dialog>
 
         <Dialog open={bedarfDialogOpen} title="Bedarfsmeldung erstellen" onClose={() => {
@@ -278,7 +299,7 @@ export default function Bestand() {
             <div className="form-row">
                 <p>Beim Speichern wird nur eine Bedarfsmeldung fuer den Einkauf angelegt. Ein Lieferant wird noch nicht festgelegt und der Einkauf bearbeitet den Vorgang spaeter weiter.</p>
             </div>
-            <div className="form-row"><button onClick={bedarfsmeldungSpeichern}>Bedarfsmeldung speichern</button></div>
+            <div className="form-row"><button type="button" onClick={bedarfsmeldungSpeichern}>Bedarfsmeldung speichern</button></div>
         </Dialog>
     </>;
 }

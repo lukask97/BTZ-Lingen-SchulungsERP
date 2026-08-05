@@ -106,7 +106,11 @@ PREVIEW_DATA = {
         {"id": 1, "schluessel": "angebot", "bezeichnung": "Angebot", "kuerzel": "ANG"},
         {"id": 2, "schluessel": "auftrag", "bezeichnung": "Auftrag", "kuerzel": "AU"},
         {"id": 3, "schluessel": "rechnung", "bezeichnung": "Rechnung", "kuerzel": "RG"},
-        {"id": 4, "schluessel": "lieferschein", "bezeichnung": "Lieferschein", "kuerzel": "LS"}
+        {"id": 4, "schluessel": "lieferschein", "bezeichnung": "Lieferschein", "kuerzel": "LS"},
+        {"id": 5, "schluessel": "bestellung", "bezeichnung": "Bestellung", "kuerzel": "EK"},
+        {"id": 6, "schluessel": "gutschrift", "bezeichnung": "Gutschrift", "kuerzel": "GS"},
+        {"id": 7, "schluessel": "mahnung", "bezeichnung": "Mahnung", "kuerzel": "MH"},
+        {"id": 8, "schluessel": "zahlung", "bezeichnung": "Zahlung", "kuerzel": "ZA"}
     ],
     "auftraege": [],
     "vertriebsdokumente": [],

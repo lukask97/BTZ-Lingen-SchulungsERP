@@ -4,10 +4,22 @@ import { getCustomerName } from "../../utils/customerReferences";
 
 const baseService = createCRUDService("kundenanfragen", kundenanfragen);
 
+function withPermissionFallback<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (error instanceof Error && error.message.startsWith("Keine Berechtigung")) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function hydrateInquiry(item: any = {}) {
     return {
         ...item,
-        kunde: getCustomerName(item.kundeId, item.kunde)
+        kunde: withPermissionFallback(() => getCustomerName(item.kundeId, item.kunde), item.kunde || "")
     };
 }
 

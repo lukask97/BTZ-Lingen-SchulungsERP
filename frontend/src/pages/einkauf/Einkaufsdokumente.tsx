@@ -245,7 +245,7 @@ export default function Einkaufsdokumente() {
             <div className="form-row"><Label>Vorschau Titel</Label><strong>{createDokumentTitel(current.dokumentTyp, bestellungen.find(item => String(item.id) === String(current.bestellungId)))}</strong></div>
             <div><Label>Datum</Label><input type="date" value={current.datum} onChange={event => setCurrent(item => ({ ...item, datum: event.target.value }))}/></div>
             <div className="form-row"><Label>Hinweis</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

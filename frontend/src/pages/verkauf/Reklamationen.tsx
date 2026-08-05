@@ -79,7 +79,7 @@ export default function Reklamationen() {
             <div><Label>Datum</Label><input type="date" value={heute()} disabled/></div>
             <div className="form-row"><Label required>Beschreibung</Label><TextArea rows={4} value={beschreibung} placeholder="Was ist passiert?" onChange={setBeschreibung}/>
                 {fehler && <p className="form-error">{fehler}</p>}</div>
-            <div className="form-row"><button onClick={speichern}>Reklamation speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Reklamation speichern</button></div>
         </Dialog>
     </>;
 }

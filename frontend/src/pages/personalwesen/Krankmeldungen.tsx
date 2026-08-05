@@ -108,7 +108,7 @@ export default function Krankmeldungen() {
             <div><Label>Von</Label><TextField type="date" value={current.von} onChange={value => setCurrent(item => ({ ...item, von: value }))}/></div>
             <div><Label>Bis</Label><TextField type="date" value={current.bis} onChange={value => setCurrent(item => ({ ...item, bis: value }))}/></div>
             <div className="form-row"><Label>Grund / Hinweis</Label><TextArea rows={3} value={current.grund} onChange={value => setCurrent(item => ({ ...item, grund: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

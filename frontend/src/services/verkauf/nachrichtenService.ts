@@ -8,19 +8,27 @@ import { getCustomerName } from "../../utils/customerReferences";
 
 const service = createCRUDService("nachrichten", nachrichten);
 
+function tryRead<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch {
+        return fallback;
+    }
+}
+
 function resolveMessageContext(item: any = {}) {
-    const auftrag = item.auftragId ? auftraegeService.getById(item.auftragId) : null;
+    const auftrag = item.auftragId ? tryRead(() => auftraegeService.getById(item.auftragId), null) : null;
     const angebot = item.angebotId
-        ? angeboteService.getById(item.angebotId)
+        ? tryRead(() => angeboteService.getById(item.angebotId), null)
         : auftrag?.angebotId
-            ? angeboteService.getById(auftrag.angebotId)
+            ? tryRead(() => angeboteService.getById(auftrag.angebotId), null)
             : null;
     const anfrage = item.anfrageId
-        ? customerInquiryService.getById(item.anfrageId)
+        ? tryRead(() => customerInquiryService.getById(item.anfrageId), null)
         : angebot?.anfrageId
-            ? customerInquiryService.getById(angebot.anfrageId)
+            ? tryRead(() => customerInquiryService.getById(angebot.anfrageId), null)
             : auftrag?.anfrageId
-                ? customerInquiryService.getById(auftrag.anfrageId)
+                ? tryRead(() => customerInquiryService.getById(auftrag.anfrageId), null)
                 : null;
 
     return { auftrag, angebot, anfrage };

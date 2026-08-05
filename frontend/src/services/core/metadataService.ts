@@ -4,10 +4,29 @@ import {
     loadData, saveData
 } from "../mockup/mockStorage";
 import { buildDatabasePath, isDatabaseModeEnabled, syncApiRequest } from "./api";
+
+function isPermissionError(error) {
+    if (!(error instanceof Error)) return false;
+
+    const message = error.message.toLowerCase();
+    return message.startsWith("keine berechtigung")
+        || message.includes("status 403")
+        || message.includes("403")
+        || message.includes("forbidden");
+}
+
 function getUserColumnSettings() {
     if (isDatabaseModeEnabled()) {
-        const result = syncApiRequest(buildDatabasePath("/benutzerSpalten"));
-        return result.items || [];
+        try {
+            const result = syncApiRequest(buildDatabasePath("/benutzerSpalten"));
+            return result.items || [];
+        } catch (error) {
+            if (isPermissionError(error)) {
+                return [];
+            }
+
+            throw error;
+        }
     }
 
     return loadData("benutzerSpalten", benutzerSpalten);
@@ -44,18 +63,26 @@ export function saveUserColumns(username, tabelle, fields) {
     };
 
     if (isDatabaseModeEnabled()) {
-        if (bisher?.id) {
-            syncApiRequest(buildDatabasePath(`/benutzerSpalten/${bisher.id}`), {
-                method: "PATCH",
+        try {
+            if (bisher?.id) {
+                syncApiRequest(buildDatabasePath(`/benutzerSpalten/${bisher.id}`), {
+                    method: "PATCH",
+                    body: payload
+                });
+                return;
+            }
+
+            syncApiRequest(buildDatabasePath("/benutzerSpalten"), {
+                method: "POST",
                 body: payload
             });
-            return;
-        }
+        } catch (error) {
+            if (isPermissionError(error)) {
+                return;
+            }
 
-        syncApiRequest(buildDatabasePath("/benutzerSpalten"), {
-            method: "POST",
-            body: payload
-        });
+            throw error;
+        }
         return;
     }
 

@@ -113,7 +113,7 @@ export default function Bewerber() {
             <div><Label>Name</Label><TextField value={current.name} onChange={value => setCurrent(item => ({ ...item, name: value }))}/></div>
             <div><Label>Stelle</Label><TextField value={current.stelle} onChange={value => setCurrent(item => ({ ...item, stelle: value }))}/></div>
             <div className="form-row"><Label>Notiz</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

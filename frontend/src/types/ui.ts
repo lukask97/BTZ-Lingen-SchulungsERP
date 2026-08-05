@@ -52,6 +52,7 @@ export interface TextAreaProps {
     onChange: (value: string) => void;
     rows?: number;
     placeholder?: string;
+    onKeyDown?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
 export interface DataTableAction {

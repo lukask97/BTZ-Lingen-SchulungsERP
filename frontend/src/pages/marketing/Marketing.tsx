@@ -116,7 +116,7 @@ export default function Marketing() {
             <div className="form-row"><Label>Beschreibung</Label><TextArea rows={3} value={aktion.beschreibung} onChange={wert => aendern("beschreibung", wert)}/></div>
             <div className="form-row">
                 {fehler && <p className="form-error">{fehler}</p>}
-                <button onClick={speichern}>Speichern</button>
+                <button type="button" onClick={speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

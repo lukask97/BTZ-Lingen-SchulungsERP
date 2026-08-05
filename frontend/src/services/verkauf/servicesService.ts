@@ -19,6 +19,18 @@ const legacyServices = artikel
 const fallbackServices = services.length > 0 ? services : legacyServices;
 const baseService = createCRUDService("services", fallbackServices);
 
+function withPermissionFallback<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (error instanceof Error && error.message.startsWith("Keine Berechtigung")) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function normalizeService(item = {}) {
     const basisPreis = Number(item.preis ?? 0);
     return {
@@ -39,10 +51,17 @@ function withFallback(items = []) {
     return fallbackServices.map(normalizeService);
 }
 
+function getFallbackServices() {
+    return fallbackServices.map(normalizeService);
+}
+
 const servicesService = {
-    list: () => withFallback(baseService.list()),
-    getAll: () => withFallback(baseService.list()),
-    getById: (id) => withFallback(baseService.list()).find(item => String(item.id) === String(id)),
+    list: () => withPermissionFallback(() => withFallback(baseService.list()), getFallbackServices()),
+    getAll: () => withPermissionFallback(() => withFallback(baseService.list()), getFallbackServices()),
+    getById: (id) => withPermissionFallback(
+        () => withFallback(baseService.list()).find(item => String(item.id) === String(id)),
+        getFallbackServices().find(item => String(item.id) === String(id))
+    ),
     create: (payload) => baseService.create(normalizeService(payload)),
     add: (payload) => baseService.create(normalizeService(payload)),
     update: (idOrItem, payload) => {

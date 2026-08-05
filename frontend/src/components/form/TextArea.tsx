@@ -4,7 +4,8 @@ export default function TextArea({
     value,
     onChange,
     rows = 4,
-    placeholder = ""
+    placeholder = "",
+    onKeyDown
 }: TextAreaProps) {
 
     return (
@@ -14,6 +15,7 @@ export default function TextArea({
             value={value}
             placeholder={placeholder}
             onChange={e => onChange(e.target.value)}
+            onKeyDown={onKeyDown}
         />
     );
 

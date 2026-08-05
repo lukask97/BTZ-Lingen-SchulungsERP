@@ -55,7 +55,7 @@ def _load_applied_versions(connection) -> set[str]:
 def _connect_with_retry(dsn: str):
     last_error = None
 
-    for _ in range(10):
+    for _ in range(30):
         try:
             return psycopg2.connect(dsn)
         except psycopg2.OperationalError as error:

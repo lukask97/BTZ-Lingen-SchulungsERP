@@ -1,7 +1,17 @@
 import { nummernkreise } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
 
-export type NummernkreisSchluessel = "angebot" | "auftrag" | "rechnung" | "lieferschein";
+export type NummernkreisSchluessel =
+    | "artikel"
+    | "service"
+    | "angebot"
+    | "auftrag"
+    | "rechnung"
+    | "lieferschein"
+    | "bestellung"
+    | "gutschrift"
+    | "mahnung"
+    | "zahlung";
 
 export type Nummernkreis = {
     id: number | string;
@@ -13,10 +23,16 @@ export type Nummernkreis = {
 const baseService = createCRUDService<Nummernkreis>("nummernkreise", nummernkreise);
 
 const DEFAULT_NUMMERNKREISE: Record<NummernkreisSchluessel, { bezeichnung: string; kuerzel: string }> = {
+    artikel: { bezeichnung: "Artikel", kuerzel: "ART" },
+    service: { bezeichnung: "Service", kuerzel: "SER" },
     angebot: { bezeichnung: "Angebot", kuerzel: "ANG" },
     auftrag: { bezeichnung: "Auftrag", kuerzel: "AU" },
     rechnung: { bezeichnung: "Rechnung", kuerzel: "RG" },
-    lieferschein: { bezeichnung: "Lieferschein", kuerzel: "LS" }
+    lieferschein: { bezeichnung: "Lieferschein", kuerzel: "LS" },
+    bestellung: { bezeichnung: "Bestellung", kuerzel: "EK" },
+    gutschrift: { bezeichnung: "Gutschrift", kuerzel: "GS" },
+    mahnung: { bezeichnung: "Mahnung", kuerzel: "MH" },
+    zahlung: { bezeichnung: "Zahlung", kuerzel: "ZA" }
 };
 
 let nummernkreiseTableAvailable: boolean | null = null;
@@ -28,6 +44,16 @@ function isMissingTableError(error: unknown) {
         || error.message.includes("status 404")
         || error.message.includes("404")
         || error.message.toLowerCase().includes("not found");
+}
+
+function isPermissionError(error: unknown) {
+    if (!(error instanceof Error)) return false;
+
+    const message = error.message.toLowerCase();
+    return message.startsWith("keine berechtigung")
+        || message.includes("status 403")
+        || message.includes("403")
+        || message.includes("forbidden");
 }
 
 function normalizeKuerzel(value: string) {
@@ -77,7 +103,7 @@ function listWithFallback() {
         nummernkreiseTableAvailable = true;
         return result;
     } catch (error) {
-        if (isMissingTableError(error)) {
+        if (isMissingTableError(error) || isPermissionError(error)) {
             nummernkreiseTableAvailable = false;
             return withDefaults([]);
         }
@@ -98,7 +124,7 @@ const nummernkreiseService = {
             nummernkreiseTableAvailable = true;
             return item ? normalizeNummernkreis(item) : undefined;
         } catch (error) {
-            if (isMissingTableError(error)) {
+            if (isMissingTableError(error) || isPermissionError(error)) {
                 nummernkreiseTableAvailable = false;
                 return listWithFallback().find(item => String(item.id) === String(id));
             }

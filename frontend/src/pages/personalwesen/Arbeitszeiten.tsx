@@ -81,7 +81,7 @@ export default function Arbeitszeiten() {
             <div><Label>Mitarbeiter</Label><LookupField value={current.mitarbeiterId} options={mitarbeiterOptionen} onChange={mitarbeiterAuswaehlen} placeholder="Mitarbeiter suchen..."/></div>
             <div><Label>Von</Label><TextField type="time" value={current.von} onChange={value => setCurrent(item => ({ ...item, von: value }))}/></div>
             <div><Label>Bis</Label><TextField type="time" value={current.bis} onChange={value => setCurrent(item => ({ ...item, bis: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

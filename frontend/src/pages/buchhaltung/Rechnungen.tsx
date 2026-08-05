@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
+import SalesFlowBar from "../../components/SalesFlowBar";
 import { PERMISSIONS } from "../../constants/permissions";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
@@ -24,6 +25,7 @@ export default function Rechnungen() {
     const bezahlteRechnungen = rechnungen.filter(item => item.ampel === "bezahlt");
 
     return <>
+        <SalesFlowBar currentStep="rechnungen"/>
         <OverviewCards cards={[
             { label: "Abgeleitete Rechnungen", value: rechnungen.length },
             { label: "Offen", value: offeneRechnungen.length },

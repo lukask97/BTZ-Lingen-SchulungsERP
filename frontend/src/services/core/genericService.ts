@@ -47,6 +47,20 @@ export function createCRUDService<T extends EntityWithId>(tableName: string, ini
         list: () => reload(),
         getById: (id: number | string) => {
             if (useBackend()) {
+                const cached = getCachedTableData<T>(tableName);
+                if (cached) {
+                    const cachedItem = cached.find(item => String(item.id) === String(id));
+                    if (cachedItem) {
+                        return cachedItem;
+                    }
+                }
+
+                const loadedItems = reload();
+                const loadedItem = loadedItems.find(item => String(item.id) === String(id));
+                if (loadedItem) {
+                    return loadedItem;
+                }
+
                 const result = syncApiRequest(buildDatabasePath(`/${tableName}/${id}`));
                 return result.item;
             }

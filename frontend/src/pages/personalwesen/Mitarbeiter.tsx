@@ -62,7 +62,7 @@ export default function Mitarbeiter() {
                 <option value="in Einarbeitung">In Einarbeitung</option>
                 <option value="beurlaubt">Beurlaubt</option>
             </select></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

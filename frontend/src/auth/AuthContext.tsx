@@ -21,23 +21,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const [user, setUser] = useState<AuthUser | null>(readInitialUser);
     const [isAuthReady, setIsAuthReady] = useState(false);
+    const [authError, setAuthError] = useState("");
 
     useEffect(() => {
         let isMounted = true;
 
         async function syncUserWithBackend() {
-            const backendUser = await getCurrentBackendUser();
-            if (!isMounted) return;
+            try {
+                const backendUser = await getCurrentBackendUser();
+                if (!isMounted) return;
 
-            setUser(backendUser);
+                setUser(backendUser);
+                setAuthError("");
 
-            if (backendUser) {
-                sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(backendUser));
-            } else {
+                if (backendUser) {
+                    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(backendUser));
+                } else {
+                    sessionStorage.removeItem(AUTH_STORAGE_KEY);
+                }
+            } catch (error) {
+                if (!isMounted) return;
+                setUser(null);
                 sessionStorage.removeItem(AUTH_STORAGE_KEY);
+                setAuthError(
+                    error instanceof Error
+                        ? error.message
+                        : "Backend nicht erreichbar."
+                );
+            } finally {
+                if (isMounted) {
+                    setIsAuthReady(true);
+                }
             }
-
-            setIsAuthReady(true);
         }
 
         syncUserWithBackend();
@@ -52,6 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         setUser(userData);
         setIsAuthReady(true);
+        setAuthError("");
 
         sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
 
@@ -62,6 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         setUser(null);
         setIsAuthReady(true);
+        setAuthError("");
 
         sessionStorage.removeItem(AUTH_STORAGE_KEY);
         await logoutPreviewSession();
@@ -86,7 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return (<AuthContext.Provider
         value={{
-            user, isAuthReady, login, logout, hasFullAccess, hasPermission, hasAccess
+            user, isAuthReady, authError, login, logout, hasFullAccess, hasPermission, hasAccess
         }}
     >
         {children}

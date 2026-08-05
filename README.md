@@ -208,3 +208,22 @@ location.reload();
 
 - Im Datenbankmodus synchronisieren sich Aenderungen ueber das Backend zwischen Browsern
 - Ein Testdaten-Reset laedt im Datenbankmodus die Seed-Daten neu in PostgreSQL
+
+------------------------------------------------------------------------
+
+# Docker Watch
+
+Fuer die lokale Entwicklung ist `docker compose watch` eingerichtet, damit du Container nicht staendig manuell neu starten musst.
+
+Start:
+
+``` bash
+docker compose up -d
+docker compose watch
+```
+
+Verhalten:
+
+- `frontend/` wird in den Container synchronisiert, Vite aktualisiert die Seite automatisch.
+- `backend/` wird in den Container synchronisiert und der Backend-Container bei Aenderungen automatisch neu gestartet.
+- Aenderungen an `backend/requirements.txt`, `frontend/package.json`, `frontend/package-lock.json` oder den jeweiligen `Dockerfile`s loesen einen Rebuild aus.

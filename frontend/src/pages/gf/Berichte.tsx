@@ -197,7 +197,7 @@ export default function Berichte() {
             </select></div>
             <div className="form-row"><Label>Zusammenfassung</Label><TextArea rows={4} value={current.zusammenfassung} onChange={value => setCurrent(item => ({ ...item, zusammenfassung: value }))}/></div>
             <div className="form-row"><Label>Empfohlene Aktion</Label><TextArea rows={3} value={current.empfohlenAktion} onChange={value => setCurrent(item => ({ ...item, empfohlenAktion: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
         </Dialog>
     </>;
 }

@@ -206,27 +206,63 @@ export let services = [
 export let nummernkreise = [
     {
         id: 1,
+        schluessel: "artikel",
+        bezeichnung: "Artikel",
+        kuerzel: "ART"
+    },
+    {
+        id: 2,
+        schluessel: "service",
+        bezeichnung: "Service",
+        kuerzel: "SER"
+    },
+    {
+        id: 3,
         schluessel: "angebot",
         bezeichnung: "Angebot",
         kuerzel: "ANG"
     },
     {
-        id: 2,
+        id: 4,
         schluessel: "auftrag",
         bezeichnung: "Auftrag",
         kuerzel: "AU"
     },
     {
-        id: 3,
+        id: 5,
         schluessel: "rechnung",
         bezeichnung: "Rechnung",
         kuerzel: "RG"
     },
     {
-        id: 4,
+        id: 6,
         schluessel: "lieferschein",
         bezeichnung: "Lieferschein",
         kuerzel: "LS"
+    },
+    {
+        id: 7,
+        schluessel: "bestellung",
+        bezeichnung: "Bestellung",
+        kuerzel: "EK"
+    },
+    {
+        id: 8,
+        schluessel: "gutschrift",
+        bezeichnung: "Gutschrift",
+        kuerzel: "GS"
+    },
+    {
+        id: 9,
+        schluessel: "mahnung",
+        bezeichnung: "Mahnung",
+        kuerzel: "MH"
+    },
+    {
+        id: 10,
+        schluessel: "zahlung",
+        bezeichnung: "Zahlung",
+        kuerzel: "ZA"
     }
 ];
 
@@ -241,7 +277,7 @@ export let benutzer = [
     },
 
     {
-        id: 3, username: "buchhaltung", email: "buchhaltung@test.de", password: "buchhaltung", rolle: "Buchhaltung", name: "Buchhaltung", permissions: ["kunde.lesen", "kunde.anlegen", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
+        id: 3, username: "buchhaltung", email: "buchhaltung@test.de", password: "buchhaltung", rolle: "Buchhaltung", name: "Buchhaltung", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
     },
     {
         id: 4, username: "marketing", email: "marketing@test.de", password: "marketing", rolle: "Marketing", name: "Marketing Mitarbeiter", permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
@@ -250,16 +286,16 @@ export let benutzer = [
         id: 8, username: "einkauf", email: "einkauf@test.de", password: "einkauf", rolle: "Einkauf", name: "Einkauf Mitarbeiter", permissions: ["einkauf.lesen", "einkauf.bearbeiten", "lager.lesen", "lager.bearbeiten", "artikel.lesen", "artikel.bearbeiten"]
     },
     {
-        id: 9, username: "verkauf", email: "verkauf@test.de", password: "verkauf", rolle: "Verkauf", name: "Verkauf Mitarbeiter", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
+        id: 9, username: "verkauf", email: "verkauf@test.de", password: "verkauf", rolle: "Verkauf", name: "Verkauf Mitarbeiter", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
     },
     {
         id: 10, username: "personalwesen", email: "personalwesen@test.de", password: "personalwesen", rolle: "Personalwesen", name: "Personalwesen Mitarbeiter", permissions: ["personalwesen.lesen", "personalwesen.bearbeiten", "organisation.lesen"]
     },
     {
-        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi", name: "Verkauf Azubi", permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi", name: "Verkauf Azubi", permissions: ["kunde.lesen", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen"]
     },
     {
-        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior", name: "Verkauf Senior", permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior", name: "Verkauf Senior", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "lager.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
     },
     {
         id: 7, username: "gf", email: "gf@test.de", password: "gf", rolle: "Geschäftsführung", name: "Geschäftsführung", permissions: ["*"]
@@ -325,82 +361,60 @@ export let rollen = [
 ];
 
 export let rechte = [
-
-    {
-        id: 1, name: "kunde.anlegen", beschreibung: "Neue Kunden erstellen"
-    },
-
-    {
-        id: 2, name: "kunde.bearbeiten", beschreibung: "Kundendaten bearbeiten"
-    },
-
-    {
-        id: 3, name: "artikel.anlegen", beschreibung: "Neue Artikel erstellen"
-    },
-
-    {
-        id: 4, name: "artikel.bearbeiten", beschreibung: "Artikeldaten bearbeiten"
-    },
-
-    {
-        id: 5, name: "rechnung.anlegen", beschreibung: "Neue Rechnungen erstellen"
-    },
-
-    {
-        id: 6, name: "rechnung.bearbeiten", beschreibung: "Rechnungen bearbeiten"
-    },
-    {
-        id: 7, name: "*", beschreibung: "Vollzugriff auf alle Funktionen"
-    },
-    {
-        id: 8, name: "lager.buchen", beschreibung: "Lagerbewegungen buchen"
-    },
-    {
-        id: 9, name: "lager.lesen", beschreibung: "Lagerdaten lesen"
-    },
-    {
-        id: 10, name: "einkauf.lesen", beschreibung: "Einkaufsdaten lesen"
-    },
-    {
-        id: 11, name: "einkauf.bearbeiten", beschreibung: "Einkaufsdaten bearbeiten"
-    },
-    {
-        id: 12, name: "marketing.lesen", beschreibung: "Marketingdaten lesen"
-    },
-    {
-        id: 13, name: "marketing.bearbeiten", beschreibung: "Marketingdaten bearbeiten"
-    },
-    {
-        id: 14, name: "verkauf.lesen", beschreibung: "Verkaufsdaten lesen"
-    },
-    {
-        id: 15, name: "verkauf.bearbeiten", beschreibung: "Verkaufsdaten bearbeiten"
-    },
-    {
-        id: 16, name: "service.lesen", beschreibung: "Servicedaten lesen"
-    },
-    {
-        id: 17, name: "service.bearbeiten", beschreibung: "Servicedaten bearbeiten"
-    },
-    {
-        id: 18, name: "organisation.lesen", beschreibung: "Organisationsdaten lesen"
-    },
-    {
-        id: 19, name: "buchhaltung.lesen", beschreibung: "Buchhaltungsdaten lesen"
-    },
-    {
-        id: 20, name: "buchhaltung.bearbeiten", beschreibung: "Buchhaltungsdaten bearbeiten"
-    },
-    {
-        id: 21, name: "kunde.lesen", beschreibung: "Kundendaten lesen"
-    },
-    {
-        id: 22, name: "personalwesen.lesen", beschreibung: "Personaldaten lesen"
-    },
-    {
-        id: 23, name: "personalwesen.bearbeiten", beschreibung: "Personaldaten bearbeiten"
-    }
-
+    { id: 1, name: "*", beschreibung: "Vollzugriff auf alle Funktionen" },
+    { id: 2, name: "organisation.lesen", beschreibung: "Organisationsdaten lesen" },
+    { id: 3, name: "einkauf.lesen", beschreibung: "Einkaufsdaten lesen" },
+    { id: 4, name: "einkauf.bearbeiten", beschreibung: "Einkaufsdaten bearbeiten" },
+    { id: 5, name: "verkauf.lesen", beschreibung: "Verkaufsdaten lesen" },
+    { id: 6, name: "verkauf.bearbeiten", beschreibung: "Verkaufsdaten bearbeiten" },
+    { id: 7, name: "service.lesen", beschreibung: "Servicedaten lesen" },
+    { id: 8, name: "service.bearbeiten", beschreibung: "Servicedaten bearbeiten" },
+    { id: 9, name: "marketing.lesen", beschreibung: "Marketingdaten lesen" },
+    { id: 10, name: "marketing.bearbeiten", beschreibung: "Marketingdaten bearbeiten" },
+    { id: 11, name: "buchhaltung.lesen", beschreibung: "Buchhaltungsdaten lesen" },
+    { id: 12, name: "buchhaltung.bearbeiten", beschreibung: "Buchhaltungsdaten bearbeiten" },
+    { id: 13, name: "logistik.lesen", beschreibung: "Logistikdaten lesen" },
+    { id: 14, name: "logistik.bearbeiten", beschreibung: "Logistikdaten bearbeiten" },
+    { id: 15, name: "personalwesen.lesen", beschreibung: "Personaldaten lesen" },
+    { id: 16, name: "personalwesen.bearbeiten", beschreibung: "Personaldaten bearbeiten" },
+    { id: 17, name: "gf.lesen", beschreibung: "Geschäftsführungsdaten lesen" },
+    { id: 18, name: "gf.bearbeiten", beschreibung: "Geschäftsführungsdaten bearbeiten" },
+    { id: 19, name: "kunde.lesen", beschreibung: "Kundendaten lesen" },
+    { id: 20, name: "kunde.anzeigen", beschreibung: "Kundendaten anzeigen" },
+    { id: 21, name: "kunde.anlegen", beschreibung: "Neue Kunden erstellen" },
+    { id: 22, name: "kunde.bearbeiten", beschreibung: "Kundendaten bearbeiten" },
+    { id: 23, name: "kunde.loeschen", beschreibung: "Kundendaten löschen" },
+    { id: 24, name: "artikel.lesen", beschreibung: "Artikeldaten lesen" },
+    { id: 25, name: "artikel.anzeigen", beschreibung: "Artikeldaten anzeigen" },
+    { id: 26, name: "artikel.anlegen", beschreibung: "Neue Artikel erstellen" },
+    { id: 27, name: "artikel.bearbeiten", beschreibung: "Artikeldaten bearbeiten" },
+    { id: 28, name: "artikel.loeschen", beschreibung: "Artikeldaten löschen" },
+    { id: 29, name: "rechnung.lesen", beschreibung: "Rechnungen lesen" },
+    { id: 30, name: "rechnung.anzeigen", beschreibung: "Rechnungen anzeigen" },
+    { id: 31, name: "rechnung.anlegen", beschreibung: "Neue Rechnungen erstellen" },
+    { id: 32, name: "rechnung.bearbeiten", beschreibung: "Rechnungen bearbeiten" },
+    { id: 33, name: "rechnung.loeschen", beschreibung: "Rechnungen löschen" },
+    { id: 34, name: "lager.lesen", beschreibung: "Lagerdaten lesen" },
+    { id: 35, name: "lager.anzeigen", beschreibung: "Lagerdaten anzeigen" },
+    { id: 36, name: "lager.anlegen", beschreibung: "Neue Lager anlegen" },
+    { id: 37, name: "lager.bearbeiten", beschreibung: "Lagerdaten bearbeiten" },
+    { id: 38, name: "lager.loeschen", beschreibung: "Lagerdaten löschen" },
+    { id: 39, name: "lager.buchen", beschreibung: "Lagerbewegungen buchen" },
+    { id: 40, name: "benutzer.lesen", beschreibung: "Benutzerdaten lesen" },
+    { id: 41, name: "benutzer.anzeigen", beschreibung: "Benutzerdaten anzeigen" },
+    { id: 42, name: "benutzer.anlegen", beschreibung: "Neue Benutzer anlegen" },
+    { id: 43, name: "benutzer.bearbeiten", beschreibung: "Benutzerdaten bearbeiten" },
+    { id: 44, name: "benutzer.loeschen", beschreibung: "Benutzerdaten löschen" },
+    { id: 45, name: "rollen.lesen", beschreibung: "Rollen lesen" },
+    { id: 46, name: "rollen.anzeigen", beschreibung: "Rollen anzeigen" },
+    { id: 47, name: "rollen.anlegen", beschreibung: "Neue Rollen anlegen" },
+    { id: 48, name: "rollen.bearbeiten", beschreibung: "Rollen bearbeiten" },
+    { id: 49, name: "rollen.loeschen", beschreibung: "Rollen löschen" },
+    { id: 50, name: "rechte.lesen", beschreibung: "Rechte lesen" },
+    { id: 51, name: "rechte.anzeigen", beschreibung: "Rechte anzeigen" },
+    { id: 52, name: "rechte.anlegen", beschreibung: "Neue Rechte anlegen" },
+    { id: 53, name: "rechte.bearbeiten", beschreibung: "Rechte bearbeiten" },
+    { id: 54, name: "rechte.loeschen", beschreibung: "Rechte löschen" }
 ];
 
 export let rollenRechte = [
@@ -412,40 +426,52 @@ export let rollenRechte = [
     { id: 6, rolleId: 2, rolleName: "Lager", rechtName: "einkauf.bearbeiten" },
     { id: 7, rolleId: 3, rolleName: "Buchhaltung", rechtName: "kunde.lesen" },
     { id: 8, rolleId: 3, rolleName: "Buchhaltung", rechtName: "kunde.anlegen" },
-    { id: 9, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.lesen" },
-    { id: 10, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.anlegen" },
-    { id: 11, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.bearbeiten" },
-    { id: 12, rolleId: 3, rolleName: "Buchhaltung", rechtName: "verkauf.lesen" },
-    { id: 13, rolleId: 3, rolleName: "Buchhaltung", rechtName: "verkauf.bearbeiten" },
-    { id: 14, rolleId: 3, rolleName: "Buchhaltung", rechtName: "service.lesen" },
-    { id: 15, rolleId: 3, rolleName: "Buchhaltung", rechtName: "service.bearbeiten" },
-    { id: 16, rolleId: 3, rolleName: "Buchhaltung", rechtName: "organisation.lesen" },
-    { id: 17, rolleId: 3, rolleName: "Buchhaltung", rechtName: "buchhaltung.lesen" },
-    { id: 18, rolleId: 3, rolleName: "Buchhaltung", rechtName: "buchhaltung.bearbeiten" },
-    { id: 19, rolleId: 4, rolleName: "Marketing", rechtName: "marketing.lesen" },
-    { id: 20, rolleId: 4, rolleName: "Marketing", rechtName: "marketing.bearbeiten" },
-    { id: 21, rolleId: 4, rolleName: "Marketing", rechtName: "verkauf.lesen" },
-    { id: 22, rolleId: 5, rolleName: "Einkauf", rechtName: "einkauf.lesen" },
-    { id: 23, rolleId: 5, rolleName: "Einkauf", rechtName: "einkauf.bearbeiten" },
-    { id: 24, rolleId: 5, rolleName: "Einkauf", rechtName: "lager.lesen" },
-    { id: 25, rolleId: 5, rolleName: "Einkauf", rechtName: "lager.bearbeiten" },
-    { id: 26, rolleId: 5, rolleName: "Einkauf", rechtName: "artikel.lesen" },
-    { id: 27, rolleId: 5, rolleName: "Einkauf", rechtName: "artikel.bearbeiten" },
-    { id: 28, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.lesen" },
-    { id: 29, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.anlegen" },
-    { id: 30, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.bearbeiten" },
-    { id: 31, rolleId: 6, rolleName: "Verkauf", rechtName: "verkauf.lesen" },
-    { id: 32, rolleId: 6, rolleName: "Verkauf", rechtName: "verkauf.bearbeiten" },
-    { id: 33, rolleId: 6, rolleName: "Verkauf", rechtName: "service.lesen" },
-    { id: 34, rolleId: 6, rolleName: "Verkauf", rechtName: "service.bearbeiten" },
-    { id: 35, rolleId: 7, rolleName: "Personalwesen", rechtName: "personalwesen.lesen" },
-    { id: 36, rolleId: 7, rolleName: "Personalwesen", rechtName: "personalwesen.bearbeiten" },
-    { id: 37, rolleId: 7, rolleName: "Personalwesen", rechtName: "organisation.lesen" },
-    { id: 38, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "verkauf.lesen" },
-    { id: 39, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "verkauf.bearbeiten" },
-    { id: 40, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "verkauf.lesen" },
-    { id: 41, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "verkauf.bearbeiten" },
-    { id: 42, rolleId: 10, rolleName: "Geschäftsführung", rechtName: "*" }
+    { id: 9, rolleId: 3, rolleName: "Buchhaltung", rechtName: "kunde.bearbeiten" },
+    { id: 10, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.lesen" },
+    { id: 11, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.anlegen" },
+    { id: 12, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.bearbeiten" },
+    { id: 13, rolleId: 3, rolleName: "Buchhaltung", rechtName: "verkauf.lesen" },
+    { id: 14, rolleId: 3, rolleName: "Buchhaltung", rechtName: "verkauf.bearbeiten" },
+    { id: 15, rolleId: 3, rolleName: "Buchhaltung", rechtName: "service.lesen" },
+    { id: 16, rolleId: 3, rolleName: "Buchhaltung", rechtName: "service.bearbeiten" },
+    { id: 17, rolleId: 3, rolleName: "Buchhaltung", rechtName: "organisation.lesen" },
+    { id: 18, rolleId: 3, rolleName: "Buchhaltung", rechtName: "buchhaltung.lesen" },
+    { id: 19, rolleId: 3, rolleName: "Buchhaltung", rechtName: "buchhaltung.bearbeiten" },
+    { id: 20, rolleId: 4, rolleName: "Marketing", rechtName: "marketing.lesen" },
+    { id: 21, rolleId: 4, rolleName: "Marketing", rechtName: "marketing.bearbeiten" },
+    { id: 22, rolleId: 4, rolleName: "Marketing", rechtName: "verkauf.lesen" },
+    { id: 23, rolleId: 5, rolleName: "Einkauf", rechtName: "einkauf.lesen" },
+    { id: 24, rolleId: 5, rolleName: "Einkauf", rechtName: "einkauf.bearbeiten" },
+    { id: 25, rolleId: 5, rolleName: "Einkauf", rechtName: "lager.lesen" },
+    { id: 26, rolleId: 5, rolleName: "Einkauf", rechtName: "lager.bearbeiten" },
+    { id: 27, rolleId: 5, rolleName: "Einkauf", rechtName: "artikel.lesen" },
+    { id: 28, rolleId: 5, rolleName: "Einkauf", rechtName: "artikel.bearbeiten" },
+    { id: 29, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.lesen" },
+    { id: 30, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.anlegen" },
+    { id: 31, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.bearbeiten" },
+    { id: 32, rolleId: 6, rolleName: "Verkauf", rechtName: "artikel.lesen" },
+    { id: 33, rolleId: 6, rolleName: "Verkauf", rechtName: "verkauf.lesen" },
+    { id: 34, rolleId: 6, rolleName: "Verkauf", rechtName: "verkauf.bearbeiten" },
+    { id: 35, rolleId: 6, rolleName: "Verkauf", rechtName: "service.lesen" },
+    { id: 36, rolleId: 6, rolleName: "Verkauf", rechtName: "service.bearbeiten" },
+    { id: 37, rolleId: 7, rolleName: "Personalwesen", rechtName: "personalwesen.lesen" },
+    { id: 38, rolleId: 7, rolleName: "Personalwesen", rechtName: "personalwesen.bearbeiten" },
+    { id: 39, rolleId: 7, rolleName: "Personalwesen", rechtName: "organisation.lesen" },
+    { id: 40, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "kunde.lesen" },
+    { id: 41, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "artikel.lesen" },
+    { id: 42, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "verkauf.lesen" },
+    { id: 43, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "verkauf.bearbeiten" },
+    { id: 44, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "service.lesen" },
+    { id: 45, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "kunde.lesen" },
+    { id: 46, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "kunde.anlegen" },
+    { id: 47, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "kunde.bearbeiten" },
+    { id: 48, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "artikel.lesen" },
+    { id: 49, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "verkauf.lesen" },
+    { id: 50, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "verkauf.bearbeiten" },
+    { id: 51, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "service.lesen" },
+    { id: 52, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "service.bearbeiten" },
+    { id: 53, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "lager.lesen" },
+    { id: 54, rolleId: 10, rolleName: "Geschäftsführung", rechtName: "*" }
 ];
 
 // Logistik und Einkauf
@@ -483,7 +509,7 @@ export let users = [
         username: "buchhaltung",
         password: "buchhaltung",
         name: "Buchhaltung",
-        permissions: ["kunde.lesen", "kunde.anlegen", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
+        permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
     },
     {
         id: 4,
@@ -507,7 +533,7 @@ export let users = [
         password: "verkauf",
         name: "Verkauf Mitarbeiter",
         rolle: "Verkauf",
-        permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
+        permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "lager.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
     },
     {
         id: 10,
@@ -523,7 +549,7 @@ export let users = [
         password: "verkauf",
         name: "Verkauf Azubi",
         rolle: "Verkauf Azubi",
-        permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+        permissions: ["kunde.lesen", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen"]
     },
     {
         id: 6,
@@ -531,7 +557,7 @@ export let users = [
         password: "verkauf",
         name: "Verkauf Senior",
         rolle: "Verkauf Senior",
-        permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+        permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
     },
     {
         id: 7,
@@ -1136,6 +1162,7 @@ export let firmenkonto = [
     {
         id: 1,
         datum: "2024-10-01",
+        konto: "firma",
         betreff: "Stammkapitaleinzahlung",
         info: "",
         soll: 0,
@@ -1144,20 +1171,22 @@ export let firmenkonto = [
     },
     {
         id: 2,
-        datum: "",
-        betreff: "",
-        info: "",
+        datum: "2026-07-22",
+        konto: "verkauf",
+        betreff: "Zahlungseingang Rechnung RG-2026-002",
+        info: "Verbleibt bis zum Wochenabschluss auf dem Verkaufskonto",
         soll: 0,
-        haben: 0,
-        saldo: 25000
+        haben: 1799.7,
+        saldo: 1799.7
     },
     {
         id: 3,
-        datum: "",
-        betreff: "",
-        info: "",
-        soll: 0,
+        datum: "2026-07-24",
+        konto: "einkauf",
+        betreff: "Materialeinkauf Sicherheitshelme",
+        info: "Didaktische Beispielausgabe fuer das Einkaufskonto",
+        soll: 420,
         haben: 0,
-        saldo: 25000
+        saldo: -420
     }
 ];

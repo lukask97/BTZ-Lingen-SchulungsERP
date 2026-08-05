@@ -339,7 +339,7 @@ export default function Bestellungen() {
                 <TextArea rows={3} value={dialogState.notiz} onChange={wert => setDialogState(item => ({ ...item, notiz: wert }))}/>
                 {dialogState.fehler && <p className="form-error">{dialogState.fehler}</p>}
             </div>
-            <div className="form-row"><button onClick={speichern}>Anfrage speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Anfrage speichern</button></div>
         </Dialog>
     </>;
 }

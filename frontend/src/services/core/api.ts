@@ -1,4 +1,7 @@
-const API_URL = "http://localhost:5000/api";
+// Dynamisch die Server-IP-Adresse ermitteln
+const SERVER_IP = window.location.hostname; // Nimmt die aktuelle Host-IP oder Domain
+const API_URL = `http://${SERVER_IP}:5000/api`; // Backend-Port 5000 verwenden
+
 const DATABASE_API_URL = `${API_URL}/datenbanken`;
 
 export const DATABASE_PROVIDER = "backend-postgres";

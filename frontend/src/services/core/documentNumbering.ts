@@ -1,11 +1,17 @@
 import { getBerlinDate } from "../../utils/dateTime";
-import nummernkreiseService, { type NummernkreisSchluessel } from "../verwaltung/nummernkreiseService";
+import { getDefaultNummernkreise, type NummernkreisSchluessel } from "../verwaltung/nummernkreiseService";
 
 const LEGACY_PREFIXES: Record<NummernkreisSchluessel, string[]> = {
+    artikel: ["ART"],
+    service: ["SER"],
     angebot: ["ANG"],
     auftrag: ["AU", "VK"],
     rechnung: ["RG", "RE"],
-    lieferschein: ["LS"]
+    lieferschein: ["LS"],
+    bestellung: ["EK"],
+    gutschrift: ["GS"],
+    mahnung: ["MH"],
+    zahlung: ["ZA"]
 };
 
 function getYearFromDate(dateValue?: string) {
@@ -18,11 +24,7 @@ function padSequence(sequence: number) {
 }
 
 export function getNumberPrefix(schluessel: NummernkreisSchluessel) {
-    try {
-        return nummernkreiseService.getBySchluessel(schluessel)?.kuerzel || LEGACY_PREFIXES[schluessel][0];
-    } catch {
-        return LEGACY_PREFIXES[schluessel][0];
-    }
+    return getDefaultNummernkreise().find(item => item.schluessel === schluessel)?.kuerzel || LEGACY_PREFIXES[schluessel][0];
 }
 
 function getAcceptedPrefixes(schluessel: NummernkreisSchluessel) {
@@ -61,6 +63,10 @@ function getMaxSequence(values: Array<string | undefined>, schluessel: Nummernkr
 
 export function formatDocumentNumber(schluessel: NummernkreisSchluessel, sequence: number, dateValue?: string) {
     return `${getNumberPrefix(schluessel)}-${getYearFromDate(dateValue)}-${padSequence(sequence)}`;
+}
+
+export function formatMasterDataNumber(schluessel: "artikel" | "service", sequence: number) {
+    return `${getNumberPrefix(schluessel)}${padSequence(sequence)}`;
 }
 
 export function formatOfferNumber(angebotsBasisNr: string, revision: number) {
@@ -112,4 +118,17 @@ export function getLieferscheinnummer(auftragNr: string, dateValue?: string) {
     }
 
     return formatDocumentNumber("lieferschein", 1, dateValue);
+}
+
+export function naechsteStammdatennummer(values: Array<string | undefined>, schluessel: "artikel" | "service") {
+    const prefixes = getAcceptedPrefixes(schluessel);
+    const prefixGroup = prefixes.map(escapeRegex).join("|");
+    const pattern = new RegExp(`^(?:${prefixGroup})(\\d+)$`, "i");
+    const maxSequence = values.reduce((maxValue, currentValue) => {
+        const match = String(currentValue || "").trim().match(pattern);
+        if (!match) return maxValue;
+        return Math.max(maxValue, Number(match[1] || 0));
+    }, 0);
+
+    return formatMasterDataNumber(schluessel, maxSequence + 1);
 }

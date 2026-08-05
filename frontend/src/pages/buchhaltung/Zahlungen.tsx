@@ -128,7 +128,7 @@ export default function Zahlungen() {
                 <div><Label>Betrag</Label><NumberField value={draft.betrag} min="0" onChange={value => setDraft(item => ({ ...item, betrag: value }))}/></div>
                 <div><Label>Ausführen am</Label><input type="date" value={draft.ausfuehrenAm} onChange={event => setDraft(item => ({ ...item, ausfuehrenAm: event.target.value }))}/></div>
             </div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

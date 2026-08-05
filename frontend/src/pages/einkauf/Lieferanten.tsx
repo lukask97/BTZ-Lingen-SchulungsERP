@@ -101,7 +101,7 @@ export default function Lieferanten() {
             <div className="form-row"><Label>Für BTS</Label><TextArea rows={2} value={crud.currentItem.fuerBts || ""} onChange={wert => feldAendern("fuerBts", wert)}/></div>
             <div className="form-row">
                 {crud.error && <p className="form-error">{crud.error}</p>}
-                <button onClick={crud.speichern}>Speichern</button>
+                <button type="button" onClick={crud.speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

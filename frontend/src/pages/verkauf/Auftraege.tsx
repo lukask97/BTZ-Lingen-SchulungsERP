@@ -8,6 +8,7 @@ import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
 import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
+import SalesFlowBar from "../../components/SalesFlowBar";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import customerInquiryService from "../../services/verkauf/customerInquiryService";
 import kundenService from "../../services/verkauf/customerService";
@@ -202,6 +203,7 @@ export default function Auftraege() {
     };
 
     return <>
+        <SalesFlowBar currentStep="auftraege"/>
         <OverviewCards cards={[
             { label: "Aufträge gesamt", value: auftraege.length },
             { label: "Noch offen", value: offeneAuftraege.length },
@@ -228,14 +230,8 @@ export default function Auftraege() {
             onFilter={filters => setStatusFilter(filters.status || "")}
             toolbarActions={[{ name: "new", label: "Neuer Auftrag", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: neu }]}
             rowActions={[
-                { name: "offerOpen", label: "Angebot öffnen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => row.angebotId && navigate(`/angebote?focus=${row.angebotId}`), variant: "secondary", isVisible: row => !!row.angebotId },
-                { name: "inquiryOpen", label: "Anfrage öffnen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => row.anfrageId && navigate(`/kundenanfragen?focus=${row.anfrageId}`), variant: "secondary", isVisible: row => !!row.anfrageId },
-                { name: "confirm", label: "Dokumente öffnen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => navigate(`/vertriebsdokumente?auftrag=${row.id}`), variant: "secondary" },
-                { name: "ship", label: "Versand starten", permission: PERMISSIONS.LOGISTIK_BEARBEITEN, onClick: row => navigate(`/versand?new=fromOrder&auftragId=${row.id}`), variant: "secondary", isVisible: row => canStartShipping(row.id, vertriebsdokumente) && !findeVersandZuAuftrag(row.id) },
-                { name: "shipOpen", label: "Versand öffnen", permission: PERMISSIONS.LOGISTIK_BEARBEITEN, onClick: row => {
-                    const versand = findeVersandZuAuftrag(row.id);
-                    if (versand) navigate(`/versand?focus=${versand.id}`);
-                }, variant: "secondary", isVisible: row => !!findeVersandZuAuftrag(row.id) }
+                { name: "thread", label: "Chat", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => row.anfrageId && navigate(`/kundenanfragen?focus=${row.anfrageId}`), variant: "secondary", isDisabled: row => !row.anfrageId },
+                { name: "confirm", label: "Dokumente", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => navigate(`/vertriebsdokumente?auftrag=${row.id}`), variant: "secondary" }
             ]}
         />
         <Dialog open={open} title={draft.sourceInquiryId ? "Direkten Auftrag aus Kundenanfrage anlegen" : "Neuen Auftrag anlegen"} onClose={handleClose}>
@@ -268,7 +264,7 @@ export default function Auftraege() {
             </div>
             <div className="form-row"><strong>Gesamt: {Math.max(0, gesamtbetrag(draft.positionenDraft) - Number(draft.rabattBetrag || 0)).toFixed(2)} EUR</strong></div>
             {fehler && <p className="form-error">{fehler}</p>}
-            <div className="form-row"><button onClick={speichern}>Auftrag speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Auftrag speichern</button></div>
         </Dialog>
     </>;
 }

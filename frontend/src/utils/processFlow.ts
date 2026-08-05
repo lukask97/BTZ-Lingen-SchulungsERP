@@ -20,6 +20,13 @@ function normalize(value) {
     return String(value ?? "");
 }
 
+function isConfirmationDocumentType(value) {
+    const normalized = normalize(value).toLowerCase();
+    return normalized === "auftragsbestaetigung"
+        || normalized === "auftragsbestätigung"
+        || normalized === "auftragsbestã¤tigung";
+}
+
 export function getVorgangId(item) {
     return normalize(item?.vorgangId || (item?.anfrageId ? `anfrage-${item.anfrageId}` : item?.id ? `anfrage-${item.id}` : ""));
 }
@@ -50,7 +57,9 @@ export function getOfferForOrder(auftrag, angebote = []) {
         return angebote.find(item => normalize(item.id) === normalize(auftrag.angebotId)) || null;
     }
     if (auftrag.vorgangId) {
-        return getOffersForVorgang(auftrag.vorgangId, angebote).slice().sort((a, b) => Number(b.revision || 0) - Number(a.revision || 0))[0] || null;
+        return getOffersForVorgang(auftrag.vorgangId, angebote)
+            .slice()
+            .sort((a, b) => Number(b.revision || 0) - Number(a.revision || 0))[0] || null;
     }
     return null;
 }
@@ -95,7 +104,7 @@ export function getSalesDocumentsForVorgang(vorgangId, dokumente = [], auftraege
 }
 
 export function getConfirmationDocument(auftragId, dokumente = []) {
-    return getSalesDocumentsForOrder(auftragId, dokumente).find(item => item.dokumentTyp === "Auftragsbestätigung");
+    return getSalesDocumentsForOrder(auftragId, dokumente).find(item => isConfirmationDocumentType(item.dokumentTyp));
 }
 
 export function getSalesStepForOrder(auftrag, dokumente = [], versandauftraege = []) {
@@ -111,6 +120,7 @@ export function getSalesStepForOrder(auftrag, dokumente = [], versandauftraege =
 }
 
 export function getSalesStep(angebot, auftraege = [], dokumente = [], versandauftraege = []) {
+    if (!angebot) return SALES_STEPS.ANGEBOT_ANGENOMMEN;
     if (angebot?.status === "abgelehnt") return SALES_STEPS.ANGEBOT_ABGELEHNT;
     if (angebot?.status === "wartet auf Antwort") return SALES_STEPS.ANGEBOT_WARTET_AUF_ANTWORT;
     if (angebot?.status === "beendet") return SALES_STEPS.ANGEBOT_OFFEN;
@@ -129,9 +139,9 @@ export function getSalesStepLabel(step) {
         case SALES_STEPS.ANGEBOT_ANGENOMMEN:
             return "3. Angebot angenommen";
         case SALES_STEPS.AUFTRAGSBESTAETIGUNG_ERSTELLT:
-            return "4. Auftragsbestätigung erstellt";
+            return "4. Auftragsbestaetigung erstellt";
         case SALES_STEPS.AUFTRAGSBESTAETIGUNG_GESENDET:
-            return "5. Auftragsbestätigung gesendet";
+            return "5. Auftragsbestaetigung gesendet";
         case SALES_STEPS.VERSAND_ERSTELLT:
             return "6. Versand vorbereitet";
         case SALES_STEPS.VERSAND_VERSENDET:

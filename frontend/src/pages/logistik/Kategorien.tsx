@@ -15,6 +15,47 @@ function createEmptyKategorie() {
     return { id: null, name: "", parentId: "", beschreibung: "" };
 }
 
+function buildCategoryTree(kategorien) {
+    const byParent = new Map();
+
+    kategorien.forEach(item => {
+        const key = String(item.parentId || "");
+        const list = byParent.get(key) || [];
+        list.push(item);
+        byParent.set(key, list);
+    });
+
+    const sortItems = (items = []) => [...items].sort((a, b) => a.name.localeCompare(b.name, "de"));
+
+    const buildNode = item => ({
+        ...item,
+        children: sortItems(byParent.get(String(item.id))).map(buildNode)
+    });
+
+    return sortItems(byParent.get("")).map(buildNode);
+}
+
+function KategorienTreeList({ nodes }) {
+    if (!nodes.length) {
+        return null;
+    }
+
+    return <ul className="kategorien-simple-tree">
+        {nodes.map(node => <li key={node.id}>
+            {node.children.length > 0 ? <details className="kategorien-tree-node">
+                <summary>
+                    <span>{node.name}</span>
+                    <small>{node.children.length} Unterkategorien</small>
+                </summary>
+                <KategorienTreeList nodes={node.children}/>
+            </details> : <div className="kategorien-tree-leaf">
+                <span>{node.name}</span>
+                {node.beschreibung ? <small>{node.beschreibung}</small> : null}
+            </div>}
+        </li>)}
+    </ul>;
+}
+
 export default function Kategorien() {
     const { user } = useAuth();
     const syncTick = useStorageSyncRefresh(["kategorien"]);
@@ -32,9 +73,13 @@ export default function Kategorien() {
         label: item.pfad
     }));
 
-    const data = kategorien.filter(item =>
-        !search || Object.values(item).join(" ").toLowerCase().includes(search.toLowerCase())
-    );
+    const data = kategorien
+        .filter(item => !search || Object.values(item).join(" ").toLowerCase().includes(search.toLowerCase()))
+        .sort((a, b) => a.sortName.localeCompare(b.sortName, "de"));
+
+    const kategorienBaum = useMemo(() => buildCategoryTree(data), [data]);
+    const oberkategorieCount = kategorien.filter(item => item.istOberkategorie).length;
+    const unterkategorieCount = kategorien.length - oberkategorieCount;
 
     const neu = () => {
         setFehler("");
@@ -86,7 +131,27 @@ export default function Kategorien() {
 
     return <>
         <h1>Kategorien</h1>
-        <p>Hier lassen sich Oberkategorien und Unterkategorien fuer Artikel pflegen. So kann zum Beispiel `Fahrradkette` als Unterkategorie von `Mechanik` angelegt werden.</p>
+        <p>Die Kategorien sind jetzt klarer nach Hauptbereichen gruppiert. So sieht man schneller, welche Unterkategorien zu Fahrraedern, Bekleidung, Zubehoer oder Mechanik gehoeren.</p>
+
+        <div className="kennzahlen">
+            <div className="kennzahl"><span>Hauptkategorien</span><strong>{oberkategorieCount}</strong></div>
+            <div className="kennzahl"><span>Unterkategorien</span><strong>{unterkategorieCount}</strong></div>
+            <div className="kennzahl"><span>Kategorien gesamt</span><strong>{kategorien.length}</strong></div>
+        </div>
+
+        <section className="module-panel">
+            <div className="dashboard-panel-header">
+                <h2>Kategorienbaum</h2>
+                <span>Bei Bedarf aufklappen</span>
+            </div>
+            <details className="kategorien-tree-panel">
+                <summary>Kategorienbaum anzeigen</summary>
+                <div className="kategorien-tree">
+                    {kategorienBaum.length === 0 ? <p>Keine Kategorien gefunden.</p> : <KategorienTreeList nodes={kategorienBaum}/>}
+                </div>
+            </details>
+        </section>
+
         <DataTable
             title="Kategorien"
             tableName="kategorien"
@@ -120,7 +185,7 @@ export default function Kategorien() {
             }}/></div>
             <div className="form-row">
                 {fehler && <p className="form-error">{fehler}</p>}
-                <button onClick={speichern}>Speichern</button>
+                <button type="button" onClick={speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

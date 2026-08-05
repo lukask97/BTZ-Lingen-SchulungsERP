@@ -215,7 +215,7 @@ export default function LehrkraftLieferantenkorrespondenz() {
             </div>
             <div className="form-row">
                 {offerError && <p className="form-error">{offerError}</p>}
-                <button onClick={angebotSpeichern}>Angebot speichern</button>
+                <button type="button" onClick={angebotSpeichern}>Angebot speichern</button>
             </div>
         </Dialog>
     </>;

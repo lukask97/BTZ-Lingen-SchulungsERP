@@ -19,7 +19,7 @@ import { formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "..
 import { openDocumentPdf } from "../../utils/documentPdf";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { getPaymentOpenItemStatus, isPendingPayment } from "../../utils/openItems";
-import { getOfferForOrder, getOffersForVorgang, getOrdersForVorgang, getProcessContextForDocument, getSalesDocumentsForVorgang, getVorgangId } from "../../utils/processFlow";
+import { getInquiryForOrder, getOfferForOrder, getOffersForVorgang, getOrdersForVorgang, getProcessContextForDocument, getSalesDocumentsForVorgang, getSalesStep, getSalesStepForOrder, getSalesStepLabel, getVorgangId } from "../../utils/processFlow";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 const jetzt = () => getBerlinTimestamp();
@@ -68,6 +68,13 @@ const STATUS_HELP = {
         { label: "Angenommen", text: "Der Kunde hat das Angebot akzeptiert." },
         { label: "Abgelehnt", text: "Der Kunde hat das Angebot nicht angenommen." },
         { label: "Beendet", text: "Das Angebot ist abgeschlossen und fuer die weitere Bearbeitung nicht mehr aktiv." }
+    ],
+    auftraege: [
+        { label: "Angenommen", text: "Zum Angebot gibt es bereits einen laufenden Auftrag." },
+        { label: "Auftragsbestaetigung erstellt", text: "Die Schuelerfirma hat die Auftragsbestaetigung vorbereitet, aber noch nicht versendet." },
+        { label: "Auftragsbestaetigung gesendet", text: "Die Auftragsbestaetigung wurde an den Kunden gesendet und erscheint im Chatverlauf." },
+        { label: "Versand vorbereitet", text: "Nach der Auftragsbestaetigung wird der Versand fuer den Auftrag vorbereitet." },
+        { label: "Versand versendet", text: "Der Auftrag ist dokumentiert und die Versandunterlagen wurden bereits versendet." }
     ],
     zahlungen: [
         { label: "Offen", text: "Die Zahlung ist faellig oder angelegt, aber noch nicht erledigt." },
@@ -199,6 +206,27 @@ export default function LehrkraftKundenkorrespondenz() {
         [angebote]
     );
 
+    const laufendeAuftraege = useMemo(
+        () => auftraege
+            .map(item => {
+                const angebot = getOfferForOrder(item, angebote);
+                const anfrage = getInquiryForOrder(item, angebote, anfragen);
+                return {
+                    ...item,
+                    anfrageId: item.anfrageId || angebot?.anfrageId || anfrage?.id || "",
+                    vorgangId: item.vorgangId || angebot?.vorgangId || anfrage?.vorgangId || "",
+                    anliegen: anfrage?.anliegen || angebot?.anliegen || "",
+                    statusNormalized: normalizeStatus(item.status),
+                    prozess: getSalesStepLabel(getSalesStepForOrder(item, dokumente))
+                };
+            })
+            .filter(item => {
+                const salesStep = getSalesStep(getOfferForOrder(item, angebote), auftraege, dokumente);
+                return salesStep >= 3 && item.statusNormalized !== "storniert";
+            }),
+        [anfragen, angebote, auftraege, dokumente]
+    );
+
     const offeneWarenannahmen = useMemo(
         () => dokumente
             .filter(item => ["lieferschein", "warenbegleitpapier", "transportpapier"].includes(normalizeStatus(item.dokumentTyp)))
@@ -262,10 +290,11 @@ export default function LehrkraftKundenkorrespondenz() {
         () => [
             { key: "anfragen", label: "Offene Anfragen", value: anfragenDaten.filter(item => item.statusNormalized !== "archiviert").length },
             { key: "angebote", label: "Offene Angebote", value: alleAngebote.filter(item => OFFER_OPEN_STATUSES.includes(item.statusNormalized)).length },
+            { key: "auftraege", label: "Laufende Auftraege", value: laufendeAuftraege.length },
             { key: "zahlungen", label: "Offene Zahlungen", value: zahlungen.filter(item => item.zahlungsart !== "Ausgang" && isPendingPayment(item)).length },
             { key: "warenannahme", label: "Offene Warenannahme", value: offeneWarenannahmen.filter(item => item.statusNormalized !== "versendet").length }
         ],
-        [alleAngebote, anfragenDaten, offeneWarenannahmen, zahlungen]
+        [alleAngebote, anfragenDaten, laufendeAuftraege, offeneWarenannahmen, zahlungen]
     );
 
     useEffect(() => {
@@ -278,8 +307,14 @@ export default function LehrkraftKundenkorrespondenz() {
         }
 
         const aktuellesAngebot = angebote.find(item => String(item.id) === String(threadItem.id));
-        if (aktuellesAngebot) setThreadItem(aktuellesAngebot);
-    }, [anfragen, angebote, threadItem]);
+        if (aktuellesAngebot) {
+            setThreadItem(aktuellesAngebot);
+            return;
+        }
+
+        const aktuellerAuftrag = laufendeAuftraege.find(item => String(item.id) === String(threadItem.id));
+        if (aktuellerAuftrag) setThreadItem(aktuellerAuftrag);
+    }, [anfragen, angebote, laufendeAuftraege, threadItem]);
 
     const neueAnfrage = () => {
         setCurrent(createAnfrageDraft(String(kunden[0]?.id || "")));
@@ -335,12 +370,16 @@ export default function LehrkraftKundenkorrespondenz() {
     const kundenrueckmeldungSpeichern = () => {
         if (!threadItem || !customerReplyText.trim()) return;
         const vorgangId = getVorgangId(threadItem);
+        const anfrageZumVorgang = customerInquiryService.list().find(item =>
+            String(item.id) === String(threadItem.anfrageId || "")
+            || String(item.vorgangId || "") === String(vorgangId)
+        );
         nachrichtenService.create({
             vorgangId,
-            anfrageId: threadItem.anfrageId || threadItem.id || "",
+            anfrageId: anfrageZumVorgang?.id || threadItem.anfrageId || "",
             angebotId: threadItem.angebotId || "",
             kundeId: threadItem.kundeId || "",
-            auftragId: threadItem.auftragId || "",
+            auftragId: threadItem.auftragId || threadItem.id || "",
             datum: today,
             zeitpunkt: jetzt(),
             senderRolle: "Kunde",
@@ -350,11 +389,9 @@ export default function LehrkraftKundenkorrespondenz() {
             nachricht: customerReplyText.trim(),
             typ: "Antwort"
         });
-        const anfrageId = threadItem.anfrageId || threadItem.id;
-        const anfrage = customerInquiryService.list().find(item => String(item.id) === String(anfrageId));
-        if (anfrage) {
+        if (anfrageZumVorgang) {
             customerInquiryService.update({
-                ...anfrage,
+                ...anfrageZumVorgang,
                 status: "offen"
             });
         }
@@ -528,12 +565,6 @@ export default function LehrkraftKundenkorrespondenz() {
     };
 
     const getVorgangDokumente = (vorgangId: string) => {
-        const vorgangAngebote = angeboteZuVorgang(vorgangId);
-        const angebotLinks = vorgangAngebote.map(item => ({
-            id: `angebot-${item.id}`,
-            label: `PDF Angebot ${item.angebotsNr}`,
-            onClick: () => angebotAlsPdf(item)
-        }));
         const vertriebsdokumentLinks = getSalesDocumentsForVorgang(vorgangId, dokumente, auftraege, angebote)
             .filter(dokument => {
                 const typ = normalizeStatus(dokument.dokumentTyp);
@@ -545,7 +576,7 @@ export default function LehrkraftKundenkorrespondenz() {
                 onClick: () => vertriebsdokumentAlsPdf(dokument)
             }));
 
-        return [...angebotLinks, ...vertriebsdokumentLinks];
+        return vertriebsdokumentLinks;
     };
 
     return <>
@@ -602,20 +633,43 @@ export default function LehrkraftKundenkorrespondenz() {
             data={gefilterteAngebote}
             columns={[
                 { field: "datum", title: "Datum" },
-                { field: "angebotsNr", title: "Angebot", render: row => <Link className="detail-link" to={`/angebote?focus=${row.id}`}>{row.angebotsNr}</Link> },
+                { field: "angebotsNr", title: "Angebot", render: row => <button type="button" className="thread-inline-link" onClick={event => {
+                    event.stopPropagation();
+                    angebotAlsPdf(row);
+                }}>{row.angebotsNr}</button> },
                 { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "gueltigBis", title: "Gueltig bis" },
                 { field: "status", title: "Status" },
                 { field: "gesamtbetrag", title: "Betrag" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "angebotsNr") return `/angebote?focus=${row.id}`;
                 if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 return null;
             }}
             rowActions={[
-                { name: "thread", label: "Nachrichten", permission: PERMISSIONS.GF_BEARBEITEN, onClick: vorgangOeffnen, variant: "secondary", isVisible: row => !!row.vorgangId },
-                { name: "pdf", label: "PDF", permission: PERMISSIONS.GF_BEARBEITEN, onClick: angebotAlsPdf, variant: "secondary" }
+                { name: "documents", label: "Chat", permission: PERMISSIONS.GF_BEARBEITEN, onClick: vorgangOeffnen, variant: "secondary", isVisible: row => !!row.vorgangId }
+            ]}
+        />}
+
+        {activeTab === "auftraege" && <DataTable
+            title="Laufende Auftraege"
+            selectableColumns={false}
+            data={laufendeAuftraege}
+            columns={[
+                { field: "datum", title: "Datum" },
+                { field: "auftragNr", title: "Auftrag", render: row => row.id ? <Link className="detail-link" to={`/auftraege?focus=${row.id}`}>{row.auftragNr}</Link> : row.auftragNr },
+                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "status", title: "Status" },
+                { field: "prozess", title: "Prozess" },
+                { field: "gesamtbetrag", title: "Betrag" }
+            ]}
+            detailLinkResolver={({ field, row }) => {
+                if (field === "auftragNr" && row.id) return `/auftraege?focus=${row.id}`;
+                if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
+                return null;
+            }}
+            rowActions={[
+                { name: "documents", label: "Chat", permission: PERMISSIONS.GF_BEARBEITEN, onClick: vorgangOeffnen, variant: "secondary", isVisible: row => !!row.vorgangId }
             ]}
         />}
 
@@ -673,7 +727,7 @@ export default function LehrkraftKundenkorrespondenz() {
             <div><Label>Als Kunde</Label><LookupField value={current.kundeId} options={kundenOptionen} onChange={value => setCurrent(item => ({ ...item, kundeId: value }))} placeholder="Kunde suchen..."/></div>
             <div><Label>Kanal</Label><TextField value={current.kanal} onChange={value => setCurrent(item => ({ ...item, kanal: value }))}/></div>
             <div className="form-row"><Label>Anliegen</Label><TextArea rows={4} value={current.anliegen} onChange={value => setCurrent(item => ({ ...item, anliegen: value }))}/></div>
-            <div className="form-row"><button onClick={anfrageSpeichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={anfrageSpeichern}>Speichern</button></div>
         </Dialog>
 
         {threadItem && <ThreadChatDialog
@@ -687,10 +741,10 @@ export default function LehrkraftKundenkorrespondenz() {
             offers={angeboteZuVorgang(threadItem.vorgangId)}
             messages={getThreadMessages(threadItem, today)}
             ownRole="Kunde"
-            offerHrefResolver={item => `/angebote?focus=${item.id}`}
+            offerClickResolver={angebotAlsPdf}
             documentLinks={getVorgangDokumente(threadItem.vorgangId)}
-            headerActionLink={{ id: "combined-pdf", label: "Alles in einem Dokument", onClick: () => vorgangAlsSammelPdf(threadItem) }}
-            actionLinks={aktuellesAngebotZuVorgang(threadItem.vorgangId) && OFFER_OPEN_STATUSES.includes(normalizeStatus(aktuellesAngebotZuVorgang(threadItem.vorgangId)?.status)) ? [
+            headerActionLink={threadItem.auftragNr ? null : { id: "combined-pdf", label: "Alles in einem Dokument", onClick: () => vorgangAlsSammelPdf(threadItem) }}
+            actionLinks={!threadItem.auftragNr && aktuellesAngebotZuVorgang(threadItem.vorgangId) && OFFER_OPEN_STATUSES.includes(normalizeStatus(aktuellesAngebotZuVorgang(threadItem.vorgangId)?.status)) ? [
                 { id: "accept-offer", label: "Annehmen", onClick: () => entscheidungVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId), "angenommen") },
                 { id: "reject-offer", label: "Ablehnen", onClick: () => entscheidungVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId), "abgelehnt") },
                 { id: "end-negotiation", label: "Verhandlung beenden", onClick: () => entscheidungVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId), "beendet") }
@@ -700,7 +754,8 @@ export default function LehrkraftKundenkorrespondenz() {
             replyPlaceholder="Antwort, Nachfrage oder Kommentar aus Sicht des Kunden dokumentieren..."
             onReplyChange={setCustomerReplyText}
             onReplySend={kundenrueckmeldungSpeichern}
-            showReplyBox={threadItem.status !== "archiviert"}
+            showReplyBox
+            documentsLabel="Dokumente"
         />}
     </>;
 }

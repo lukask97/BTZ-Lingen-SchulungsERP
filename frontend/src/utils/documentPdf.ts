@@ -21,6 +21,15 @@ export function openDocumentPdf({
         .replaceAll(">", "&gt;");
 
     const formatCurrency = (value) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(value || 0));
+    const getPositionDetail = (position) => {
+        if (String(position?.leistungTyp || "") !== "Service") return "";
+        const berechnungstyp = String(position?.berechnungstyp || "Pauschal");
+        const zeEinheit = String(position?.zeEinheit || "").trim();
+
+        return berechnungstyp === "ZE" && zeEinheit
+            ? `${berechnungstyp} | ${zeEinheit}`
+            : berechnungstyp;
+    };
 
     const renderPositionsHtml = (pagePositions = []) => pagePositions.length === 0
         ? "<p>Keine Positionen vorhanden.</p>"
@@ -35,7 +44,7 @@ export function openDocumentPdf({
             </thead>
             <tbody>
                 ${pagePositions.map((position) => `<tr>
-                    <td>${safe(position.artikel)}</td>
+                    <td>${safe(position.artikel)}${getPositionDetail(position) ? `<div class="position-detail">${safe(getPositionDetail(position))}</div>` : ""}</td>
                     <td>${safe(position.menge)}</td>
                     <td>${safe(formatCurrency(position.einzelpreis ?? 0))}</td>
                     <td>${safe(formatCurrency(Number(position.menge || 0) * Number(position.einzelpreis || 0)))}</td>
@@ -187,6 +196,7 @@ export function openDocumentPdf({
         th { background: #f3f4f6; }
         .deduction { margin-top: 18px; padding: 14px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff7ed; }
         .totals { margin-top: 18px; display: grid; gap: 8px; }
+        .position-detail { margin-top: 4px; font-size: 12px; color: #6b7280; }
         .actions { display: flex; gap: 12px; margin: 0 0 24px; }
         .actions button { border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; background: #111827; color: white; font-size: 14px; }
         .actions .secondary { background: #e5e7eb; color: #111827; }

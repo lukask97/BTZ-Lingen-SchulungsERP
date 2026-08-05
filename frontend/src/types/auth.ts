@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 export type PermissionKey = string;
-export type AccessKey = string;
+export type AccessKey = string | string[];
 
 export interface AuthUser {
     id?: number | string | null;
@@ -15,6 +15,7 @@ export interface AuthUser {
 export interface AuthContextValue {
     user: AuthUser | null;
     isAuthReady: boolean;
+    authError?: string;
     login: (userData: AuthUser) => void;
     logout: () => Promise<void>;
     hasFullAccess: () => boolean;

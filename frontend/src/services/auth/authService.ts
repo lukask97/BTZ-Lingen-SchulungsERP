@@ -12,8 +12,11 @@ export async function getCurrentBackendUser() {
         }
 
         return result.user || null;
-    } catch {
-        return null;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Backend nicht erreichbar.");
     }
 }
 

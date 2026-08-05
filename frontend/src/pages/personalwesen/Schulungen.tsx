@@ -56,7 +56,7 @@ export default function Schulungen() {
             <div><Label>Titel</Label><TextField value={current.titel} onChange={value => setCurrent(item => ({ ...item, titel: value }))}/></div>
             <div><Label>Zielgruppe</Label><TextField value={current.zielgruppe} onChange={value => setCurrent(item => ({ ...item, zielgruppe: value }))}/></div>
             <div><Label>Ort</Label><TextField value={current.ort} onChange={value => setCurrent(item => ({ ...item, ort: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

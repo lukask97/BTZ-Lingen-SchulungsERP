@@ -182,7 +182,7 @@ export default function LehrkraftZahlungen() {
             </div>
             <div className="form-row">
                 {fehler && <p className="form-error">{fehler}</p>}
-                <button onClick={speichern}>Speichern</button>
+                <button type="button" onClick={speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

@@ -96,7 +96,7 @@ export default function Urlaubsantraege() {
             <div><Label>Von</Label><TextField type="date" value={current.von} onChange={value => setCurrent(item => ({ ...item, von: value }))}/></div>
             <div><Label>Bis</Label><TextField type="date" value={current.bis} onChange={value => setCurrent(item => ({ ...item, bis: value }))}/></div>
             <div><Label>Tage</Label><NumberField value={current.tage} min="1" onChange={value => setCurrent(item => ({ ...item, tage: Number(value) }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

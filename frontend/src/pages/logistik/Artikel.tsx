@@ -13,6 +13,7 @@ import kategorienService from "../../services/logistik/kategorienService";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useState, useMemo } from "react";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { naechsteStammdatennummer } from "../../services/core/documentNumbering";
 
 function createKomponentenDraft() {
     return {
@@ -43,6 +44,10 @@ export default function Artikel() {
         handleClose,
         error
     } = useCRUDPage(config.tableName, INITIAL_DATA.artikel, artikelService, {
+        createNewItem: () => ({
+            ...INITIAL_DATA.artikel,
+            artikelNr: naechsteStammdatennummer(artikelService.list().map(item => item.artikelNr), "artikel")
+        }),
         requiredFields: [
             { field: "artikelNr", label: "Artikelnummer" },
             { field: "name", label: "Name" }
@@ -166,7 +171,7 @@ export default function Artikel() {
                 onClose={handleClose}
             >
                 <Label required glossaryKey="artikelnummer">Artikelnummer</Label>
-                <TextField value={currentItem.artikelNr} onChange={v => handleFieldChange("artikelNr", v)} />
+                <TextField value={currentItem.artikelNr} onChange={v => handleFieldChange("artikelNr", v)} disabled />
 
                 <Label required>Name</Label>
                 <TextField value={currentItem.name} onChange={v => handleFieldChange("name", v)} />
@@ -244,7 +249,7 @@ export default function Artikel() {
 
                 <div className="form-row">
                     {error && <p className="form-error">{error}</p>}
-                    <button onClick={speichern}>Speichern</button>
+                    <button type="button" onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>
         </>

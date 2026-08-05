@@ -10,6 +10,7 @@ import { useCRUDPage } from "../../hooks/useCRUDPage";
 import servicesService from "../../services/verkauf/servicesService";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useMemo, useState } from "react";
+import { naechsteStammdatennummer } from "../../services/core/documentNumbering";
 
 export default function Services() {
     const { user } = useAuth();
@@ -31,6 +32,10 @@ export default function Services() {
         handleClose,
         error
     } = useCRUDPage(config.tableName, INITIAL_DATA.services, servicesService, {
+        createNewItem: () => ({
+            ...INITIAL_DATA.services,
+            serviceNr: naechsteStammdatennummer(servicesService.list().map(item => item.serviceNr), "service")
+        }),
         requiredFields: [
             { field: "serviceNr", label: "Servicenummer" },
             { field: "name", label: "Name" },
@@ -87,7 +92,7 @@ export default function Services() {
         />
         <Dialog open={open} title={editMode ? "Service bearbeiten" : "Neuer Service"} onClose={handleClose}>
             <Label required glossaryKey="servicenummer">Servicenummer</Label>
-            <TextField value={currentItem.serviceNr} onChange={v => change("serviceNr", v)} />
+            <TextField value={currentItem.serviceNr} onChange={v => change("serviceNr", v)} disabled />
             <Label required>Name</Label>
             <TextField value={currentItem.name} onChange={v => change("name", v)} />
             <Label required glossaryKey="kategorie">Kategorie</Label>
@@ -120,7 +125,7 @@ export default function Services() {
             </div>
             <div className="form-row">
                 {error && <p className="form-error">{error}</p>}
-                <button onClick={speichern}>Speichern</button>
+                <button type="button" onClick={speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

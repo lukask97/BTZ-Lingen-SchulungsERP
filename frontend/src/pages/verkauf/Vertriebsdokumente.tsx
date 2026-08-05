@@ -4,23 +4,28 @@ import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
-import NumberField from "../../components/form/NumberField";
 import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
+import SalesFlowBar from "../../components/SalesFlowBar";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import nachrichtenService from "../../services/verkauf/nachrichtenService";
 import customerInquiryService from "../../services/verkauf/customerInquiryService";
 import angeboteService from "../../services/verkauf/angeboteService";
 import { openDocumentPdf } from "../../utils/documentPdf";
-import { getCustomerName } from "../../utils/customerReferences";
 import { getBerlinDate } from "../../utils/dateTime";
 import { getConfirmationDocument, getProcessContextForDocument } from "../../utils/processFlow";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 import { PERMISSIONS } from "../../constants/permissions";
 import { getLieferscheinnummer } from "../../services/core/documentNumbering";
 
-const dokumentTypen = ["Angebot", "Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
+const dokumentTypen = ["Auftragsbestaetigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
+const AUFTRAGS_FILTER = [
+    { value: "alle", label: "Alle Auftraege" },
+    { value: "offen", label: "Nur offene Auftraege" },
+    { value: "ohne_bestaetigung", label: "Ohne Auftragsbestaetigung" },
+    { value: "bestaetigt", label: "Bestaetigung versendet" }
+];
 const euro = (value) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(value || 0));
 
 function berechneAuftragswert(positionen = []) {
@@ -35,32 +40,12 @@ function createDokumentTitel(dokumentTyp, auftrag) {
     return `${dokumentTyp} ${auftrag.auftragNr}`;
 }
 
-function createVertriebsdokument(auftragId: string, today: string, dokumentTyp = "Auftragsbestätigung") {
+function createVertriebsdokument(auftragId, today, dokumentTyp = "Auftragsbestaetigung") {
     return {
         auftragId,
         dokumentTyp,
         datum: today,
         notiz: ""
-    };
-}
-
-function createKalkulation() {
-    return { einkaufspreis: 0, aufschlag: 25, rabatt: 0, mwst: 19 };
-}
-
-function createKalkulationSummary(calculator) {
-    const einkaufspreis = Number(calculator.einkaufspreis || 0);
-    const aufschlagBetrag = einkaufspreis * (Number(calculator.aufschlag || 0) / 100);
-    const nettoVorRabatt = einkaufspreis + aufschlagBetrag;
-    const rabattBetrag = nettoVorRabatt * (Number(calculator.rabatt || 0) / 100);
-    const nettoVerkauf = nettoVorRabatt - rabattBetrag;
-    const bruttobetrag = nettoVerkauf * (1 + Number(calculator.mwst || 0) / 100);
-
-    return {
-        einkaufspreis,
-        nettoVorRabatt,
-        nettoVerkauf,
-        bruttobetrag
     };
 }
 
@@ -73,22 +58,39 @@ export default function Vertriebsdokumente() {
     const angebote = angeboteService.getAll();
     const initialAuftragId = searchParams.get("auftrag") || String(auftraege[0]?.id || "");
     const [selectedAuftragId, setSelectedAuftragId] = useState(initialAuftragId);
+    const [auftragsFilter, setAuftragsFilter] = useState("alle");
     const [dokumente, setDokumente] = useSyncedServiceData(
         ["vertriebsdokumente", "auftraege", "angebote", "kundenanfragen", "nachrichten"],
         () => vertriebsdokumenteService.list()
     );
     const [open, setOpen] = useState(false);
-    const [calculator, setCalculator] = useState(createKalkulation);
     const [current, setCurrent] = useState(createVertriebsdokument(initialAuftragId, today));
 
-    const auftragsOptionen = auftraege.map(item => ({ value: String(item.id), label: `${item.auftragNr} - ${item.kunde}` }));
+    const gefilterteAuftraegeFuerAuswahl = useMemo(
+        () => auftraege.filter(item => {
+            const bestaetigung = getConfirmationDocument(item.id, dokumente);
+
+            if (auftragsFilter === "offen") {
+                return String(item.status || "").toLowerCase() === "offen";
+            }
+            if (auftragsFilter === "ohne_bestaetigung") {
+                return !bestaetigung;
+            }
+            if (auftragsFilter === "bestaetigt") {
+                return bestaetigung?.status === "versendet";
+            }
+            return true;
+        }),
+        [auftraege, dokumente, auftragsFilter]
+    );
+
+    const auftragsOptionen = gefilterteAuftraegeFuerAuswahl.map(item => ({ value: String(item.id), label: `${item.auftragNr} - ${item.kunde}` }));
     const selectedAuftrag = auftraege.find(item => String(item.id) === String(selectedAuftragId));
     const gefilterteDokumente = useMemo(
         () => dokumente.filter(item => !selectedAuftragId || String(item.auftragId) === String(selectedAuftragId)),
         [dokumente, selectedAuftragId]
     );
     const auftragswert = berechneAuftragswert(selectedAuftrag?.positionen || []);
-    const kalkulation = useMemo(() => createKalkulationSummary(calculator), [calculator]);
     const overviewCards = useMemo(
         () => [
             { label: "Dokumente", value: gefilterteDokumente.length },
@@ -98,7 +100,7 @@ export default function Vertriebsdokumente() {
         [gefilterteDokumente]
     );
 
-    const resetCurrentDocument = (auftragId = selectedAuftragId || String(auftraege[0]?.id || ""), dokumentTyp = "Auftragsbestätigung") => {
+    const resetCurrentDocument = (auftragId = selectedAuftragId || String(auftraege[0]?.id || ""), dokumentTyp = "Auftragsbestaetigung") => {
         setCurrent(createVertriebsdokument(auftragId, today, dokumentTyp));
     };
 
@@ -114,26 +116,25 @@ export default function Vertriebsdokumente() {
     const neu = () => {
         const vorbelegterAuftragId = selectedAuftragId || String(auftraege[0]?.id || "");
         const bestaetigung = getConfirmationDocument(vorbelegterAuftragId, dokumente);
-        resetCurrentDocument(vorbelegterAuftragId, bestaetigung ? "Lieferschein" : "Auftragsbestätigung");
+        resetCurrentDocument(vorbelegterAuftragId, bestaetigung ? "Lieferschein" : "Auftragsbestaetigung");
         setOpen(true);
     };
 
-    const speichern = () => {
+    const createDokumentPayload = () => {
         const auftrag = auftraege.find(item => String(item.id) === String(current.auftragId));
-        if (!auftrag) return;
+        if (!auftrag) return null;
         const vorhandeneBestaetigung = getConfirmationDocument(auftrag.id, dokumente);
-        if (current.dokumentTyp === "Auftragsbestätigung" && vorhandeneBestaetigung) {
-            alert("Für diesen Auftrag wurde die Auftragsbestätigung bereits erstellt.");
-            return;
+        if (current.dokumentTyp === "Auftragsbestaetigung" && vorhandeneBestaetigung) {
+            alert("Fuer diesen Auftrag wurde die Auftragsbestaetigung bereits erstellt.");
+            return null;
         }
-        if (current.dokumentTyp !== "Auftragsbestätigung" && (!vorhandeneBestaetigung || vorhandeneBestaetigung.status !== "versendet")) {
-            alert("Bitte zuerst die Auftragsbestätigung erstellen und versenden.");
-            return;
+        if (current.dokumentTyp !== "Auftragsbestaetigung" && !vorhandeneBestaetigung) {
+            alert("Bitte zuerst die Auftragsbestaetigung erstellen.");
+            return null;
         }
 
         const titel = createDokumentTitel(current.dokumentTyp, auftrag);
-
-        const payload = {
+        return {
             ...current,
             auftragId: Number(current.auftragId),
             dokumentNr: current.dokumentTyp === "Lieferschein" ? getLieferscheinnummer(auftrag.auftragNr, auftrag.datum) : (current.dokumentNr || ""),
@@ -142,9 +143,13 @@ export default function Vertriebsdokumente() {
             status: current.status || "erstellt",
             notiz: current.notiz.trim()
         };
+    };
+
+    const speichern = () => {
+        const payload = createDokumentPayload();
+        if (!payload) return;
 
         vertriebsdokumenteService.create(payload);
-
         refreshDokumente();
         setOpen(false);
         resetCurrentDocument();
@@ -159,7 +164,7 @@ export default function Vertriebsdokumente() {
         const auftrag = auftraege.find(item => String(item.id) === String(dokument.auftragId));
         openDocumentPdf({
             title: dokument.titel || createDokumentTitel(dokument.dokumentTyp, { auftragNr: dokument.auftragNr }),
-            subject: "Automatisch erzeugtes Vertriebsdokument für den Schulungseinsatz.",
+            subject: "Automatisch erzeugtes Vertriebsdokument fuer den Schulungseinsatz.",
             date: dokument.datum,
             note: dokument.notiz,
             referenceLabel: "Auftrag",
@@ -179,7 +184,7 @@ export default function Vertriebsdokumente() {
             versendetAm: today
         });
 
-        if (dokument.dokumentTyp === "Auftragsbestätigung") {
+        if (dokument.dokumentTyp === "Auftragsbestaetigung") {
             const { auftrag, angebot, anfrage, vorgangId } = getProcessContextForDocument(dokument, auftraege, angebote, anfragen);
 
             if (vorgangId) {
@@ -194,9 +199,9 @@ export default function Vertriebsdokumente() {
                     senderRolle: "Verkauf",
                     senderName: "Schuelerfirma Verkauf",
                     kanal: "E-Mail",
-                    betreff: dokument.titel || `Auftragsbestätigung ${auftrag?.auftragNr || ""}`.trim(),
-                    nachricht: `Die Auftragsbestätigung ${dokument.titel || ""} wurde an den Kunden versendet.`,
-                    typ: "Auftragsbestätigung"
+                    betreff: dokument.titel || `Auftragsbestaetigung ${auftrag?.auftragNr || ""}`.trim(),
+                    nachricht: `Die Auftragsbestaetigung ${dokument.titel || ""} wurde an den Kunden versendet.`,
+                    typ: "Auftragsbestaetigung"
                 });
             }
         }
@@ -204,20 +209,37 @@ export default function Vertriebsdokumente() {
         refreshDokumente();
     };
 
+    const speichernUndVersenden = () => {
+        const payload = createDokumentPayload();
+        if (!payload) return;
+
+        const createdDokument = vertriebsdokumenteService.create(payload);
+        versenden(createdDokument);
+        setOpen(false);
+        resetCurrentDocument();
+    };
+
     return <>
+        <SalesFlowBar currentStep="auftragsbestaetigung"/>
         <h1>Vertriebsdokumente</h1>
-        <p>Arbeitsfläche für die Dokumentenkette im Vertrieb. Hier können Schüler Auftragsbestätigung, Lieferschein und Begleitpapiere zu einem Auftrag nachvollziehen und vorbereiten.</p>
+        <p>Arbeitsflaeche fuer die Dokumentenkette im Vertrieb. Hier koennen Schueler Auftragsbestaetigung, Lieferschein und Begleitpapiere zu einem Auftrag nachvollziehen und vorbereiten.</p>
 
         <section className="module-panel">
             <div className="personalakte-toolbar">
                 <div className="personalakte-select">
-                    <Label>Auftrag auswählen</Label>
+                    <Label>Auftrag auswaehlen</Label>
                     <LookupField value={selectedAuftragId} options={auftragsOptionen} onChange={auftragAuswaehlen} placeholder="Auftrag suchen..."/>
                 </div>
+                <div className="personalakte-select">
+                    <Label>Filter</Label>
+                    <select value={auftragsFilter} onChange={event => setAuftragsFilter(event.target.value)}>
+                        {AUFTRAGS_FILTER.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
+                    </select>
+                </div>
                 <div className="personalakte-links">
-                    <Link className="button-link" to="/auftraege">Aufträge öffnen</Link>
-                    <Link className="button-link" to="/versand">Versand öffnen</Link>
-                    <Link className="button-link" to="/angebote">Angebote öffnen</Link>
+                    <Link className="button-link" to="/auftraege">Auftraege oeffnen</Link>
+                    <Link className="button-link" to="/versand">Versand oeffnen</Link>
+                    <Link className="button-link" to="/angebote">Angebote oeffnen</Link>
                 </div>
             </div>
             {selectedAuftrag && <div className="personalakte-summary">
@@ -238,29 +260,10 @@ export default function Vertriebsdokumente() {
                 </div>
                 <ul className="dashboard-note-list">
                     <li>Kundenanfrage aufnehmen und als Angebot vorbereiten.</li>
-                    <li>Nach Einigung eine Auftragsbestätigung erstellen.</li>
+                    <li>Nach Einigung eine Auftragsbestaetigung erstellen.</li>
                     <li>Vor dem Versand Lieferschein und Warenbegleitpapier vorbereiten.</li>
-                    <li>Für den Transport das passende Begleit- oder Transportpapier ergänzen.</li>
+                    <li>Fuer den Transport das passende Begleit- oder Transportpapier ergaenzen.</li>
                 </ul>
-            </article>
-
-            <article className="dashboard-panel">
-                <div className="dashboard-panel-header">
-                    <h2>Einfache Kalkulation</h2>
-                    <span>Lernhilfe</span>
-                </div>
-                <div className="personalakte-summary">
-                    <div><span>Einkaufspreis</span><strong>{euro(kalkulation.einkaufspreis)}</strong></div>
-                    <div><span>Netto vor Rabatt</span><strong>{euro(kalkulation.nettoVorRabatt)}</strong></div>
-                    <div><span>Nettoverkauf</span><strong>{euro(kalkulation.nettoVerkauf)}</strong></div>
-                    <div><span>Bruttoverkauf</span><strong>{euro(kalkulation.bruttobetrag)}</strong></div>
-                </div>
-                <div className="dashboard-two-column">
-                    <div><Label>Einkaufspreis</Label><NumberField value={calculator.einkaufspreis} min="0" onChange={value => setCalculator(item => ({ ...item, einkaufspreis: Number(value) }))}/></div>
-                    <div><Label>Aufschlag %</Label><NumberField value={calculator.aufschlag} min="0" onChange={value => setCalculator(item => ({ ...item, aufschlag: Number(value) }))}/></div>
-                    <div><Label>Rabatt %</Label><NumberField value={calculator.rabatt} min="0" onChange={value => setCalculator(item => ({ ...item, rabatt: Number(value) }))}/></div>
-                    <div><Label>MwSt %</Label><NumberField value={calculator.mwst} min="0" onChange={value => setCalculator(item => ({ ...item, mwst: Number(value) }))}/></div>
-                </div>
             </article>
         </section>
 
@@ -280,7 +283,7 @@ export default function Vertriebsdokumente() {
             rowActions={[
                 { name: "pdf", label: "PDF", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: alsPdf, variant: "secondary" },
                 { name: "send", label: "Versenden", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: versenden, variant: "secondary", isVisible: row => row.status !== "versendet" },
-                { name: "delete", label: "Löschen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: loeschen, variant: "danger" }
+                { name: "delete", label: "Loeschen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: loeschen, variant: "danger" }
             ]}
             detailLinkResolver={({ field, row, value }) => {
                 if ((field === "auftrag" || field === "auftragNr" || field === "auftragId") && row.auftragId) return `/auftraege?focus=${row.auftragId}`;
@@ -293,14 +296,17 @@ export default function Vertriebsdokumente() {
         <Dialog open={open} title="Vertriebsdokument erstellen" onClose={() => setOpen(false)}>
             <div><Label>Auftrag</Label><LookupField value={current.auftragId} options={auftragsOptionen} onChange={value => setCurrent(item => ({ ...item, auftragId: value }))} placeholder="Auftrag suchen..."/></div>
             <div><Label>Dokumenttyp</Label><select value={current.dokumentTyp} onChange={event => setCurrent(item => ({ ...item, dokumentTyp: event.target.value }))}>
-                {(getConfirmationDocument(current.auftragId, dokumente)?.status === "versendet" ? dokumentTypen : ["Auftragsbestätigung"]).map(item => <option key={item} value={item}>{item}</option>)}
+                {(getConfirmationDocument(current.auftragId, dokumente) ? dokumentTypen : ["Auftragsbestaetigung"]).map(item => <option key={item} value={item}>{item}</option>)}
             </select></div>
             <div className="form-row"><p>Der Dokumenttitel wird automatisch aus Dokumenttyp und Auftragsnummer erzeugt.</p></div>
             <div className="form-row"><Label>Dokumentnummer</Label><strong>{current.dokumentTyp === "Lieferschein" ? getLieferscheinnummer(auftraege.find(item => String(item.id) === String(current.auftragId))?.auftragNr || "", today) : "-"}</strong></div>
             <div className="form-row"><Label>Vorschau Titel</Label><strong>{createDokumentTitel(current.dokumentTyp, auftraege.find(item => String(item.id) === String(current.auftragId)))}</strong></div>
             <div><Label>Datum</Label><input type="date" value={current.datum} onChange={event => setCurrent(item => ({ ...item, datum: event.target.value }))}/></div>
             <div className="form-row"><Label>Hinweis</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row">
+                <button type="button" onClick={speichern}>Speichern</button>
+                <button type="button" onClick={speichernUndVersenden}>Direkt versenden</button>
+            </div>
         </Dialog>
     </>;
 }

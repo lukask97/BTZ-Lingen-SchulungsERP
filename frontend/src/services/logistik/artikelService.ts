@@ -9,11 +9,26 @@ const stuecklisteService = createPositionTableService(artikelStueckliste, {
     parentField: "hauptartikelId"
 });
 
+function withPermissionFallback<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (error instanceof Error && error.message.startsWith("Keine Berechtigung")) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function hydrateKomponenten(item = {}) {
     return stuecklisteService.listByParent(item.id || "")
         .map(position => ({
             artikelId: position.komponentenartikelId ?? position.artikelId,
-            artikel: baseService.list().find(entry => String(entry.id) === String(position.komponentenartikelId ?? position.artikelId))?.name || "",
+            artikel: withPermissionFallback(
+                () => baseService.list().find(entry => String(entry.id) === String(position.komponentenartikelId ?? position.artikelId))?.name || "",
+                artikel.find(entry => String(entry.id) === String(position.komponentenartikelId ?? position.artikelId))?.name || ""
+            ),
             menge: Number(position.menge || 0)
         }));
 }
@@ -47,9 +62,19 @@ function splitPayload(payload = {}) {
     return { basePayload, komponenten };
 }
 
+function getFallbackArtikel() {
+    return artikel.map(normalizeArtikel).filter(item => item.artikelTyp !== "Dienstleistung");
+}
+
 const artikelService = {
-    list: () => baseService.list().map(normalizeArtikel).filter(item => item.artikelTyp !== "Dienstleistung"),
-    getAll: () => baseService.list().map(normalizeArtikel).filter(item => item.artikelTyp !== "Dienstleistung"),
+    list: () => withPermissionFallback(
+        () => baseService.list().map(normalizeArtikel).filter(item => item.artikelTyp !== "Dienstleistung"),
+        getFallbackArtikel()
+    ),
+    getAll: () => withPermissionFallback(
+        () => baseService.list().map(normalizeArtikel).filter(item => item.artikelTyp !== "Dienstleistung"),
+        getFallbackArtikel()
+    ),
     getById: (id) => {
         const item = artikelService.list().find(entry => String(entry.id) === String(id));
         return item ? normalizeArtikel(item) : undefined;
@@ -104,8 +129,18 @@ const artikelService = {
     },
     removeMany: (ids) => baseService.removeMany(ids),
     deleteMultiple: (ids) => baseService.removeMany(ids),
-    search: (query) => baseService.search(query).map(normalizeArtikel),
-    sortBy: (field, order = "asc") => baseService.sortBy(field, order).map(normalizeArtikel)
+    search: (query) => withPermissionFallback(
+        () => baseService.search(query).map(normalizeArtikel),
+        artikelService.list().filter(item => JSON.stringify(item).toLowerCase().includes(String(query || "").toLowerCase()))
+    ),
+    sortBy: (field, order = "asc") => withPermissionFallback(
+        () => baseService.sortBy(field, order).map(normalizeArtikel),
+        [...artikelService.list()].sort((a, b) => {
+            const aValue = String(a?.[field] ?? "");
+            const bValue = String(b?.[field] ?? "");
+            return order === "desc" ? bValue.localeCompare(aValue) : aValue.localeCompare(bValue);
+        })
+    )
 };
 
 export const getArtikels = () => artikelService.getAll();

@@ -1,4 +1,4 @@
-import type { AuthUser, PermissionKey } from "../types/auth";
+import type { AccessKey, AuthUser, PermissionKey } from "../types/auth";
 
 export const FULL_ACCESS_PERMISSION = "*";
 
@@ -14,10 +14,14 @@ export function userHasPermission(user: AuthUser | null, permission?: Permission
     return user.permissions.includes(permission);
 }
 
-export function userHasAccess(user: AuthUser | null, access?: string) {
+export function userHasAccess(user: AuthUser | null, access?: AccessKey) {
     if (!access) return true;
     if (!user?.permissions) return false;
     if (userHasFullAccess(user)) return true;
+
+    if (Array.isArray(access)) {
+        return access.some(entry => userHasAccess(user, entry));
+    }
 
     return user.permissions.some(permission => permission === access || permission.startsWith(`${access}.`));
 }

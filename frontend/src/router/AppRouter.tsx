@@ -75,6 +75,10 @@ function AppRouter() {
         <ProtectedRoute access={access}>{element}</ProtectedRoute>
     );
 
+    const protectedAnyPage = (access: string[], element: ReactElement) => (
+        <ProtectedRoute access={access}>{element}</ProtectedRoute>
+    );
+
     return (<BrowserRouter>
         <Routes>
             {/* öffentlich */}
@@ -149,7 +153,7 @@ function AppRouter() {
                 <Route path="zahlungen" element={protectedPage(ACCESS.BUCHHALTUNG, <Zahlungen/>)}/>
                 <Route path="mahnungen" element={protectedPage(ACCESS.BUCHHALTUNG, <Mahnungen/>)}/>
                 <Route path="belege" element={protectedPage(ACCESS.BUCHHALTUNG, <Belege/>)}/>
-                <Route path="firmenkonto" element={protectedPage(ACCESS.BUCHHALTUNG, <Firmenkonto/>)}/>
+                <Route path="firmenkonto" element={protectedAnyPage([ACCESS.BUCHHALTUNG, ACCESS.VERKAUF, ACCESS.EINKAUF, ACCESS.GESCHAEFTSFUEHRUNG], <Firmenkonto/>)}/>
                 <Route path="abc-analyse" element={protectedPage(ACCESS.BUCHHALTUNG, <ABCAnalyse/>)}/>
                 <Route path="freigaben" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <Freigaben/>)}/>
                 <Route path="berichte" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <Berichte/>)}/>
