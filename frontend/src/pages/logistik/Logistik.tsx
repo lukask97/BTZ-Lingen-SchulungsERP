@@ -45,7 +45,7 @@ export default function Logistik() {
                 <ul className="dashboard-note-list">
                     <li>Wareneingaenge aus dem Einkauf pruefen und buchen.</li>
                     <li>Bestaende beobachten und Engpaesse erkennen.</li>
-                    <li>Verplante Mengen aus aktiven Auftraegen mitdenken.</li>
+                    <li>Reservierte Mengen aus aktiven Auftraegen mitdenken.</li>
                     <li>Versandauftraege aus dem Verkauf vorbereiten und abschliessen.</li>
                     <li>Retouren dokumentieren und als Folgeprozess sauber beenden.</li>
                 </ul>
@@ -59,7 +59,7 @@ export default function Logistik() {
                 <ul className="dashboard-note-list">
                     <li>Versendete Bestellungen wirken direkt auf Wareneingaenge und Bestaende.</li>
                     <li>Offene Auftraege fuehren zu Versandauftraegen im Logistikbereich.</li>
-                    <li>Verplante Mengen senken den verfuegbaren Bestand bereits vor dem Versand.</li>
+                    <li>Reservierte Mengen senken den verfuegbaren Bestand bereits vor dem Versand.</li>
                     <li>Retouren koennen Service, Reklamation und Ersatzlieferung ausloesen.</li>
                 </ul>
                 <div className="link-list">

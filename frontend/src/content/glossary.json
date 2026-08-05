@@ -24,4 +24,6 @@
   "stueckliste": "Die Stueckliste zeigt, aus welchen Komponenten eine Baugruppe oder ein zusammengesetzter Artikel besteht.",
   "verkaufspreis": "Der Verkaufspreis ist der Preis, zu dem ein Artikel oder eine Leistung an Kunden angeboten oder verkauft wird.",
   "ze": "ZE steht fuer Zeiteinheit. Damit wird angegeben, auf welche Zeitspanne sich eine abrechenbare Leistung bezieht."
+  ,
+  "zuAbschlaege": "Zu- und Abschläge sind Auf- oder Abzüge, die vom Angebotssumme abweichen können; sie können feste Beträge oder prozentuale Anpassungen sein."
 }

@@ -173,6 +173,7 @@ export default function Freigaben() {
             partnerLabel: "Kunde",
             partnerValue: angebot.kunde,
             positions: angebot.positionen || [],
+            preispositionen: angebot.preispositionen || [],
             deductionAmount: angebot.rabattBetrag || 0,
             deductionReason: angebot.verguenstigungsGrund || ""
         });
@@ -297,7 +298,7 @@ export default function Freigaben() {
         const inAngeboten = Number(offeneAngeboteJeArtikel[String(position.artikelId)] || 0);
 
         return {
-            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Verplant: ${verplant} | In Angeboten: ${inAngeboten}`,
+            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | In Angeboten: ${inAngeboten}`,
             istKritisch: Number(position.menge || 0) > verfuegbar
         };
     };

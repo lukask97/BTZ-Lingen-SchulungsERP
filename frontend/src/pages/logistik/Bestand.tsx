@@ -240,9 +240,9 @@ export default function Bestand() {
                 { field: "name", title: "Artikel", render: row => <Link className="detail-link" to={`/artikel?focus=${row.id}`}>{row.name}</Link> },
                 { field: "artikelTyp", title: "Typ" },
                 { field: "bestand", title: "Bestand", helpText: "Aktueller physischer Lagerbestand des Artikels." },
-                { field: "verplant", title: "Verplant", helpText: "Menge, die bereits in aktiven Auftraegen reserviert ist." },
+                { field: "verplant", title: "Reserviert", helpText: "Menge, die bereits reserviert ist." },
                 { field: "inAngeboten", title: "In Angeboten", helpText: "Summierte Menge aus aktuell offenen Angeboten mit Status 'Wartet auf Antwort', in denen der Artikel verwendet wird." },
-                { field: "verfuegbar", title: "Verfuegbar", helpText: "Bestand minus bereits verplante Menge. Dieser Wert ist fuer neue Zusagen relevant." }
+                { field: "verfuegbar", title: "Verfuegbar", helpText: "Bestand minus bereits reservierte Menge. Dieser Wert ist fuer neue Zusagen relevant." }
             ]}
             rowClassName={row => Number(row.verfuegbar || 0) < Number(kritischerBestand || 0) ? "datatable-row-critical" : ""}
             detailLinkResolver={({ field, row }) => field === "name" ? `/artikel?focus=${row.id}` : null}
@@ -258,7 +258,7 @@ export default function Bestand() {
         }}>
             <div className="form-row">
                 <div><Label>Artikel</Label><p>{ausgewaehlterArtikel?.artikelNr} - {ausgewaehlterArtikel?.name}</p></div>
-                <div><Label>Verplant</Label><p>{ausgewaehlterArtikel?.verplant ?? 0}</p></div>
+                <div><Label>Reserviert</Label><p>{ausgewaehlterArtikel?.verplant ?? 0}</p></div>
             </div>
             <div className="form-row">
                 <div><Label>Aktueller Bestand</Label><p>{ausgewaehlterArtikel?.bestand ?? 0}</p></div>

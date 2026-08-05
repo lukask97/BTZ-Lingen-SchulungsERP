@@ -40,6 +40,7 @@ function normalizeAngebot(item: any = {}) {
     return {
         ...item,
         positionen: item.positionen || [],
+        preispositionen: item.preispositionen || [],
         angebotsBasisNr: basis,
         revision,
         angebotsNr: basis ? formatOfferNumber(basis, revision) : nummer,
@@ -104,7 +105,8 @@ function hydrateAngebote(items: any[] = []) {
         return {
             ...normalized,
             kunde: normalized.kunde || kundenById.get(String(normalized.kundeId || "")) || "",
-            positionen
+            positionen,
+            preispositionen: normalized.preispositionen || []
         };
     });
 }
@@ -127,9 +129,12 @@ function hydratePosition(position: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { positionen = [], kunde, ...basePayload } = payload;
+    const { positionen = [], preispositionen = [], kunde, ...basePayload } = payload;
     return {
-        basePayload,
+        basePayload: {
+            ...basePayload,
+            preispositionen: preispositionen || []
+        },
         positionen: positionen.map(position => {
             const hydrated = hydratePosition(position);
             return {

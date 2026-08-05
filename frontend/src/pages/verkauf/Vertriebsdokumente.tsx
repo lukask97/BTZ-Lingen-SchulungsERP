@@ -172,6 +172,7 @@ export default function Vertriebsdokumente() {
             partnerLabel: "Kunde",
             partnerValue: dokument.kunde,
             positions: auftrag?.positionen || dokument.positionen || [],
+            preispositionen: auftrag?.preispositionen || dokument.preispositionen || [],
             deductionAmount: auftrag?.rabattBetrag || 0,
             deductionReason: auftrag?.verguenstigungsGrund || ""
         });

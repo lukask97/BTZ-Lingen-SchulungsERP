@@ -31,10 +31,38 @@ import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 import freigabenService from "../../services/gf/freigabenService";
 
 const heute = getBerlinDate();
-const gesamtNachAbzug = (positionen, rabattBetrag = 0) => Math.max(
-    0,
-    (positionen || []).reduce((summe, position) => summe + Number(position.menge) * Number(position.einzelpreis), 0) - Number(rabattBetrag || 0)
-);
+const MWST_RATE = 0.19;
+const calculatePositionenTotal = (positionen = []) => {
+    return (positionen || []).reduce((summe, position) => {
+        const menge = Number(position.menge);
+        const einzelpreis = Number(position.einzelpreis);
+        return summe + (Number.isFinite(menge) ? menge : 0) * (Number.isFinite(einzelpreis) ? einzelpreis : 0);
+    }, 0);
+};
+const calculatePreispositionenTotal = (positionen = [], preispositionen = []) => {
+    const positionsTotal = calculatePositionenTotal(positionen);
+    return (preispositionen || []).reduce((summe, preisposition) => {
+        const rawWert = preisposition.wert;
+        const wert = Number(rawWert);
+        const numericWert = Number.isFinite(wert) ? wert : 0;
+        if (preisposition.typ === "percent") {
+            return summe + (positionsTotal * numericWert) / 100;
+        }
+        return summe + numericWert;
+    }, 0);
+};
+const calculateNetto = (positionen, preispositionen = [], rabattBetrag = 0) => {
+    const positionsTotal = calculatePositionenTotal(positionen);
+    const adjustmentTotal = calculatePreispositionenTotal(positionen, preispositionen);
+    const rabatt = Number(rabattBetrag);
+    return Math.max(0, positionsTotal + adjustmentTotal - (Number.isFinite(rabatt) ? rabatt : 0));
+};
+const calculateMwSt = (positionen, preispositionen = [], rabattBetrag = 0) => {
+    return Math.max(0, calculateNetto(positionen, preispositionen, rabattBetrag) * MWST_RATE);
+};
+const gesamtNachAbzug = (positionen, preispositionen = [], rabattBetrag = 0) => {
+    return Math.max(0, calculateNetto(positionen, preispositionen, rabattBetrag) + calculateMwSt(positionen, preispositionen, rabattBetrag));
+};
 const istOffenesAngebot = angebot => ["wartet auf antwort"].includes(String(angebot?.status || "").toLowerCase());
 const STATUS_FILTER_OPTIONS = [
     { value: "in vorbereitung", label: "In Vorbereitung", defaultSelected: true },
@@ -164,6 +192,7 @@ function createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigab
         gueltigBis: plusTage(14),
         rabattBetrag: 0,
         verguenstigungsGrund: "",
+        preispositionenDraft: [],
         fehler: "",
         angebotsNrDraft: "",
         bearbeiter: defaultBearbeiter,
@@ -183,6 +212,15 @@ function createAngebotPositionDraft(auswahl, menge) {
         einzelpreis: auswahl.preis,
         berechnungstyp: auswahl.berechnungstyp || "",
         zeEinheit: auswahl.zeEinheit || ""
+    };
+}
+
+function createPreispositionDraft() {
+    return {
+        id: `preis-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        beschreibung: "",
+        typ: "amount",
+        wert: ""
     };
 }
 
@@ -348,6 +386,7 @@ export default function Angebote() {
             gueltigBis: templateOffer?.gueltigBis || plusTage(14),
             rabattBetrag: Number(templateOffer?.rabattBetrag || 0),
             verguenstigungsGrund: templateOffer?.verguenstigungsGrund || "",
+            preispositionenDraft: templateOffer?.preispositionen || [],
             fehler: "",
             angebotsNrDraft: `${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`,
             bearbeiter: defaultBearbeiter,
@@ -373,6 +412,7 @@ export default function Angebote() {
             gueltigBis: templateOffer.gueltigBis || current.gueltigBis,
             rabattBetrag: Number(templateOffer.rabattBetrag || 0),
             verguenstigungsGrund: templateOffer.verguenstigungsGrund || "",
+            preispositionenDraft: templateOffer.preispositionen || [],
             fehler: "",
             selectedTemplateOfferId: String(templateOfferId)
         }));
@@ -394,6 +434,7 @@ export default function Angebote() {
             gueltigBis: angebot.gueltigBis || plusTage(14),
             rabattBetrag: Number(angebot.rabattBetrag || 0),
             verguenstigungsGrund: angebot.verguenstigungsGrund || "",
+            preispositionenDraft: angebot.preispositionen || [],
             fehler: "",
             angebotsNrDraft: angebot.angebotsNr || "",
             bearbeiter: String(angebot.bearbeiter || defaultBearbeiter),
@@ -454,7 +495,7 @@ export default function Angebote() {
                 kunde: getCustomerName(angebot.kundeId, angebot.kunde),
                 anliegenText: getInquiryForOffer(angebot, anfragen)?.anliegen || "-",
                 positionenText: (angebot.positionen || []).map(position => `${position.artikel} (${position.menge})`).join(", "),
-                gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.rabattBetrag).toFixed(2)} EUR`,
+                gesamt: `${gesamtNachAbzug(angebot.positionen, angebot.preispositionen || [], angebot.rabattBetrag).toFixed(2)} EUR`,
                 prozess: getSalesStepLabel(getSalesStep(angebot, auftraege, vertriebsdokumente, versandauftraege))
             }))
             .sort((a, b) => String(b.datum || "").localeCompare(String(a.datum || "")));
@@ -471,6 +512,7 @@ export default function Angebote() {
             partnerLabel: "Kunde",
             partnerValue: angebot.kunde,
             positions: angebot.positionen || [],
+            preispositionen: angebot.preispositionen || [],
             deductionAmount: angebot.rabattBetrag || 0,
             deductionReason: angebot.verguenstigungsGrund || ""
         });
@@ -505,7 +547,7 @@ export default function Angebote() {
         const inAngeboten = Number(offeneAngeboteJeArtikel[String(position.artikelId)] || 0);
 
         return {
-            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Verplant: ${verplant} | In Angeboten: ${inAngeboten}`,
+            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | In Angeboten: ${inAngeboten}`,
             istKritisch: Number(position.menge || 0) > verfuegbar
         };
     };
@@ -549,9 +591,10 @@ export default function Angebote() {
                 gueltigBis: draft.gueltigBis,
                 rabattBetrag: Number(draft.rabattBetrag || 0),
                 verguenstigungsGrund: draft.verguenstigungsGrund.trim(),
-                gesamtbetrag: gesamtNachAbzug(draft.positionenDraft, draft.rabattBetrag),
+                gesamtbetrag: gesamtNachAbzug(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag),
                 status: "in Vorbereitung",
                 positionen: draft.positionenDraft,
+                preispositionen: draft.preispositionenDraft,
                 bearbeiter: draft.bearbeiter,
                 direktSendenGewuenscht: false,
                 freigabeStatus: "angefragt",
@@ -592,9 +635,10 @@ export default function Angebote() {
             gueltigBis: draft.gueltigBis,
             rabattBetrag: Number(draft.rabattBetrag || 0),
             verguenstigungsGrund: draft.verguenstigungsGrund.trim(),
-            gesamtbetrag: gesamtNachAbzug(draft.positionenDraft, draft.rabattBetrag),
+            gesamtbetrag: gesamtNachAbzug(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag),
             status,
             positionen: draft.positionenDraft,
+            preispositionen: draft.preispositionenDraft,
             bearbeiter: draft.bearbeiter,
             direktSendenGewuenscht: freigabeDirektErteilen,
             freigabeStatus: freigabeNoetig ? "angefragt" : "freigegeben",
@@ -924,7 +968,7 @@ export default function Angebote() {
                                                 onChange={wert => setDraft(items => ({
                                                     ...items,
                                                     positionenDraft: items.positionenDraft.map(item => item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp
-                                                        ? { ...item, menge: Number(wert || 1) }
+                                                        ? { ...item, menge: wert }
                                                         : item
                                                     )
                                                 }))}
@@ -951,20 +995,98 @@ export default function Angebote() {
                 <div className="thread-summary-card">
                     <Label>Kalkulationsuebersicht</Label>
                     <div className="thread-summary-lines">
-                        <div><span>Zwischensumme</span><strong>{gesamtNachAbzug(draft.positionenDraft, 0).toFixed(2)} EUR</strong></div>
-                        <div><span>Verguenstigung</span><strong>{Number(draft.rabattBetrag || 0).toFixed(2)} EUR</strong></div>
-                        <div><span>Gesamtbetrag</span><strong>{gesamtNachAbzug(draft.positionenDraft, draft.rabattBetrag).toFixed(2)} EUR</strong></div>
+                        <div><span>Zwischensumme</span><strong>{calculatePositionenTotal(draft.positionenDraft).toFixed(2)} EUR</strong></div>
+                        {draft.preispositionenDraft.length > 0 && (
+                            <>
+                                {(() => {
+                                    const baseTotal = calculatePositionenTotal(draft.positionenDraft);
+                                    return draft.preispositionenDraft.map(position => (
+                                        <div key={position.id}>
+                                            <span>{position.beschreibung || (position.typ === "percent" ? "Prozent-Anpassung" : "Betrag")}</span>
+                                            <strong>{position.typ === "percent" ? `${Number(position.wert || 0).toFixed(2)} % ≙ ${ (baseTotal * Number(position.wert || 0) / 100).toFixed(2) } EUR` : `${Number(position.wert || 0).toFixed(2)} EUR`}</strong>
+                                        </div>
+                                    ));
+                                })()}
+                            </>
+                        )}
+                        <div className="offer-total"><span>Gesamtbetrag exkl. MwSt</span><strong style={{fontSize: '1.15em'}}>{calculateNetto(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag).toFixed(2)} EUR</strong></div>
+                        <div><span>MwSt ({(MWST_RATE * 100).toFixed(0)}%)</span><strong>{calculateMwSt(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag).toFixed(2)} EUR</strong></div>
+                        <div className="offer-total"><span>Gesamtbetrag inkl. MwSt</span><strong style={{fontSize: '1.15em'}}>{gesamtNachAbzug(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag).toFixed(2)} EUR</strong></div>
                     </div>
                 </div>
             </div>
             <div className="form-row thread-section">
                 <div className="thread-section-header">
-                    <Label>Preisgestaltung</Label>
+                    <Label glossaryKey="zuAbschlaege">Zu- und Abschläge</Label>
                 </div>
-                <div className="thread-form-grid">
-                    <div><Label glossaryKey="rabatt">Verguenstigung</Label><NumberField value={draft.rabattBetrag} min="0" step="0.01" format="currency" onChange={wert => setDraft(item => ({ ...item, rabattBetrag: Number(wert || 0) }))}/></div>
-                    <div><Label glossaryKey="rabatt">Grund fuer Verguenstigung</Label><TextArea rows={2} value={draft.verguenstigungsGrund} onChange={value => setDraft(item => ({ ...item, verguenstigungsGrund: value }))}/></div>
+                
+                <div className="position-table-wrapper">
+                    <table className="position-table">
+                        <thead>
+                            <tr>
+                                <th>Beschreibung</th>
+                                <th>Typ</th>
+                                <th>Wert</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {draft.preispositionenDraft.map((position) => (
+                                <tr key={position.id}>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            value={position.beschreibung}
+                                            placeholder="z. B. Bundle-Rabatt oder Expresslieferung"
+                                            onChange={event => setDraft(current => ({
+                                                ...current,
+                                                preispositionenDraft: current.preispositionenDraft.map(item => item.id === position.id ? { ...item, beschreibung: event.target.value } : item)
+                                            }))}
+                                        />
+                                    </td>
+                                    <td>
+                                        <select
+                                            value={position.typ}
+                                            onChange={event => setDraft(current => ({
+                                                ...current,
+                                                preispositionenDraft: current.preispositionenDraft.map(item => item.id === position.id ? { ...item, typ: event.target.value } : item)
+                                            }))}
+                                        >
+                                            <option value="amount">Betrag</option>
+                                            <option value="percent">Prozent</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <NumberField
+                                            value={position.wert}
+                                            min="-999999"
+                                            step="0.01"
+                                            format={position.typ === "percent" ? "percent" : "currency"}
+                                            onChange={wert => setDraft(current => ({
+                                                ...current,
+                                                preispositionenDraft: current.preispositionenDraft.map(item => item.id === position.id ? { ...item, wert } : item)
+                                            }))}
+                                        />
+                                    </td>
+                                    <td>
+                                        <button type="button" className="link-button" onClick={() => setDraft(current => ({
+                                            ...current,
+                                            preispositionenDraft: current.preispositionenDraft.filter(item => item.id !== position.id)
+                                        }))}>
+                                            Entfernen
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
+                <button type="button" onClick={() => setDraft(current => ({
+                    ...current,
+                    preispositionenDraft: [...current.preispositionenDraft, createPreispositionDraft()]
+                }))}>
+                    Neue Preisposition hinzufügen
+                </button>
             </div>
             <div className="form-row thread-section">
                 <div className="thread-section-header">
@@ -1005,10 +1127,10 @@ export default function Angebote() {
             vorgangId={approvalOffer.vorgangId || ""}
             status={approvalOffer.freigabeText || approvalOffer.status}
             currentOfferLabel={approvalOffer.angebotsNr}
-            currentOfferAmount={`${gesamtNachAbzug(approvalOffer.positionen, approvalOffer.rabattBetrag).toFixed(2)} EUR`}
+            currentOfferAmount={`${gesamtNachAbzug(approvalOffer.positionen, approvalOffer.preispositionen || [], approvalOffer.rabattBetrag).toFixed(2)} EUR`}
             currentOfferNote={approvalOffer.verguenstigungsGrund || ""}
             discountLabel={Number(approvalOffer.rabattBetrag || 0) > 0 ? `${Number(approvalOffer.rabattBetrag || 0).toFixed(2)} EUR` : "Keine"}
-            totalAmountLabel={`${gesamtNachAbzug(approvalOffer.positionen, approvalOffer.rabattBetrag).toFixed(2)} EUR`}
+            totalAmountLabel={`${gesamtNachAbzug(approvalOffer.positionen, approvalOffer.preispositionen || [], approvalOffer.rabattBetrag).toFixed(2)} EUR`}
             onOpenCurrentOffer={() => angebotAlsPdf(approvalOffer)}
             positionInfos={(approvalOffer.positionen || []).map((position, index) => {
                 const verfuegbarkeit = getVerfuegbarkeitFuerPosition(position);

@@ -100,6 +100,7 @@ export default function Kundenanfragen() {
             partnerLabel: "Kunde",
             partnerValue: getCustomerName(angebot.kundeId, angebot.kunde),
             positions: angebot.positionen || [],
+            preispositionen: angebot.preispositionen || [],
             deductionAmount: angebot.rabattBetrag || 0,
             deductionReason: angebot.verguenstigungsGrund || ""
         });
