@@ -21,6 +21,7 @@ import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { getPaymentOpenItemStatus, isPendingPayment } from "../../utils/openItems";
 import { getOfferForOrder, getOffersForVorgang, getOrdersForVorgang, getProcessContextForDocument, getSalesDocumentsForVorgang, getVorgangId } from "../../utils/processFlow";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 
 const jetzt = () => getBerlinTimestamp();
 const OFFER_OPEN_STATUSES = ["wartet auf antwort"];
@@ -160,6 +161,7 @@ function MultiStatusFilter({ options, selectedValues, onToggle }) {
 
 export default function LehrkraftKundenkorrespondenz() {
     const today = getBerlinDate();
+    useLehrkraftAutomationen();
     const syncTick = useStorageSyncRefresh(["kundenanfragen", "nachrichten", "angebote", "auftraege", "vertriebsdokumente", "zahlungen", "kunden"]);
     const [refreshKey, setRefreshKey] = useState(0);
     const [activeTab, setActiveTab] = useState("anfragen");

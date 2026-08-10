@@ -109,4 +109,7 @@ export interface DataTableProps {
     focusField?: string;
     detailLinkResolver?: (args: { field: string; row: any; value: any }) => string | null;
     rowClassName?: (row: any) => string;
+    selectableRows?: boolean;
+    selectedRowIds?: Array<string | number>;
+    onSelectedRowsChange?: (rowIds: Array<string | number>) => void;
 }

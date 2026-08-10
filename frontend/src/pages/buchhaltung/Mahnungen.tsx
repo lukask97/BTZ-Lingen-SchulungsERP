@@ -53,7 +53,7 @@ export default function Mahnungen() {
             data={mahnungen}
             columns={[
                 { field: "datum", title: "Datum" },
-                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
+                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/ausgangsrechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
                 { field: "kunde", title: "Kunde", render: row => {
                     const link = resolveKundenLink(row);
                     return link ? <Link className="detail-link" to={link}>{row.kunde}</Link> : row.kunde;
@@ -63,7 +63,7 @@ export default function Mahnungen() {
             ]}
             focusField="rechnungsnr"
             detailLinkResolver={({ field, row, value }) => {
-                if (field === "rechnungsnr") return `/rechnungen?focus=${value}`;
+                if (field === "rechnungsnr") return `/ausgangsrechnungen?focus=${value}`;
                 if (field === "kunde") return resolveKundenLink(row);
                 return null;
             }}
@@ -74,14 +74,14 @@ export default function Mahnungen() {
             selectableColumns={false}
             data={offeneRechnungen}
             columns={[
-                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
+                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/ausgangsrechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
                 { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "betrag", title: "Betrag" },
                 { field: "datum", title: "Datum" }
             ]}
             focusField="rechnungsnr"
             detailLinkResolver={({ field, row, value }) => {
-                if (field === "rechnungsnr") return `/rechnungen?focus=${value}`;
+                if (field === "rechnungsnr") return `/ausgangsrechnungen?focus=${value}`;
                 if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 return null;
             }}

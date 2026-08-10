@@ -13,6 +13,7 @@ export const INITIAL_DATA = {
         plz: "",
         ort: "",
         segment: "",
+        iban: "",
         fuerBts: "",
         bewertung: 3,
         abc: "Unbestimmt"
@@ -26,6 +27,7 @@ export const INITIAL_DATA = {
         ort: "",
         segment: "",
         abc: "Unbestimmt",
+        iban: "",
         website: "",
         optionen: [],
         notiz: ""
@@ -41,6 +43,8 @@ export const INITIAL_DATA = {
         einkaufspreis: 0,
         verkaufspreis: 0,
         bestand: 0,
+        mindestmenge: 0,
+        bedarfsmeldungBei: 0,
         beschreibung: "",
         komponenten: []
     },
@@ -195,6 +199,7 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "firma", title: "Firma" },
         { field: "ort", title: "Ort" },
         { field: "segment", title: "Segment" },
+        { field: "iban", title: "IBAN" },
         { field: "bewertung", title: "Bewertung" },
         { field: "abc", title: "ABC" },
         { field: "anschrift", title: "Anschrift", visible: false },
@@ -207,6 +212,7 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "ort", title: "Ort" },
         { field: "segment", title: "Kategorie" },
         { field: "abc", title: "ABC" },
+        { field: "iban", title: "IBAN" },
         { field: "website", title: "Website" },
         { field: "anschrift", title: "Anschrift", visible: false },
         { field: "plz", title: "PLZ", visible: false },
@@ -221,6 +227,8 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "einkaufspreis", title: "Einkaufspreis" },
         { field: "verkaufspreis", title: "Verkaufspreis" },
         { field: "bestand", title: "Bestand" },
+        { field: "mindestmenge", title: "Sicherheitsbestand" },
+        { field: "bedarfsmeldungBei", title: "Bedarfsmeldung bei" },
         { field: "beschreibung", title: "Beschreibung", visible: false },
         { field: "komponenten", title: "Komponenten", visible: false }
     ],

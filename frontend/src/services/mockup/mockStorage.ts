@@ -87,7 +87,9 @@ export const SYNC_DATA_KEYS = [
     "mitarbeiter", "arbeitszeiten", "urlaubsantraege", "schulungen",
     "firmenkonto",
     "benutzerSpalten",
-    "nummernkreise"
+    "nummernkreise",
+    "lehrkraftOptionen",
+    "fristenOptionen"
 ];
 
 export function resetTestData() {

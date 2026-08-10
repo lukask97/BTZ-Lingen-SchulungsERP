@@ -21,6 +21,7 @@ import servicesService from "../../services/verkauf/servicesService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import versandService from "../../services/logistik/versandService";
+import bestellungenService, { getOffeneBestellmengenProArtikel } from "../../services/einkauf/bestellungenService";
 import { getCustomerName } from "../../utils/customerReferences";
 import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
 import { addDaysToIsoDate, formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
@@ -282,7 +283,7 @@ function MultiStatusFilter({ options, selectedValues, onToggle }) {
 export default function Angebote() {
     const syncTick = useStorageSyncRefresh([
         "angebote", "auftraege", "vertriebsdokumente", "versandauftraege",
-        "kundenanfragen", "kunden", "benutzer", "artikel", "services", "nachrichten"
+        "kundenanfragen", "kunden", "benutzer", "artikel", "services", "nachrichten", "bestellungen", "bestellpositionen"
     ]);
     const { user, hasAccess, hasFullAccess } = useAuth();
     const navigate = useNavigate();
@@ -308,6 +309,7 @@ export default function Angebote() {
     const benutzer = canReadBenutzer ? withPermissionFallback(() => benutzerService.list(), []) : [];
     const artikel = withPermissionFallback(() => artikelService.getAll(), []).filter(item => item.istVerkaeuflich);
     const services = withPermissionFallback(() => servicesService.getAll(), []);
+    const offeneBestellmengen = useMemo(() => getOffeneBestellmengenProArtikel(), [syncTick]);
     const verplanteMengen = useMemo(() => getVerplanteMengen(auftraege), [auftraege]);
     const leistungen = [
         ...artikel.map(item => toLeistung(item, "Artikel")),
@@ -485,7 +487,7 @@ export default function Angebote() {
                 freigabeText: angebot.freigabeStatus === "angefragt"
                     ? "Freigabe offen"
                     : angebot.freigabeStatus === "weitergeleitet"
-                        ? "Weitergeleitet"
+                        ? `Gesperrt: ${angebot.freigabeNotiz || "Grund siehe Notiz"}`
                         : angebot.freigabeStatus === "intern_abgelehnt"
                             ? "Zur Ueberarbeitung zurueckgegeben"
                             : angebot.freigabeStatus === "freigegeben"
@@ -527,6 +529,25 @@ export default function Angebote() {
             .sort((a, b) => Number(a.revision || 0) - Number(b.revision || 0))
         : [];
 
+    const getMindestmengenWarnungen = (positionen = []) => positionen
+        .filter(position => position.leistungTyp !== "Service")
+        .map(position => {
+            const artikelEintrag = artikel.find(item => String(item.id) === String(position.artikelId));
+            if (!artikelEintrag) return null;
+            const bestand = Number(artikelEintrag.bestand || 0);
+            const verplant = Number(verplanteMengen[String(position.artikelId)] || 0);
+            const projected = bestand - verplant - Number(position.menge || 0);
+            return projected < Number(artikelEintrag.mindestmenge || 0)
+                ? {
+                    artikelId: position.artikelId,
+                    artikel: artikelEintrag.name,
+                    projected,
+                    sicherheitsbestand: Number(artikelEintrag.mindestmenge || 0)
+                }
+                : null;
+        })
+        .filter(Boolean);
+
     const getVerfuegbarkeitFuerPosition = position => {
         if (position.leistungTyp === "Service") {
             const berechnungstyp = String(position.berechnungstyp || "Pauschal");
@@ -545,10 +566,14 @@ export default function Angebote() {
         const verplant = Number(verplanteMengen[String(position.artikelId)] || 0);
         const verfuegbar = bestand - verplant;
         const inAngeboten = Number(offeneAngeboteJeArtikel[String(position.artikelId)] || 0);
+        const imZulauf = Number(offeneBestellmengen[String(position.artikelId)] || 0);
+        const projected = verfuegbar - Number(position.menge || 0);
+        const sicherheitsbestand = Number(artikelEintrag?.mindestmenge || 0);
+        const unterschreitetSicherheitsbestand = projected < sicherheitsbestand;
 
         return {
-            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | In Angeboten: ${inAngeboten}`,
-            istKritisch: Number(position.menge || 0) > verfuegbar
+            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Sicherheitsbestand von ${sicherheitsbestand} wird unterschritten` : ""}`,
+            istKritisch: Number(position.menge || 0) > verfuegbar || unterschreitetSicherheitsbestand
         };
     };
 
@@ -572,6 +597,8 @@ export default function Angebote() {
         const kunde = kunden.find(item => String(item.id) === String(draft.kundeId));
         const anfrage = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId));
         const vorgangId = getVorgangId(anfrage) || (draft.sourceInquiryId ? `anfrage-${draft.sourceInquiryId}` : `angebot-${Date.now()}`);
+        const mindestmengenWarnungen = getMindestmengenWarnungen(draft.positionenDraft);
+        const mindestmengenFreigabeNoetig = mindestmengenWarnungen.length > 0;
 
         if (!kunde || draft.positionenDraft.length === 0) {
             setDraft(current => ({ ...current, fehler: "Bitte einen Kunden und mindestens eine Position auswaehlen." }));
@@ -597,8 +624,10 @@ export default function Angebote() {
                 preispositionen: draft.preispositionenDraft,
                 bearbeiter: draft.bearbeiter,
                 direktSendenGewuenscht: false,
-                freigabeStatus: "angefragt",
-                freigabeNotiz: ""
+                freigabeStatus: mindestmengenFreigabeNoetig ? "weitergeleitet" : "angefragt",
+                freigabeNotiz: mindestmengenFreigabeNoetig
+                    ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                    : ""
             });
 
             nachrichtenService.create({
@@ -621,7 +650,7 @@ export default function Angebote() {
         }
 
         const revisionInfo = naechsteAngebotsrevision(vorgangId);
-        const freigabeDirektErteilen = brauchtFreigabe ? false : draft.direktSenden;
+        const freigabeDirektErteilen = mindestmengenFreigabeNoetig ? false : (brauchtFreigabe ? false : draft.direktSenden);
         const freigabeNoetig = !freigabeDirektErteilen;
         const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
         const neuesAngebot = angeboteService.add({
@@ -641,10 +670,27 @@ export default function Angebote() {
             preispositionen: draft.preispositionenDraft,
             bearbeiter: draft.bearbeiter,
             direktSendenGewuenscht: freigabeDirektErteilen,
-            freigabeStatus: freigabeNoetig ? "angefragt" : "freigegeben",
+            freigabeStatus: freigabeNoetig ? (mindestmengenFreigabeNoetig ? "weitergeleitet" : "angefragt") : "freigegeben",
             freigabeAngefragtVon: user?.username || draft.bearbeiter,
-            freigegebenVon: freigabeDirektErteilen ? (user?.username || "") : ""
+            freigegebenVon: freigabeDirektErteilen ? (user?.username || "") : "",
+            freigabeNotiz: mindestmengenFreigabeNoetig
+                ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                : ""
         });
+
+        if (mindestmengenFreigabeNoetig) {
+            freigabenService.create({
+                titel: `Sicherheitsbestandsfreigabe ${neuesAngebot.angebotsNr}`,
+                bereich: "verkauf",
+                verantwortung: "Geschaeftsfuehrung",
+                status: "offen",
+                datum: heute,
+                bezug: neuesAngebot.angebotsNr,
+                angebotId: neuesAngebot.id,
+                vorgangId,
+                notiz: `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+            });
+        }
 
         if (anfrage) {
             customerInquiryService.update({
@@ -813,6 +859,10 @@ export default function Angebote() {
         : activeTab === "alle"
             ? "Alle Angebote"
             : "Laufende Angebote";
+    const mindestmengenWarnungenImDialog = getMindestmengenWarnungen(draft.positionenDraft);
+    const sperrgrundText = mindestmengenWarnungenImDialog.length > 0
+        ? `Das Angebot kann nicht freigegeben werden: ${mindestmengenWarnungenImDialog.map(item => `${item.artikel} unterschreitet den Sicherheitsbestand von ${item.sicherheitsbestand}`).join(", ")}.`
+        : "";
 
     return <>
         <SalesFlowBar currentStep="angebote"/>
@@ -853,7 +903,12 @@ export default function Angebote() {
                 return null;
             }}
         />
-        <Dialog open={open} title={editingOfferId ? "Angebot bearbeiten" : (draft.sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot")} onClose={handleClose}>
+        <Dialog
+            open={open}
+            title={editingOfferId ? "Angebot bearbeiten" : (draft.sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot")}
+            onClose={handleClose}
+            footer={<button type="button" onClick={speichern}>{editingOfferId ? "Aenderungen speichern" : "Angebot speichern"}</button>}
+        >
             {draft.sourceInquiryId && anfrageImDialog && <div className="offer-forward-panel form-row thread-section">
                 <div className="thread-section-header">
                     <Label>Vorgang</Label>
@@ -1090,30 +1145,22 @@ export default function Angebote() {
             </div>
             <div className="form-row thread-section">
                 <div className="thread-section-header">
-                    <Label>Freigabe</Label>
+                    <Label glossaryKey="freigabe">Freigabe</Label>
                 </div>
                 <div className="offer-send-checkbox-row">
-                    <Checkbox checked={!brauchtFreigabe && draft.direktSenden} onChange={value => setDraft(item => ({ ...item, direktSenden: value }))} disabled={brauchtFreigabe}>
+                    <Checkbox checked={!brauchtFreigabe && draft.direktSenden} onChange={value => setDraft(item => ({ ...item, direktSenden: value }))} disabled={brauchtFreigabe || mindestmengenWarnungenImDialog.length > 0}>
                         Freigabe direkt erteilen
                     </Checkbox>
-                    <HelpHint text={istErfahrenerVerkaeufer ? "Mit Haken wird das Angebot sofort freigegeben und nach dem Speichern direkt an den Kunden gesendet." : "Fuer diese Rolle kann die Freigabe nicht direkt erteilt werden. Das Angebot geht nach dem Speichern in die Freigabe."} />
                 </div>
-                {!brauchtFreigabe && !draft.direktSenden && <p className="thread-template-hint">
+                {(brauchtFreigabe || sperrgrundText) && <div className="form-error">
+                    {brauchtFreigabe && <p>Du hast keine Berechtigung zur eigenstaendigen Freigabe.</p>}
+                    {sperrgrundText && <p>{sperrgrundText}</p>}
+                </div>}
+                {!draft.direktSenden && <p className="thread-template-hint">
                     Ohne Haken bleibt das Angebot in der internen Freigabe und wird noch nicht an den Kunden gesendet.
-                </p>}
-                {brauchtFreigabe && <p className="thread-template-hint">
-                    Fuer diese Rolle wird das Angebot nach dem Speichern zur Freigabe vorgelegt.
                 </p>}
             </div>
             {draft.fehler && <p className="form-error">{draft.fehler}</p>}
-            <div className="form-row thread-section thread-dialog-footer">
-                <div className="thread-section-header">
-                    <Label>Aktionen</Label>
-                </div>
-                <div className="thread-document-links">
-                    <button type="button" onClick={speichern}>{editingOfferId ? "Aenderungen speichern" : "Angebot speichern"}</button>
-                </div>
-            </div>
         </Dialog>
         {approvalOffer && <OfferApprovalDialog
             open={approvalOpen}

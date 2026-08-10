@@ -162,7 +162,7 @@ export default function Einkaufsdokumente() {
                     <Link className="button-link" to="/bestellungen">Bestellungen öffnen</Link>
                     <Link className="button-link" to="/wareneingaenge">Wareneingänge öffnen</Link>
                     <Link className="button-link" to="/lieferantenvergleich">Lieferantenvergleich</Link>
-                    {selectedBestellung?.status === "eingegangen" && <Link className="button-link" to={`/rechnungen?new=eingangsrechnung&bestellungId=${selectedBestellung.id}&bestellNr=${selectedBestellung.bestellNr}&lieferantId=${selectedBestellung.lieferantId}`}>Eingangsrechnung prüfen</Link>}
+                    {selectedBestellung?.status === "eingegangen" && <Link className="button-link" to={`/eingangsrechnungen?focus=${String(selectedBestellung.bestellNr || "").replace("EK-", "ER-")}`}>Eingangsrechnung prüfen</Link>}
                 </div>
             </div>
             {selectedBestellung && <div className="personalakte-summary">

@@ -207,6 +207,21 @@ export default function Artikel() {
                 <Label>Bestand</Label>
                 <NumberField value={currentItem.bestand} min="0" step="1" onChange={v => handleFieldChange("bestand", Number(v || 0))} />
 
+                <div className="form-row">
+                    <div>
+                        <Label>Sicherheitsbestand</Label>
+                        <NumberField value={currentItem.mindestmenge || 0} min="0" step="1" onChange={v => handleFieldChange("mindestmenge", Number(v || 0))} />
+                    </div>
+                    <div>
+                        <Label>Bedarfsmeldung bei</Label>
+                        <NumberField value={currentItem.bedarfsmeldungBei || 0} min="0" step="1" onChange={v => handleFieldChange("bedarfsmeldungBei", Number(v || 0))} />
+                    </div>
+                </div>
+
+                <div className="form-row">
+                    <p>Der Sicherheitsbestand steuert die Freigabepflicht im Verkauf. Die Bedarfsmeldung taucht im Einkauf auf, sobald der Bestand diesen Wert erreicht oder unterschreitet.</p>
+                </div>
+
                 {currentItem.artikelTyp === "Baugruppe" && <>
                     <div className="form-row bestellposition-hinzufuegen">
                         <div>

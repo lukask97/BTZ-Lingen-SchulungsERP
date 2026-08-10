@@ -16,6 +16,7 @@ import artikelService from "../../services/logistik/artikelService";
 import servicesService from "../../services/verkauf/servicesService";
 import versandService from "../../services/logistik/versandService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
+import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
 import { kundenanfrageInAuftragUebernehmen, naechsteAuftragsnummer } from "../../services/verkauf/verkaufService";
 import { getCustomerName } from "../../utils/customerReferences";
 import { getBerlinDate, getRelativeBerlinDate } from "../../utils/dateTime";
@@ -47,13 +48,14 @@ function createAuftragspositionDraft(auswahl, menge) {
 }
 
 function createAuftragDraft(defaultKundeId, defaultLeistungId) {
+    const fristen = fristenOptionenService.get();
     return {
         sourceInquiryId: "",
         kundeId: defaultKundeId,
         leistungId: defaultLeistungId,
         menge: 1,
         positionenDraft: [],
-        faelligAm: inTagen(14),
+        faelligAm: inTagen(fristen.zahlungszielTage),
         rabattBetrag: 0,
         verguenstigungsGrund: "",
         auftragNrDraft: naechsteAuftragsnummer()

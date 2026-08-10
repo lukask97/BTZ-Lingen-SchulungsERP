@@ -49,11 +49,14 @@ export function normalizeArtikel(item = {}) {
         einkaufspreis,
         verkaufspreis,
         bestand: Number(item.bestand ?? 0),
+        mindestmenge: Number(item.mindestmenge ?? 0),
+        bedarfsmeldungBei: Number(item.bedarfsmeldungBei ?? 0),
         komponenten,
         istEinkaufbar: einkaufspreis > 0,
         istVerkaeuflich: verkaufspreis > 0,
         beschaffungsart: einkaufspreis > 0 ? "Zukauf" : "Herstellung",
-        verkaufsstatus: verkaufspreis > 0 ? "Verkaufbar" : "Nicht verkaufbar"
+        verkaufsstatus: verkaufspreis > 0 ? "Verkaufbar" : "Nicht verkaufbar",
+        bedarfsmeldungAktiv: Number(item.bedarfsmeldungBei ?? 0) > 0 && Number(item.bestand ?? 0) <= Number(item.bedarfsmeldungBei ?? 0)
     };
 }
 

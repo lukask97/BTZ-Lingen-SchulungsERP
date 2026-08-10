@@ -1,2298 +1,2328 @@
 {
-    "kunden":  [
-                   {
-                       "id":  1,
-                       "kundenNr":  "DB10001",
-                       "firma":  "Campus Baumarkt GmbH",
-                       "anschrift":  "Industriestraße 3",
-                       "plz":  "49809",
-                       "ort":  "Lingen",
-                       "segment":  "Baumarkt",
-                       "abc":  "A",
-                       "optionen":  [
-                                        "Fahrradbekleidung",
-                                        "Sicherheitsbekleidung",
-                                        "Sonderfahrräder",
-                                        "Lastenbikes"
-                                    ],
-                       "notiz":  ""
-                   },
-                   {
-                       "id":  2,
-                       "kundenNr":  "DB10002",
-                       "firma":  "Emsland Tourismus GmbH",
-                       "anschrift":  "Helter Damm 11a",
-                       "plz":  "49716",
-                       "ort":  "Meppen",
-                       "segment":  "Tourismus",
-                       "abc":  "B",
-                       "optionen":  [
-                                        "Bikes aller Art",
-                                        "Leasing",
-                                        "Reparatur Service"
-                                    ],
-                       "website":  "https://www.emsland.com/",
-                       "notiz":  ""
-                   }
-               ],
-    "artikel":  [
-                    {
-                        "id":  1,
-                        "artikelNr":  "ART001",
-                        "name":  "Schulungsfahrrad City",
-                        "kategorieId":  4,
-                        "kategorie":  "Fahrraeder",
-                        "kategoriePfad":  "Fahrraeder \u003e Citybike",
-                        "artikelTyp":  "Baugruppe",
-                        "einkaufspreis":  420,
-                        "verkaufspreis":  799,
-                        "bestand":  6,
-                        "beschreibung":  "Komplettes Fahrrad als Beispiel für einen zusammengesetzten Artikel."
-                    },
-                    {
-                        "id":  2,
-                        "artikelNr":  "ART002",
-                        "name":  "Sicherheitsjacke",
-                        "kategorieId":  6,
-                        "kategorie":  "Bekleidung",
-                        "kategoriePfad":  "Bekleidung \u003e Sicherheitsbekleidung",
-                        "artikelTyp":  "Einzelartikel",
-                        "einkaufspreis":  39.9,
-                        "verkaufspreis":  89.9,
-                        "bestand":  120,
-                        "beschreibung":  "Reflektierende Sicherheitsjacke"
-                    },
-                    {
-                        "id":  3,
-                        "artikelNr":  "ART003",
-                        "name":  "Fahrradhelm",
-                        "kategorieId":  8,
-                        "kategorie":  "Zubehoer",
-                        "kategoriePfad":  "Zubehoer \u003e Helm",
-                        "artikelTyp":  "Einzelartikel",
-                        "einkaufspreis":  24.5,
-                        "verkaufspreis":  59.99,
-                        "bestand":  45,
-                        "beschreibung":  "Sicherer Fahrradhelm mit Zertifikat"
-                    },
-                    {
-                        "id":  4,
-                        "artikelNr":  "ART004",
-                        "name":  "Fahrradrahmen",
-                        "kategorieId":  10,
-                        "kategorie":  "Mechanik",
-                        "kategoriePfad":  "Mechanik \u003e Rahmen",
-                        "artikelTyp":  "Komponente",
-                        "einkaufspreis":  120,
-                        "verkaufspreis":  199,
-                        "bestand":  18,
-                        "beschreibung":  "Rahmen als Einzelkomponente für Schulungsbeispiele."
-                    },
-                    {
-                        "id":  5,
-                        "artikelNr":  "ART005",
-                        "name":  "Lenker",
-                        "kategorieId":  11,
-                        "kategorie":  "Mechanik",
-                        "kategoriePfad":  "Mechanik \u003e Lenker",
-                        "artikelTyp":  "Komponente",
-                        "einkaufspreis":  18,
-                        "verkaufspreis":  34.9,
-                        "bestand":  35,
-                        "beschreibung":  "Lenker für Fahrradmontage."
-                    },
-                    {
-                        "id":  6,
-                        "artikelNr":  "ART006",
-                        "name":  "Reifen 28 Zoll",
-                        "kategorieId":  12,
-                        "kategorie":  "Mechanik",
-                        "kategoriePfad":  "Mechanik \u003e Reifen",
-                        "artikelTyp":  "Komponente",
-                        "einkaufspreis":  14.5,
-                        "verkaufspreis":  29.9,
-                        "bestand":  64,
-                        "beschreibung":  "Standardreifen als Lagerkomponente."
-                    },
-                    {
-                        "id":  7,
-                        "artikelNr":  "ART007",
-                        "name":  "Sattel Komfort",
-                        "kategorieId":  13,
-                        "kategorie":  "Mechanik",
-                        "kategoriePfad":  "Mechanik \u003e Sattel",
-                        "artikelTyp":  "Komponente",
-                        "einkaufspreis":  16,
-                        "verkaufspreis":  39,
-                        "bestand":  29,
-                        "beschreibung":  "Komfortsattel für Schulungsfahrräder."
-                    }
-                ],
-    "artikelStueckliste":  [
-                               {
-                                   "id":  1,
-                                   "hauptartikelId":  1,
-                                   "komponentenartikelId":  4,
-                                   "menge":  1
-                               },
-                               {
-                                   "id":  2,
-                                   "hauptartikelId":  1,
-                                   "komponentenartikelId":  5,
-                                   "menge":  1
-                               },
-                               {
-                                   "id":  3,
-                                   "hauptartikelId":  1,
-                                   "komponentenartikelId":  6,
-                                   "menge":  2
-                               },
-                               {
-                                   "id":  4,
-                                   "hauptartikelId":  1,
-                                   "komponentenartikelId":  7,
-                                   "menge":  1
-                               }
-                           ],
-    "services":  [
-                     {
-                         "id":  1,
-                         "serviceNr":  "SER001",
-                         "name":  "Reparatur",
-                         "kategorie":  "Werkstatt",
-                         "berechnungstyp":  "Pauschal",
-                         "zeEinheit":  "",
-                         "einkaufspreis":  0,
-                         "verkaufspreis":  65,
-                         "beschreibung":  "Einfache Werkstattleistung für Reparaturen."
-                     },
-                     {
-                         "id":  2,
-                         "serviceNr":  "SER002",
-                         "name":  "Wartung",
-                         "kategorie":  "Werkstatt",
-                         "berechnungstyp":  "Pauschal",
-                         "zeEinheit":  "",
-                         "einkaufspreis":  0,
-                         "verkaufspreis":  89,
-                         "beschreibung":  "Wartungspaket für Fahrräder oder Fuhrpark."
-                     },
-                     {
-                         "id":  3,
-                         "serviceNr":  "SER003",
-                         "name":  "Miete",
-                         "kategorie":  "Vertrag",
-                         "berechnungstyp":  "ZE",
-                         "zeEinheit":  "1 Tag",
-                         "einkaufspreis":  0,
-                         "verkaufspreis":  149,
-                         "beschreibung":  "Mietleistung mit Berechnung je Zeiteinheit von einem Tag."
-                     },
-                     {
-                         "id":  4,
-                         "serviceNr":  "SER004",
-                         "name":  "Lieferung",
-                         "kategorie":  "Logistik",
-                         "berechnungstyp":  "Pauschal",
-                         "zeEinheit":  "",
-                         "einkaufspreis":  0,
-                         "verkaufspreis":  35,
-                         "beschreibung":  "Lieferung zum Kundenstandort."
-                     },
-                     {
-                         "id":  5,
-                         "serviceNr":  "SER005",
-                         "name":  "Abholung",
-                         "kategorie":  "Logistik",
-                         "berechnungstyp":  "Pauschal",
-                         "zeEinheit":  "",
-                         "einkaufspreis":  0,
-                         "verkaufspreis":  20,
-                         "beschreibung":  "Abholung beim Kunden oder Partner."
-                     }
-                 ],
-    "nummernkreise":  [
-                          {
-                              "id":  1,
-                              "schluessel":  "angebot",
-                              "bezeichnung":  "Angebot",
-                              "kuerzel":  "ANG"
-                          },
-                          {
-                              "id":  2,
-                              "schluessel":  "auftrag",
-                              "bezeichnung":  "Auftrag",
-                              "kuerzel":  "AU"
-                          },
-                          {
-                              "id":  3,
-                              "schluessel":  "rechnung",
-                              "bezeichnung":  "Rechnung",
-                              "kuerzel":  "RG"
-                          },
-                          {
-                              "id":  4,
-                              "schluessel":  "lieferschein",
-                              "bezeichnung":  "Lieferschein",
-                              "kuerzel":  "LS"
-                          },
-                          {
-                              "id":  5,
-                              "schluessel":  "bestellung",
-                              "bezeichnung":  "Bestellung",
-                              "kuerzel":  "EK"
-                          },
-                          {
-                              "id":  6,
-                              "schluessel":  "gutschrift",
-                              "bezeichnung":  "Gutschrift",
-                              "kuerzel":  "GS"
-                          },
-                          {
-                              "id":  7,
-                              "schluessel":  "mahnung",
-                              "bezeichnung":  "Mahnung",
-                              "kuerzel":  "MH"
-                          },
-                          {
-                              "id":  8,
-                              "schluessel":  "zahlung",
-                              "bezeichnung":  "Zahlung",
-                              "kuerzel":  "ZA"
-                          }
-                      ],
-    "benutzer":  [
-                     {
-                         "id":  1,
-                         "username":  "admin",
-                         "email":  "admin@test.de",
-                         "password":  "admin",
-                         "rolle":  "Admin",
-                         "name":  "Administrator",
-                         "permissions":  [
-                                             "*"
-                                         ]
-                     },
-                     {
-                         "id":  2,
-                         "username":  "lager",
-                         "email":  "lager@test.de",
-                         "password":  "lager",
-                         "rolle":  "Lager",
-                         "name":  "Lager Mitarbeiter",
-                         "permissions":  [
-                                             "artikel.lesen",
-                                             "lager.buchen",
-                                             "lager.lesen",
-                                             "einkauf.lesen",
-                                             "einkauf.bearbeiten"
-                                         ]
-                     },
-                     {
-                         "id":  3,
-                         "username":  "buchhaltung",
-                         "email":  "buchhaltung@test.de",
-                         "password":  "buchhaltung",
-                         "rolle":  "Buchhaltung",
-                         "name":  "Buchhaltung",
-                         "permissions":  [
-                                             "kunde.lesen",
-                                             "kunde.anlegen",
-                                             "kunde.bearbeiten",
-                                             "rechnung.lesen",
-                                             "rechnung.anlegen",
-                                             "rechnung.bearbeiten",
-                                             "verkauf.lesen",
-                                             "verkauf.bearbeiten",
-                                             "service.lesen",
-                                             "service.bearbeiten",
-                                             "organisation.lesen",
-                                             "buchhaltung.lesen",
-                                             "buchhaltung.bearbeiten"
-                                         ]
-                     },
-                     {
-                         "id":  4,
-                         "username":  "marketing",
-                         "email":  "marketing@test.de",
-                         "password":  "marketing",
-                         "rolle":  "Marketing",
-                         "name":  "Marketing Mitarbeiter",
-                         "permissions":  [
-                                             "marketing.lesen",
-                                             "marketing.bearbeiten",
-                                             "verkauf.lesen"
-                                         ]
-                     },
-                     {
-                         "id":  8,
-                         "username":  "einkauf",
-                         "email":  "einkauf@test.de",
-                         "password":  "einkauf",
-                         "rolle":  "Einkauf",
-                         "name":  "Einkauf Mitarbeiter",
-                         "permissions":  [
-                                             "einkauf.lesen",
-                                             "einkauf.bearbeiten",
-                                             "lager.lesen",
-                                             "lager.bearbeiten",
-                                             "artikel.lesen",
-                                             "artikel.bearbeiten"
-                                         ]
-                     },
-                     {
-                         "id":  9,
-                         "username":  "verkauf",
-                         "email":  "verkauf@test.de",
-                         "password":  "verkauf",
-                         "rolle":  "Verkauf",
-                         "name":  "Verkauf Mitarbeiter",
-                         "permissions":  [
-                                             "kunde.lesen",
-                                             "kunde.anlegen",
-                                             "kunde.bearbeiten",
-                                             "artikel.lesen",
-                                             "verkauf.lesen",
-                                             "verkauf.bearbeiten",
-                                             "service.lesen",
-                                             "service.bearbeiten"
-                                         ]
-                     },
-                     {
-                         "id":  10,
-                         "username":  "personalwesen",
-                         "email":  "personalwesen@test.de",
-                         "password":  "personalwesen",
-                         "rolle":  "Personalwesen",
-                         "name":  "Personalwesen Mitarbeiter",
-                         "permissions":  [
-                                             "personalwesen.lesen",
-                                             "personalwesen.bearbeiten",
-                                             "organisation.lesen"
-                                         ]
-                     },
-                     {
-                         "id":  5,
-                         "username":  "verkauf_azubi",
-                         "email":  "verkauf.azubi@test.de",
-                         "password":  "verkauf",
-                         "rolle":  "Verkauf Azubi",
-                         "name":  "Verkauf Azubi",
-                         "permissions":  [
-                                             "kunde.lesen",
-                                             "artikel.lesen",
-                                             "verkauf.lesen",
-                                             "verkauf.bearbeiten",
-                                             "service.lesen"
-                                         ]
-                     },
-                     {
-                         "id":  6,
-                         "username":  "verkauf_senior",
-                         "email":  "verkauf.senior@test.de",
-                         "password":  "verkauf",
-                         "rolle":  "Verkauf Senior",
-                         "name":  "Verkauf Senior",
-                         "permissions":  [
-                                             "kunde.lesen",
-                                             "kunde.anlegen",
-                                             "kunde.bearbeiten",
-                                             "artikel.lesen",
-                                             "verkauf.lesen",
-                                             "verkauf.bearbeiten",
-                                             "service.lesen",
-                                             "service.bearbeiten",
-                                             "gf.lesen"
-                                         ]
-                     },
-                     {
-                         "id":  7,
-                         "username":  "gf",
-                         "email":  "gf@test.de",
-                         "password":  "gf",
-                         "rolle":  "Geschäftsführung",
-                         "name":  "Geschäftsführung",
-                         "permissions":  [
-                                             "*"
-                                         ]
-                     }
-                 ],
-    "rollen":  [
-                   {
-                       "id":  1,
-                       "name":  "Admin",
-                       "beschreibung":  "Vollständiger Zugriff auf alle Funktionen"
-                   },
-                   {
-                       "id":  2,
-                       "name":  "Lager",
-                       "beschreibung":  "Verwaltung des Lagers und Bestände"
-                   },
-                   {
-                       "id":  3,
-                       "name":  "Buchhaltung",
-                       "beschreibung":  "Verwaltung von Rechnungen und Kundenkonten"
-                   },
-                   {
-                       "id":  4,
-                       "name":  "Marketing",
-                       "beschreibung":  "Marketing und Kampagnenarbeit"
-                   },
-                   {
-                       "id":  5,
-                       "name":  "Einkauf",
-                       "beschreibung":  "Einkauf und Lieferantenmanagement"
-                   },
-                   {
-                       "id":  6,
-                       "name":  "Verkauf",
-                       "beschreibung":  "Vertrieb und Kundenkommunikation"
-                   },
-                   {
-                       "id":  7,
-                       "name":  "Personalwesen",
-                       "beschreibung":  "Mitarbeiter- und Personalarbeit"
-                   },
-                   {
-                       "id":  8,
-                       "name":  "Verkauf Azubi",
-                       "beschreibung":  "Verkauf für Auszubildende"
-                   },
-                   {
-                       "id":  9,
-                       "name":  "Verkauf Senior",
-                       "beschreibung":  "Erweiterte Verkaufsrolle mit Freigaben"
-                   },
-                   {
-                       "id":  10,
-                       "name":  "Geschäftsführung",
-                       "beschreibung":  "Vollzugriff für die Geschäftsführung"
-                   }
-               ],
-    "rechte":  [
-                   {
-                       "id":  1,
-                       "name":  "*",
-                       "beschreibung":  "Vollzugriff auf alle Funktionen"
-                   },
-                   {
-                       "id":  2,
-                       "name":  "organisation.lesen",
-                       "beschreibung":  "Organisationsdaten lesen"
-                   },
-                   {
-                       "id":  3,
-                       "name":  "einkauf.lesen",
-                       "beschreibung":  "Einkaufsdaten lesen"
-                   },
-                   {
-                       "id":  4,
-                       "name":  "einkauf.bearbeiten",
-                       "beschreibung":  "Einkaufsdaten bearbeiten"
-                   },
-                   {
-                       "id":  5,
-                       "name":  "verkauf.lesen",
-                       "beschreibung":  "Verkaufsdaten lesen"
-                   },
-                   {
-                       "id":  6,
-                       "name":  "verkauf.bearbeiten",
-                       "beschreibung":  "Verkaufsdaten bearbeiten"
-                   },
-                   {
-                       "id":  7,
-                       "name":  "service.lesen",
-                       "beschreibung":  "Servicedaten lesen"
-                   },
-                   {
-                       "id":  8,
-                       "name":  "service.bearbeiten",
-                       "beschreibung":  "Servicedaten bearbeiten"
-                   },
-                   {
-                       "id":  9,
-                       "name":  "marketing.lesen",
-                       "beschreibung":  "Marketingdaten lesen"
-                   },
-                   {
-                       "id":  10,
-                       "name":  "marketing.bearbeiten",
-                       "beschreibung":  "Marketingdaten bearbeiten"
-                   },
-                   {
-                       "id":  11,
-                       "name":  "buchhaltung.lesen",
-                       "beschreibung":  "Buchhaltungsdaten lesen"
-                   },
-                   {
-                       "id":  12,
-                       "name":  "buchhaltung.bearbeiten",
-                       "beschreibung":  "Buchhaltungsdaten bearbeiten"
-                   },
-                   {
-                       "id":  13,
-                       "name":  "logistik.lesen",
-                       "beschreibung":  "Logistikdaten lesen"
-                   },
-                   {
-                       "id":  14,
-                       "name":  "logistik.bearbeiten",
-                       "beschreibung":  "Logistikdaten bearbeiten"
-                   },
-                   {
-                       "id":  15,
-                       "name":  "personalwesen.lesen",
-                       "beschreibung":  "Personaldaten lesen"
-                   },
-                   {
-                       "id":  16,
-                       "name":  "personalwesen.bearbeiten",
-                       "beschreibung":  "Personaldaten bearbeiten"
-                   },
-                   {
-                       "id":  17,
-                       "name":  "gf.lesen",
-                       "beschreibung":  "Geschaeftsfuehrungsdaten lesen"
-                   },
-                   {
-                       "id":  18,
-                       "name":  "gf.bearbeiten",
-                       "beschreibung":  "Geschaeftsfuehrungsdaten bearbeiten"
-                   },
-                   {
-                       "id":  19,
-                       "name":  "kunde.lesen",
-                       "beschreibung":  "Kundendaten lesen"
-                   },
-                   {
-                       "id":  20,
-                       "name":  "kunde.anzeigen",
-                       "beschreibung":  "Kundendaten anzeigen"
-                   },
-                   {
-                       "id":  21,
-                       "name":  "kunde.anlegen",
-                       "beschreibung":  "Neue Kunden erstellen"
-                   },
-                   {
-                       "id":  22,
-                       "name":  "kunde.bearbeiten",
-                       "beschreibung":  "Kundendaten bearbeiten"
-                   },
-                   {
-                       "id":  23,
-                       "name":  "kunde.loeschen",
-                       "beschreibung":  "Kundendaten loeschen"
-                   },
-                   {
-                       "id":  24,
-                       "name":  "artikel.lesen",
-                       "beschreibung":  "Artikeldaten lesen"
-                   },
-                   {
-                       "id":  25,
-                       "name":  "artikel.anzeigen",
-                       "beschreibung":  "Artikeldaten anzeigen"
-                   },
-                   {
-                       "id":  26,
-                       "name":  "artikel.anlegen",
-                       "beschreibung":  "Neue Artikel erstellen"
-                   },
-                   {
-                       "id":  27,
-                       "name":  "artikel.bearbeiten",
-                       "beschreibung":  "Artikeldaten bearbeiten"
-                   },
-                   {
-                       "id":  28,
-                       "name":  "artikel.loeschen",
-                       "beschreibung":  "Artikeldaten loeschen"
-                   },
-                   {
-                       "id":  29,
-                       "name":  "rechnung.lesen",
-                       "beschreibung":  "Rechnungen lesen"
-                   },
-                   {
-                       "id":  30,
-                       "name":  "rechnung.anzeigen",
-                       "beschreibung":  "Rechnungen anzeigen"
-                   },
-                   {
-                       "id":  31,
-                       "name":  "rechnung.anlegen",
-                       "beschreibung":  "Neue Rechnungen erstellen"
-                   },
-                   {
-                       "id":  32,
-                       "name":  "rechnung.bearbeiten",
-                       "beschreibung":  "Rechnungen bearbeiten"
-                   },
-                   {
-                       "id":  33,
-                       "name":  "rechnung.loeschen",
-                       "beschreibung":  "Rechnungen loeschen"
-                   },
-                   {
-                       "id":  34,
-                       "name":  "lager.lesen",
-                       "beschreibung":  "Lagerdaten lesen"
-                   },
-                   {
-                       "id":  35,
-                       "name":  "lager.anzeigen",
-                       "beschreibung":  "Lagerdaten anzeigen"
-                   },
-                   {
-                       "id":  36,
-                       "name":  "lager.anlegen",
-                       "beschreibung":  "Neue Lager anlegen"
-                   },
-                   {
-                       "id":  37,
-                       "name":  "lager.bearbeiten",
-                       "beschreibung":  "Lagerdaten bearbeiten"
-                   },
-                   {
-                       "id":  38,
-                       "name":  "lager.loeschen",
-                       "beschreibung":  "Lagerdaten loeschen"
-                   },
-                   {
-                       "id":  39,
-                       "name":  "lager.buchen",
-                       "beschreibung":  "Lagerbewegungen buchen"
-                   },
-                   {
-                       "id":  40,
-                       "name":  "benutzer.lesen",
-                       "beschreibung":  "Benutzerdaten lesen"
-                   },
-                   {
-                       "id":  41,
-                       "name":  "benutzer.anzeigen",
-                       "beschreibung":  "Benutzerdaten anzeigen"
-                   },
-                   {
-                       "id":  42,
-                       "name":  "benutzer.anlegen",
-                       "beschreibung":  "Neue Benutzer anlegen"
-                   },
-                   {
-                       "id":  43,
-                       "name":  "benutzer.bearbeiten",
-                       "beschreibung":  "Benutzerdaten bearbeiten"
-                   },
-                   {
-                       "id":  44,
-                       "name":  "benutzer.loeschen",
-                       "beschreibung":  "Benutzerdaten loeschen"
-                   },
-                   {
-                       "id":  45,
-                       "name":  "rollen.lesen",
-                       "beschreibung":  "Rollen lesen"
-                   },
-                   {
-                       "id":  46,
-                       "name":  "rollen.anzeigen",
-                       "beschreibung":  "Rollen anzeigen"
-                   },
-                   {
-                       "id":  47,
-                       "name":  "rollen.anlegen",
-                       "beschreibung":  "Neue Rollen anlegen"
-                   },
-                   {
-                       "id":  48,
-                       "name":  "rollen.bearbeiten",
-                       "beschreibung":  "Rollen bearbeiten"
-                   },
-                   {
-                       "id":  49,
-                       "name":  "rollen.loeschen",
-                       "beschreibung":  "Rollen loeschen"
-                   },
-                   {
-                       "id":  50,
-                       "name":  "rechte.lesen",
-                       "beschreibung":  "Rechte lesen"
-                   },
-                   {
-                       "id":  51,
-                       "name":  "rechte.anzeigen",
-                       "beschreibung":  "Rechte anzeigen"
-                   },
-                   {
-                       "id":  52,
-                       "name":  "rechte.anlegen",
-                       "beschreibung":  "Neue Rechte anlegen"
-                   },
-                   {
-                       "id":  53,
-                       "name":  "rechte.bearbeiten",
-                       "beschreibung":  "Rechte bearbeiten"
-                   },
-                   {
-                       "id":  54,
-                       "name":  "rechte.loeschen",
-                       "beschreibung":  "Rechte loeschen"
-                   }
-               ],
-    "rollenRechte":  [
-                         {
-                             "id":  1,
-                             "rolleId":  1,
-                             "rolleName":  "Admin",
-                             "rechtName":  "*"
-                         },
-                         {
-                             "id":  2,
-                             "rolleId":  2,
-                             "rolleName":  "Lager",
-                             "rechtName":  "artikel.lesen"
-                         },
-                         {
-                             "id":  3,
-                             "rolleId":  2,
-                             "rolleName":  "Lager",
-                             "rechtName":  "lager.buchen"
-                         },
-                         {
-                             "id":  4,
-                             "rolleId":  2,
-                             "rolleName":  "Lager",
-                             "rechtName":  "lager.lesen"
-                         },
-                         {
-                             "id":  5,
-                             "rolleId":  2,
-                             "rolleName":  "Lager",
-                             "rechtName":  "einkauf.lesen"
-                         },
-                         {
-                             "id":  6,
-                             "rolleId":  2,
-                             "rolleName":  "Lager",
-                             "rechtName":  "einkauf.bearbeiten"
-                         },
-                         {
-                             "id":  7,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "kunde.lesen"
-                         },
-                         {
-                             "id":  8,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "kunde.anlegen"
-                         },
-                         {
-                             "id":  9,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "kunde.bearbeiten"
-                         },
-                         {
-                             "id":  10,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "rechnung.lesen"
-                         },
-                         {
-                             "id":  11,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "rechnung.anlegen"
-                         },
-                         {
-                             "id":  12,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "rechnung.bearbeiten"
-                         },
-                         {
-                             "id":  13,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "verkauf.lesen"
-                         },
-                         {
-                             "id":  14,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "verkauf.bearbeiten"
-                         },
-                         {
-                             "id":  15,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "service.lesen"
-                         },
-                         {
-                             "id":  16,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "service.bearbeiten"
-                         },
-                         {
-                             "id":  17,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "organisation.lesen"
-                         },
-                         {
-                             "id":  18,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "buchhaltung.lesen"
-                         },
-                         {
-                             "id":  19,
-                             "rolleId":  3,
-                             "rolleName":  "Buchhaltung",
-                             "rechtName":  "buchhaltung.bearbeiten"
-                         },
-                         {
-                             "id":  20,
-                             "rolleId":  4,
-                             "rolleName":  "Marketing",
-                             "rechtName":  "marketing.lesen"
-                         },
-                         {
-                             "id":  21,
-                             "rolleId":  4,
-                             "rolleName":  "Marketing",
-                             "rechtName":  "marketing.bearbeiten"
-                         },
-                         {
-                             "id":  22,
-                             "rolleId":  4,
-                             "rolleName":  "Marketing",
-                             "rechtName":  "verkauf.lesen"
-                         },
-                         {
-                             "id":  23,
-                             "rolleId":  5,
-                             "rolleName":  "Einkauf",
-                             "rechtName":  "einkauf.lesen"
-                         },
-                         {
-                             "id":  24,
-                             "rolleId":  5,
-                             "rolleName":  "Einkauf",
-                             "rechtName":  "einkauf.bearbeiten"
-                         },
-                         {
-                             "id":  25,
-                             "rolleId":  5,
-                             "rolleName":  "Einkauf",
-                             "rechtName":  "lager.lesen"
-                         },
-                         {
-                             "id":  26,
-                             "rolleId":  5,
-                             "rolleName":  "Einkauf",
-                             "rechtName":  "lager.bearbeiten"
-                         },
-                         {
-                             "id":  27,
-                             "rolleId":  5,
-                             "rolleName":  "Einkauf",
-                             "rechtName":  "artikel.lesen"
-                         },
-                         {
-                             "id":  28,
-                             "rolleId":  5,
-                             "rolleName":  "Einkauf",
-                             "rechtName":  "artikel.bearbeiten"
-                         },
-                         {
-                             "id":  29,
-                             "rolleId":  6,
-                             "rolleName":  "Verkauf",
-                             "rechtName":  "kunde.lesen"
-                         },
-                         {
-                             "id":  30,
-                             "rolleId":  6,
-                             "rolleName":  "Verkauf",
-                             "rechtName":  "kunde.anlegen"
-                         },
-                         {
-                             "id":  31,
-                             "rolleId":  6,
-                             "rolleName":  "Verkauf",
-                             "rechtName":  "kunde.bearbeiten"
-                         },
-                         {
-                             "id":  32,
-                             "rolleId":  6,
-                             "rolleName":  "Verkauf",
-                             "rechtName":  "artikel.lesen"
-                         },
-                         {
-                             "id":  33,
-                             "rolleId":  6,
-                             "rolleName":  "Verkauf",
-                             "rechtName":  "verkauf.lesen"
-                         },
-                         {
-                             "id":  34,
-                             "rolleId":  6,
-                             "rolleName":  "Verkauf",
-                             "rechtName":  "verkauf.bearbeiten"
-                         },
-                         {
-                             "id":  35,
-                             "rolleId":  6,
-                             "rolleName":  "Verkauf",
-                             "rechtName":  "service.lesen"
-                         },
-                         {
-                             "id":  36,
-                             "rolleId":  6,
-                             "rolleName":  "Verkauf",
-                             "rechtName":  "service.bearbeiten"
-                         },
-                         {
-                             "id":  37,
-                             "rolleId":  7,
-                             "rolleName":  "Personalwesen",
-                             "rechtName":  "personalwesen.lesen"
-                         },
-                         {
-                             "id":  38,
-                             "rolleId":  7,
-                             "rolleName":  "Personalwesen",
-                             "rechtName":  "personalwesen.bearbeiten"
-                         },
-                         {
-                             "id":  39,
-                             "rolleId":  7,
-                             "rolleName":  "Personalwesen",
-                             "rechtName":  "organisation.lesen"
-                         },
-                         {
-                             "id":  40,
-                             "rolleId":  8,
-                             "rolleName":  "Verkauf Azubi",
-                             "rechtName":  "kunde.lesen"
-                         },
-                         {
-                             "id":  41,
-                             "rolleId":  8,
-                             "rolleName":  "Verkauf Azubi",
-                             "rechtName":  "artikel.lesen"
-                         },
-                         {
-                             "id":  42,
-                             "rolleId":  8,
-                             "rolleName":  "Verkauf Azubi",
-                             "rechtName":  "verkauf.lesen"
-                         },
-                         {
-                             "id":  43,
-                             "rolleId":  8,
-                             "rolleName":  "Verkauf Azubi",
-                             "rechtName":  "verkauf.bearbeiten"
-                         },
-                         {
-                             "id":  44,
-                             "rolleId":  8,
-                             "rolleName":  "Verkauf Azubi",
-                             "rechtName":  "service.lesen"
-                         },
-                         {
-                             "id":  45,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "kunde.lesen"
-                         },
-                         {
-                             "id":  46,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "kunde.anlegen"
-                         },
-                         {
-                             "id":  47,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "kunde.bearbeiten"
-                         },
-                         {
-                             "id":  48,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "artikel.lesen"
-                         },
-                         {
-                             "id":  49,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "verkauf.lesen"
-                         },
-                         {
-                             "id":  50,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "verkauf.bearbeiten"
-                         },
-                         {
-                             "id":  51,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "service.lesen"
-                         },
-                         {
-                             "id":  52,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "service.bearbeiten"
-                         },
-                         {
-                             "id":  53,
-                             "rolleId":  9,
-                             "rolleName":  "Verkauf Senior",
-                             "rechtName":  "gf.lesen"
-                         },
-                         {
-                             "id":  54,
-                             "rolleId":  10,
-                             "rolleName":  "Geschaeftsfuehrung",
-                             "rechtName":  "*"
-                         }
-                     ],
-    "lager":  [
-                  {
-                      "id":  1,
-                      "name":  "Hauptlager",
-                      "standort":  "Lingen, Industriestraße 3",
-                      "kapazitaet":  5000
-                  },
-                  {
-                      "id":  2,
-                      "name":  "Außenlager",
-                      "standort":  "Meppen, Gewerbepark Nord",
-                      "kapazitaet":  2000
-                  }
-              ],
-    "lieferanten":  [
-                        {
-                            "id":  1,
-                            "lieferantenNr":  "KR10001",
-                            "firma":  "Weber GmbH",
-                            "anschrift":  "Max-Weber Str. 2",
-                            "plz":  "49716",
-                            "ort":  "Meppen",
-                            "segment":  "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
-                            "fuerBts":  "Alternativlieferant für Zubehör und Lastenbikes",
-                            "bewertung":  4,
-                            "abc":  "B"
-                        },
-                        {
-                            "id":  2,
-                            "lieferantenNr":  "KR10002",
-                            "firma":  "Kalkhoff Werke GmbH",
-                            "anschrift":  "Europa-Allee 26",
-                            "plz":  "49685",
-                            "ort":  "Emstek",
-                            "segment":  "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
-                            "fuerBts":  "",
-                            "bewertung":  5,
-                            "abc":  "A"
-                        },
-                        {
-                            "id":  3,
-                            "lieferantenNr":  "KR10003",
-                            "firma":  "Meister Handels GmbH",
-                            "anschrift":  "Industriestraße 9",
-                            "plz":  "",
-                            "ort":  "",
-                            "segment":  "",
-                            "fuerBts":  "",
-                            "bewertung":  3,
-                            "abc":  "C"
-                        },
-                        {
-                            "id":  4,
-                            "lieferantenNr":  "KR10004",
-                            "firma":  "Campus Sonderbaumarkt GmbH",
-                            "anschrift":  "Industriestraße 9",
-                            "plz":  "49809",
-                            "ort":  "Lingen",
-                            "segment":  "Klassischer Baumarkt mit Fahrradabteilung",
-                            "fuerBts":  "Soll Lieferant sein und Kunde",
-                            "bewertung":  3,
-                            "abc":  "C"
-                        }
-                    ],
-    "bestellungen":  [
-                         {
-                             "id":  1,
-                             "bestellNr":  "EK-2026-001",
-                             "lieferantId":  1,
-                             "datum":  "2026-07-20",
-                             "status":  "angefragt"
-                         }
-                     ],
-    "bestellpositionen":  [
-                              {
-                                  "id":  1,
-                                  "bestellungId":  1,
-                                  "artikelId":  3,
-                                  "menge":  3,
-                                  "einzelpreis":  24.5
-                              }
-                          ],
-    "kategorien":  [
-                       {
-                           "id":  1,
-                           "name":  "Fahrraeder",
-                           "parentId":  "",
-                           "beschreibung":  "Komplette Fahrraeder und fahrbereite Baugruppen."
-                       },
-                       {
-                           "id":  4,
-                           "name":  "Citybike",
-                           "parentId":  1,
-                           "beschreibung":  "Komplette City- und Schulungsfahrraeder."
-                       },
-                       {
-                           "id":  5,
-                           "name":  "Bekleidung",
-                           "parentId":  "",
-                           "beschreibung":  "Bekleidung und Sicherheitsausstattung."
-                       },
-                       {
-                           "id":  6,
-                           "name":  "Sicherheitsbekleidung",
-                           "parentId":  5,
-                           "beschreibung":  "Warn- und Schutzkleidung fuer den Einsatz."
-                       },
-                       {
-                           "id":  7,
-                           "name":  "Zubehoer",
-                           "parentId":  "",
-                           "beschreibung":  "Zusatzprodukte rund ums Fahrrad."
-                       },
-                       {
-                           "id":  8,
-                           "name":  "Helm",
-                           "parentId":  7,
-                           "beschreibung":  "Helme und Schutzzubehoer."
-                       },
-                       {
-                           "id":  9,
-                           "name":  "Mechanik",
-                           "parentId":  "",
-                           "beschreibung":  "Mechanische Bauteile und Einzelkomponenten."
-                       },
-                       {
-                           "id":  10,
-                           "name":  "Rahmen",
-                           "parentId":  9,
-                           "beschreibung":  "Rahmen und tragende Elemente."
-                       },
-                       {
-                           "id":  11,
-                           "name":  "Lenker",
-                           "parentId":  9,
-                           "beschreibung":  "Lenker und Bedienelemente."
-                       },
-                       {
-                           "id":  12,
-                           "name":  "Reifen",
-                           "parentId":  9,
-                           "beschreibung":  "Reifen und laufende Teile."
-                       },
-                       {
-                           "id":  13,
-                           "name":  "Sattel",
-                           "parentId":  9,
-                           "beschreibung":  "Saettel und Sitzkomponenten."
-                       },
-                       {
-                           "id":  14,
-                           "name":  "Fahrradkette",
-                           "parentId":  9,
-                           "beschreibung":  "Antriebskomponenten wie Ketten und Kettenraeeder."
-                       }
-                   ],
-    "angebote":  [
-                     {
-                         "id":  1,
-                         "angebotsNr":  "ANG-2026-001.0",
-                         "angebotsBasisNr":  "ANG-2026-001",
-                         "revision":  0,
-                         "vorgangId":  "anfrage-1",
-                         "anfrageId":  1,
-                         "kundeId":  1,
-                         "datum":  "2026-07-22",
-                         "gueltigBis":  "2026-08-05",
-                         "rabattBetrag":  0,
-                         "gesamtbetrag":  1348.5,
-                         "status":  "wartet auf Antwort"
-                     }
-                 ],
-    "angebotspositionen":  [
-                               {
-                                   "id":  1,
-                                   "angebotId":  1,
-                                   "artikelId":  2,
-                                   "leistungTyp":  "Artikel",
-                                   "menge":  15,
-                                   "einzelpreis":  89.9
-                               }
-                           ],
-    "auftraege":  [
-                      {
-                          "id":  1,
-                          "auftragNr":  "AU-2026-001",
-                          "kundeId":  1,
-                          "anfrageId":  1,
-                          "vorgangId":  "anfrage-1",
-                          "datum":  "2026-07-25",
-                          "status":  "abgerechnet",
-                          "rabattBetrag":  0,
-                          "gesamtbetrag":  1348.5,
-                          "faelligAm":  "2026-08-08",
-                          "angebotId":  1
-                      },
-                      {
-                          "id":  2,
-                          "auftragNr":  "AU-2026-002",
-                          "kundeId":  2,
-                          "datum":  "2026-07-20",
-                          "status":  "bezahlt",
-                          "rabattBetrag":  0,
-                          "gesamtbetrag":  1799.7,
-                          "faelligAm":  "2026-08-03",
-                          "angebotId":  ""
-                      },
-                      {
-                          "id":  3,
-                          "auftragNr":  "AU-2026-003",
-                          "kundeId":  1,
-                          "datum":  "2026-07-26",
-                          "status":  "offen",
-                          "rabattBetrag":  0,
-                          "gesamtbetrag":  799,
-                          "faelligAm":  "",
-                          "angebotId":  ""
-                      }
-                  ],
-    "auftragspositionen":  [
-                               {
-                                   "id":  1,
-                                   "auftragId":  1,
-                                   "artikelId":  2,
-                                   "leistungTyp":  "Artikel",
-                                   "menge":  15,
-                                   "einzelpreis":  89.9
-                               },
-                               {
-                                   "id":  2,
-                                   "auftragId":  2,
-                                   "artikelId":  3,
-                                   "leistungTyp":  "Artikel",
-                                   "menge":  30,
-                                   "einzelpreis":  59.99
-                               },
-                               {
-                                   "id":  3,
-                                   "auftragId":  3,
-                                   "artikelId":  1,
-                                   "leistungTyp":  "Artikel",
-                                   "menge":  1,
-                                   "einzelpreis":  799
-                               }
-                           ],
-    "reklamationen":  [
-                          {
-                              "id":  1,
-                              "reklamationsNr":  "REK-2026-001",
-                              "kundeId":  2,
-                              "datum":  "2026-07-24",
-                              "beschreibung":  "Ein Fahrradhelm wurde beschädigt geliefert.",
-                              "status":  "neu"
-                          }
-                      ],
-    "marketingaktionen":  [
-                              {
-                                  "id":  1,
-                                  "typ":  "Kampagne",
-                                  "titel":  "Sommeraktion Lastenbikes",
-                                  "datum":  "2026-08-01",
-                                  "status":  "geplant",
-                                  "beschreibung":  "Regionale Kampagne für Lastenbikes und Zubehör."
-                              },
-                              {
-                                  "id":  2,
-                                  "typ":  "Newsletter",
-                                  "titel":  "Newsletter August",
-                                  "datum":  "2026-08-05",
-                                  "status":  "Entwurf",
-                                  "beschreibung":  "Neue Fahrräder, Serviceangebote und Termine."
-                              },
-                              {
-                                  "id":  3,
-                                  "typ":  "Event",
-                                  "titel":  "Betriebshoffest",
-                                  "datum":  "2026-09-10",
-                                  "status":  "geplant",
-                                  "beschreibung":  "Schulungs- und Kundenevent mit Testfahrten."
-                              }
-                          ],
-    "abteilungen":  [
-                        {
-                            "id":  1,
-                            "kuerzel":  "BU",
-                            "name":  "Buchhaltung",
-                            "zuordnung":  "A – Bürowesen",
-                            "aufgaben":  [
-                                             "Überweisungen",
-                                             "Lohn und Gehalt",
-                                             "Bankübersicht"
-                                         ]
-                        },
-                        {
-                            "id":  2,
-                            "kuerzel":  "MW-EK",
-                            "name":  "Einkauf",
-                            "zuordnung":  "B – Materialwirtschaft",
-                            "aufgaben":  [
-                                             "EK-Rechnungsprüfung",
-                                             "Wareneingang"
-                                         ]
-                        },
-                        {
-                            "id":  3,
-                            "kuerzel":  "MW-VK",
-                            "name":  "Verkauf",
-                            "zuordnung":  "C – Materialwirtschaft",
-                            "aufgaben":  [
-                                             "Lieferscheine",
-                                             "Auftragsbearbeitung",
-                                             "Versandpapiere",
-                                             "Transport"
-                                         ]
-                        },
-                        {
-                            "id":  4,
-                            "kuerzel":  "MK",
-                            "name":  "Marketing",
-                            "zuordnung":  "C – Materialwirtschaft",
-                            "aufgaben":  [
-                                             "Werbemaßnahmen",
-                                             "Webseite",
-                                             "Onlineshop",
-                                             "Interner und externer Auftritt"
-                                         ]
-                        },
-                        {
-                            "id":  5,
-                            "kuerzel":  "PW",
-                            "name":  "Personalwesen",
-                            "zuordnung":  "A – Bürowesen",
-                            "aufgaben":  [
-                                             "Schulungen und Fortbildungen",
-                                             "Personalbeschaffung und -einsatz",
-                                             "Personalakten",
-                                             "Abteilungsunterlagen"
-                                         ]
-                        },
-                        {
-                            "id":  6,
-                            "kuerzel":  "MW-TAM",
-                            "name":  "Technische Anlagen und Maschinen",
-                            "zuordnung":  "B – Materialwirtschaft",
-                            "aufgaben":  [
-                                             "Übersichten und Einsatzplanung",
-                                             "TÜV und Papiere",
-                                             "Miete, Leasing und Kauf"
-                                         ]
-                        },
-                        {
-                            "id":  7,
-                            "kuerzel":  "MW-FP",
-                            "name":  "Fuhrpark",
-                            "zuordnung":  "B – Materialwirtschaft",
-                            "aufgaben":  [
-                                             "Übersichten und Einsatzplanung",
-                                             "TÜV und Papiere",
-                                             "Miete, Leasing und Kauf"
-                                         ]
-                        },
-                        {
-                            "id":  8,
-                            "kuerzel":  "IT",
-                            "name":  "IT und Kommunikation",
-                            "zuordnung":  "D – Stabsstelle unter Bürowesen",
-                            "aufgaben":  [
-                                             "IT-Ausstattung",
-                                             "Webshop, Flyer und Präsentationen",
-                                             "Bilder und Gestaltung",
-                                             "Schnittstelle für WW, BW und AGF"
-                                         ]
-                        },
-                        {
-                            "id":  9,
-                            "kuerzel":  "AGF",
-                            "name":  "Stellvertretende Geschäftsführung",
-                            "zuordnung":  "Übergeordnet",
-                            "aufgaben":  [
-                                             "Stellvertretende Leitung für die Geschäftsführung"
-                                         ]
-                        }
-                    ],
-    "kundenanfragen":  [
-                           {
-                               "id":  1,
-                               "typ":  "Produktanfrage",
-                               "kundeId":  1,
-                               "vorgangId":  "anfrage-1",
-                               "angebotId":  1,
-                               "kanal":  "Telefon",
-                               "status":  "in Bearbeitung",
-                               "datum":  "2026-07-24",
-                               "anliegen":  "Frage nach Lieferzeiten für Sicherheitsjacken."
-                           }
-                       ],
-    "nachrichten":  [
-                        {
-                            "id":  1,
-                            "vorgangId":  "anfrage-1",
-                            "anfrageId":  1,
-                            "angebotId":  "",
-                            "kundeId":  1,
-                            "datum":  "2026-07-24",
-                            "senderRolle":  "Kunde",
-                            "senderName":  "Campus Baumarkt GmbH",
-                            "kanal":  "Telefon",
-                            "betreff":  "Lieferzeiten für Sicherheitsjacken",
-                            "nachricht":  "Wir benötigen eine Rückmeldung zu Lieferzeiten und möglichen Mengenstaffeln.",
-                            "typ":  "Anfrage"
-                        },
-                        {
-                            "id":  2,
-                            "vorgangId":  "anfrage-1",
-                            "anfrageId":  1,
-                            "angebotId":  1,
-                            "kundeId":  1,
-                            "datum":  "2026-07-25",
-                            "senderRolle":  "Verkauf",
-                            "senderName":  "Schülerfirma Verkauf",
-                            "kanal":  "E-Mail",
-                            "betreff":  "Angebot ANG-2026-001.0",
-                            "nachricht":  "Ein erstes Angebot wurde erstellt und an den Kunden zur Prüfung weitergegeben.",
-                            "typ":  "Angebot"
-                        }
-                    ],
-    "zahlungen":  [
-                      {
-                          "id":  1,
-                          "auftragId":  2,
-                          "rechnungId":  2,
-                          "zahlungsart":  "Eingang",
-                          "datum":  "2026-07-22",
-                          "ausfuehrenAm":  "2026-07-22",
-                          "betrag":  1799.7,
-                          "methode":  "Überweisung",
-                          "status":  "ausgefuehrt"
-                      }
-                  ],
-    "mahnungen":  [
-                      {
-                          "id":  1,
-                          "rechnungId":  1,
-                          "datum":  "2026-07-23",
-                          "status":  "gesendet",
-                          "stufe":  "1. Mahnung"
-                      }
-                  ],
-    "belege":  [
-                   {
-                       "id":  1,
-                       "typ":  "Rechnungskopie",
-                       "bezugTyp":  "Rechnung",
-                       "rechnungId":  2,
-                       "datum":  "2026-07-21",
-                       "status":  "archiviert",
-                       "beschreibung":  "Digitale Ablage für die erste Beispielrechnung."
-                   },
-                   {
-                       "id":  2,
-                       "typ":  "Zahlungsbeleg",
-                       "bezugTyp":  "Rechnung",
-                       "rechnungId":  2,
-                       "datum":  "2026-07-22",
-                       "status":  "archiviert",
-                       "beschreibung":  "Zahlungseingang per Überweisung wurde abgelegt."
-                   },
-                   {
-                       "id":  3,
-                       "typ":  "Mahnschreiben",
-                       "bezugTyp":  "Rechnung",
-                       "rechnungId":  1,
-                       "datum":  "2026-07-23",
-                       "status":  "versendet",
-                       "beschreibung":  "1. Mahnung für eine fällige Ausgangsrechnung."
-                   }
-               ],
-    "freigaben":  [
-                      {
-                          "id":  1,
-                          "titel":  "Rabattfreigabe Großkunde",
-                          "bereich":  "verkauf",
-                          "status":  "offen",
-                          "verantwortung":  "Geschäftsführung",
-                          "datum":  "2026-07-25",
-                          "bezug":  "Großbestellung Nordrad Einkauf",
-                          "notiz":  "10 % Mengenrabatt für den Großkunden prüfen."
-                      }
-                  ],
-    "berichte":  [
-                     {
-                         "id":  1,
-                         "titel":  "Wochenbericht Vertrieb",
-                         "bereich":  "verkauf",
-                         "datum":  "2026-07-25",
-                         "status":  "fertig",
-                         "zusammenfassung":  "3 offene Angebote, 1 neuer Auftrag, 1 Reklamation.",
-                         "zielgruppe":  "Lehrkraft",
-                         "empfohlenAktion":  "Angebote und Reklamationen im Unterricht vergleichen."
-                     },
-                     {
-                         "id":  2,
-                         "titel":  "Lagerüberblick",
-                         "bereich":  "logistik",
-                         "datum":  "2026-07-25",
-                         "status":  "Entwurf",
-                         "zusammenfassung":  "Niedrige Bestände bei Lastenrädern und Helmen.",
-                         "zielgruppe":  "Klasse",
-                         "empfohlenAktion":  "Bedarfsmeldung und Bestellung aus dem Lagerstand ableiten."
-                     }
-                 ],
-    "versandauftraege":  [
-                             {
-                                 "id":  1,
-                                 "versandNr":  "LOG-2026-001",
-                                 "auftragId":  1,
-                                 "datum":  "2026-07-26",
-                                 "status":  "in Vorbereitung",
-                                 "transport":  "Spedition Nord"
-                             }
-                         ],
-    "retouren":  [
-                     {
-                         "id":  1,
-                         "retourenNr":  "RET-2026-001",
-                         "kundeId":  2,
-                         "artikelId":  3,
-                         "datum":  "2026-07-25",
-                         "status":  "eingegangen",
-                         "grund":  "Transportschaden"
-                     }
-                 ],
-    "bewerber":  [
-                     {
-                         "id":  1,
-                         "name":  "Lena Fischer",
-                         "stelle":  "Kaufmännische Assistenz",
-                         "datum":  "2026-07-20",
-                         "status":  "eingegangen",
-                         "notiz":  "Gute Vorkenntnisse in Excel und Kundenkontakt."
-                     }
-                 ],
-    "mitarbeiter":  [
-                        {
-                            "id":  1,
-                            "name":  "Tom Berger",
-                            "abteilung":  "Lager",
-                            "rolle":  "Fachkraft",
-                            "eintritt":  "2024-08-01",
-                            "status":  "im Einsatz"
-                        },
-                        {
-                            "id":  2,
-                            "name":  "Mira Koch",
-                            "abteilung":  "Marketing",
-                            "rolle":  "Koordinatorin",
-                            "eintritt":  "2025-02-15",
-                            "status":  "im Einsatz"
-                        }
-                    ],
-    "arbeitszeiten":  [
-                          {
-                              "id":  1,
-                              "mitarbeiterId":  1,
-                              "datum":  "2026-07-25",
-                              "von":  "08:00",
-                              "bis":  "16:30",
-                              "status":  "erfasst"
-                          }
-                      ],
-    "urlaubsantraege":  [
-                            {
-                                "id":  1,
-                                "mitarbeiterId":  2,
-                                "von":  "2026-08-10",
-                                "bis":  "2026-08-14",
-                                "tage":  5,
-                                "status":  "offen"
-                            }
-                        ],
-    "krankmeldungen":  [
-                           {
-                               "id":  1,
-                               "mitarbeiterId":  1,
-                               "von":  "2026-07-24",
-                               "bis":  "2026-07-26",
-                               "grund":  "Erkältung",
-                               "status":  "eingegangen"
-                           }
-                       ],
-    "schulungen":  [
-                       {
-                           "id":  1,
-                           "titel":  "Produktschulung Lastenbikes",
-                           "zielgruppe":  "Verkauf",
-                           "datum":  "2026-08-18",
-                           "status":  "geplant",
-                           "ort":  "Seminarraum 2"
-                       }
-                   ],
-    "personalakten":  [
-                          {
-                              "id":  1,
-                              "mitarbeiterId":  1,
-                              "dokumentTyp":  "Vertragsunterlage",
-                              "titel":  "Arbeitsvertrag Fachkraft Lager",
-                              "datum":  "2024-08-01",
-                              "status":  "archiviert",
-                              "notiz":  "Grundlage für die simulierte Personalakte."
-                          },
-                          {
-                              "id":  2,
-                              "mitarbeiterId":  1,
-                              "dokumentTyp":  "Onboarding-Checkliste",
-                              "titel":  "Einarbeitung Lager und Sicherheit",
-                              "datum":  "2024-08-02",
-                              "status":  "abgeschlossen",
-                              "notiz":  "Einweisung in Lagerordnung, Arbeitsschutz und Scanner."
-                          },
-                          {
-                              "id":  3,
-                              "mitarbeiterId":  2,
-                              "dokumentTyp":  "Urlaubsantrag",
-                              "titel":  "Urlaubsantrag August 2026",
-                              "datum":  "2026-07-26",
-                              "status":  "offen",
-                              "notiz":  "Antrag liegt zur Genehmigung vor."
-                          },
-                          {
-                              "id":  4,
-                              "mitarbeiterId":  2,
-                              "dokumentTyp":  "Schulungsnachweis",
-                              "titel":  "Marketing-Schulung Kampagnenplanung",
-                              "datum":  "2026-07-15",
-                              "status":  "archiviert",
-                              "notiz":  "Teilnahmebescheinigung für interne Weiterbildung."
-                          }
-                      ],
-    "vertriebsdokumente":  [
-                               {
-                                   "id":  1,
-                                   "auftragId":  1,
-                                   "angebotId":  1,
-                                   "anfrageId":  1,
-                                   "vorgangId":  "anfrage-1",
-                                   "dokumentTyp":  "Auftragsbestätigung",
-                                   "titel":  "Auftragsbestätigung AU-2026-001",
-                                   "datum":  "2026-07-25",
-                                   "status":  "fertig",
-                                   "notiz":  "Bestellung bestätigt und Liefertermin angekündigt."
-                               },
-                               {
-                                   "id":  2,
-                                   "auftragId":  1,
-                                   "angebotId":  1,
-                                   "anfrageId":  1,
-                                   "vorgangId":  "anfrage-1",
-                                   "dokumentTyp":  "Lieferschein",
-                                   "dokumentNr":  "LS-2026-001",
-                                   "titel":  "Lieferschein LS-2026-001",
-                                   "datum":  "2026-07-26",
-                                   "status":  "Entwurf",
-                                   "notiz":  "Wird mit dem Versand abgestimmt."
-                               }
-                           ],
-    "einkaufsdokumente":  [
-                              {
-                                  "id":  1,
-                                  "bestellungId":  1,
-                                  "dokumentTyp":  "Bedarfsmeldung",
-                                  "titel":  "Bedarfsmeldung Lastenrad Premium",
-                                  "datum":  "2026-07-18",
-                                  "status":  "freigegeben",
-                                  "notiz":  "Lagerbestand unterschreitet den Zielwert."
-                              },
-                              {
-                                  "id":  2,
-                                  "bestellungId":  1,
-                                  "dokumentTyp":  "Anfrage",
-                                  "titel":  "Anfrage Lieferzeit und Staffelpreise",
-                                  "datum":  "2026-07-19",
-                                  "status":  "versendet",
-                                  "notiz":  "Lieferant soll Lieferzeit und Preisstaffel bestätigen."
-                              },
-                              {
-                                  "id":  3,
-                                  "bestellungId":  1,
-                                  "dokumentTyp":  "Bestellung",
-                                  "titel":  "Bestellung EK-2026-001",
-                                  "datum":  "2026-07-20",
-                                  "status":  "fertig",
-                                  "notiz":  "Verbindliche Bestellung ausgelöst."
-                              }
-                          ],
-    "firmenkonto":  [
-                        {
-                            "id":  1,
-                            "datum":  "2024-10-01",
-                            "konto":  "firma",
-                            "betreff":  "Stammkapitaleinzahlung",
-                            "info":  "",
-                            "soll":  0,
-                            "haben":  25000,
-                            "saldo":  25000
-                        },
-                        {
-                            "id":  2,
-                            "datum":  "2026-07-22",
-                            "konto":  "verkauf",
-                            "betreff":  "Zahlungseingang Rechnung RG-2026-002",
-                            "info":  "Verbleibt bis zum Wochenabschluss auf dem Verkaufskonto",
-                            "soll":  0,
-                            "haben":  1799.7,
-                            "saldo":  1799.7
-                        },
-                        {
-                            "id":  3,
-                            "datum":  "2026-07-24",
-                            "konto":  "einkauf",
-                            "betreff":  "Materialeinkauf Sicherheitshelme",
-                            "info":  "Didaktische Beispielausgabe fuer das Einkaufskonto",
-                            "soll":  420,
-                            "haben":  0,
-                            "saldo":  -420
-                        }
-                    ],
-    "feldMetadaten":  [
-                          {
-                              "id":  1,
-                              "tabelle":  "lieferanten",
-                              "feld":  "lieferantenNr",
-                              "anzeigename":  "Lieferantennummer",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  2,
-                              "tabelle":  "lieferanten",
-                              "feld":  "firma",
-                              "anzeigename":  "Firma",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  3,
-                              "tabelle":  "lieferanten",
-                              "feld":  "anschrift",
-                              "anzeigename":  "Anschrift",
-                              "reihenfolge":  3,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  4,
-                              "tabelle":  "lieferanten",
-                              "feld":  "plz",
-                              "anzeigename":  "PLZ",
-                              "reihenfolge":  4,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  5,
-                              "tabelle":  "lieferanten",
-                              "feld":  "ort",
-                              "anzeigename":  "Ort",
-                              "reihenfolge":  5,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  6,
-                              "tabelle":  "lieferanten",
-                              "feld":  "segment",
-                              "anzeigename":  "Segment",
-                              "reihenfolge":  6,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  7,
-                              "tabelle":  "lieferanten",
-                              "feld":  "fuerBts",
-                              "anzeigename":  "Für BTS",
-                              "reihenfolge":  7,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  8,
-                              "tabelle":  "lieferanten",
-                              "feld":  "bewertung",
-                              "anzeigename":  "Bewertung (1–5)",
-                              "reihenfolge":  8,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  9,
-                              "tabelle":  "lieferanten",
-                              "feld":  "abc",
-                              "anzeigename":  "ABC",
-                              "reihenfolge":  9,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  10,
-                              "tabelle":  "kunden",
-                              "feld":  "kundenNr",
-                              "anzeigename":  "Kundennummer",
-                              "beschreibung":  "Eindeutige Kundennummer",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  11,
-                              "tabelle":  "kunden",
-                              "feld":  "firma",
-                              "anzeigename":  "Firma",
-                              "beschreibung":  "Name des Kunden",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  12,
-                              "tabelle":  "kunden",
-                              "feld":  "anschrift",
-                              "anzeigename":  "Anschrift",
-                              "beschreibung":  "Straße und Hausnummer",
-                              "reihenfolge":  3,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  13,
-                              "tabelle":  "kunden",
-                              "feld":  "plz",
-                              "anzeigename":  "PLZ",
-                              "beschreibung":  "Postleitzahl",
-                              "reihenfolge":  4,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  14,
-                              "tabelle":  "kunden",
-                              "feld":  "ort",
-                              "anzeigename":  "Ort",
-                              "beschreibung":  "Kundenort",
-                              "reihenfolge":  5,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  15,
-                              "tabelle":  "kunden",
-                              "feld":  "segment",
-                              "anzeigename":  "Segment",
-                              "beschreibung":  "Kundengruppe",
-                              "reihenfolge":  6,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  16,
-                              "tabelle":  "kunden",
-                              "feld":  "abc",
-                              "anzeigename":  "ABC",
-                              "beschreibung":  "ABC-Einstufung des Kunden",
-                              "reihenfolge":  7,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  17,
-                              "tabelle":  "kunden",
-                              "feld":  "optionen",
-                              "anzeigename":  "Unsere Leistungen",
-                              "beschreibung":  "Produkte und Dienstleistungen",
-                              "reihenfolge":  8,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  18,
-                              "tabelle":  "kunden",
-                              "feld":  "notiz",
-                              "anzeigename":  "Notiz",
-                              "beschreibung":  "Interne Bemerkungen zum Kunden",
-                              "feldtyp":  "textarea",
-                              "zeilen":  6,
-                              "sichtbar":  true,
-                              "reihenfolge":  11
-                          },
-                          {
-                              "id":  19,
-                              "tabelle":  "artikel",
-                              "feld":  "artikelNr",
-                              "anzeigename":  "Artikelnummer",
-                              "beschreibung":  "Artikelnummer",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  20,
-                              "tabelle":  "artikel",
-                              "feld":  "name",
-                              "anzeigename":  "Bezeichnung",
-                              "beschreibung":  "Artikelname",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  21,
-                              "tabelle":  "artikel",
-                              "feld":  "kategoriePfad",
-                              "anzeigename":  "Kategorie",
-                              "beschreibung":  "Kategorie mit Unterkategorie",
-                              "reihenfolge":  3,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  22,
-                              "tabelle":  "artikel",
-                              "feld":  "artikelTyp",
-                              "anzeigename":  "Typ",
-                              "beschreibung":  "Einzelartikel, Komponente oder Baugruppe",
-                              "reihenfolge":  4,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  23,
-                              "tabelle":  "artikel",
-                              "feld":  "einkaufspreis",
-                              "anzeigename":  "EK-Preis",
-                              "beschreibung":  "Einkaufspreis",
-                              "reihenfolge":  5,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  24,
-                              "tabelle":  "artikel",
-                              "feld":  "verkaufspreis",
-                              "anzeigename":  "VK-Preis",
-                              "beschreibung":  "Verkaufspreis",
-                              "reihenfolge":  6,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  25,
-                              "tabelle":  "artikel",
-                              "feld":  "beschaffungsart",
-                              "anzeigename":  "Beschaffung",
-                              "beschreibung":  "Zukauf oder Herstellung",
-                              "reihenfolge":  7,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  26,
-                              "tabelle":  "artikel",
-                              "feld":  "verkaufsstatus",
-                              "anzeigename":  "Verkauf",
-                              "beschreibung":  "Verkaufbar oder nicht verkaufbar",
-                              "reihenfolge":  8,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  27,
-                              "tabelle":  "artikel",
-                              "feld":  "bestand",
-                              "anzeigename":  "Bestand",
-                              "beschreibung":  "Aktueller Lagerbestand",
-                              "reihenfolge":  9,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  28,
-                              "tabelle":  "kategorien",
-                              "feld":  "name",
-                              "anzeigename":  "Kategorie",
-                              "beschreibung":  "Name der Kategorie",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  29,
-                              "tabelle":  "kategorien",
-                              "feld":  "parentName",
-                              "anzeigename":  "Oberkategorie",
-                              "beschreibung":  "Direkte Oberkategorie",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  30,
-                              "tabelle":  "kategorien",
-                              "feld":  "pfad",
-                              "anzeigename":  "Pfad",
-                              "beschreibung":  "Vollstaendige Kategoriehierarchie",
-                              "reihenfolge":  3,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  31,
-                              "tabelle":  "services",
-                              "feld":  "serviceNr",
-                              "anzeigename":  "Servicenummer",
-                              "beschreibung":  "Servicenummer",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  32,
-                              "tabelle":  "services",
-                              "feld":  "name",
-                              "anzeigename":  "Bezeichnung",
-                              "beschreibung":  "Servicebezeichnung",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  33,
-                              "tabelle":  "services",
-                              "feld":  "kategorie",
-                              "anzeigename":  "Kategorie",
-                              "beschreibung":  "Servicekategorie",
-                              "reihenfolge":  3,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  34,
-                              "tabelle":  "services",
-                              "feld":  "berechnungstyp",
-                              "anzeigename":  "Berechnung",
-                              "beschreibung":  "Pauschal oder Zeiteinheit",
-                              "reihenfolge":  4,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  35,
-                              "tabelle":  "services",
-                              "feld":  "zeEinheit",
-                              "anzeigename":  "ZE",
-                              "beschreibung":  "Zeiteinheit, falls nach ZE berechnet wird",
-                              "reihenfolge":  5,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  36,
-                              "tabelle":  "services",
-                              "feld":  "einkaufspreis",
-                              "anzeigename":  "EK-Preis",
-                              "beschreibung":  "Interner Einkaufspreis",
-                              "reihenfolge":  6,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  37,
-                              "tabelle":  "services",
-                              "feld":  "verkaufspreis",
-                              "anzeigename":  "VK-Preis",
-                              "beschreibung":  "Verkaufspreis",
-                              "reihenfolge":  7,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  38,
-                              "tabelle":  "benutzer",
-                              "feld":  "username",
-                              "anzeigename":  "Benutzername",
-                              "beschreibung":  "Eindeutiger Benutzername",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  39,
-                              "tabelle":  "benutzer",
-                              "feld":  "email",
-                              "anzeigename":  "Email",
-                              "beschreibung":  "E-Mail-Adresse",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  40,
-                              "tabelle":  "benutzer",
-                              "feld":  "rolle",
-                              "anzeigename":  "Rolle",
-                              "beschreibung":  "Benutzerrolle",
-                              "reihenfolge":  3,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  41,
-                              "tabelle":  "rollen",
-                              "feld":  "name",
-                              "anzeigename":  "Rollenname",
-                              "beschreibung":  "Name der Rolle",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  42,
-                              "tabelle":  "rollen",
-                              "feld":  "beschreibung",
-                              "anzeigename":  "Beschreibung",
-                              "beschreibung":  "Beschreibung der Rolle",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  43,
-                              "tabelle":  "rechte",
-                              "feld":  "name",
-                              "anzeigename":  "Recht",
-                              "beschreibung":  "Name des Rechts",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  44,
-                              "tabelle":  "rechte",
-                              "feld":  "beschreibung",
-                              "anzeigename":  "Beschreibung",
-                              "beschreibung":  "Beschreibung des Rechts",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  45,
-                              "tabelle":  "lager",
-                              "feld":  "name",
-                              "anzeigename":  "Lagername",
-                              "beschreibung":  "Name des Lagers",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  46,
-                              "tabelle":  "lager",
-                              "feld":  "standort",
-                              "anzeigename":  "Standort",
-                              "beschreibung":  "Lagerstandort",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  47,
-                              "tabelle":  "lager",
-                              "feld":  "kapazitaet",
-                              "anzeigename":  "Kapazität",
-                              "beschreibung":  "Lagerkapazität",
-                              "reihenfolge":  3,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  48,
-                              "tabelle":  "rechnungen",
-                              "feld":  "rechnungsnr",
-                              "anzeigename":  "Rechnungsnummer",
-                              "beschreibung":  "Eindeutige Rechnungsnummer",
-                              "reihenfolge":  1,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  49,
-                              "tabelle":  "rechnungen",
-                              "feld":  "rechnungstyp",
-                              "anzeigename":  "Typ",
-                              "beschreibung":  "Eingangs- oder Ausgangsrechnung",
-                              "reihenfolge":  2,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  50,
-                              "tabelle":  "rechnungen",
-                              "feld":  "kunde",
-                              "anzeigename":  "Geschäftspartner",
-                              "beschreibung":  "Kunden- oder Lieferantenname",
-                              "reihenfolge":  3,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  51,
-                              "tabelle":  "rechnungen",
-                              "feld":  "bestellNr",
-                              "anzeigename":  "Bestellbezug",
-                              "beschreibung":  "Bezug zur Bestellung bei Eingangsrechnungen",
-                              "reihenfolge":  4,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  52,
-                              "tabelle":  "rechnungen",
-                              "feld":  "datum",
-                              "anzeigename":  "Datum",
-                              "beschreibung":  "Rechnungsdatum",
-                              "reihenfolge":  5,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  53,
-                              "tabelle":  "rechnungen",
-                              "feld":  "faelligAm",
-                              "anzeigename":  "Fällig am",
-                              "beschreibung":  "Fälligkeitsdatum",
-                              "reihenfolge":  6,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  54,
-                              "tabelle":  "rechnungen",
-                              "feld":  "betrag",
-                              "anzeigename":  "Betrag",
-                              "beschreibung":  "Rechnungsbetrag",
-                              "reihenfolge":  7,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  55,
-                              "tabelle":  "rechnungen",
-                              "feld":  "status",
-                              "anzeigename":  "Status",
-                              "beschreibung":  "Rechnungsstatus",
-                              "reihenfolge":  8,
-                              "sichtbar":  true
-                          },
-                          {
-                              "id":  56,
-                              "tabelle":  "rechnungen",
-                              "feld":  "mahnstufe",
-                              "anzeigename":  "Mahnstufe",
-                              "beschreibung":  "Didaktisch vereinfachte Mahnstufe",
-                              "reihenfolge":  9,
-                              "sichtbar":  true
-                          }
-                      ],
-    "benutzerSpalten":  [
-
-                        ]
+  "kunden": [
+    {
+      "id": 1,
+      "kundenNr": "DB10001",
+      "firma": "Campus Baumarkt GmbH",
+      "anschrift": "Industriestraße 3",
+      "plz": "49809",
+      "ort": "Lingen",
+      "segment": "Baumarkt",
+      "abc": "A",
+      "iban": "DE44500105175407324931",
+      "optionen": [
+        "Fahrradbekleidung",
+        "Sicherheitsbekleidung",
+        "Sonderfahrräder",
+        "Lastenbikes"
+      ],
+      "notiz": ""
+    },
+    {
+      "id": 2,
+      "kundenNr": "DB10002",
+      "firma": "Emsland Tourismus GmbH",
+      "anschrift": "Helter Damm 11a",
+      "plz": "49716",
+      "ort": "Meppen",
+      "segment": "Tourismus",
+      "abc": "B",
+      "iban": "DE75512108001245126199",
+      "optionen": [
+        "Bikes aller Art",
+        "Leasing",
+        "Reparatur Service"
+      ],
+      "website": "https://www.emsland.com/",
+      "notiz": ""
+    }
+  ],
+  "artikel": [
+    {
+      "id": 1,
+      "artikelNr": "ART001",
+      "name": "Schulungsfahrrad City",
+      "kategorieId": 4,
+      "kategorie": "Fahrraeder",
+      "kategoriePfad": "Fahrraeder > Citybike",
+      "artikelTyp": "Baugruppe",
+      "einkaufspreis": 420,
+      "verkaufspreis": 799,
+      "bestand": 4,
+      "mindestmenge": 3,
+      "bedarfsmeldungBei": 5,
+      "beschreibung": "Komplettes Fahrrad als Beispiel fuer einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
+    },
+    {
+      "id": 2,
+      "artikelNr": "ART002",
+      "name": "Sicherheitsjacke",
+      "kategorieId": 6,
+      "kategorie": "Bekleidung",
+      "kategoriePfad": "Bekleidung > Sicherheitsbekleidung",
+      "artikelTyp": "Einzelartikel",
+      "einkaufspreis": 39.9,
+      "verkaufspreis": 89.9,
+      "bestand": 120,
+      "mindestmenge": 20,
+      "bedarfsmeldungBei": 30,
+      "beschreibung": "Reflektierende Sicherheitsjacke mit komfortablem Lagerbestand."
+    },
+    {
+      "id": 3,
+      "artikelNr": "ART003",
+      "name": "Fahrradhelm",
+      "kategorieId": 8,
+      "kategorie": "Zubehoer",
+      "kategoriePfad": "Zubehoer > Helm",
+      "artikelTyp": "Einzelartikel",
+      "einkaufspreis": 24.5,
+      "verkaufspreis": 59.99,
+      "bestand": 12,
+      "mindestmenge": 10,
+      "bedarfsmeldungBei": 15,
+      "beschreibung": "Sicherer Fahrradhelm mit Zertifikat. Zusaetzliche Menge ist bereits bestellt."
+    },
+    {
+      "id": 4,
+      "artikelNr": "ART004",
+      "name": "Fahrradrahmen",
+      "kategorieId": 10,
+      "kategorie": "Mechanik",
+      "kategoriePfad": "Mechanik > Rahmen",
+      "artikelTyp": "Komponente",
+      "einkaufspreis": 120,
+      "verkaufspreis": 199,
+      "bestand": 8,
+      "mindestmenge": 6,
+      "bedarfsmeldungBei": 9,
+      "beschreibung": "Rahmen als Einzelkomponente fuer Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
+    },
+    {
+      "id": 5,
+      "artikelNr": "ART005",
+      "name": "Lenker",
+      "kategorieId": 11,
+      "kategorie": "Mechanik",
+      "kategoriePfad": "Mechanik > Lenker",
+      "artikelTyp": "Komponente",
+      "einkaufspreis": 18,
+      "verkaufspreis": 34.9,
+      "bestand": 9,
+      "mindestmenge": 10,
+      "bedarfsmeldungBei": 12,
+      "beschreibung": "Lenker fuer Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
+    },
+    {
+      "id": 6,
+      "artikelNr": "ART006",
+      "name": "Reifen 28 Zoll",
+      "kategorieId": 12,
+      "kategorie": "Mechanik",
+      "kategoriePfad": "Mechanik > Reifen",
+      "artikelTyp": "Komponente",
+      "einkaufspreis": 14.5,
+      "verkaufspreis": 29.9,
+      "bestand": 28,
+      "mindestmenge": 20,
+      "bedarfsmeldungBei": 25,
+      "beschreibung": "Standardreifen als Lagerkomponente mit noch stabilem Bestand."
+    },
+    {
+      "id": 7,
+      "artikelNr": "ART007",
+      "name": "Sattel Komfort",
+      "kategorieId": 13,
+      "kategorie": "Mechanik",
+      "kategoriePfad": "Mechanik > Sattel",
+      "artikelTyp": "Komponente",
+      "einkaufspreis": 16,
+      "verkaufspreis": 39,
+      "bestand": 14,
+      "mindestmenge": 8,
+      "bedarfsmeldungBei": 10,
+      "beschreibung": "Komfortsattel fuer Schulungsfahrraeder mit ausreichend freiem Bestand."
+    }
+  ],
+  "artikelStueckliste": [
+    {
+      "id": 1,
+      "hauptartikelId": 1,
+      "komponentenartikelId": 4,
+      "menge": 1
+    },
+    {
+      "id": 2,
+      "hauptartikelId": 1,
+      "komponentenartikelId": 5,
+      "menge": 1
+    },
+    {
+      "id": 3,
+      "hauptartikelId": 1,
+      "komponentenartikelId": 6,
+      "menge": 2
+    },
+    {
+      "id": 4,
+      "hauptartikelId": 1,
+      "komponentenartikelId": 7,
+      "menge": 1
+    }
+  ],
+  "services": [
+    {
+      "id": 1,
+      "serviceNr": "SER001",
+      "name": "Reparatur",
+      "kategorie": "Werkstatt",
+      "berechnungstyp": "Pauschal",
+      "zeEinheit": "",
+      "einkaufspreis": 0,
+      "verkaufspreis": 65,
+      "beschreibung": "Einfache Werkstattleistung für Reparaturen."
+    },
+    {
+      "id": 2,
+      "serviceNr": "SER002",
+      "name": "Wartung",
+      "kategorie": "Werkstatt",
+      "berechnungstyp": "Pauschal",
+      "zeEinheit": "",
+      "einkaufspreis": 0,
+      "verkaufspreis": 89,
+      "beschreibung": "Wartungspaket für Fahrräder oder Fuhrpark."
+    },
+    {
+      "id": 3,
+      "serviceNr": "SER003",
+      "name": "Miete",
+      "kategorie": "Vertrag",
+      "berechnungstyp": "ZE",
+      "zeEinheit": "1 Tag",
+      "einkaufspreis": 0,
+      "verkaufspreis": 149,
+      "beschreibung": "Mietleistung mit Berechnung je Zeiteinheit von einem Tag."
+    },
+    {
+      "id": 4,
+      "serviceNr": "SER004",
+      "name": "Lieferung",
+      "kategorie": "Logistik",
+      "berechnungstyp": "Pauschal",
+      "zeEinheit": "",
+      "einkaufspreis": 0,
+      "verkaufspreis": 35,
+      "beschreibung": "Lieferung zum Kundenstandort."
+    },
+    {
+      "id": 5,
+      "serviceNr": "SER005",
+      "name": "Abholung",
+      "kategorie": "Logistik",
+      "berechnungstyp": "Pauschal",
+      "zeEinheit": "",
+      "einkaufspreis": 0,
+      "verkaufspreis": 20,
+      "beschreibung": "Abholung beim Kunden oder Partner."
+    }
+  ],
+  "benutzer": [
+    {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@test.de",
+      "password": "admin",
+      "rolle": "Admin",
+      "name": "Administrator",
+      "permissions": [
+        "*"
+      ]
+    },
+    {
+      "id": 2,
+      "username": "lager",
+      "email": "lager@test.de",
+      "password": "lager",
+      "rolle": "Lager",
+      "name": "Lager Mitarbeiter",
+      "permissions": [
+        "artikel.lesen",
+        "lager.buchen",
+        "lager.lesen",
+        "einkauf.lesen",
+        "einkauf.bearbeiten"
+      ]
+    },
+    {
+      "id": 3,
+      "username": "buchhaltung",
+      "email": "buchhaltung@test.de",
+      "password": "buchhaltung",
+      "rolle": "Buchhaltung",
+      "name": "Buchhaltung",
+      "permissions": [
+        "kunde.lesen",
+        "kunde.anlegen",
+        "kunde.bearbeiten",
+        "rechnung.lesen",
+        "rechnung.anlegen",
+        "rechnung.bearbeiten",
+        "verkauf.lesen",
+        "verkauf.bearbeiten",
+        "service.lesen",
+        "service.bearbeiten",
+        "organisation.lesen",
+        "buchhaltung.lesen",
+        "buchhaltung.bearbeiten"
+      ]
+    },
+    {
+      "id": 4,
+      "username": "marketing",
+      "email": "marketing@test.de",
+      "password": "marketing",
+      "rolle": "Marketing",
+      "name": "Marketing Mitarbeiter",
+      "permissions": [
+        "marketing.lesen",
+        "marketing.bearbeiten",
+        "verkauf.lesen"
+      ]
+    },
+    {
+      "id": 8,
+      "username": "einkauf",
+      "email": "einkauf@test.de",
+      "password": "einkauf",
+      "rolle": "Einkauf",
+      "name": "Einkauf Mitarbeiter",
+      "permissions": [
+        "einkauf.lesen",
+        "einkauf.bearbeiten",
+        "lager.lesen",
+        "lager.bearbeiten",
+        "artikel.lesen",
+        "artikel.bearbeiten"
+      ]
+    },
+    {
+      "id": 9,
+      "username": "verkauf",
+      "email": "verkauf@test.de",
+      "password": "verkauf",
+      "rolle": "Verkauf",
+      "name": "Verkauf Mitarbeiter",
+      "permissions": [
+        "kunde.lesen",
+        "kunde.anlegen",
+        "kunde.bearbeiten",
+        "artikel.lesen",
+        "verkauf.lesen",
+        "verkauf.bearbeiten",
+        "service.lesen",
+        "service.bearbeiten"
+      ]
+    },
+    {
+      "id": 10,
+      "username": "personalwesen",
+      "email": "personalwesen@test.de",
+      "password": "personalwesen",
+      "rolle": "Personalwesen",
+      "name": "Personalwesen Mitarbeiter",
+      "permissions": [
+        "personalwesen.lesen",
+        "personalwesen.bearbeiten",
+        "organisation.lesen"
+      ]
+    },
+    {
+      "id": 5,
+      "username": "verkauf_azubi",
+      "email": "verkauf.azubi@test.de",
+      "password": "verkauf",
+      "rolle": "Verkauf Azubi",
+      "name": "Verkauf Azubi",
+      "permissions": [
+        "kunde.lesen",
+        "artikel.lesen",
+        "verkauf.lesen",
+        "verkauf.bearbeiten",
+        "service.lesen"
+      ]
+    },
+    {
+      "id": 6,
+      "username": "verkauf_senior",
+      "email": "verkauf.senior@test.de",
+      "password": "verkauf",
+      "rolle": "Verkauf Senior",
+      "name": "Verkauf Senior",
+      "permissions": [
+        "kunde.lesen",
+        "kunde.anlegen",
+        "kunde.bearbeiten",
+        "artikel.lesen",
+        "lager.lesen",
+        "verkauf.lesen",
+        "verkauf.bearbeiten",
+        "service.lesen",
+        "service.bearbeiten"
+      ]
+    },
+    {
+      "id": 7,
+      "username": "gf",
+      "email": "gf@test.de",
+      "password": "gf",
+      "rolle": "Geschäftsführung",
+      "name": "Geschäftsführung",
+      "permissions": [
+        "*"
+      ]
+    }
+  ],
+  "rollen": [
+    {
+      "id": 1,
+      "name": "Admin",
+      "beschreibung": "Vollständiger Zugriff auf alle Funktionen"
+    },
+    {
+      "id": 2,
+      "name": "Lager",
+      "beschreibung": "Verwaltung des Lagers und Bestände"
+    },
+    {
+      "id": 3,
+      "name": "Buchhaltung",
+      "beschreibung": "Verwaltung von Rechnungen und Kundenkonten"
+    },
+    {
+      "id": 4,
+      "name": "Marketing",
+      "beschreibung": "Marketing und Kampagnenarbeit"
+    },
+    {
+      "id": 5,
+      "name": "Einkauf",
+      "beschreibung": "Einkauf und Lieferantenmanagement"
+    },
+    {
+      "id": 6,
+      "name": "Verkauf",
+      "beschreibung": "Vertrieb und Kundenkommunikation"
+    },
+    {
+      "id": 7,
+      "name": "Personalwesen",
+      "beschreibung": "Mitarbeiter- und Personalarbeit"
+    },
+    {
+      "id": 8,
+      "name": "Verkauf Azubi",
+      "beschreibung": "Verkauf für Auszubildende"
+    },
+    {
+      "id": 9,
+      "name": "Verkauf Senior",
+      "beschreibung": "Erweiterte Verkaufsrolle mit Freigaben"
+    },
+    {
+      "id": 10,
+      "name": "Geschäftsführung",
+      "beschreibung": "Vollzugriff für die Geschäftsführung"
+    }
+  ],
+  "rechte": [
+    {
+      "id": 1,
+      "name": "*",
+      "beschreibung": "Vollzugriff auf alle Funktionen"
+    },
+    {
+      "id": 2,
+      "name": "organisation.lesen",
+      "beschreibung": "Organisationsdaten lesen"
+    },
+    {
+      "id": 3,
+      "name": "einkauf.lesen",
+      "beschreibung": "Einkaufsdaten lesen"
+    },
+    {
+      "id": 4,
+      "name": "einkauf.bearbeiten",
+      "beschreibung": "Einkaufsdaten bearbeiten"
+    },
+    {
+      "id": 5,
+      "name": "verkauf.lesen",
+      "beschreibung": "Verkaufsdaten lesen"
+    },
+    {
+      "id": 6,
+      "name": "verkauf.bearbeiten",
+      "beschreibung": "Verkaufsdaten bearbeiten"
+    },
+    {
+      "id": 7,
+      "name": "service.lesen",
+      "beschreibung": "Servicedaten lesen"
+    },
+    {
+      "id": 8,
+      "name": "service.bearbeiten",
+      "beschreibung": "Servicedaten bearbeiten"
+    },
+    {
+      "id": 9,
+      "name": "marketing.lesen",
+      "beschreibung": "Marketingdaten lesen"
+    },
+    {
+      "id": 10,
+      "name": "marketing.bearbeiten",
+      "beschreibung": "Marketingdaten bearbeiten"
+    },
+    {
+      "id": 11,
+      "name": "buchhaltung.lesen",
+      "beschreibung": "Buchhaltungsdaten lesen"
+    },
+    {
+      "id": 12,
+      "name": "buchhaltung.bearbeiten",
+      "beschreibung": "Buchhaltungsdaten bearbeiten"
+    },
+    {
+      "id": 13,
+      "name": "logistik.lesen",
+      "beschreibung": "Logistikdaten lesen"
+    },
+    {
+      "id": 14,
+      "name": "logistik.bearbeiten",
+      "beschreibung": "Logistikdaten bearbeiten"
+    },
+    {
+      "id": 15,
+      "name": "personalwesen.lesen",
+      "beschreibung": "Personaldaten lesen"
+    },
+    {
+      "id": 16,
+      "name": "personalwesen.bearbeiten",
+      "beschreibung": "Personaldaten bearbeiten"
+    },
+    {
+      "id": 17,
+      "name": "gf.lesen",
+      "beschreibung": "Geschäftsführungsdaten lesen"
+    },
+    {
+      "id": 18,
+      "name": "gf.bearbeiten",
+      "beschreibung": "Geschäftsführungsdaten bearbeiten"
+    },
+    {
+      "id": 19,
+      "name": "kunde.lesen",
+      "beschreibung": "Kundendaten lesen"
+    },
+    {
+      "id": 20,
+      "name": "kunde.anzeigen",
+      "beschreibung": "Kundendaten anzeigen"
+    },
+    {
+      "id": 21,
+      "name": "kunde.anlegen",
+      "beschreibung": "Neue Kunden erstellen"
+    },
+    {
+      "id": 22,
+      "name": "kunde.bearbeiten",
+      "beschreibung": "Kundendaten bearbeiten"
+    },
+    {
+      "id": 23,
+      "name": "kunde.loeschen",
+      "beschreibung": "Kundendaten löschen"
+    },
+    {
+      "id": 24,
+      "name": "artikel.lesen",
+      "beschreibung": "Artikeldaten lesen"
+    },
+    {
+      "id": 25,
+      "name": "artikel.anzeigen",
+      "beschreibung": "Artikeldaten anzeigen"
+    },
+    {
+      "id": 26,
+      "name": "artikel.anlegen",
+      "beschreibung": "Neue Artikel erstellen"
+    },
+    {
+      "id": 27,
+      "name": "artikel.bearbeiten",
+      "beschreibung": "Artikeldaten bearbeiten"
+    },
+    {
+      "id": 28,
+      "name": "artikel.loeschen",
+      "beschreibung": "Artikeldaten löschen"
+    },
+    {
+      "id": 29,
+      "name": "rechnung.lesen",
+      "beschreibung": "Rechnungen lesen"
+    },
+    {
+      "id": 30,
+      "name": "rechnung.anzeigen",
+      "beschreibung": "Rechnungen anzeigen"
+    },
+    {
+      "id": 31,
+      "name": "rechnung.anlegen",
+      "beschreibung": "Neue Rechnungen erstellen"
+    },
+    {
+      "id": 32,
+      "name": "rechnung.bearbeiten",
+      "beschreibung": "Rechnungen bearbeiten"
+    },
+    {
+      "id": 33,
+      "name": "rechnung.loeschen",
+      "beschreibung": "Rechnungen löschen"
+    },
+    {
+      "id": 34,
+      "name": "lager.lesen",
+      "beschreibung": "Lagerdaten lesen"
+    },
+    {
+      "id": 35,
+      "name": "lager.anzeigen",
+      "beschreibung": "Lagerdaten anzeigen"
+    },
+    {
+      "id": 36,
+      "name": "lager.anlegen",
+      "beschreibung": "Neue Lager anlegen"
+    },
+    {
+      "id": 37,
+      "name": "lager.bearbeiten",
+      "beschreibung": "Lagerdaten bearbeiten"
+    },
+    {
+      "id": 38,
+      "name": "lager.loeschen",
+      "beschreibung": "Lagerdaten löschen"
+    },
+    {
+      "id": 39,
+      "name": "lager.buchen",
+      "beschreibung": "Lagerbewegungen buchen"
+    },
+    {
+      "id": 40,
+      "name": "benutzer.lesen",
+      "beschreibung": "Benutzerdaten lesen"
+    },
+    {
+      "id": 41,
+      "name": "benutzer.anzeigen",
+      "beschreibung": "Benutzerdaten anzeigen"
+    },
+    {
+      "id": 42,
+      "name": "benutzer.anlegen",
+      "beschreibung": "Neue Benutzer anlegen"
+    },
+    {
+      "id": 43,
+      "name": "benutzer.bearbeiten",
+      "beschreibung": "Benutzerdaten bearbeiten"
+    },
+    {
+      "id": 44,
+      "name": "benutzer.loeschen",
+      "beschreibung": "Benutzerdaten löschen"
+    },
+    {
+      "id": 45,
+      "name": "rollen.lesen",
+      "beschreibung": "Rollen lesen"
+    },
+    {
+      "id": 46,
+      "name": "rollen.anzeigen",
+      "beschreibung": "Rollen anzeigen"
+    },
+    {
+      "id": 47,
+      "name": "rollen.anlegen",
+      "beschreibung": "Neue Rollen anlegen"
+    },
+    {
+      "id": 48,
+      "name": "rollen.bearbeiten",
+      "beschreibung": "Rollen bearbeiten"
+    },
+    {
+      "id": 49,
+      "name": "rollen.loeschen",
+      "beschreibung": "Rollen löschen"
+    },
+    {
+      "id": 50,
+      "name": "rechte.lesen",
+      "beschreibung": "Rechte lesen"
+    },
+    {
+      "id": 51,
+      "name": "rechte.anzeigen",
+      "beschreibung": "Rechte anzeigen"
+    },
+    {
+      "id": 52,
+      "name": "rechte.anlegen",
+      "beschreibung": "Neue Rechte anlegen"
+    },
+    {
+      "id": 53,
+      "name": "rechte.bearbeiten",
+      "beschreibung": "Rechte bearbeiten"
+    },
+    {
+      "id": 54,
+      "name": "rechte.loeschen",
+      "beschreibung": "Rechte löschen"
+    }
+  ],
+  "rollenRechte": [
+    {
+      "id": 1,
+      "rolleId": 1,
+      "rolleName": "Admin",
+      "rechtName": "*"
+    },
+    {
+      "id": 2,
+      "rolleId": 2,
+      "rolleName": "Lager",
+      "rechtName": "artikel.lesen"
+    },
+    {
+      "id": 3,
+      "rolleId": 2,
+      "rolleName": "Lager",
+      "rechtName": "lager.buchen"
+    },
+    {
+      "id": 4,
+      "rolleId": 2,
+      "rolleName": "Lager",
+      "rechtName": "lager.lesen"
+    },
+    {
+      "id": 5,
+      "rolleId": 2,
+      "rolleName": "Lager",
+      "rechtName": "einkauf.lesen"
+    },
+    {
+      "id": 6,
+      "rolleId": 2,
+      "rolleName": "Lager",
+      "rechtName": "einkauf.bearbeiten"
+    },
+    {
+      "id": 7,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "kunde.lesen"
+    },
+    {
+      "id": 8,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "kunde.anlegen"
+    },
+    {
+      "id": 9,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "kunde.bearbeiten"
+    },
+    {
+      "id": 10,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "rechnung.lesen"
+    },
+    {
+      "id": 11,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "rechnung.anlegen"
+    },
+    {
+      "id": 12,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "rechnung.bearbeiten"
+    },
+    {
+      "id": 13,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "verkauf.lesen"
+    },
+    {
+      "id": 14,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "verkauf.bearbeiten"
+    },
+    {
+      "id": 15,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "service.lesen"
+    },
+    {
+      "id": 16,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "service.bearbeiten"
+    },
+    {
+      "id": 17,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "organisation.lesen"
+    },
+    {
+      "id": 18,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "buchhaltung.lesen"
+    },
+    {
+      "id": 19,
+      "rolleId": 3,
+      "rolleName": "Buchhaltung",
+      "rechtName": "buchhaltung.bearbeiten"
+    },
+    {
+      "id": 20,
+      "rolleId": 4,
+      "rolleName": "Marketing",
+      "rechtName": "marketing.lesen"
+    },
+    {
+      "id": 21,
+      "rolleId": 4,
+      "rolleName": "Marketing",
+      "rechtName": "marketing.bearbeiten"
+    },
+    {
+      "id": 22,
+      "rolleId": 4,
+      "rolleName": "Marketing",
+      "rechtName": "verkauf.lesen"
+    },
+    {
+      "id": 23,
+      "rolleId": 5,
+      "rolleName": "Einkauf",
+      "rechtName": "einkauf.lesen"
+    },
+    {
+      "id": 24,
+      "rolleId": 5,
+      "rolleName": "Einkauf",
+      "rechtName": "einkauf.bearbeiten"
+    },
+    {
+      "id": 25,
+      "rolleId": 5,
+      "rolleName": "Einkauf",
+      "rechtName": "lager.lesen"
+    },
+    {
+      "id": 26,
+      "rolleId": 5,
+      "rolleName": "Einkauf",
+      "rechtName": "lager.bearbeiten"
+    },
+    {
+      "id": 27,
+      "rolleId": 5,
+      "rolleName": "Einkauf",
+      "rechtName": "artikel.lesen"
+    },
+    {
+      "id": 28,
+      "rolleId": 5,
+      "rolleName": "Einkauf",
+      "rechtName": "artikel.bearbeiten"
+    },
+    {
+      "id": 29,
+      "rolleId": 6,
+      "rolleName": "Verkauf",
+      "rechtName": "kunde.lesen"
+    },
+    {
+      "id": 30,
+      "rolleId": 6,
+      "rolleName": "Verkauf",
+      "rechtName": "kunde.anlegen"
+    },
+    {
+      "id": 31,
+      "rolleId": 6,
+      "rolleName": "Verkauf",
+      "rechtName": "kunde.bearbeiten"
+    },
+    {
+      "id": 32,
+      "rolleId": 6,
+      "rolleName": "Verkauf",
+      "rechtName": "artikel.lesen"
+    },
+    {
+      "id": 33,
+      "rolleId": 6,
+      "rolleName": "Verkauf",
+      "rechtName": "verkauf.lesen"
+    },
+    {
+      "id": 34,
+      "rolleId": 6,
+      "rolleName": "Verkauf",
+      "rechtName": "verkauf.bearbeiten"
+    },
+    {
+      "id": 35,
+      "rolleId": 6,
+      "rolleName": "Verkauf",
+      "rechtName": "service.lesen"
+    },
+    {
+      "id": 36,
+      "rolleId": 6,
+      "rolleName": "Verkauf",
+      "rechtName": "service.bearbeiten"
+    },
+    {
+      "id": 37,
+      "rolleId": 7,
+      "rolleName": "Personalwesen",
+      "rechtName": "personalwesen.lesen"
+    },
+    {
+      "id": 38,
+      "rolleId": 7,
+      "rolleName": "Personalwesen",
+      "rechtName": "personalwesen.bearbeiten"
+    },
+    {
+      "id": 39,
+      "rolleId": 7,
+      "rolleName": "Personalwesen",
+      "rechtName": "organisation.lesen"
+    },
+    {
+      "id": 40,
+      "rolleId": 8,
+      "rolleName": "Verkauf Azubi",
+      "rechtName": "kunde.lesen"
+    },
+    {
+      "id": 41,
+      "rolleId": 8,
+      "rolleName": "Verkauf Azubi",
+      "rechtName": "artikel.lesen"
+    },
+    {
+      "id": 42,
+      "rolleId": 8,
+      "rolleName": "Verkauf Azubi",
+      "rechtName": "verkauf.lesen"
+    },
+    {
+      "id": 43,
+      "rolleId": 8,
+      "rolleName": "Verkauf Azubi",
+      "rechtName": "verkauf.bearbeiten"
+    },
+    {
+      "id": 44,
+      "rolleId": 8,
+      "rolleName": "Verkauf Azubi",
+      "rechtName": "service.lesen"
+    },
+    {
+      "id": 45,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "kunde.lesen"
+    },
+    {
+      "id": 46,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "kunde.anlegen"
+    },
+    {
+      "id": 47,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "kunde.bearbeiten"
+    },
+    {
+      "id": 48,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "artikel.lesen"
+    },
+    {
+      "id": 49,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "verkauf.lesen"
+    },
+    {
+      "id": 50,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "verkauf.bearbeiten"
+    },
+    {
+      "id": 51,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "service.lesen"
+    },
+    {
+      "id": 52,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "service.bearbeiten"
+    },
+    {
+      "id": 53,
+      "rolleId": 9,
+      "rolleName": "Verkauf Senior",
+      "rechtName": "lager.lesen"
+    },
+    {
+      "id": 54,
+      "rolleId": 10,
+      "rolleName": "Geschäftsführung",
+      "rechtName": "*"
+    }
+  ],
+  "lager": [
+    {
+      "id": 1,
+      "name": "Hauptlager",
+      "standort": "Lingen, Industriestraße 3",
+      "kapazitaet": 5000
+    },
+    {
+      "id": 2,
+      "name": "Außenlager",
+      "standort": "Meppen, Gewerbepark Nord",
+      "kapazitaet": 2000
+    }
+  ],
+  "lieferanten": [
+    {
+      "id": 1,
+      "lieferantenNr": "KR10001",
+      "firma": "Weber GmbH",
+      "anschrift": "Max-Weber Str. 2",
+      "plz": "49716",
+      "ort": "Meppen",
+      "segment": "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
+      "iban": "DE91500105178640732418",
+      "fuerBts": "Alternativlieferant für Zubehör und Lastenbikes",
+      "bewertung": 4,
+      "abc": "B"
+    },
+    {
+      "id": 2,
+      "lieferantenNr": "KR10002",
+      "firma": "Kalkhoff Werke GmbH",
+      "anschrift": "Europa-Allee 26",
+      "plz": "49685",
+      "ort": "Emstek",
+      "segment": "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
+      "iban": "DE68500500001234567890",
+      "fuerBts": "",
+      "bewertung": 5,
+      "abc": "A"
+    },
+    {
+      "id": 3,
+      "lieferantenNr": "KR10003",
+      "firma": "Meister Handels GmbH",
+      "anschrift": "Industriestraße 9",
+      "plz": "",
+      "ort": "",
+      "segment": "",
+      "iban": "DE30500105170648489890",
+      "fuerBts": "",
+      "bewertung": 3,
+      "abc": "C"
+    },
+    {
+      "id": 4,
+      "lieferantenNr": "KR10004",
+      "firma": "Campus Sonderbaumarkt GmbH",
+      "anschrift": "Industriestraße 9",
+      "plz": "49809",
+      "ort": "Lingen",
+      "segment": "Klassischer Baumarkt mit Fahrradabteilung",
+      "iban": "DE02500105170648489901",
+      "fuerBts": "Soll Lieferant sein und Kunde",
+      "bewertung": 3,
+      "abc": "C"
+    }
+  ],
+  "bestellungen": [
+    {
+      "id": 1,
+      "bestellNr": "EK-2026-001",
+      "lieferantId": 1,
+      "datum": "2026-07-20",
+      "status": "angefragt",
+      "anfrageQuelle": "lieferantenvergleich",
+      "lehrkraftAngebotAm": "2026-07-21",
+      "lehrkraftAngebotPreis": 73.5,
+      "lehrkraftLieferzeitTage": 5,
+      "lehrkraftAngebotText": "Standardangebot fuer drei Helme aus dem Vergleich."
+    },
+    {
+      "id": 2,
+      "bestellNr": "EK-2026-002",
+      "lieferantId": 2,
+      "datum": "2026-08-01",
+      "status": "versendet",
+      "anfrageQuelle": "bedarfsmeldung",
+      "bedarfsmeldungId": "auto-artikel-1",
+      "rechnungStatus": "offen",
+      "faelligAm": "2026-08-20",
+      "anfrageNotiz": "Nachbestellung fuer Citybikes im Zulauf."
+    }
+  ],
+  "bestellpositionen": [
+    {
+      "id": 1,
+      "bestellungId": 1,
+      "artikelId": 3,
+      "artikelNr": "ART003",
+      "menge": 3,
+      "einzelpreis": 24.5
+    },
+    {
+      "id": 2,
+      "bestellungId": 2,
+      "artikelId": 1,
+      "artikelNr": "ART001",
+      "menge": 5,
+      "einzelpreis": 420
+    }
+  ],
+  "kategorien": [
+    {
+      "id": 1,
+      "name": "Fahrraeder",
+      "parentId": "",
+      "beschreibung": "Komplette Fahrraeder und fahrbereite Baugruppen."
+    },
+    {
+      "id": 4,
+      "name": "Citybike",
+      "parentId": 1,
+      "beschreibung": "Komplette City- und Schulungsfahrraeder."
+    },
+    {
+      "id": 5,
+      "name": "Bekleidung",
+      "parentId": "",
+      "beschreibung": "Bekleidung und Sicherheitsausstattung."
+    },
+    {
+      "id": 6,
+      "name": "Sicherheitsbekleidung",
+      "parentId": 5,
+      "beschreibung": "Warn- und Schutzkleidung fuer den Einsatz."
+    },
+    {
+      "id": 7,
+      "name": "Zubehoer",
+      "parentId": "",
+      "beschreibung": "Zusatzprodukte rund ums Fahrrad."
+    },
+    {
+      "id": 8,
+      "name": "Helm",
+      "parentId": 7,
+      "beschreibung": "Helme und Schutzzubehoer."
+    },
+    {
+      "id": 9,
+      "name": "Mechanik",
+      "parentId": "",
+      "beschreibung": "Mechanische Bauteile und Einzelkomponenten."
+    },
+    {
+      "id": 10,
+      "name": "Rahmen",
+      "parentId": 9,
+      "beschreibung": "Rahmen und tragende Elemente."
+    },
+    {
+      "id": 11,
+      "name": "Lenker",
+      "parentId": 9,
+      "beschreibung": "Lenker und Bedienelemente."
+    },
+    {
+      "id": 12,
+      "name": "Reifen",
+      "parentId": 9,
+      "beschreibung": "Reifen und laufende Teile."
+    },
+    {
+      "id": 13,
+      "name": "Sattel",
+      "parentId": 9,
+      "beschreibung": "Saettel und Sitzkomponenten."
+    },
+    {
+      "id": 14,
+      "name": "Fahrradkette",
+      "parentId": 9,
+      "beschreibung": "Antriebskomponenten wie Ketten und Kettenraeeder."
+    }
+  ],
+  "angebote": [
+    {
+      "id": 1,
+      "angebotsNr": "ANG-2026-001.0",
+      "angebotsBasisNr": "ANG-2026-001",
+      "revision": 0,
+      "vorgangId": "anfrage-1",
+      "anfrageId": 1,
+      "kundeId": 1,
+      "datum": "2026-07-22",
+      "gueltigBis": "2026-08-05",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 1348.5,
+      "status": "wartet auf Antwort"
+    }
+  ],
+  "angebotspositionen": [
+    {
+      "id": 1,
+      "angebotId": 1,
+      "artikelId": 2,
+      "leistungTyp": "Artikel",
+      "menge": 15,
+      "einzelpreis": 89.9
+    }
+  ],
+  "auftraege": [
+    {
+      "id": 1,
+      "auftragNr": "AU-2026-001",
+      "kundeId": 1,
+      "anfrageId": 1,
+      "vorgangId": "anfrage-1",
+      "datum": "2026-07-25",
+      "status": "abgerechnet",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 1348.5,
+      "faelligAm": "2026-08-08",
+      "angebotId": 1
+    },
+    {
+      "id": 2,
+      "auftragNr": "AU-2026-002",
+      "kundeId": 2,
+      "datum": "2026-07-20",
+      "status": "bezahlt",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 1799.7,
+      "faelligAm": "2026-08-03",
+      "angebotId": ""
+    },
+    {
+      "id": 3,
+      "auftragNr": "AU-2026-003",
+      "kundeId": 1,
+      "datum": "2026-07-26",
+      "status": "offen",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 799,
+      "faelligAm": "",
+      "angebotId": ""
+    }
+  ],
+  "auftragspositionen": [
+    {
+      "id": 1,
+      "auftragId": 1,
+      "artikelId": 2,
+      "leistungTyp": "Artikel",
+      "menge": 15,
+      "einzelpreis": 89.9
+    },
+    {
+      "id": 2,
+      "auftragId": 2,
+      "artikelId": 3,
+      "leistungTyp": "Artikel",
+      "menge": 30,
+      "einzelpreis": 59.99
+    },
+    {
+      "id": 3,
+      "auftragId": 3,
+      "artikelId": 1,
+      "leistungTyp": "Artikel",
+      "menge": 1,
+      "einzelpreis": 799
+    }
+  ],
+  "reklamationen": [
+    {
+      "id": 1,
+      "reklamationsNr": "REK-2026-001",
+      "kundeId": 2,
+      "datum": "2026-07-24",
+      "beschreibung": "Ein Fahrradhelm wurde beschädigt geliefert.",
+      "status": "neu"
+    }
+  ],
+  "marketingaktionen": [
+    {
+      "id": 1,
+      "typ": "Kampagne",
+      "titel": "Sommeraktion Lastenbikes",
+      "datum": "2026-08-01",
+      "status": "geplant",
+      "beschreibung": "Regionale Kampagne für Lastenbikes und Zubehör."
+    },
+    {
+      "id": 2,
+      "typ": "Newsletter",
+      "titel": "Newsletter August",
+      "datum": "2026-08-05",
+      "status": "Entwurf",
+      "beschreibung": "Neue Fahrräder, Serviceangebote und Termine."
+    },
+    {
+      "id": 3,
+      "typ": "Event",
+      "titel": "Betriebshoffest",
+      "datum": "2026-09-10",
+      "status": "geplant",
+      "beschreibung": "Schulungs- und Kundenevent mit Testfahrten."
+    }
+  ],
+  "abteilungen": [
+    {
+      "id": 1,
+      "kuerzel": "BU",
+      "name": "Buchhaltung",
+      "zuordnung": "A – Bürowesen",
+      "aufgaben": [
+        "Überweisungen",
+        "Lohn und Gehalt",
+        "Bankübersicht"
+      ]
+    },
+    {
+      "id": 2,
+      "kuerzel": "MW-EK",
+      "name": "Einkauf",
+      "zuordnung": "B – Materialwirtschaft",
+      "aufgaben": [
+        "EK-Rechnungsprüfung",
+        "Wareneingang"
+      ]
+    },
+    {
+      "id": 3,
+      "kuerzel": "MW-VK",
+      "name": "Verkauf",
+      "zuordnung": "C – Materialwirtschaft",
+      "aufgaben": [
+        "Lieferscheine",
+        "Auftragsbearbeitung",
+        "Versandpapiere",
+        "Transport"
+      ]
+    },
+    {
+      "id": 4,
+      "kuerzel": "MK",
+      "name": "Marketing",
+      "zuordnung": "C – Materialwirtschaft",
+      "aufgaben": [
+        "Werbemaßnahmen",
+        "Webseite",
+        "Onlineshop",
+        "Interner und externer Auftritt"
+      ]
+    },
+    {
+      "id": 5,
+      "kuerzel": "PW",
+      "name": "Personalwesen",
+      "zuordnung": "A – Bürowesen",
+      "aufgaben": [
+        "Schulungen und Fortbildungen",
+        "Personalbeschaffung und -einsatz",
+        "Personalakten",
+        "Abteilungsunterlagen"
+      ]
+    },
+    {
+      "id": 6,
+      "kuerzel": "MW-TAM",
+      "name": "Technische Anlagen und Maschinen",
+      "zuordnung": "B – Materialwirtschaft",
+      "aufgaben": [
+        "Übersichten und Einsatzplanung",
+        "TÜV und Papiere",
+        "Miete, Leasing und Kauf"
+      ]
+    },
+    {
+      "id": 7,
+      "kuerzel": "MW-FP",
+      "name": "Fuhrpark",
+      "zuordnung": "B – Materialwirtschaft",
+      "aufgaben": [
+        "Übersichten und Einsatzplanung",
+        "TÜV und Papiere",
+        "Miete, Leasing und Kauf"
+      ]
+    },
+    {
+      "id": 8,
+      "kuerzel": "IT",
+      "name": "IT und Kommunikation",
+      "zuordnung": "D – Stabsstelle unter Bürowesen",
+      "aufgaben": [
+        "IT-Ausstattung",
+        "Webshop, Flyer und Präsentationen",
+        "Bilder und Gestaltung",
+        "Schnittstelle für WW, BW und AGF"
+      ]
+    },
+    {
+      "id": 9,
+      "kuerzel": "AGF",
+      "name": "Stellvertretende Geschäftsführung",
+      "zuordnung": "Übergeordnet",
+      "aufgaben": [
+        "Stellvertretende Leitung für die Geschäftsführung"
+      ]
+    }
+  ],
+  "kundenanfragen": [
+    {
+      "id": 1,
+      "typ": "Produktanfrage",
+      "kundeId": 1,
+      "vorgangId": "anfrage-1",
+      "angebotId": 1,
+      "kanal": "Telefon",
+      "status": "in Bearbeitung",
+      "datum": "2026-07-24",
+      "anliegen": "Frage nach Lieferzeiten für Sicherheitsjacken."
+    }
+  ],
+  "nachrichten": [
+    {
+      "id": 1,
+      "vorgangId": "anfrage-1",
+      "anfrageId": 1,
+      "angebotId": "",
+      "kundeId": 1,
+      "datum": "2026-07-24",
+      "senderRolle": "Kunde",
+      "senderName": "Campus Baumarkt GmbH",
+      "kanal": "Telefon",
+      "betreff": "Lieferzeiten für Sicherheitsjacken",
+      "nachricht": "Wir benötigen eine Rückmeldung zu Lieferzeiten und möglichen Mengenstaffeln.",
+      "typ": "Anfrage"
+    },
+    {
+      "id": 2,
+      "vorgangId": "anfrage-1",
+      "anfrageId": 1,
+      "angebotId": 1,
+      "kundeId": 1,
+      "datum": "2026-07-25",
+      "senderRolle": "Verkauf",
+      "senderName": "Schülerfirma Verkauf",
+      "kanal": "E-Mail",
+      "betreff": "Angebot ANG-2026-001.0",
+      "nachricht": "Ein erstes Angebot wurde erstellt und an den Kunden zur Prüfung weitergegeben.",
+      "typ": "Angebot"
+    }
+  ],
+  "zahlungen": [
+    {
+      "id": 1,
+      "auftragId": 2,
+      "rechnungId": 2,
+      "zahlungsart": "Eingang",
+      "datum": "2026-07-22",
+      "ausfuehrenAm": "2026-07-22",
+      "ausfuehrungsdatum": "2026-07-22",
+      "betrag": 1799.7,
+      "name": "Emsland Tourismus GmbH",
+      "iban": "DE75512108001245126199",
+      "verwendungszweck": "Rechnung RG-2026-002",
+      "methode": "Überweisung",
+      "status": "ausgefuehrt"
+    },
+    {
+      "id": 2,
+      "zahlungsart": "Eingang",
+      "datum": "2026-08-06",
+      "ausfuehrenAm": "2026-08-06",
+      "ausfuehrungsdatum": "2026-08-06",
+      "betrag": 1348.5,
+      "name": "Campus Baumarkt GmbH",
+      "iban": "DE44500105175407324931",
+      "verwendungszweck": "Zahlung zu RG-2026-001",
+      "methode": "Überweisung",
+      "status": "offen"
+    },
+    {
+      "id": 3,
+      "zahlungsart": "Ausgang",
+      "datum": "2026-08-07",
+      "ausfuehrenAm": "2026-08-07",
+      "ausfuehrungsdatum": "2026-08-07",
+      "betrag": 2100,
+      "name": "Kalkhoff Werke GmbH",
+      "iban": "DE68500500001234567890",
+      "verwendungszweck": "Eingangsrechnung ER-2026-002",
+      "methode": "Überweisung",
+      "status": "offen"
+    }
+  ],
+  "mahnungen": [
+    {
+      "id": 1,
+      "rechnungId": 1,
+      "datum": "2026-07-23",
+      "status": "gesendet",
+      "stufe": "1. Mahnung"
+    }
+  ],
+  "belege": [
+    {
+      "id": 1,
+      "typ": "Rechnungskopie",
+      "bezugTyp": "Rechnung",
+      "rechnungId": 2,
+      "datum": "2026-07-21",
+      "status": "archiviert",
+      "beschreibung": "Digitale Ablage für die erste Beispielrechnung."
+    },
+    {
+      "id": 2,
+      "typ": "Zahlungsbeleg",
+      "bezugTyp": "Rechnung",
+      "rechnungId": 2,
+      "datum": "2026-07-22",
+      "status": "archiviert",
+      "beschreibung": "Zahlungseingang per Überweisung wurde abgelegt."
+    },
+    {
+      "id": 3,
+      "typ": "Mahnschreiben",
+      "bezugTyp": "Rechnung",
+      "rechnungId": 1,
+      "datum": "2026-07-23",
+      "status": "versendet",
+      "beschreibung": "1. Mahnung für eine fällige Ausgangsrechnung."
+    }
+  ],
+  "freigaben": [
+    {
+      "id": 1,
+      "titel": "Rabattfreigabe Großkunde",
+      "bereich": "verkauf",
+      "status": "offen",
+      "verantwortung": "Geschäftsführung",
+      "datum": "2026-07-25",
+      "bezug": "Großbestellung Nordrad Einkauf",
+      "notiz": "10 % Mengenrabatt für den Großkunden prüfen."
+    }
+  ],
+  "berichte": [
+    {
+      "id": 1,
+      "titel": "Wochenbericht Vertrieb",
+      "bereich": "verkauf",
+      "datum": "2026-07-25",
+      "status": "fertig",
+      "zusammenfassung": "3 offene Angebote, 1 neuer Auftrag, 1 Reklamation.",
+      "zielgruppe": "Lehrkraft",
+      "empfohlenAktion": "Angebote und Reklamationen im Unterricht vergleichen.",
+      "startdatum": "2026-07-21",
+      "enddatum": "2026-07-27",
+      "intervall": "Woche"
+    },
+    {
+      "id": 2,
+      "titel": "Lagerüberblick",
+      "bereich": "logistik",
+      "datum": "2026-07-25",
+      "status": "Entwurf",
+      "zusammenfassung": "Niedrige Bestände bei Lastenrädern und Helmen.",
+      "zielgruppe": "Klasse",
+      "empfohlenAktion": "Bedarfsmeldung und Bestellung aus dem Lagerstand ableiten.",
+      "startdatum": "2026-07-01",
+      "enddatum": "2026-07-31",
+      "intervall": "Monat"
+    }
+  ],
+  "versandauftraege": [
+    {
+      "id": 1,
+      "versandNr": "LOG-2026-001",
+      "auftragId": 1,
+      "datum": "2026-07-26",
+      "status": "in Vorbereitung",
+      "transport": "Spedition Nord"
+    }
+  ],
+  "retouren": [
+    {
+      "id": 1,
+      "retourenNr": "RET-2026-001",
+      "kundeId": 2,
+      "artikelId": 3,
+      "datum": "2026-07-25",
+      "status": "eingegangen",
+      "grund": "Transportschaden"
+    }
+  ],
+  "bewerber": [
+    {
+      "id": 1,
+      "name": "Lena Fischer",
+      "stelle": "Kaufmännische Assistenz",
+      "datum": "2026-07-20",
+      "status": "eingegangen",
+      "notiz": "Gute Vorkenntnisse in Excel und Kundenkontakt."
+    }
+  ],
+  "mitarbeiter": [
+    {
+      "id": 1,
+      "name": "Tom Berger",
+      "abteilung": "Lager",
+      "rolle": "Fachkraft",
+      "eintritt": "2024-08-01",
+      "status": "im Einsatz"
+    },
+    {
+      "id": 2,
+      "name": "Mira Koch",
+      "abteilung": "Marketing",
+      "rolle": "Koordinatorin",
+      "eintritt": "2025-02-15",
+      "status": "im Einsatz"
+    }
+  ],
+  "arbeitszeiten": [
+    {
+      "id": 1,
+      "mitarbeiterId": 1,
+      "datum": "2026-07-25",
+      "von": "08:00",
+      "bis": "16:30",
+      "status": "erfasst"
+    }
+  ],
+  "urlaubsantraege": [
+    {
+      "id": 1,
+      "mitarbeiterId": 2,
+      "von": "2026-08-10",
+      "bis": "2026-08-14",
+      "tage": 5,
+      "status": "offen"
+    }
+  ],
+  "krankmeldungen": [
+    {
+      "id": 1,
+      "mitarbeiterId": 1,
+      "von": "2026-07-24",
+      "bis": "2026-07-26",
+      "grund": "Erkältung",
+      "status": "eingegangen"
+    }
+  ],
+  "schulungen": [
+    {
+      "id": 1,
+      "titel": "Produktschulung Lastenbikes",
+      "zielgruppe": "Verkauf",
+      "datum": "2026-08-18",
+      "status": "geplant",
+      "ort": "Seminarraum 2"
+    }
+  ],
+  "personalakten": [
+    {
+      "id": 1,
+      "mitarbeiterId": 1,
+      "dokumentTyp": "Vertragsunterlage",
+      "titel": "Arbeitsvertrag Fachkraft Lager",
+      "datum": "2024-08-01",
+      "status": "archiviert",
+      "notiz": "Grundlage für die simulierte Personalakte."
+    },
+    {
+      "id": 2,
+      "mitarbeiterId": 1,
+      "dokumentTyp": "Onboarding-Checkliste",
+      "titel": "Einarbeitung Lager und Sicherheit",
+      "datum": "2024-08-02",
+      "status": "abgeschlossen",
+      "notiz": "Einweisung in Lagerordnung, Arbeitsschutz und Scanner."
+    },
+    {
+      "id": 3,
+      "mitarbeiterId": 2,
+      "dokumentTyp": "Urlaubsantrag",
+      "titel": "Urlaubsantrag August 2026",
+      "datum": "2026-07-26",
+      "status": "offen",
+      "notiz": "Antrag liegt zur Genehmigung vor."
+    },
+    {
+      "id": 4,
+      "mitarbeiterId": 2,
+      "dokumentTyp": "Schulungsnachweis",
+      "titel": "Marketing-Schulung Kampagnenplanung",
+      "datum": "2026-07-15",
+      "status": "archiviert",
+      "notiz": "Teilnahmebescheinigung für interne Weiterbildung."
+    }
+  ],
+  "vertriebsdokumente": [
+    {
+      "id": 1,
+      "auftragId": 1,
+      "angebotId": 1,
+      "anfrageId": 1,
+      "vorgangId": "anfrage-1",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-001",
+      "datum": "2026-07-25",
+      "status": "fertig",
+      "notiz": "Bestellung bestätigt und Liefertermin angekündigt."
+    },
+    {
+      "id": 2,
+      "auftragId": 1,
+      "angebotId": 1,
+      "anfrageId": 1,
+      "vorgangId": "anfrage-1",
+      "dokumentTyp": "Lieferschein",
+      "dokumentNr": "LS-2026-001",
+      "titel": "Lieferschein LS-2026-001",
+      "datum": "2026-07-26",
+      "status": "Entwurf",
+      "notiz": "Wird mit dem Versand abgestimmt."
+    }
+  ],
+  "einkaufsdokumente": [
+    {
+      "id": 1,
+      "bestellungId": 1,
+      "dokumentTyp": "Bedarfsmeldung",
+      "titel": "Bedarfsmeldung Lastenrad Premium",
+      "datum": "2026-07-18",
+      "status": "freigegeben",
+      "notiz": "Lagerbestand unterschreitet den Zielwert."
+    },
+    {
+      "id": 2,
+      "bestellungId": 1,
+      "dokumentTyp": "Anfrage",
+      "titel": "Anfrage Lieferzeit und Staffelpreise",
+      "datum": "2026-07-19",
+      "status": "versendet",
+      "notiz": "Lieferant soll Lieferzeit und Preisstaffel bestätigen."
+    },
+    {
+      "id": 3,
+      "bestellungId": 1,
+      "dokumentTyp": "Bestellung",
+      "titel": "Bestellung EK-2026-001",
+      "datum": "2026-07-20",
+      "status": "fertig",
+      "notiz": "Verbindliche Bestellung ausgelöst."
+    }
+  ],
+  "firmenkonto": [
+    {
+      "id": 1,
+      "datum": "2024-10-01",
+      "konto": "firma",
+      "betreff": "Stammkapitaleinzahlung",
+      "info": "",
+      "soll": 0,
+      "haben": 25000,
+      "saldo": 25000
+    },
+    {
+      "id": 2,
+      "datum": "2026-07-22",
+      "konto": "verkauf",
+      "betreff": "Zahlungseingang Rechnung RG-2026-002",
+      "info": "Verbleibt bis zum Wochenabschluss auf dem Verkaufskonto",
+      "soll": 0,
+      "haben": 1799.7,
+      "saldo": 1799.7
+    },
+    {
+      "id": 3,
+      "datum": "2026-07-24",
+      "konto": "einkauf",
+      "betreff": "Materialeinkauf Sicherheitshelme",
+      "info": "Didaktische Beispielausgabe fuer das Einkaufskonto",
+      "soll": 420,
+      "haben": 0,
+      "saldo": -420
+    }
+  ],
+  "feldMetadaten": [
+    {
+      "id": 1,
+      "tabelle": "lieferanten",
+      "feld": "lieferantenNr",
+      "anzeigename": "Lieferantennummer",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 2,
+      "tabelle": "lieferanten",
+      "feld": "firma",
+      "anzeigename": "Firma",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 3,
+      "tabelle": "lieferanten",
+      "feld": "anschrift",
+      "anzeigename": "Anschrift",
+      "reihenfolge": 3,
+      "sichtbar": true
+    },
+    {
+      "id": 4,
+      "tabelle": "lieferanten",
+      "feld": "plz",
+      "anzeigename": "PLZ",
+      "reihenfolge": 4,
+      "sichtbar": true
+    },
+    {
+      "id": 5,
+      "tabelle": "lieferanten",
+      "feld": "ort",
+      "anzeigename": "Ort",
+      "reihenfolge": 5,
+      "sichtbar": true
+    },
+    {
+      "id": 6,
+      "tabelle": "lieferanten",
+      "feld": "segment",
+      "anzeigename": "Segment",
+      "reihenfolge": 6,
+      "sichtbar": true
+    },
+    {
+      "id": 7,
+      "tabelle": "lieferanten",
+      "feld": "fuerBts",
+      "anzeigename": "Für BTS",
+      "reihenfolge": 7,
+      "sichtbar": true
+    },
+    {
+      "id": 8,
+      "tabelle": "lieferanten",
+      "feld": "bewertung",
+      "anzeigename": "Bewertung (1–5)",
+      "reihenfolge": 8,
+      "sichtbar": true
+    },
+    {
+      "id": 9,
+      "tabelle": "lieferanten",
+      "feld": "abc",
+      "anzeigename": "ABC",
+      "reihenfolge": 9,
+      "sichtbar": true
+    },
+    {
+      "id": 10,
+      "tabelle": "kunden",
+      "feld": "kundenNr",
+      "anzeigename": "Kundennummer",
+      "beschreibung": "Eindeutige Kundennummer",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 11,
+      "tabelle": "kunden",
+      "feld": "firma",
+      "anzeigename": "Firma",
+      "beschreibung": "Name des Kunden",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 12,
+      "tabelle": "kunden",
+      "feld": "anschrift",
+      "anzeigename": "Anschrift",
+      "beschreibung": "Straße und Hausnummer",
+      "reihenfolge": 3,
+      "sichtbar": true
+    },
+    {
+      "id": 13,
+      "tabelle": "kunden",
+      "feld": "plz",
+      "anzeigename": "PLZ",
+      "beschreibung": "Postleitzahl",
+      "reihenfolge": 4,
+      "sichtbar": true
+    },
+    {
+      "id": 14,
+      "tabelle": "kunden",
+      "feld": "ort",
+      "anzeigename": "Ort",
+      "beschreibung": "Kundenort",
+      "reihenfolge": 5,
+      "sichtbar": true
+    },
+    {
+      "id": 15,
+      "tabelle": "kunden",
+      "feld": "segment",
+      "anzeigename": "Kategorie",
+      "beschreibung": "Kundenkategorie",
+      "reihenfolge": 6,
+      "sichtbar": true
+    },
+    {
+      "id": 16,
+      "tabelle": "kunden",
+      "feld": "abc",
+      "anzeigename": "ABC",
+      "beschreibung": "ABC-Einstufung des Kunden",
+      "reihenfolge": 7,
+      "sichtbar": true
+    },
+    {
+      "id": 17,
+      "tabelle": "kunden",
+      "feld": "optionen",
+      "anzeigename": "Unsere Leistungen",
+      "beschreibung": "Produkte und Dienstleistungen",
+      "reihenfolge": 8,
+      "sichtbar": true
+    },
+    {
+      "id": 18,
+      "tabelle": "kunden",
+      "feld": "notiz",
+      "anzeigename": "Notiz",
+      "beschreibung": "Interne Bemerkungen zum Kunden",
+      "feldtyp": "textarea",
+      "zeilen": 6,
+      "sichtbar": true,
+      "reihenfolge": 11
+    },
+    {
+      "id": 19,
+      "tabelle": "artikel",
+      "feld": "artikelNr",
+      "anzeigename": "Artikelnummer",
+      "beschreibung": "Artikelnummer",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 20,
+      "tabelle": "artikel",
+      "feld": "name",
+      "anzeigename": "Bezeichnung",
+      "beschreibung": "Artikelname",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 21,
+      "tabelle": "artikel",
+      "feld": "kategoriePfad",
+      "anzeigename": "Kategorie",
+      "beschreibung": "Kategorie mit Unterkategorie",
+      "reihenfolge": 3,
+      "sichtbar": true
+    },
+    {
+      "id": 22,
+      "tabelle": "artikel",
+      "feld": "artikelTyp",
+      "anzeigename": "Typ",
+      "beschreibung": "Einzelartikel, Komponente oder Baugruppe",
+      "reihenfolge": 4,
+      "sichtbar": true
+    },
+    {
+      "id": 23,
+      "tabelle": "artikel",
+      "feld": "einkaufspreis",
+      "anzeigename": "EK-Preis",
+      "beschreibung": "Einkaufspreis",
+      "reihenfolge": 5,
+      "sichtbar": true
+    },
+    {
+      "id": 24,
+      "tabelle": "artikel",
+      "feld": "verkaufspreis",
+      "anzeigename": "VK-Preis",
+      "beschreibung": "Verkaufspreis",
+      "reihenfolge": 6,
+      "sichtbar": true
+    },
+    {
+      "id": 25,
+      "tabelle": "artikel",
+      "feld": "beschaffungsart",
+      "anzeigename": "Beschaffung",
+      "beschreibung": "Zukauf oder Herstellung",
+      "reihenfolge": 7,
+      "sichtbar": true
+    },
+    {
+      "id": 26,
+      "tabelle": "artikel",
+      "feld": "verkaufsstatus",
+      "anzeigename": "Verkauf",
+      "beschreibung": "Verkaufbar oder nicht verkaufbar",
+      "reihenfolge": 8,
+      "sichtbar": true
+    },
+    {
+      "id": 27,
+      "tabelle": "artikel",
+      "feld": "bestand",
+      "anzeigename": "Bestand",
+      "beschreibung": "Aktueller Lagerbestand",
+      "reihenfolge": 9,
+      "sichtbar": true
+    },
+    {
+      "id": 28,
+      "tabelle": "kategorien",
+      "feld": "name",
+      "anzeigename": "Kategorie",
+      "beschreibung": "Name der Kategorie",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 29,
+      "tabelle": "kategorien",
+      "feld": "parentName",
+      "anzeigename": "Oberkategorie",
+      "beschreibung": "Direkte Oberkategorie",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 30,
+      "tabelle": "kategorien",
+      "feld": "pfad",
+      "anzeigename": "Pfad",
+      "beschreibung": "Vollstaendige Kategoriehierarchie",
+      "reihenfolge": 3,
+      "sichtbar": true
+    },
+    {
+      "id": 31,
+      "tabelle": "services",
+      "feld": "serviceNr",
+      "anzeigename": "Servicenummer",
+      "beschreibung": "Servicenummer",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 32,
+      "tabelle": "services",
+      "feld": "name",
+      "anzeigename": "Bezeichnung",
+      "beschreibung": "Servicebezeichnung",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 33,
+      "tabelle": "services",
+      "feld": "kategorie",
+      "anzeigename": "Kategorie",
+      "beschreibung": "Servicekategorie",
+      "reihenfolge": 3,
+      "sichtbar": true
+    },
+    {
+      "id": 34,
+      "tabelle": "services",
+      "feld": "berechnungstyp",
+      "anzeigename": "Berechnung",
+      "beschreibung": "Pauschal oder Zeiteinheit",
+      "reihenfolge": 4,
+      "sichtbar": true
+    },
+    {
+      "id": 35,
+      "tabelle": "services",
+      "feld": "zeEinheit",
+      "anzeigename": "ZE",
+      "beschreibung": "Zeiteinheit, falls nach ZE berechnet wird",
+      "reihenfolge": 5,
+      "sichtbar": true
+    },
+    {
+      "id": 36,
+      "tabelle": "services",
+      "feld": "einkaufspreis",
+      "anzeigename": "EK-Preis",
+      "beschreibung": "Interner Einkaufspreis",
+      "reihenfolge": 6,
+      "sichtbar": true
+    },
+    {
+      "id": 37,
+      "tabelle": "services",
+      "feld": "verkaufspreis",
+      "anzeigename": "VK-Preis",
+      "beschreibung": "Verkaufspreis",
+      "reihenfolge": 7,
+      "sichtbar": true
+    },
+    {
+      "id": 38,
+      "tabelle": "benutzer",
+      "feld": "username",
+      "anzeigename": "Benutzername",
+      "beschreibung": "Eindeutiger Benutzername",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 39,
+      "tabelle": "benutzer",
+      "feld": "email",
+      "anzeigename": "Email",
+      "beschreibung": "E-Mail-Adresse",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 40,
+      "tabelle": "benutzer",
+      "feld": "rolle",
+      "anzeigename": "Rolle",
+      "beschreibung": "Benutzerrolle",
+      "reihenfolge": 3,
+      "sichtbar": true
+    },
+    {
+      "id": 41,
+      "tabelle": "rollen",
+      "feld": "name",
+      "anzeigename": "Rollenname",
+      "beschreibung": "Name der Rolle",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 42,
+      "tabelle": "rollen",
+      "feld": "beschreibung",
+      "anzeigename": "Beschreibung",
+      "beschreibung": "Beschreibung der Rolle",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 43,
+      "tabelle": "rechte",
+      "feld": "name",
+      "anzeigename": "Recht",
+      "beschreibung": "Name des Rechts",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 44,
+      "tabelle": "rechte",
+      "feld": "beschreibung",
+      "anzeigename": "Beschreibung",
+      "beschreibung": "Beschreibung des Rechts",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 45,
+      "tabelle": "lager",
+      "feld": "name",
+      "anzeigename": "Lagername",
+      "beschreibung": "Name des Lagers",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 46,
+      "tabelle": "lager",
+      "feld": "standort",
+      "anzeigename": "Standort",
+      "beschreibung": "Lagerstandort",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 47,
+      "tabelle": "lager",
+      "feld": "kapazitaet",
+      "anzeigename": "Kapazität",
+      "beschreibung": "Lagerkapazität",
+      "reihenfolge": 3,
+      "sichtbar": true
+    },
+    {
+      "id": 48,
+      "tabelle": "rechnungen",
+      "feld": "rechnungsnr",
+      "anzeigename": "Rechnungsnummer",
+      "beschreibung": "Eindeutige Rechnungsnummer",
+      "reihenfolge": 1,
+      "sichtbar": true
+    },
+    {
+      "id": 49,
+      "tabelle": "rechnungen",
+      "feld": "rechnungstyp",
+      "anzeigename": "Typ",
+      "beschreibung": "Eingangs- oder Ausgangsrechnung",
+      "reihenfolge": 2,
+      "sichtbar": true
+    },
+    {
+      "id": 50,
+      "tabelle": "rechnungen",
+      "feld": "kunde",
+      "anzeigename": "Geschäftspartner",
+      "beschreibung": "Kunden- oder Lieferantenname",
+      "reihenfolge": 3,
+      "sichtbar": true
+    },
+    {
+      "id": 51,
+      "tabelle": "rechnungen",
+      "feld": "bestellNr",
+      "anzeigename": "Bestellbezug",
+      "beschreibung": "Bezug zur Bestellung bei Eingangsrechnungen",
+      "reihenfolge": 4,
+      "sichtbar": true
+    },
+    {
+      "id": 52,
+      "tabelle": "rechnungen",
+      "feld": "datum",
+      "anzeigename": "Datum",
+      "beschreibung": "Rechnungsdatum",
+      "reihenfolge": 5,
+      "sichtbar": true
+    },
+    {
+      "id": 53,
+      "tabelle": "rechnungen",
+      "feld": "faelligAm",
+      "anzeigename": "Fällig am",
+      "beschreibung": "Fälligkeitsdatum",
+      "reihenfolge": 6,
+      "sichtbar": true
+    },
+    {
+      "id": 54,
+      "tabelle": "rechnungen",
+      "feld": "betrag",
+      "anzeigename": "Betrag",
+      "beschreibung": "Rechnungsbetrag",
+      "reihenfolge": 7,
+      "sichtbar": true
+    },
+    {
+      "id": 55,
+      "tabelle": "rechnungen",
+      "feld": "status",
+      "anzeigename": "Status",
+      "beschreibung": "Rechnungsstatus",
+      "reihenfolge": 8,
+      "sichtbar": true
+    },
+    {
+      "id": 56,
+      "tabelle": "rechnungen",
+      "feld": "mahnstufe",
+      "anzeigename": "Mahnstufe",
+      "beschreibung": "Didaktisch vereinfachte Mahnstufe",
+      "reihenfolge": 9,
+      "sichtbar": true
+    }
+  ],
+  "benutzerSpalten": []
 }

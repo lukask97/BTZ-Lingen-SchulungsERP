@@ -61,6 +61,9 @@ export default function Belege() {
     const rechnungenMitBeleg = new Set(belege.filter(item => item.bezugTyp === "Rechnung").map(item => String(item.rechnungId || "")));
     const fehlendeBelege = rechnungen.filter(item => !rechnungenMitBeleg.has(String(item.id)));
     const versendet = daten.filter(item => item.status === "versendet").length;
+    const resolveInvoiceLink = (rechnung: any) => rechnung?.rechnungstyp === "Eingangsrechnung"
+        ? `/eingangsrechnungen?focus=${rechnung.rechnungsnr}`
+        : `/ausgangsrechnungen?focus=${rechnung.rechnungsnr}`;
 
     return <>
         <OverviewCards cards={[
@@ -77,13 +80,20 @@ export default function Belege() {
                 { field: "datum", title: "Datum" },
                 { field: "typ", title: "Typ" },
                 { field: "bezugTyp", title: "Bezugsart" },
-                { field: "bezug", title: "Bezug", render: row => row.bezugTyp === "Rechnung" ? <Link className="detail-link" to={`/rechnungen?focus=${row.bezug}`}>{row.bezug}</Link> : row.bezug },
+                { field: "bezug", title: "Bezug", render: row => {
+                    const rechnung = row.rechnungId ? rechnungen.find(item => String(item.id) === String(row.rechnungId)) : rechnungen.find(item => item.rechnungsnr === row.bezug);
+                    return row.bezugTyp === "Rechnung" && rechnung ? <Link className="detail-link" to={resolveInvoiceLink(rechnung)}>{row.bezug}</Link> : row.bezug;
+                } },
                 { field: "status", title: "Status" },
                 { field: "beschreibung", title: "Beschreibung" }
             ]}
             focusRowId={bezugFilter}
             focusField="bezug"
-            detailLinkResolver={({ field, row }) => field === "bezug" && row.bezugTyp === "Rechnung" ? `/rechnungen?focus=${row.bezug}` : null}
+            detailLinkResolver={({ field, row }) => {
+                if (field !== "bezug" || row.bezugTyp !== "Rechnung") return null;
+                const rechnung = row.rechnungId ? rechnungen.find(item => String(item.id) === String(row.rechnungId)) : rechnungen.find(item => item.rechnungsnr === row.bezug);
+                return rechnung ? resolveInvoiceLink(rechnung) : null;
+            }}
             filters={[{
                 name: "typ",
                 label: "Typ",

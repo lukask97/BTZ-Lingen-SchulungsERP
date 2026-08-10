@@ -2,6 +2,9 @@ import auftraegeService from "../verkauf/auftraegeService";
 import bestellungenService from "../einkauf/bestellungenService";
 import artikelService from "../logistik/artikelService";
 import { getCustomerName } from "../../utils/customerReferences";
+import { getSupplierName } from "../../utils/supplierReferences";
+import kundenService from "../verkauf/customerService";
+import lieferantenService from "../einkauf/lieferantenService";
 import { getRechnungsnummer as buildInvoiceNumber } from "../core/documentNumbering";
 
 const INVOICE_RELEVANT_STATUSES = ["abgerechnet", "bezahlt", "archiviert"];
@@ -18,6 +21,7 @@ function normalizeInvoiceStatus(status: string) {
 
 function mapOrderToInvoice(auftrag: any) {
     const kundenname = auftrag.kunde || getCustomerName(auftrag.kundeId, "");
+    const kunde = kundenService.getById(auftrag.kundeId);
 
     return {
         id: auftrag.id,
@@ -27,6 +31,7 @@ function mapOrderToInvoice(auftrag: any) {
         rechnungstyp: "Ausgangsrechnung",
         kundeId: auftrag.kundeId,
         kunde: kundenname,
+        iban: kunde?.iban || "",
         bestellungId: "",
         bestellNr: "",
         datum: auftrag.datum,
@@ -61,6 +66,7 @@ function getPurchaseOrderAmount(bestellung: any) {
 }
 
 function mapPurchaseOrderToInvoice(bestellung: any) {
+    const lieferant = lieferantenService.getById(bestellung.lieferantId);
     return {
         id: `eingang-${bestellung.id}`,
         auftragId: "",
@@ -70,8 +76,9 @@ function mapPurchaseOrderToInvoice(bestellung: any) {
         rechnungsnr: toIncomingInvoiceNumber(bestellung.bestellNr),
         rechnungstyp: "Eingangsrechnung",
         kundeId: "",
-        kunde: bestellung.lieferant,
+        kunde: bestellung.lieferant || getSupplierName(bestellung.lieferantId, ""),
         lieferantId: bestellung.lieferantId,
+        iban: lieferant?.iban || "",
         datum: bestellung.wareneingangAm || bestellung.datum,
         faelligAm: bestellung.faelligAm || "",
         betrag: getPurchaseOrderAmount(bestellung),

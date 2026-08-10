@@ -279,21 +279,140 @@ button:disabled {
 }
 
 .datatable tbody tr.datatable-row-critical,
-.datatable tbody tr.datatable-row-critical:nth-child(even) {
-    background: #fde8e8;
+.datatable tbody tr.datatable-row-critical:nth-child(even),
+.datatable tbody tr.datatable-row-critical-light,
+.datatable tbody tr.datatable-row-critical-light:nth-child(even) {
+    background: #ffe2bf;
 }
 
 .datatable tbody tr.datatable-row-critical .datatable-actions-column,
-.datatable tbody tr.datatable-row-critical:nth-child(even) .datatable-actions-column {
-    background: #fde8e8;
+.datatable tbody tr.datatable-row-critical:nth-child(even) .datatable-actions-column,
+.datatable tbody tr.datatable-row-critical-light .datatable-actions-column,
+.datatable tbody tr.datatable-row-critical-light:nth-child(even) .datatable-actions-column {
+    background: #ffe2bf;
 }
 
-.datatable tbody tr.datatable-row-critical:hover {
+.datatable tbody tr.datatable-row-critical-dark,
+.datatable tbody tr.datatable-row-critical-dark:nth-child(even) {
     background: #f8caca;
 }
 
-.datatable tbody tr.datatable-row-critical:hover .datatable-actions-column {
+.datatable tbody tr.datatable-row-critical-dark .datatable-actions-column,
+.datatable tbody tr.datatable-row-critical-dark:nth-child(even) .datatable-actions-column {
     background: #f8caca;
+}
+
+.datatable tbody tr.datatable-row-critical:hover,
+.datatable tbody tr.datatable-row-critical-light:hover {
+    background: #ffd1a3;
+}
+
+.datatable tbody tr.datatable-row-critical:hover .datatable-actions-column,
+.datatable tbody tr.datatable-row-critical-light:hover .datatable-actions-column {
+    background: #ffd1a3;
+}
+
+.datatable tbody tr.datatable-row-critical-dark:hover {
+    background: #ef9b9b;
+}
+
+.datatable tbody tr.datatable-row-critical-dark:hover .datatable-actions-column {
+    background: #ef9b9b;
+}
+
+.datatable tbody tr.datatable-row-inbound,
+.datatable tbody tr.datatable-row-inbound:nth-child(even) {
+    background: #dff1ff;
+}
+
+.datatable tbody tr.datatable-row-inbound .datatable-actions-column,
+.datatable tbody tr.datatable-row-inbound:nth-child(even) .datatable-actions-column {
+    background: #dff1ff;
+}
+
+.datatable tbody tr.datatable-row-inbound:hover {
+    background: #c9e8ff;
+}
+
+.datatable tbody tr.datatable-row-inbound:hover .datatable-actions-column {
+    background: #c9e8ff;
+}
+
+.stock-legend {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0 18px;
+    padding: 12px 14px;
+    border: 1px solid #dbe4f0;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #f9fbfd 0%, #f1f6fb 100%);
+}
+
+.stock-legend-table {
+    display: grid;
+    border: 1px solid #dbe4f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.stock-legend-row {
+    display: grid;
+    grid-template-columns: 180px 80px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border-top: 1px solid #e5edf6;
+    color: #1f2937;
+    font-size: 14px;
+}
+
+.stock-legend-row:first-child {
+    border-top: none;
+}
+
+.stock-legend-head {
+    background: #eef4fb;
+    font-weight: 600;
+}
+
+.stock-legend-color-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.stock-legend-chip {
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(31, 41, 55, 0.16);
+    flex: 0 0 auto;
+}
+
+.stock-legend-chip-normal {
+    background: #ffffff;
+}
+
+.stock-legend-chip-order {
+    background: #dff1ff;
+}
+
+.stock-legend-chip-warning {
+    background: #ffe2bf;
+}
+
+.stock-legend-chip-critical {
+    background: #f8caca;
+}
+
+@media (max-width: 720px) {
+    .stock-legend-row {
+        grid-template-columns: 120px 64px minmax(0, 1fr);
+        gap: 10px;
+        font-size: 13px;
+    }
 }
 
 .pagination {
@@ -318,7 +437,9 @@ button:disabled {
     width: 75vw;
     max-width: 75vw;
     max-height: 90vh;
-    overflow: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     background: white;
     border-radius: 6px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
@@ -330,6 +451,10 @@ button:disabled {
     align-items: center;
     padding: 15px 20px;
     border-bottom: 1px solid #ddd;
+    background: white;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 2;
 }
 
 .dialog-header h2 {
@@ -341,6 +466,9 @@ button:disabled {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px 40px;
+    overflow: auto;
+    flex: 1 1 auto;
+    align-content: start;
 }
 
 .dialog-body .form-row {
@@ -366,17 +494,72 @@ button:disabled {
 }
 
 .dialog-close {
-    background: none;
-    color: #555;
-    border: none;
-    font-size: 22px;
-    min-width: auto;
+    background: #fff;
+    color: #444;
+    border: 1px solid #d0d7de;
+    border-radius: 999px;
+    font-size: 24px;
+    line-height: 1;
+    min-width: 42px;
+    width: 42px;
+    height: 42px;
     padding: 0;
     cursor: pointer;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    flex: 0 0 auto;
 }
 
 .dialog-close:hover {
     color: #d32f2f;
+    border-color: #d32f2f;
+    background: #fff5f5;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-top: 1px solid #ddd;
+    background: white;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.dialog-footer-extra {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+.dialog-cancel {
+    background: #f3f4f6;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
+}
+
+.dialog-body > .thread-dialog-footer,
+.dialog-body > .firmenkonto-dialog-actions {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, #ffffff 82%, rgba(255, 255, 255, 0));
+    padding-top: 14px;
+    margin-top: 8px;
+    z-index: 1;
+}
+
+.dialog-body > .thread-dialog-footer,
+.dialog-body > .firmenkonto-dialog-actions,
+.dialog-body > .thread-dialog-footer .thread-document-links {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
 }
 
 .toolbar-right {
@@ -1219,6 +1402,36 @@ button:disabled {
 
 .firmenkonto-status {
     margin: 12px 0 0;
+}
+
+.buchhaltung-tab-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.buchhaltung-tab {
+    padding: 9px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.buchhaltung-tab:hover {
+    background: #e8f1fb;
+}
+
+.buchhaltung-tab.is-active {
+    background: #1976d2;
+    border-color: #1976d2;
+    color: #fff;
+}
+
+.buchhaltung-tab.is-active:hover {
+    background: #1565c0;
 }
 
 .firmenkonto-table td:nth-child(4),

@@ -97,6 +97,7 @@ export default function Lieferanten() {
                 <option value="B">B</option>
                 <option value="C">C</option>
             </select></div>
+            <div><Label>IBAN</Label><TextField value={crud.currentItem.iban || ""} onChange={wert => feldAendern("iban", wert)}/></div>
             <div className="form-row"><Label glossaryKey="segment">Segment</Label><TextArea rows={2} value={crud.currentItem.segment || ""} onChange={wert => feldAendern("segment", wert)}/></div>
             <div className="form-row"><Label>Für BTS</Label><TextArea rows={2} value={crud.currentItem.fuerBts || ""} onChange={wert => feldAendern("fuerBts", wert)}/></div>
             <div className="form-row">

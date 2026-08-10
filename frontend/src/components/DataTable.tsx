@@ -124,6 +124,9 @@ export default function DataTable({
   focusField = "id",
   detailLinkResolver,
   rowClassName,
+  selectableRows = false,
+  selectedRowIds = [],
+  onSelectedRowsChange,
 }: DataTableProps) {
   const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -154,7 +157,8 @@ export default function DataTable({
     [sourceColumns]
   );
   const hasRowActions = rowActions.length > 0;
-  const tableColSpan = getTableColSpan(visibleColumns.length, hasRowActions);
+  const selectionColumnOffset = selectableRows ? 1 : 0;
+  const tableColSpan = getTableColSpan(visibleColumns.length + selectionColumnOffset, hasRowActions);
   const pageSizeOptions = [10, 25, 50, 100];
 
   /*
@@ -453,6 +457,23 @@ export default function DataTable({
     );
   }
 
+  function toggleRowSelection(rowId) {
+    if (!onSelectedRowsChange) return;
+    const exists = selectedRowIds.some((id) => String(id) === String(rowId));
+    onSelectedRowsChange(
+      exists
+        ? selectedRowIds.filter((id) => String(id) !== String(rowId))
+        : [...selectedRowIds, rowId]
+    );
+  }
+
+  function toggleSelectAllRows() {
+    if (!onSelectedRowsChange) return;
+    const visibleIds = sortedData.map((row) => row.id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedRowIds.some((selectedId) => String(selectedId) === String(id)));
+    onSelectedRowsChange(allSelected ? [] : visibleIds);
+  }
+
   function renderPagination() {
     return (
       <div className="pagination">
@@ -531,6 +552,7 @@ export default function DataTable({
               access={action.access}
               variant={resolveActionVariant(action)}
               className={action.className}
+              disabled={action.isDisabled ? action.isDisabled() : false}
               onClick={action.onClick}
             >
               {action.label}
@@ -557,6 +579,16 @@ export default function DataTable({
         <table className="datatable">
           <thead>
             <tr>
+              {selectableRows && (
+                <th className="datatable-selection-column">
+                  <input
+                    type="checkbox"
+                    checked={sortedData.length > 0 && sortedData.every((row) => selectedRowIds.some((id) => String(id) === String(row.id)))}
+                    onChange={toggleSelectAllRows}
+                    aria-label="Alle Zeilen auswählen"
+                  />
+                </th>
+              )}
               {visibleColumns.map((column) => (
                 <th key={column.field} onClick={() => sort(column.field)}>
                   <span className="datatable-header">
@@ -596,6 +628,16 @@ export default function DataTable({
                   className={[showDetails ? "clickable-row" : "", rowClassName ? rowClassName(row) : ""].filter(Boolean).join(" ")}
                   onClick={() => openDetails(row)}
                 >
+                  {selectableRows && (
+                    <td className="datatable-selection-column" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedRowIds.some((id) => String(id) === String(row.id))}
+                        onChange={() => toggleRowSelection(row.id)}
+                        aria-label={`Zeile ${row.id} auswählen`}
+                      />
+                    </td>
+                  )}
                   {visibleColumns.map((column) => (
                     <td key={column.field}>
                       {column.render

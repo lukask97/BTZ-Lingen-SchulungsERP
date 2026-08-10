@@ -5,6 +5,7 @@ import { PERMISSIONS } from "../../constants/permissions";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 import { getBerlinDate } from "../../utils/dateTime";
+import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 
 function getInvoiceViewStatus(rechnung: any) {
     const today = getBerlinDate();
@@ -14,6 +15,7 @@ function getInvoiceViewStatus(rechnung: any) {
 }
 
 export default function LehrkraftRechnungen() {
+    useLehrkraftAutomationen();
     useStorageSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen"]);
 
     const navigate = useNavigate();

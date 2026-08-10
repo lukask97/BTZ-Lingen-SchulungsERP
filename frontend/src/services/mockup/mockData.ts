@@ -15,6 +15,7 @@ export let kunden = [
         ort: "Lingen",
         segment: "Baumarkt",
         abc: "A",
+        iban: "DE44500105175407324931",
 
         optionen: ["Fahrradbekleidung", "Sicherheitsbekleidung", "Sonderfahrräder", "Lastenbikes"],
         notiz:""
@@ -30,6 +31,7 @@ export let kunden = [
         ort: "Meppen",
         segment: "Tourismus",
         abc: "B",
+        iban: "DE75512108001245126199",
 
         optionen: ["Bikes aller Art", "Leasing", "Reparatur Service"],
 
@@ -52,8 +54,10 @@ export let artikel = [
         artikelTyp: "Baugruppe",
         einkaufspreis: 420,
         verkaufspreis: 799,
-        bestand: 6,
-        beschreibung: "Komplettes Fahrrad als Beispiel für einen zusammengesetzten Artikel."
+        bestand: 4,
+        mindestmenge: 3,
+        bedarfsmeldungBei: 5,
+        beschreibung: "Komplettes Fahrrad als Beispiel fuer einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
     },
 
 
@@ -68,7 +72,9 @@ export let artikel = [
         einkaufspreis: 39.9,
         verkaufspreis: 89.9,
         bestand: 120,
-        beschreibung: "Reflektierende Sicherheitsjacke"
+        mindestmenge: 20,
+        bedarfsmeldungBei: 30,
+        beschreibung: "Reflektierende Sicherheitsjacke mit komfortablem Lagerbestand."
     },
 
     {
@@ -81,8 +87,10 @@ export let artikel = [
         artikelTyp: "Einzelartikel",
         einkaufspreis: 24.5,
         verkaufspreis: 59.99,
-        bestand: 45,
-        beschreibung: "Sicherer Fahrradhelm mit Zertifikat"
+        bestand: 12,
+        mindestmenge: 10,
+        bedarfsmeldungBei: 15,
+        beschreibung: "Sicherer Fahrradhelm mit Zertifikat. Zusaetzliche Menge ist bereits bestellt."
     },
     {
         id: 4,
@@ -94,8 +102,10 @@ export let artikel = [
         artikelTyp: "Komponente",
         einkaufspreis: 120,
         verkaufspreis: 199,
-        bestand: 18,
-        beschreibung: "Rahmen als Einzelkomponente für Schulungsbeispiele."
+        bestand: 8,
+        mindestmenge: 6,
+        bedarfsmeldungBei: 9,
+        beschreibung: "Rahmen als Einzelkomponente fuer Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
     },
     {
         id: 5,
@@ -107,8 +117,10 @@ export let artikel = [
         artikelTyp: "Komponente",
         einkaufspreis: 18,
         verkaufspreis: 34.9,
-        bestand: 35,
-        beschreibung: "Lenker für Fahrradmontage."
+        bestand: 9,
+        mindestmenge: 10,
+        bedarfsmeldungBei: 12,
+        beschreibung: "Lenker fuer Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
     },
     {
         id: 6,
@@ -120,8 +132,10 @@ export let artikel = [
         artikelTyp: "Komponente",
         einkaufspreis: 14.5,
         verkaufspreis: 29.9,
-        bestand: 64,
-        beschreibung: "Standardreifen als Lagerkomponente."
+        bestand: 28,
+        mindestmenge: 20,
+        bedarfsmeldungBei: 25,
+        beschreibung: "Standardreifen als Lagerkomponente mit noch stabilem Bestand."
     },
     {
         id: 7,
@@ -133,8 +147,10 @@ export let artikel = [
         artikelTyp: "Komponente",
         einkaufspreis: 16,
         verkaufspreis: 39,
-        bestand: 29,
-        beschreibung: "Komfortsattel für Schulungsfahrräder."
+        bestand: 14,
+        mindestmenge: 8,
+        bedarfsmeldungBei: 10,
+        beschreibung: "Komfortsattel fuer Schulungsfahrraeder mit ausreichend freiem Bestand."
     }
 ];
 
@@ -581,6 +597,7 @@ export let lieferanten = [
         plz: "49716",
         ort: "Meppen",
         segment: "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
+        iban: "DE91500105178640732418",
         fuerBts: "Alternativlieferant für Zubehör und Lastenbikes",
         bewertung: 4,
         abc: "B"
@@ -593,6 +610,7 @@ export let lieferanten = [
         plz: "49685",
         ort: "Emstek",
         segment: "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
+        iban: "DE68500500001234567890",
         fuerBts: "",
         bewertung: 5,
         abc: "A"
@@ -605,6 +623,7 @@ export let lieferanten = [
         plz: "",
         ort: "",
         segment: "",
+        iban: "DE30500105170648489890",
         fuerBts: "",
         bewertung: 3,
         abc: "C"
@@ -617,6 +636,7 @@ export let lieferanten = [
         plz: "49809",
         ort: "Lingen",
         segment: "Klassischer Baumarkt mit Fahrradabteilung",
+        iban: "DE02500105170648489901",
         fuerBts: "Soll Lieferant sein und Kunde",
         bewertung: 3,
         abc: "C"
@@ -635,11 +655,24 @@ export let bestellungen = [
         lehrkraftAngebotPreis: 73.5,
         lehrkraftLieferzeitTage: 5,
         lehrkraftAngebotText: "Standardangebot fuer drei Helme aus dem Vergleich."
+    },
+    {
+        id: 2,
+        bestellNr: "EK-2026-002",
+        lieferantId: 2,
+        datum: "2026-08-01",
+        status: "versendet",
+        anfrageQuelle: "bedarfsmeldung",
+        bedarfsmeldungId: "auto-artikel-1",
+        rechnungStatus: "offen",
+        faelligAm: "2026-08-20",
+        anfrageNotiz: "Nachbestellung fuer Citybikes im Zulauf."
     }
 ];
 
 export let bestellpositionen = [
-    { id: 1, bestellungId: 1, artikelId: 3, artikelNr: "ART003", menge: 3, einzelpreis: 24.5 }
+    { id: 1, bestellungId: 1, artikelId: 3, artikelNr: "ART003", menge: 3, einzelpreis: 24.5 },
+    { id: 2, bestellungId: 2, artikelId: 1, artikelNr: "ART001", menge: 5, einzelpreis: 420 }
 ];
 
 export let kategorien = [
@@ -876,9 +909,39 @@ export let zahlungen = [
         zahlungsart: "Eingang",
         datum: "2026-07-22",
         ausfuehrenAm: "2026-07-22",
+        ausfuehrungsdatum: "2026-07-22",
         betrag: 1799.7,
+        name: "Emsland Tourismus GmbH",
+        iban: "DE75512108001245126199",
+        verwendungszweck: "Rechnung RG-2026-002",
         methode: "Überweisung",
         status: "ausgefuehrt"
+    },
+    {
+        id: 2,
+        zahlungsart: "Eingang",
+        datum: "2026-08-06",
+        ausfuehrenAm: "2026-08-06",
+        ausfuehrungsdatum: "2026-08-06",
+        betrag: 1348.5,
+        name: "Campus Baumarkt GmbH",
+        iban: "DE44500105175407324931",
+        verwendungszweck: "Zahlung zu RG-2026-001",
+        methode: "Überweisung",
+        status: "offen"
+    },
+    {
+        id: 3,
+        zahlungsart: "Ausgang",
+        datum: "2026-08-07",
+        ausfuehrenAm: "2026-08-07",
+        ausfuehrungsdatum: "2026-08-07",
+        betrag: 2100,
+        name: "Kalkhoff Werke GmbH",
+        iban: "DE68500500001234567890",
+        verwendungszweck: "Eingangsrechnung ER-2026-002",
+        methode: "Überweisung",
+        status: "offen"
     }
 ];
 
@@ -944,7 +1007,10 @@ export let berichte = [
         status: "fertig",
         zusammenfassung: "3 offene Angebote, 1 neuer Auftrag, 1 Reklamation.",
         zielgruppe: "Lehrkraft",
-        empfohlenAktion: "Angebote und Reklamationen im Unterricht vergleichen."
+        empfohlenAktion: "Angebote und Reklamationen im Unterricht vergleichen.",
+        startdatum: "2026-07-21",
+        enddatum: "2026-07-27",
+        intervall: "Woche"
     },
     {
         id: 2,
@@ -954,7 +1020,10 @@ export let berichte = [
         status: "Entwurf",
         zusammenfassung: "Niedrige Bestände bei Lastenrädern und Helmen.",
         zielgruppe: "Klasse",
-        empfohlenAktion: "Bedarfsmeldung und Bestellung aus dem Lagerstand ableiten."
+        empfohlenAktion: "Bedarfsmeldung und Bestellung aus dem Lagerstand ableiten.",
+        startdatum: "2026-07-01",
+        enddatum: "2026-07-31",
+        intervall: "Monat"
     }
 ];
 

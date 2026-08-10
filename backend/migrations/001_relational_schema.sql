@@ -6,6 +6,7 @@ create table if not exists kunden (
     plz text,
     ort text,
     segment text,
+    iban text,
     website text,
     notiz text
 );
@@ -18,6 +19,7 @@ create table if not exists lieferanten (
     plz text,
     ort text,
     segment text,
+    iban text,
     fuer_btz boolean default false,
     bewertung numeric(4,2),
     favorit boolean default false,
@@ -33,6 +35,8 @@ create table if not exists artikel (
     einkaufspreis numeric(12,2),
     verkaufspreis numeric(12,2),
     bestand numeric(12,2) default 0,
+    mindestmenge numeric(12,2) default 0,
+    bedarfsmeldung_bei numeric(12,2) default 0,
     beschreibung text,
     ist_verkaufbar boolean default true
 );
@@ -354,9 +358,13 @@ create table if not exists zahlungen (
     auftrag_id bigint references auftraege(id) on delete set null,
     bestellung_id bigint references bestellungen(id) on delete set null,
     zahlungsart text not null,
+    name text,
+    iban text,
     datum date not null,
     ausfuehren_am date,
+    ausfuehrungsdatum date,
     betrag numeric(12,2) not null,
+    verwendungszweck text,
     methode text,
     status text not null
 );

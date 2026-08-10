@@ -7,11 +7,14 @@ import LoginLayout from "../layouts/LoginLayout";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/start/Dashboard";
 import Organisation from "../pages/start/Organisation";
+import Glossar from "../pages/start/Glossar";
+import Suche from "../pages/start/Suche";
 import LehrkraftOverview from "../pages/lehrkraft/LehrkraftOverview";
 import LehrkraftKundenkorrespondenz from "../pages/lehrkraft/LehrkraftKundenkorrespondenz";
 import LehrkraftLieferantenkorrespondenz from "../pages/lehrkraft/LehrkraftLieferantenkorrespondenz";
 import LehrkraftZahlungen from "../pages/lehrkraft/LehrkraftZahlungen";
 import LehrkraftRechnungen from "../pages/lehrkraft/LehrkraftRechnungen";
+import LehrkraftOptionen from "../pages/lehrkraft/LehrkraftOptionen";
 import EinkaufOverview from "../pages/einkauf/EinkaufOverview";
 import Lieferanten from "../pages/einkauf/Lieferanten";
 import Lieferantenvergleich from "../pages/einkauf/Lieferantenvergleich";
@@ -42,6 +45,9 @@ import Urlaubsantraege from "../pages/personalwesen/Urlaubsantraege";
 import Krankmeldungen from "../pages/personalwesen/Krankmeldungen";
 import Schulungen from "../pages/personalwesen/Schulungen";
 import Buchhaltung from "../pages/buchhaltung/Buchhaltung";
+import Bankauszug from "../pages/buchhaltung/Bankauszug";
+import Eingangsrechnungen from "../pages/buchhaltung/Eingangsrechnungen";
+import Ausgangsrechnungen from "../pages/buchhaltung/Ausgangsrechnungen";
 import Firmenkonto from "../pages/buchhaltung/Firmenkonto";
 import Rechnungen from "../pages/buchhaltung/Rechnungen";
 import Zahlungen from "../pages/buchhaltung/Zahlungen";
@@ -54,6 +60,7 @@ import Freigaben from "../pages/gf/Freigaben";
 import VerwaltungOverview from "../pages/verwaltung/VerwaltungOverview";
 import Benutzer from "../pages/verwaltung/Benutzer";
 import Nummernkreise from "../pages/verwaltung/Nummernkreise";
+import Optionen from "../pages/verwaltung/Optionen";
 import Rollen from "../pages/verwaltung/Rollen";
 import Rechte from "../pages/verwaltung/Rechte";
 import SzenarienOverview from "../pages/szenarien/SzenarienOverview";
@@ -106,6 +113,7 @@ function AppRouter() {
                 <Route path="lehrkraft/lieferantenkorrespondenz" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <LehrkraftLieferantenkorrespondenz/>)}/>
                 <Route path="lehrkraft/zahlungen" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <LehrkraftZahlungen/>)}/>
                 <Route path="lehrkraft/rechnungen" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <LehrkraftRechnungen/>)}/>
+                <Route path="lehrkraft/optionen" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <LehrkraftOptionen/>)}/>
                 <Route
                     path="kunden"
                     element={protectedPage(ACCESS.KUNDE, <Kunden/>)}
@@ -128,6 +136,8 @@ function AppRouter() {
                 <Route path="vertriebsdokumente" element={protectedPage(ACCESS.VERKAUF, <Vertriebsdokumente/>)}/>
                 <Route path="reklamationen" element={protectedPage(ACCESS.SERVICE, <Reklamationen/>)}/>
                 <Route path="organisation" element={protectedPage(ACCESS.ORGANISATION, <Organisation/>)}/>
+                <Route path="glossar" element={<Glossar/>}/>
+                <Route path="suche" element={<Suche/>}/>
                 <Route path="buchhaltung" element={protectedPage(ACCESS.BUCHHALTUNG, <Buchhaltung/>)}/>
                 <Route path="marketing" element={protectedPage(ACCESS.MARKETING, <Marketing/>)}/>
                 <Route path="logistik" element={protectedPage(ACCESS.LOGISTIK, <Logistik/>)}/>
@@ -150,9 +160,12 @@ function AppRouter() {
                     path="rechnungen"
                     element={protectedPage(ACCESS.RECHNUNG, <Rechnungen/>)}
                 />
+                <Route path="eingangsrechnungen" element={protectedPage(ACCESS.RECHNUNG, <Eingangsrechnungen/>)}/>
+                <Route path="ausgangsrechnungen" element={protectedPage(ACCESS.RECHNUNG, <Ausgangsrechnungen/>)}/>
                 <Route path="zahlungen" element={protectedPage(ACCESS.BUCHHALTUNG, <Zahlungen/>)}/>
                 <Route path="mahnungen" element={protectedPage(ACCESS.BUCHHALTUNG, <Mahnungen/>)}/>
                 <Route path="belege" element={protectedPage(ACCESS.BUCHHALTUNG, <Belege/>)}/>
+                <Route path="bankauszug" element={protectedAnyPage([ACCESS.BUCHHALTUNG, ACCESS.VERKAUF, ACCESS.EINKAUF, ACCESS.GESCHAEFTSFUEHRUNG], <Bankauszug/>)}/>
                 <Route path="firmenkonto" element={protectedAnyPage([ACCESS.BUCHHALTUNG, ACCESS.VERKAUF, ACCESS.EINKAUF, ACCESS.GESCHAEFTSFUEHRUNG], <Firmenkonto/>)}/>
                 <Route path="abc-analyse" element={protectedPage(ACCESS.BUCHHALTUNG, <ABCAnalyse/>)}/>
                 <Route path="freigaben" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <Freigaben/>)}/>
@@ -171,6 +184,10 @@ function AppRouter() {
                 <Route
                     path="nummernkreise"
                     element={protectedPage(ACCESS.BENUTZER, <Nummernkreise/>)}
+                />
+                <Route
+                    path="optionen"
+                    element={protectedPage(ACCESS.BENUTZER, <Optionen/>)}
                 />
                 <Route
                     path="rollen"

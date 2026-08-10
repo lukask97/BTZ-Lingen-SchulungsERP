@@ -8,7 +8,9 @@ export const NAVIGATION_GROUPS = [
         access: null,
         items: [
             { title: "Dashboard", path: "/", access: null },
-            { title: "Organisation", path: "/organisation", access: ACCESS.ORGANISATION }
+            { title: "Organisation", path: "/organisation", access: ACCESS.ORGANISATION },
+            { title: "Glossar", path: "/glossar", access: null },
+            { title: "Suche", path: "/suche", access: null }
         ]
     },
     {
@@ -20,7 +22,8 @@ export const NAVIGATION_GROUPS = [
         items: [
             { title: "Lehrkraft-Übersicht", path: "/lehrkraft", access: ACCESS.GESCHAEFTSFUEHRUNG },
             { title: "Kundenkorrespondenz", path: "/lehrkraft/kundenkorrespondenz", access: ACCESS.GESCHAEFTSFUEHRUNG },
-            { title: "Lieferantenkorrespondenz", path: "/lehrkraft/lieferantenkorrespondenz", access: ACCESS.GESCHAEFTSFUEHRUNG }
+            { title: "Lieferantenkorrespondenz", path: "/lehrkraft/lieferantenkorrespondenz", access: ACCESS.GESCHAEFTSFUEHRUNG },
+            { title: "Lehrkraft-Optionen", path: "/lehrkraft/optionen", access: ACCESS.GESCHAEFTSFUEHRUNG }
         ]
     },
     {
@@ -97,9 +100,10 @@ export const NAVIGATION_GROUPS = [
         items: [
             { title: "Buchhaltung", path: "/buchhaltung", access: ACCESS.BUCHHALTUNG },
             { title: "ABC-Analyse", path: "/abc-analyse", access: ACCESS.BUCHHALTUNG },
+            { title: "Ausgangsrechnungen", path: "/ausgangsrechnungen", access: ACCESS.RECHNUNG },
+            { title: "Eingangsrechnungen", path: "/eingangsrechnungen", access: ACCESS.RECHNUNG },
+            { title: "Bankauszug", path: "/bankauszug", access: ACCESS.BUCHHALTUNG },
             { title: "Firmenkonto", path: "/firmenkonto", access: ACCESS.BUCHHALTUNG },
-            { title: "Rechnungen", path: "/rechnungen", access: ACCESS.RECHNUNG },
-            { title: "Zahlungen", path: "/zahlungen", access: ACCESS.BUCHHALTUNG },
             { title: "Mahnungen", path: "/mahnungen", access: ACCESS.BUCHHALTUNG },
             { title: "Belege", path: "/belege", access: ACCESS.BUCHHALTUNG }
         ]
@@ -123,6 +127,7 @@ export const NAVIGATION_GROUPS = [
         items: [
             { title: "Benutzer", path: "/benutzer", access: ACCESS.BENUTZER },
             { title: "Nummernkreise", path: "/nummernkreise", access: ACCESS.BENUTZER },
+            { title: "Optionen", path: "/optionen", access: ACCESS.BENUTZER },
             { title: "Rollen", path: "/rollen", access: ACCESS.ROLLEN }
         ]
     }

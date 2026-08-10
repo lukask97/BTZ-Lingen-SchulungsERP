@@ -45,6 +45,8 @@ function splitPayload(payload: any = {}) {
     };
 }
 
+const OFFENE_BESTELLSTATUS = ["angefragt", "bestaetigt", "versendet"];
+
 export function naechsteBestellnummer() {
     return `EK-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
 }
@@ -104,6 +106,40 @@ export function versendeBestellung(bestellung: any) {
         status: "versendet",
         versendetAm: getBerlinDate()
     });
+}
+
+export function getOffeneBestellmengenProArtikel() {
+    return service.getAll()
+        .filter(bestellung => OFFENE_BESTELLSTATUS.includes(String(bestellung.status || "").toLowerCase()))
+        .reduce((map: Record<string, number>, bestellung) => {
+            (bestellung.positionen || []).forEach((position: any) => {
+                const key = String(position.artikelId || "");
+                if (!key) return;
+                map[key] = Number(map[key] || 0) + Number(position.menge || 0);
+            });
+            return map;
+        }, {});
+}
+
+export function getAutomatischeBedarfsmeldungen() {
+    return artikelService.getAll()
+        .filter(item => Number(item.bedarfsmeldungBei || 0) > 0)
+        .filter(item => Number(item.bestand || 0) <= Number(item.bedarfsmeldungBei || 0))
+        .map(item => ({
+            id: `auto-artikel-${item.id}`,
+            artikelId: item.id,
+            artikelNr: item.artikelNr,
+            artikel: item.name,
+            bestand: Number(item.bestand || 0),
+            bedarfsmeldungBei: Number(item.bedarfsmeldungBei || 0),
+            mindestmenge: Number(item.mindestmenge || 0),
+            empfohleneMenge: Math.max(
+                1,
+                Number(item.mindestmenge || 0) > Number(item.bestand || 0)
+                    ? Number(item.mindestmenge || 0) - Number(item.bestand || 0)
+                    : Number(item.bedarfsmeldungBei || 0) - Number(item.bestand || 0) + 1
+            )
+        }));
 }
 
 export default service;

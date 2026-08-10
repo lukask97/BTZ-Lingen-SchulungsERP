@@ -8,7 +8,7 @@ import NumberField from "../../components/form/NumberField";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import { PERMISSIONS } from "../../constants/permissions";
-import bestellungenService, { naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
+import bestellungenService, { getAutomatischeBedarfsmeldungen, naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
 import artikelService from "../../services/logistik/artikelService";
 import OverviewCards from "../../components/OverviewCards";
@@ -27,7 +27,8 @@ function createBestellungDialogState(lieferanten: any[], artikel: any[]) {
         menge: 1,
         positionen: [],
         notiz: "",
-        fehler: ""
+        fehler: "",
+        vorgemerktePositionen: []
     };
 }
 
@@ -62,8 +63,10 @@ export default function Bestellungen() {
     const [suchbegriff, setSuchbegriff] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [quellenFilter, setQuellenFilter] = useState("");
+    const [selectedBedarfIds, setSelectedBedarfIds] = useState<Array<string | number>>([]);
     const lieferanten = lieferantenService.getAll();
     const artikel = artikelService.getAll().filter(item => item.istEinkaufbar);
+    const automatischeBedarfsmeldungen = useMemo(() => getAutomatischeBedarfsmeldungen(), [bestellungen]);
     const bedarfsmeldungen = useMemo(
         () => bestellungen.filter(item => item.status === "bedarf gemeldet"),
         [bestellungen]
@@ -119,19 +122,19 @@ export default function Bestellungen() {
         if (vorgaben?.bedarfsmeldungId) {
             const bedarfsmeldung = bedarfsmeldungen.find(item => String(item.id) === String(vorgaben.bedarfsmeldungId));
             setDialogState({
-                ...naechsterDialog,
-                bedarfsmeldungId: String(vorgaben.bedarfsmeldungId),
-                positionen: bedarfsmeldung?.positionen?.map(position => ({
-                    artikelId: position.artikelId || "",
-                    artikelNr: position.artikelNr || "",
-                    artikel: position.artikel || "",
-                    menge: Number(position.menge || 0),
-                    einzelpreis: Number(position.einzelpreis || 0)
-                })) || [],
-                notiz: bedarfsmeldung
-                    ? `Uebernommen aus Bedarfsmeldung ${bedarfsmeldung.bestellNr}.`
-                    : ""
-            });
+            ...naechsterDialog,
+            bedarfsmeldungId: String(vorgaben.bedarfsmeldungId),
+            positionen: (vorgaben?.positionen || bedarfsmeldung?.positionen || []).map(position => ({
+                artikelId: position.artikelId || "",
+                artikelNr: position.artikelNr || "",
+                artikel: position.artikel || "",
+                menge: Number(position.menge || 0),
+                einzelpreis: Number(position.einzelpreis || 0)
+            })) || [],
+            notiz: vorgaben?.notiz || (bedarfsmeldung
+                ? `Uebernommen aus Bedarfsmeldung ${bedarfsmeldung.bestellNr}.`
+                : "")
+        });
         }
         setOffen(true);
     };
@@ -196,6 +199,38 @@ export default function Bestellungen() {
         });
     };
 
+    const gruppenbestellungStarten = () => {
+        const ausgewaehlteBedarfe = automatischeBedarfsmeldungen.filter(item =>
+            selectedBedarfIds.some(id => String(id) === String(item.id))
+        );
+        if (ausgewaehlteBedarfe.length === 0) return;
+
+        const positionenMap = new Map<string, any>();
+        ausgewaehlteBedarfe.forEach(row => {
+            const key = String(row.artikelId);
+            const vorhandenePosition = positionenMap.get(key);
+            const einzelpreis = artikel.find(item => String(item.id) === String(row.artikelId))?.einkaufspreis || 0;
+            if (vorhandenePosition) {
+                vorhandenePosition.menge += Number(row.empfohleneMenge || 0);
+                return;
+            }
+            positionenMap.set(key, {
+                artikelId: row.artikelId,
+                artikelNr: row.artikelNr,
+                artikel: row.artikel,
+                menge: Number(row.empfohleneMenge || 0),
+                einzelpreis
+            });
+        });
+
+        neu({
+            anfrageQuelle: "bedarfsmeldung",
+            bedarfsmeldungId: ausgewaehlteBedarfe.map(item => item.id).join(","),
+            positionen: Array.from(positionenMap.values()),
+            notiz: `Gruppenbestellung aus ${ausgewaehlteBedarfe.length} Bedarfsmeldungen übernommen: ${ausgewaehlteBedarfe.map(item => item.artikelNr).join(", ")}.`
+        });
+    };
+
     const speichern = () => {
         const lieferant = lieferanten.find(item => item.id === Number(dialogState.lieferantId));
         if (dialogState.anfrageQuelle === "lieferantenvergleich" && !lieferant) {
@@ -242,15 +277,63 @@ export default function Bestellungen() {
     const angefragteBestellungen = bestellungen.filter(item => item.status === "angefragt").length;
     const versendeteBestellungen = bestellungen.filter(item => item.status === "versendet").length;
     const eingegangeneBestellungen = bestellungen.filter(item => item.status === "eingegangen").length;
+    const offeneAutomatischeBedarfe = automatischeBedarfsmeldungen.length;
 
     return <>
         <OverviewCards cards={[
             { label: "Bestellungen gesamt", value: bestellungen.length },
             { label: "Bedarf gemeldet", value: gemeldeteBedarfe },
+            { label: "Kritische Bedarfsmeldungen", value: offeneAutomatischeBedarfe },
             { label: "Anfragen offen", value: angefragteBestellungen },
             { label: "Aus Lieferantenvergleich", value: bestellungen.filter(item => item.anfrageQuelle === "lieferantenvergleich").length },
             { label: "Wareneingang gebucht", value: eingegangeneBestellungen }
         ]}/>
+        <DataTable
+            title="Offene Bedarfsmeldungen aus dem Artikelbestand"
+            selectableColumns={false}
+            selectableRows
+            selectedRowIds={selectedBedarfIds}
+            onSelectedRowsChange={setSelectedBedarfIds}
+            data={automatischeBedarfsmeldungen}
+            columns={[
+                { field: "artikelNr", title: "Artikelnummer" },
+                { field: "artikel", title: "Artikel" },
+                { field: "bestand", title: "Bestand" },
+                { field: "bedarfsmeldungBei", title: "Bedarfsmeldung bei" },
+                { field: "mindestmenge", title: "Sicherheitsbestand" },
+                { field: "empfohleneMenge", title: "Empfohlene Bestellmenge" }
+            ]}
+            toolbarActions={[
+                {
+                    name: "group-create",
+                    label: `Auswahl übernehmen (${selectedBedarfIds.length})`,
+                    permission: PERMISSIONS.EINKAUF_BEARBEITEN,
+                    onClick: gruppenbestellungStarten,
+                    variant: "success",
+                    isDisabled: () => selectedBedarfIds.length === 0
+                }
+            ]}
+            rowActions={[
+                {
+                    name: "create",
+                    label: "In Bestellung übernehmen",
+                    permission: PERMISSIONS.EINKAUF_BEARBEITEN,
+                    onClick: row => neu({
+                        anfrageQuelle: "bedarfsmeldung",
+                        bedarfsmeldungId: row.id,
+                        positionen: [{
+                            artikelId: row.artikelId,
+                            artikelNr: row.artikelNr,
+                            artikel: row.artikel,
+                            menge: row.empfohleneMenge,
+                            einzelpreis: artikel.find(item => String(item.id) === String(row.artikelId))?.einkaufspreis || 0
+                        }],
+                        notiz: `Automatische Bedarfsmeldung für ${row.artikelNr} aus dem Artikelbestand übernommen.`
+                    }),
+                    variant: "secondary"
+                }
+            ]}
+        />
         <DataTable
             title="Bestellungen"
             columns={[

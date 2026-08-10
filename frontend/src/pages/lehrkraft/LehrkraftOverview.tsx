@@ -9,10 +9,12 @@ import bestellungenService from "../../services/einkauf/bestellungenService";
 import { isPendingPayment } from "../../utils/openItems";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 import { getOpenGoodsReceiptOrders, getPurchaseOrdersByStatus } from "../../utils/processFlow";
+import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 
 const OFFER_OPEN_STATUSES = ["wartet auf antwort"];
 
 export default function LehrkraftOverview() {
+    useLehrkraftAutomationen();
     useStorageSyncRefresh(["kundenanfragen", "angebote", "vertriebsdokumente", "bestellungen", "zahlungen", "auftraege"]);
 
     const kundenkorrespondenz = customerInquiryService.list();
@@ -61,7 +63,7 @@ export default function LehrkraftOverview() {
                 </ul>
                 <div className="dashboard-mini-links">
                     <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Kundenkorrespondenz oeffnen</Link>
-                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Offene Antworten oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/optionen">Lehrkraft-Optionen</Link>
                 </div>
             </article>
 
@@ -97,6 +99,7 @@ export default function LehrkraftOverview() {
                 <div className="dashboard-mini-links">
                     <Link className="button-link" to="/lehrkraft/zahlungen">Zahlungen extern oeffnen</Link>
                     <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Zur Kundenkorrespondenz</Link>
+                    <Link className="button-link" to="/lehrkraft/optionen">Automatik verwalten</Link>
                 </div>
             </article>
 

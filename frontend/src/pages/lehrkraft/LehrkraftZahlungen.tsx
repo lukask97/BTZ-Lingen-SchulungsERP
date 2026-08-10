@@ -13,9 +13,11 @@ import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { getBerlinDate } from "../../utils/dateTime";
 import { getPaymentOpenItemStatus, isPendingPayment } from "../../utils/openItems";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 
 export default function LehrkraftZahlungen() {
     const today = getBerlinDate();
+    useLehrkraftAutomationen();
     const [searchParams] = useSearchParams();
     const [zahlungen, setZahlungen] = useSyncedServiceData(
         ["zahlungen", "auftraege", "bestellungen"],

@@ -167,6 +167,9 @@ export default function Kunden() {
                     <option value="C">C</option>
                 </select>
 
+                <Label>IBAN</Label>
+                <TextField value={currentItem.iban || ""} onChange={v => handleFieldChange("iban", v)} />
+
                 <Label>Website</Label>
                 <TextField value={currentItem.website || ""} onChange={v => handleFieldChange("website", v)} />
 

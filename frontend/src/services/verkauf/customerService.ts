@@ -24,7 +24,7 @@ export const addKunde = (kunde) => kundenService.add(kunde);
 export const updateKunde = (kunde) => kundenService.update(kunde);
 export const deleteKunde = (id) => kundenService.delete(id);
 export const getKundeById = (id) => withPermissionFallback(
-    () => kundenService.getById(id),
+    () => (id == null || id === "" ? undefined : kundenService.getById(id)),
     getFallbackCustomers().find(item => String(item.id) === String(id))
 );
 export const searchKunden = (query) => withPermissionFallback(
@@ -37,7 +37,7 @@ export default {
     list: () => withPermissionFallback(() => kundenService.list(), getFallbackCustomers()),
     getAll: () => withPermissionFallback(() => kundenService.getAll(), getFallbackCustomers()),
     getById: (id) => withPermissionFallback(
-        () => kundenService.getById(id),
+        () => (id == null || id === "" ? undefined : kundenService.getById(id)),
         getFallbackCustomers().find(item => String(item.id) === String(id))
     ),
     search: (query) => withPermissionFallback(
