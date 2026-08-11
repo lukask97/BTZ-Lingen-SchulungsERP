@@ -9,7 +9,12 @@ export default function ProtectedRoute({
     access
 }: ProtectedRouteProps) {
 
-    const { user, hasAccess } = useAuth();
+    const { user, isAuthReady, hasAccess } = useAuth();
+
+
+    if (!isAuthReady) {
+        return null;
+    }
 
 
     if (!user) {

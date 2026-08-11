@@ -1,9 +1,43 @@
-import {users} from "../mockup/mockData.js";
+import { benutzer, rollen, rollenRechte } from "../mockup/mockData.js";
+import { apiRequest, isDatabaseModeEnabled } from "../core/api";
+import { resolveUserPermissions } from "../../auth/permissionResolver";
 
+export async function getCurrentBackendUser() {
+    if (!isDatabaseModeEnabled()) return null;
 
-export function login(username,password){
+    try {
+        const result = await apiRequest("/auth/me");
+        if (!result?.authenticated) {
+            return null;
+        }
 
-    const user = users.find(
+        return result.user || null;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error("Backend nicht erreichbar.");
+    }
+}
+
+export async function login(username,password){
+    try {
+        const result = await apiRequest("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ username, password })
+        });
+        return result.user || null;
+    } catch (error) {
+        if (error instanceof Error && error.message === "Benutzername oder Passwort falsch.") {
+            return null;
+        }
+
+        if (isDatabaseModeEnabled()) {
+            throw error;
+        }
+    }
+
+    const user = benutzer.find(
         u =>
             u.username === username &&
             u.password === password
@@ -14,6 +48,14 @@ export function login(username,password){
         return null;
 
 
-    return user;
+    return {
+        ...user,
+        permissions: resolveUserPermissions(user, rollen, rollenRechte)
+    };
 
+}
+
+export async function logoutPreviewSession() {
+    if (!isDatabaseModeEnabled()) return;
+    await apiRequest("/auth/logout", { method: "POST" });
 }

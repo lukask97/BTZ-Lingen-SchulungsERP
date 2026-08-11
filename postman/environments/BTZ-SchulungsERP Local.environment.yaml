@@ -1,0 +1,34 @@
+name: BTZ-SchulungsERP Local
+values:
+  - key: baseUrl
+    value: 'http://localhost:5000/api'
+  - key: dbBaseUrl
+    value: 'http://localhost:5000/api/datenbanken'
+  - key: username
+    value: gf
+  - key: password
+    value: gf
+  - key: lagerUsername
+    value: lager
+  - key: lagerPassword
+    value: lager
+  - key: kundeId
+    value: '1'
+  - key: kundeName
+    value: Campus Baumarkt GmbH
+  - key: anfrageId
+    value: ''
+  - key: vorgangId
+    value: ''
+  - key: angebotId
+    value: ''
+  - key: nachrichtId
+    value: ''
+  - key: userId
+    value: ''
+  - key: requestDate
+    value: ''
+  - key: requestDateCompact
+    value: ''
+  - key: requestTimestamp
+    value: ''

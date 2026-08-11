@@ -1,0 +1,34 @@
+$kind: http-request
+url: "{{dbBaseUrl}}/nachrichten"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "vorgangId": "{{vorgangId}}",
+      "anfrageId": {{anfrageId}},
+      "datum": "{{requestDate}}",
+      "zeitpunkt": "{{requestTimestamp}}",
+      "senderRolle": "Kunde",
+      "senderName": "{{kundeName}}",
+      "kanal": "E-Mail",
+      "betreff": "Rueckfrage aus Postman",
+      "nachricht": "Bitte senden Sie weitere Informationen zum Angebot.",
+      "typ": "Rueckfrage"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', function () {
+        pm.response.to.have.status(201);
+      });
+      const data = pm.response.json();
+      pm.test('Nachricht angelegt', function () {
+        pm.expect(data.ok).to.eql(true);
+        pm.expect(data.item.vorgangId).to.eql(pm.environment.get('vorgangId'));
+      });
+      pm.environment.set('nachrichtId', String(data.item.id));
+    language: text/javascript
+order: 3000

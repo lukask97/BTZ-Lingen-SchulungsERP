@@ -6,8 +6,14 @@ import mitarbeiterService from "../../services/personalwesen/mitarbeiterService"
 import personalaktenService from "../../services/personalwesen/personalaktenService";
 import schulungenService from "../../services/personalwesen/schulungenService";
 import urlaubsantraegeService from "../../services/personalwesen/urlaubsantraegeService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function Personalwesen() {
+    useStorageSyncRefresh([
+        "bewerber", "mitarbeiter", "arbeitszeiten", "urlaubsantraege",
+        "krankmeldungen", "schulungen", "personalakten"
+    ]);
+
     const bewerber = bewerberService.list();
     const mitarbeiter = mitarbeiterService.list();
     const arbeitszeiten = arbeitszeitenService.list();

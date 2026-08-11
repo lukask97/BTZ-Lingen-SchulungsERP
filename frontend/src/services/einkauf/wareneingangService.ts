@@ -1,6 +1,6 @@
-// @ts-nocheck
 import bestellungenService from "./bestellungenService";
 import artikelService from "../logistik/artikelService";
+import { getBerlinDate } from "../../utils/dateTime";
 
 export function bucheWareneingang(bestellungId) {
     const bestellung = bestellungenService.getAll().find(item => item.id === bestellungId);
@@ -19,7 +19,7 @@ export function bucheWareneingang(bestellungId) {
     bestellungenService.update({
         ...bestellung,
         status: "eingegangen",
-        wareneingangAm: new Date().toISOString().slice(0, 10),
+        wareneingangAm: getBerlinDate(),
         rechnungStatus: "offen"
     });
 

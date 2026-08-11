@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { kategorien } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
 
@@ -19,13 +18,46 @@ function resolvePath(category, allCategories) {
     return parts.join(" > ");
 }
 
+function resolveDepth(category, allCategories) {
+    let depth = 0;
+    let currentParentId = category?.parentId;
+
+    while (currentParentId) {
+        const parent = allCategories.find(item => String(item.id) === String(currentParentId));
+        if (!parent) break;
+        depth += 1;
+        currentParentId = parent.parentId;
+    }
+
+    return depth;
+}
+
+function resolveRootCategory(category, allCategories) {
+    if (!category) return null;
+
+    let current = category;
+    while (current?.parentId) {
+        const parent = allCategories.find(item => String(item.id) === String(current.parentId));
+        if (!parent) break;
+        current = parent;
+    }
+
+    return current;
+}
+
 export function normalizeKategorie(item = {}, allCategories = baseService.list()) {
     const parent = allCategories.find(entry => String(entry.id) === String(item.parentId));
+    const root = resolveRootCategory(item, allCategories);
+    const depth = resolveDepth(item, allCategories);
     return {
         ...item,
         parentId: item.parentId ?? "",
         parentName: parent?.name || "",
-        pfad: resolvePath(item, allCategories)
+        pfad: resolvePath(item, allCategories),
+        ebene: depth,
+        istOberkategorie: depth === 0,
+        hauptkategorie: root?.name || item.name || "",
+        sortName: `${root?.name || item.name || ""}-${resolvePath(item, allCategories)}`
     };
 }
 

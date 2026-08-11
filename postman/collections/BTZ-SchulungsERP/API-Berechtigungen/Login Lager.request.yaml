@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "{{lagerUsername}}",
+      "password": "{{lagerPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', function () {
+        pm.response.to.have.status(200);
+      });
+      const data = pm.response.json();
+      pm.test('Lager-Login erfolgreich', function () {
+        pm.expect(data.ok).to.eql(true);
+        pm.expect(data.user.username).to.eql(pm.environment.get('lagerUsername'));
+        pm.expect(data.user.rolle).to.eql('Lager');
+        pm.expect(Array.isArray(data.user.permissions)).to.eql(true);
+      });
+    language: text/javascript
+order: 3000

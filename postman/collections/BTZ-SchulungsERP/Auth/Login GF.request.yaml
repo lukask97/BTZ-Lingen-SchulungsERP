@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', function () {
+        pm.response.to.have.status(200);
+      });
+      const data = pm.response.json();
+      pm.test('Login erfolgreich', function () {
+        pm.expect(data.ok).to.eql(true);
+        pm.expect(data.user.username).to.eql(pm.environment.get('username'));
+      });
+      pm.environment.set('userId', String(data.user.id));
+    language: text/javascript
+order: 1000

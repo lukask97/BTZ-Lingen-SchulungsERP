@@ -6,6 +6,7 @@ import freigabenService from "../gf/freigabenService";
 import kundenService from "../verkauf/customerService";
 import marketingService from "../marketing/marketingService";
 import reklamationenService, { naechsteReklamationsnummer } from "../verkauf/reklamationenService";
+import { naechsteAuftragsnummer } from "../verkauf/verkaufService";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const plusDays = (days) => {
@@ -13,8 +14,6 @@ const plusDays = (days) => {
     date.setDate(date.getDate() + days);
     return date.toISOString().slice(0, 10);
 };
-const nextOrderNumber = () => `VK-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
-
 function findOrCreateCustomer(name) {
     const existing = kundenService.list().find(item => item.firma.toLowerCase() === name.toLowerCase());
     if (existing) return existing;
@@ -31,11 +30,10 @@ function findOrCreateCustomer(name) {
     });
 }
 
-function createOrder({ kunde, positionen, status = "offen", notiz = "" }) {
+function createOrder({ kundeId, positionen, status = "offen", notiz = "" }) {
     return auftraegeService.create({
-        auftragNr: nextOrderNumber(),
-        kundeId: kunde.id,
-        kunde: kunde.firma,
+        auftragNr: naechsteAuftragsnummer(),
+        kundeId,
         datum: today(),
         status,
         positionen,
@@ -46,7 +44,7 @@ function createOrder({ kunde, positionen, status = "offen", notiz = "" }) {
 export function createRegionalOrder({ kunde, produkt, menge, liefertermin, transport }) {
     const customer = findOrCreateCustomer(kunde.trim());
     const order = createOrder({
-        kunde: customer,
+        kundeId: customer.id,
         positionen: [{ artikelId: 0, artikel: produkt.trim(), menge: Number(menge) }],
         notiz: `Liefertermin: ${liefertermin}. Transport: ${transport}.`
     });
@@ -58,7 +56,6 @@ export function createBulkOrder({ kunde, produkt, menge, zubehoer, rabatt }) {
     const angebot = angeboteService.create({
         angebotsNr: naechsteAngebotsnummer(),
         kundeId: customer.id,
-        kunde: customer.firma,
         datum: today(),
         gueltigBis: plusDays(14),
         status: "offen",
@@ -74,7 +71,7 @@ export function createBulkOrder({ kunde, produkt, menge, zubehoer, rabatt }) {
 export function createFleetOrder({ kunde, flotte, wartung, status }) {
     const customer = findOrCreateCustomer(kunde.trim());
     const order = createOrder({
-        kunde: customer,
+        kundeId: customer.id,
         positionen: [{ artikelId: 0, artikel: "Flottenauftrag", menge: Number(flotte) }],
         status: status || "offen",
         notiz: `Wartung: ${wartung}.`
@@ -85,7 +82,7 @@ export function createFleetOrder({ kunde, flotte, wartung, status }) {
 export function createEventOrder({ kunde, eventname, menge, koordinierung }) {
     const customer = findOrCreateCustomer(kunde.trim());
     const order = createOrder({
-        kunde: customer,
+        kundeId: customer.id,
         positionen: [{ artikelId: 0, artikel: `Eventpaket ${eventname.trim()}`, menge: Number(menge) }],
         notiz: `Koordination: ${koordinierung}.`
     });
@@ -98,7 +95,6 @@ export function createServiceCase({ kunde, problem, wartung }) {
     const complaint = reklamationenService.create({
         reklamationsNr: naechsteReklamationsnummer(),
         kundeId: customer.id,
-        kunde: customer.firma,
         datum: today(),
         beschreibung: `${problem}. Wartung: ${wartung}.`,
         status: "Ersatzlieferung geplant"
@@ -111,7 +107,6 @@ export function createDelayCase({ kunde, auftrag, info, alternative }) {
     customerInquiryService.create({
         typ: "Transportverzögerung",
         kundeId: customer.id,
-        kunde: customer.firma,
         kanal: "E-Mail",
         status: "erledigt",
         datum: today(),

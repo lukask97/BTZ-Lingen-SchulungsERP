@@ -1,10 +1,15 @@
-const TODAY = "2026-07-28";
+import { getBerlinDate } from "./dateTime";
+
+function getToday() {
+    return getBerlinDate();
+}
 
 export function getOpenItemStatus(rechnung: any) {
+    const today = getToday();
     if (!rechnung) return "offen";
     if (rechnung.status === "bezahlt") return "bezahlt";
     if (rechnung.status === "storniert") return "storniert";
-    if (rechnung.faelligAm && rechnung.faelligAm < TODAY) return "ueberfaellig";
+    if (rechnung.faelligAm && rechnung.faelligAm < today) return "ueberfaellig";
     return "offen";
 }
 
@@ -30,10 +35,11 @@ export function sumPaidItems(rechnungen: any[] = []) {
 }
 
 export function getPaymentOpenItemStatus(zahlung: any) {
+    const today = getToday();
     if (!zahlung) return "offen";
-    if (zahlung.status === "ausgefuehrt") return "bezahlt";
+    if (zahlung.status === "ausgefuehrt" || zahlung.status === "zugeordnet") return "bezahlt";
     if (zahlung.status === "storniert") return "storniert";
-    if ((zahlung.ausfuehrenAm || zahlung.datum) && (zahlung.ausfuehrenAm || zahlung.datum) < TODAY) return "ueberfaellig";
+    if ((zahlung.ausfuehrenAm || zahlung.datum) && (zahlung.ausfuehrenAm || zahlung.datum) < today) return "ueberfaellig";
     return "offen";
 }
 
@@ -59,7 +65,7 @@ export function getUnifiedOpenItems(rechnungen: any[] = [], zahlungen: any[] = [
             faelligAm: rechnung.faelligAm || "",
             betrag: Number(rechnung.betrag || 0),
             ampel: getOpenItemStatus(rechnung),
-            link: `/rechnungen?focus=${rechnung.rechnungsnr}`
+            link: `/${rechnung.rechnungstyp === "Eingangsrechnung" ? "eingangsrechnungen" : "ausgangsrechnungen"}?focus=${rechnung.rechnungsnr}`
         }));
 
     const offeneZahlungen = zahlungen
@@ -74,7 +80,7 @@ export function getUnifiedOpenItems(rechnungen: any[] = [], zahlungen: any[] = [
             faelligAm: zahlung.ausfuehrenAm || zahlung.datum || "",
             betrag: Number(zahlung.betrag || 0),
             ampel: getPaymentOpenItemStatus(zahlung),
-            link: `/zahlungen?focus=${zahlung.rechnungsnr}`
+            link: `/${zahlung.zahlungsart === "Ausgang" ? "eingangsrechnungen" : "ausgangsrechnungen"}${zahlung.rechnungsnr ? `?focus=${zahlung.rechnungsnr}` : ""}`
         }));
 
     return [...offeneRechnungen, ...offeneZahlungen];

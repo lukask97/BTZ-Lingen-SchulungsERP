@@ -1,0 +1,10 @@
+.footer {
+    padding: 20px;
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+  }
+  .footer-content > div {
+    margin: 4px 0;
+  }
+  

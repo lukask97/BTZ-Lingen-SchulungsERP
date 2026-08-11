@@ -7,10 +7,16 @@ import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumente
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import { isPendingPayment } from "../../utils/openItems";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { getOpenGoodsReceiptOrders, getPurchaseOrdersByStatus } from "../../utils/processFlow";
+import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 
 const OFFER_OPEN_STATUSES = ["wartet auf antwort"];
 
 export default function LehrkraftOverview() {
+    useLehrkraftAutomationen();
+    useStorageSyncRefresh(["kundenanfragen", "angebote", "vertriebsdokumente", "bestellungen", "zahlungen", "auftraege"]);
+
     const kundenkorrespondenz = customerInquiryService.list();
     const angebote = angeboteService.getAll();
     const vertriebsdokumente = vertriebsdokumenteService.list();
@@ -24,9 +30,9 @@ export default function LehrkraftOverview() {
         ["lieferschein", "warenbegleitpapier", "transportpapier"].includes(String(item.dokumentTyp || "").toLowerCase())
         && String(item.status || "").toLowerCase() !== "versendet"
     ).length;
-    const offeneLieferantenanfragen = bestellungen.filter(item => item.status === "angefragt").length;
-    const bestaetigteBestellungen = bestellungen.filter(item => item.status === "bestaetigt").length;
-    const versendeteBestellungen = bestellungen.filter(item => item.status === "versendet").length;
+    const offeneLieferantenanfragen = getPurchaseOrdersByStatus(bestellungen, "angefragt").length;
+    const bestaetigteBestellungen = getPurchaseOrdersByStatus(bestellungen, "bestaetigt").length;
+    const versendeteBestellungen = getOpenGoodsReceiptOrders(bestellungen).length;
     const offeneDebitorenzahlungen = zahlungen.filter(item => item.zahlungsart !== "Ausgang" && isPendingPayment(item)).length;
     const offeneRechnungenZurSchuelerfirma = rechnungen.filter(item => item.status !== "bezahlt").length;
 
@@ -57,7 +63,7 @@ export default function LehrkraftOverview() {
                 </ul>
                 <div className="dashboard-mini-links">
                     <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Kundenkorrespondenz oeffnen</Link>
-                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Offene Antworten oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/optionen">Lehrkraft-Optionen</Link>
                 </div>
             </article>
 
@@ -93,6 +99,7 @@ export default function LehrkraftOverview() {
                 <div className="dashboard-mini-links">
                     <Link className="button-link" to="/lehrkraft/zahlungen">Zahlungen extern oeffnen</Link>
                     <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Zur Kundenkorrespondenz</Link>
+                    <Link className="button-link" to="/lehrkraft/optionen">Automatik verwalten</Link>
                 </div>
             </article>
 

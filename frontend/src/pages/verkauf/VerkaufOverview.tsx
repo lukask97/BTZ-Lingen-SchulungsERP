@@ -5,8 +5,11 @@ import customerInquiryService from "../../services/verkauf/customerInquiryServic
 import kundenService from "../../services/verkauf/customerService";
 import reklamationenService from "../../services/verkauf/reklamationenService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function VerkaufOverview() {
+    useStorageSyncRefresh(["kunden", "kundenanfragen", "angebote", "auftraege", "reklamationen", "vertriebsdokumente"]);
+
     const kunden = kundenService.list();
     const anfragen = customerInquiryService.list();
     const angebote = angeboteService.list();

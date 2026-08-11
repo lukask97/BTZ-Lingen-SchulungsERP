@@ -3,9 +3,11 @@ import { useState } from "react";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
 import retourenService from "../../services/logistik/retourenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
 
 export default function Retouren() {
-    const [retouren, setRetouren] = useState(retourenService.list());
+    const [retouren, setRetouren] = useSyncedServiceData(["retouren", "kunden", "artikel"], () => retourenService.list());
 
     const abschliessen = (retoure) => {
         retourenService.update({ ...retoure, status: "abgeschlossen" });
@@ -49,13 +51,18 @@ export default function Retouren() {
             data={retouren}
             columns={[
                 { field: "retourenNr", title: "Retourennummer" },
-                { field: "kunde", title: "Kunde" },
-                { field: "artikel", title: "Artikel" },
+                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "artikel", title: "Artikel", render: row => row.artikelId ? <Link className="detail-link" to={`/artikel?focus=${row.artikelId}`}>{row.artikel}</Link> : row.artikel },
                 { field: "datum", title: "Datum" },
                 { field: "grund", title: "Grund" },
                 { field: "status", title: "Status" }
             ]}
-            rowActions={[{ name: "done", label: "Abschließen", permission: "logistik.bearbeiten", onClick: abschliessen, variant: "success", isVisible: row => row.status !== "abgeschlossen" }]}
+            detailLinkResolver={({ field, row }) => {
+                if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
+                if (field === "artikel" && row.artikelId) return `/artikel?focus=${row.artikelId}`;
+                return null;
+            }}
+            rowActions={[{ name: "done", label: "Abschließen", permission: PERMISSIONS.LOGISTIK_BEARBEITEN, onClick: abschliessen, variant: "success", isVisible: row => row.status !== "abgeschlossen" }]}
         />
     </>;
 }

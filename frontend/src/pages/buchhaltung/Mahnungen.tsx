@@ -2,29 +2,29 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
+import { PERMISSIONS } from "../../constants/permissions";
 import mahnungenService from "../../services/buchhaltung/mahnungenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
-import kundenService from "../../services/verkauf/customerService";
-import { getCustomerName } from "../../utils/customerReferences";
 import { isOpenItem, isOverdueOpenItem } from "../../utils/openItems";
-
-const today = "2026-07-28";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { getBerlinDate } from "../../utils/dateTime";
 
 export default function Mahnungen() {
-    const [mahnungen, setMahnungen] = useState(mahnungenService.list());
-    const kunden = kundenService.list();
+    const today = getBerlinDate();
+    const [mahnungen, setMahnungen] = useSyncedServiceData(
+        ["mahnungen", "auftraege", "bestellungen", "zahlungen", "kunden"],
+        () => mahnungenService.list()
+    );
 
     const resolveKundenLink = (row) => {
-        const rechnung = rechnungenService.list().find(item => item.rechnungsnr === row.rechnungsnr);
+        const rechnung = row.rechnungId ? rechnungenService.getById(row.rechnungId) : null;
         if (rechnung?.kundeId) return `/kunden?focus=${rechnung.kundeId}`;
-        const kunde = kunden.find(item => item.firma === row.kunde);
-        return kunde ? `/kunden?focus=${kunde.id}` : null;
+        return null;
     };
 
     const erzeugen = (rechnung) => {
         mahnungenService.create({
-            rechnungsnr: rechnung.rechnungsnr,
-            kunde: getCustomerName(rechnung.kundeId, rechnung.kunde),
+            rechnungId: rechnung.id,
             datum: today,
             status: "gesendet",
             stufe: "1. Mahnung"
@@ -53,7 +53,7 @@ export default function Mahnungen() {
             data={mahnungen}
             columns={[
                 { field: "datum", title: "Datum" },
-                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
+                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/ausgangsrechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
                 { field: "kunde", title: "Kunde", render: row => {
                     const link = resolveKundenLink(row);
                     return link ? <Link className="detail-link" to={link}>{row.kunde}</Link> : row.kunde;
@@ -63,29 +63,29 @@ export default function Mahnungen() {
             ]}
             focusField="rechnungsnr"
             detailLinkResolver={({ field, row, value }) => {
-                if (field === "rechnungsnr") return `/rechnungen?focus=${value}`;
+                if (field === "rechnungsnr") return `/ausgangsrechnungen?focus=${value}`;
                 if (field === "kunde") return resolveKundenLink(row);
                 return null;
             }}
-            rowActions={[{ name: "cancel", label: "Stornieren", permission: "buchhaltung.bearbeiten", onClick: stornieren, variant: "danger" }]}
+            rowActions={[{ name: "cancel", label: "Stornieren", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: stornieren, variant: "danger" }]}
         />
         <DataTable
             title="Mahnbare offene Posten"
             selectableColumns={false}
             data={offeneRechnungen}
             columns={[
-                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
+                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/ausgangsrechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
                 { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "betrag", title: "Betrag" },
                 { field: "datum", title: "Datum" }
             ]}
             focusField="rechnungsnr"
             detailLinkResolver={({ field, row, value }) => {
-                if (field === "rechnungsnr") return `/rechnungen?focus=${value}`;
+                if (field === "rechnungsnr") return `/ausgangsrechnungen?focus=${value}`;
                 if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 return null;
             }}
-            rowActions={[{ name: "remind", label: "Mahnung erstellen", permission: "buchhaltung.bearbeiten", onClick: erzeugen, variant: "warning" }]}
+            rowActions={[{ name: "remind", label: "Mahnung erstellen", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: erzeugen, variant: "warning" }]}
         />
     </>;
 }

@@ -20,9 +20,21 @@ services:
 
       - "5432:5432"
 
+    healthcheck:
+
+      test: ["CMD-SHELL", "pg_isready -U erp -d erp"]
+
+      interval: 5s
+
+      timeout: 5s
+
+      retries: 12
+
     volumes:
 
-      - ./database/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+
+      - ./database/init:/docker-entrypoint-initdb.d:ro
 
 
   pgadmin:
@@ -39,9 +51,21 @@ services:
 
       PGADMIN_DEFAULT_PASSWORD: admin
 
+      PGADMIN_REPLACE_SERVERS_ON_STARTUP: "True"
+
+      PGPASS_FILE: /pgpassfile
+
     ports:
 
       - "5050:80"
+
+    volumes:
+
+      - pgadmin_data:/var/lib/pgadmin
+
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+
+      - ./docker/pgadmin/pgpassfile:/pgpassfile:ro
 
 
   backend:
@@ -50,17 +74,63 @@ services:
 
     container_name: erp_backend
 
+    environment:
+
+      ERP_DATA_MODE: postgres
+
+      DATABASE_DSN: dbname=erp user=erp password=geheim host=postgres port=5432
+
+      ERP_SECRET_KEY: erp-docker-secret
+
+      ERP_CORS_ORIGINS: "*"
+
+      ERP_SERVER_CONFIG_PATH: /app_data/server-config.json
+
     ports:
 
       - "5000:5000"
 
+    restart: unless-stopped
+
     volumes:
 
-      - ./backend:/app
+      - backend_app_data:/app_data
+
+    develop:
+
+      watch:
+
+        - action: sync+restart
+
+          path: ./backend
+
+          target: /app
+
+          ignore:
+
+            - __pycache__/
+
+            - .pytest_cache/
+
+            - .mypy_cache/
+
+            - venv/
+
+            - .venv/
+
+        - action: rebuild
+
+          path: ./backend/requirements.txt
+
+        - action: rebuild
+
+          path: ./backend/Dockerfile
 
     depends_on:
 
-      - postgres
+      postgres:
+
+        condition: service_healthy
 
 
   frontend:
@@ -75,12 +145,49 @@ services:
 
     volumes:
 
-      - ./frontend:/app
-
       - /app/node_modules
 
-    command: npm run dev -- --host
+    develop:
 
+      watch:
+
+        - action: sync
+
+          path: ./frontend
+
+          target: /app
+
+          ignore:
+
+            - node_modules/
+
+            - dist/
+
+        - action: rebuild
+
+          path: ./frontend/package.json
+
+        - action: rebuild
+
+          path: ./frontend/package-lock.json
+
+        - action: rebuild
+
+          path: ./frontend/Dockerfile
+
+    command: >
+      sh -c "npm install &&
+         npm run dev -- --host &&
+         echo 'Frontend IP Address: http://$(hostname -I | awk \"{print \$1}\"):5173'"
     depends_on:
 
       - backend
+
+
+volumes:
+
+  postgres_data:
+
+  pgadmin_data:
+
+  backend_app_data:

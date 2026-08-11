@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/me"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', function () {
+        pm.response.to.have.status(200);
+      });
+      const data = pm.response.json();
+      pm.test('Lager-Session aktiv', function () {
+        pm.expect(data.authenticated).to.eql(true);
+        pm.expect(data.user.username).to.eql(pm.environment.get('lagerUsername'));
+        pm.expect(data.user.rolle).to.eql('Lager');
+      });
+    language: text/javascript
+order: 3500

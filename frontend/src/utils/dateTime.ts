@@ -29,6 +29,16 @@ export function getBerlinDate(date = new Date()) {
     return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
+export function addDaysToIsoDate(dateValue: string, days: number) {
+    const shiftedDate = new Date(`${dateValue}T12:00:00`);
+    shiftedDate.setDate(shiftedDate.getDate() + days);
+    return getBerlinDate(shiftedDate);
+}
+
+export function getRelativeBerlinDate(days: number, baseDate = getBerlinDate()) {
+    return addDaysToIsoDate(baseDate, days);
+}
+
 export function formatTimestampForDisplay(value?: string) {
     if (!value) return "";
     return String(value).replace("T", " ").slice(0, 16);

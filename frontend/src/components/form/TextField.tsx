@@ -1,6 +1,9 @@
+import { useId } from "react";
 import type { TextFieldProps } from "../../types/ui";
 
 export default function TextField({
+    id,
+    name,
     value = "",
     onChange,
     type = "text",
@@ -10,9 +13,14 @@ export default function TextField({
     maxLength,
     autoFocus = false
 }: TextFieldProps) {
+    const generatedId = useId();
+    const fieldId = id || `text-field-${generatedId}`;
+    const fieldName = name || fieldId;
 
     return (
         <input
+            id={fieldId}
+            name={fieldName}
             type={type}
             value={value}
             placeholder={placeholder}

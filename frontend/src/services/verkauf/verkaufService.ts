@@ -1,10 +1,11 @@
-// @ts-nocheck
 import angeboteService from "./angeboteService";
 import auftraegeService from "./auftraegeService";
 import customerInquiryService from "./customerInquiryService";
+import { getBerlinDate } from "../../utils/dateTime";
+import { naechsteAuftragsnummer as createNextOrderNumber } from "../core/documentNumbering";
 
 export function naechsteAuftragsnummer() {
-    return `VK-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+    return createNextOrderNumber(auftraegeService.getAll());
 }
 
 export function angebotInAuftragUebernehmen(angebotId) {
@@ -14,7 +15,7 @@ export function angebotInAuftragUebernehmen(angebotId) {
     const neuerAuftrag = auftraegeService.add({
         auftragNr: naechsteAuftragsnummer(),
         kundeId: angebot.kundeId,
-        datum: new Date().toISOString().slice(0, 10),
+        datum: getBerlinDate(),
         status: "offen",
         positionen: angebot.positionen,
         rabattBetrag: Number(angebot.rabattBetrag || 0),
@@ -39,7 +40,7 @@ export function kundenanfrageInAuftragUebernehmen(anfrageId, payload = {}) {
     const neuerAuftrag = auftraegeService.add({
         auftragNr: naechsteAuftragsnummer(),
         kundeId: anfrage.kundeId,
-        datum: new Date().toISOString().slice(0, 10),
+        datum: getBerlinDate(),
         status: "offen",
         positionen: payload.positionen || [],
         rabattBetrag: Number(payload.rabattBetrag || 0),

@@ -9,8 +9,13 @@ import OverviewCards from "../../components/OverviewCards";
 import bewerberService from "../../services/personalwesen/bewerberService";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import personalaktenService from "../../services/personalwesen/personalaktenService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 
-const today = "2026-07-26";
+function createBewerber(today: string) {
+    return { name: "", stelle: "", datum: today, status: "eingegangen", notiz: "" };
+}
 
 function ableitungAusStelle(stelle = "") {
     const normalized = stelle.toLowerCase();
@@ -22,16 +27,21 @@ function ableitungAusStelle(stelle = "") {
 }
 
 export default function Bewerber() {
+    const today = getBerlinDate();
     const navigate = useNavigate();
-    const [bewerber, setBewerber] = useState(bewerberService.list());
+    const [bewerber, setBewerber] = useSyncedServiceData(
+        ["bewerber", "mitarbeiter", "personalakten"],
+        () => bewerberService.list()
+    );
     const [open, setOpen] = useState(false);
-    const [current, setCurrent] = useState({ name: "", stelle: "", datum: today, status: "eingegangen", notiz: "" });
+    const [current, setCurrent] = useState(createBewerber(today));
 
     const speichern = () => {
         if (!current.name.trim()) return;
         bewerberService.create(current);
         setBewerber(bewerberService.list());
         setOpen(false);
+        setCurrent(createBewerber(today));
     };
 
     const einladen = (item) => {
@@ -57,7 +67,6 @@ export default function Bewerber() {
 
         personalaktenService.create({
             mitarbeiterId: neuerMitarbeiter.id,
-            mitarbeiter: neuerMitarbeiter.name,
             dokumentTyp: "Onboarding-Checkliste",
             titel: `Onboarding ${neuerMitarbeiter.name}`,
             datum: today,
@@ -94,17 +103,17 @@ export default function Bewerber() {
                 { field: "notiz", title: "Notiz" }
             ]}
             detailLinkResolver={({ field, row }) => field === "name" && row.mitarbeiterId ? `/personalakte?mitarbeiter=${row.mitarbeiterId}` : null}
-            toolbarActions={[{ name: "new", label: "Bewerber anlegen", permission: "personalwesen.bearbeiten", onClick: () => setOpen(true), variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Bewerber anlegen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: () => setOpen(true), variant: "secondary" }]}
             rowActions={[
-                { name: "invite", label: "Zum Gespräch einladen", permission: "personalwesen.bearbeiten", onClick: einladen, variant: "success", isVisible: row => row.status === "eingegangen" },
-                { name: "hire", label: "Als Mitarbeiter übernehmen", permission: "personalwesen.bearbeiten", onClick: uebernehmen, variant: "secondary", isVisible: row => row.status === "eingeladen" || row.status === "übernommen" }
+                { name: "invite", label: "Zum Gespräch einladen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: einladen, variant: "success", isVisible: row => row.status === "eingegangen" },
+                { name: "hire", label: "Als Mitarbeiter übernehmen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: uebernehmen, variant: "secondary", isVisible: row => row.status === "eingeladen" || row.status === "übernommen" }
             ]}
         />
         <Dialog open={open} title="Bewerber anlegen" onClose={() => setOpen(false)}>
             <div><Label>Name</Label><TextField value={current.name} onChange={value => setCurrent(item => ({ ...item, name: value }))}/></div>
             <div><Label>Stelle</Label><TextField value={current.stelle} onChange={value => setCurrent(item => ({ ...item, stelle: value }))}/></div>
             <div className="form-row"><Label>Notiz</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

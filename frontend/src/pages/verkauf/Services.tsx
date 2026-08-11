@@ -1,4 +1,3 @@
-// @ts-nocheck
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import HelpHint from "../../components/HelpHint";
@@ -6,12 +5,12 @@ import TextField from "../../components/form/TextField";
 import TextArea from "../../components/form/TextArea";
 import Label from "../../components/form/Label";
 import NumberField from "../../components/form/NumberField";
-import { getColumns, getAllColumns } from "../../services/core/metadataService";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import servicesService from "../../services/verkauf/servicesService";
-import { INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useMemo, useState } from "react";
+import { naechsteStammdatennummer } from "../../services/core/documentNumbering";
 
 export default function Services() {
     const { user } = useAuth();
@@ -30,11 +29,22 @@ export default function Services() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.services, servicesService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.services, servicesService, {
+        createNewItem: () => ({
+            ...INITIAL_DATA.services,
+            serviceNr: naechsteStammdatennummer(servicesService.list().map(item => item.serviceNr), "service")
+        }),
+        requiredFields: [
+            { field: "serviceNr", label: "Servicenummer" },
+            { field: "name", label: "Name" },
+            { field: "kategorie", label: "Kategorie" }
+        ]
+    });
 
-    const columns = getColumns(config.tableName, user.username);
-    const allColumns = getAllColumns(config.tableName);
+    const columns = getVisibleTableColumns(config.tableName);
+    const allColumns = getAllTableColumns(config.tableName);
     const [categoryFilter, setCategoryFilter] = useState("");
 
     const filteredDisplayData = useMemo(() => {
@@ -64,7 +74,7 @@ export default function Services() {
         <DataTable
             title={config.title}
             tableName={config.tableName}
-            username={user.username}
+            username={user?.username || ""}
             columns={columns}
             allColumns={allColumns}
             data={filteredDisplayData}
@@ -81,14 +91,14 @@ export default function Services() {
             ]}
         />
         <Dialog open={open} title={editMode ? "Service bearbeiten" : "Neuer Service"} onClose={handleClose}>
-            <Label required>Servicenummer</Label>
-            <TextField value={currentItem.serviceNr} onChange={v => change("serviceNr", v)} />
+            <Label required glossaryKey="servicenummer">Servicenummer</Label>
+            <TextField value={currentItem.serviceNr} onChange={v => change("serviceNr", v)} disabled />
             <Label required>Name</Label>
             <TextField value={currentItem.name} onChange={v => change("name", v)} />
-            <Label>Kategorie</Label>
+            <Label required glossaryKey="kategorie">Kategorie</Label>
             <TextField value={currentItem.kategorie} onChange={v => change("kategorie", v)} />
             <div className="label-with-hint">
-                <Label>Berechnungstyp</Label>
+                <Label glossaryKey="berechnungstyp">Berechnungstyp</Label>
                 <HelpHint text="Pauschal bedeutet ein fester Gesamtpreis. ZE bedeutet, dass der Preis pro Zeiteinheit wie Tag oder Stunde gilt." />
             </div>
             <select value={currentItem.berechnungstyp || "Pauschal"} onChange={event => change("berechnungstyp", event.target.value)}>
@@ -97,7 +107,7 @@ export default function Services() {
             </select>
             {String(currentItem.berechnungstyp || "Pauschal") === "ZE" && <>
                 <div className="label-with-hint">
-                    <Label>ZE</Label>
+                    <Label glossaryKey="ze">ZE</Label>
                     <HelpHint text="Hier steht die Einheit, auf die sich der Preis bezieht, zum Beispiel 1 Tag oder 1 Stunde." />
                 </div>
                 <TextField value={currentItem.zeEinheit || ""} onChange={v => change("zeEinheit", v)} placeholder="z. B. 1 Tag" />
@@ -105,16 +115,17 @@ export default function Services() {
             <div className="form-row">
                 <p>`Pauschal` bedeutet ein fester Preis pro Service. `ZE` bedeutet, dass der Preis pro Zeiteinheit gilt, zum Beispiel `1 Tag` oder `1 Stunde`.</p>
             </div>
-            <Label>Einkaufspreis</Label>
+            <Label glossaryKey="einkaufspreis">Einkaufspreis</Label>
             <NumberField value={currentItem.einkaufspreis} min="0" step="0.01" format="currency" onChange={v => change("einkaufspreis", Number(v || 0))} />
-            <Label>Verkaufspreis</Label>
+            <Label glossaryKey="verkaufspreis">Verkaufspreis</Label>
             <NumberField value={currentItem.verkaufspreis} min="0" step="0.01" format="currency" onChange={v => change("verkaufspreis", Number(v || 0))} />
             <div className="form-row">
                 <Label>Beschreibung</Label>
                 <TextArea rows={2} value={currentItem.beschreibung} onChange={v => change("beschreibung", v)} />
             </div>
             <div className="form-row">
-                <button onClick={speichern}>Speichern</button>
+                {error && <p className="form-error">{error}</p>}
+                <button type="button" onClick={speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

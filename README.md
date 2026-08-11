@@ -49,19 +49,35 @@ Eine geführte Vorstellung mit Testkonten und Klickpfaden steht in [docs/DEMO.md
 
 ------------------------------------------------------------------------
 
+# Backend und Datenbankmodus
+
+Im Ordner `backend/` liegt jetzt das Flask-Backend fuer den Mehrbenutzerbetrieb.
+
+- Standardmodus ist PostgreSQL ueber Docker Compose
+- Login laeuft sitzungsbasiert ueber das Backend
+- Tabellen werden im DB-Modus ueber REST-Endpunkte gelesen und geschrieben
+- Mehrere Browser koennen gleichzeitig mit unterschiedlichen Benutzern arbeiten
+
+Details stehen in:
+
+    backend/README_PREVIEW.md
+
+------------------------------------------------------------------------
+
 # Anmeldung
 
-Aktuell werden Benutzer lokal verwaltet.
+Im Mock-Modus und im DB-Modus werden dieselben Seed-Benutzer verwendet.
 
-Beispiel:
+Beispiele:
 
-    Benutzer:
-    admin
+    admin / admin
+    lager / lager
+    buchhaltung / buchhaltung
+    marketing / marketing
+    verkauf_azubi / verkauf
+    verkauf_senior / verkauf
 
-    Passwort:
-    admin
-
-Die Rechte werden über den AuthContext geprüft.
+Die Berechtigungen werden im Frontend weiter ueber den AuthContext geprueft.
 
 ------------------------------------------------------------------------
 
@@ -180,14 +196,34 @@ Die fertigen Dateien befinden sich danach in:
 
 ------------------------------------------------------------------------
 
-# Spätere Erweiterungen
+# Hinweise zum Datenmodus
 
-Geplant:
+- Standard ohne Umschalten: Backend- und PostgreSQL-Modus
+- Optionaler Mock-Modus im Browser:
 
--   PostgreSQL Datenbank
--   Benutzerverwaltung
--   Rollenverwaltung
--   Feld-Metadaten
--   Benutzerdefinierte Tabellenansichten
--   Automatische Detailansichten
--   Verknüpfungen zwischen Datensätzen
+``` js
+localStorage.setItem("data-provider", "mock-local-storage");
+location.reload();
+```
+
+- Im Datenbankmodus synchronisieren sich Aenderungen ueber das Backend zwischen Browsern
+- Ein Testdaten-Reset laedt im Datenbankmodus die Seed-Daten neu in PostgreSQL
+
+------------------------------------------------------------------------
+
+# Docker Watch
+
+Fuer die lokale Entwicklung ist `docker compose watch` eingerichtet, damit du Container nicht staendig manuell neu starten musst.
+
+Start:
+
+``` bash
+docker compose up -d
+docker compose watch
+```
+
+Verhalten:
+
+- `frontend/` wird in den Container synchronisiert, Vite aktualisiert die Seite automatisch.
+- `backend/` wird in den Container synchronisiert und der Backend-Container bei Aenderungen automatisch neu gestartet.
+- Aenderungen an `backend/requirements.txt`, `frontend/package.json`, `frontend/package-lock.json` oder den jeweiligen `Dockerfile`s loesen einen Rebuild aus.

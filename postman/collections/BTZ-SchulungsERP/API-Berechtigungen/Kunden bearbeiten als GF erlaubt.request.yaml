@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{dbBaseUrl}}/kunden/{{kundeId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "notiz": "Postman GF Bearbeitung {{requestTimestamp}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', function () {
+        pm.response.to.have.status(200);
+      });
+      const data = pm.response.json();
+      pm.test('GF darf Kunden bearbeiten', function () {
+        pm.expect(data.ok).to.eql(true);
+        pm.expect(data.item.id).to.eql(Number(pm.environment.get('kundeId')));
+        pm.expect(data.item.notiz).to.include('Postman GF Bearbeitung');
+      });
+    language: text/javascript
+order: 8500

@@ -16,38 +16,126 @@ import urlaubsantraegeService from "../../services/personalwesen/urlaubsantraege
 import versandService from "../../services/logistik/versandService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
+import { ACCESS } from "../../constants/permissions";
 import { resetTestData } from "../../services/mockup/mockStorage";
 import useAuth from "../../auth/useAuth";
+import { getBerlinDate } from "../../utils/dateTime";
 import { getUnifiedOpenItems, isOpenItem, isOverdueOpenItem, isPendingPayment, isOverduePayment } from "../../utils/openItems";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
-const today = "2026-07-28";
+const DASHBOARD_AREAS = [
+    { access: ACCESS.EINKAUF, title: "Einkauf", text: "Lieferanten vergleichen, Bestellungen anlegen und Wareneingänge bearbeiten.", to: "/themen/einkauf", link: "Zum Einkauf" },
+    { access: ACCESS.VERKAUF, title: "Verkauf", text: "Kundenanfragen, Angebote und Aufträge miteinander verknüpfen.", to: "/themen/verkauf", link: "Zum Verkauf" },
+    { access: ACCESS.BUCHHALTUNG, title: "Buchhaltung", text: "Rechnungen, Zahlungen, Mahnungen und Belege einfach einordnen.", to: "/buchhaltung", link: "Zur Buchhaltung" },
+    { access: ACCESS.PERSONALWESEN, title: "Personal", text: "Mitarbeiter, Personalakte und Formulare im Zusammenhang bearbeiten.", to: "/personalwesen", link: "Zum Personal" },
+    { access: ACCESS.MARKETING, title: "Marketing", text: "Aktionen, Feedback und Events als Zusatzbereich dokumentieren.", to: "/marketing", link: "Zum Marketing" },
+    { access: ACCESS.LOGISTIK, title: "Logistik", text: "Versand, Lager und Retouren als unterstützende Bereiche nutzen.", to: "/logistik", link: "Zur Logistik" }
+];
 
 function dateScore(dateValue = "") {
     return Number(String(dateValue).replaceAll("-", "")) || 0;
 }
 
-function Dashboard() {
-    const { user, hasAccess, hasPermission } = useAuth();
-    const isTeacherView = hasPermission("*");
-    const auftraege = auftraegeService.getAll();
-    const angebote = angeboteService.getAll();
-    const rechnungen = rechnungenService.getAll();
-    const bestellungen = bestellungenService.list();
-    const artikel = artikelService.getAll();
-    const anfragen = customerInquiryService.list();
-    const freigaben = freigabenService.list();
-    const versandauftraege = versandService.list();
-    const vertriebsdokumente = vertriebsdokumenteService.list();
-    const zahlungen = zahlungenService.list();
-    const urlaubsantraege = urlaubsantraegeService.list();
-    const krankmeldungen = krankmeldungenService.list();
-    const arbeitszeiten = arbeitszeitenService.list();
-    const schulungen = schulungenService.list();
-    const bewerber = bewerberService.list();
-    const mahnungen = mahnungenService.list();
-    const mitarbeiter = mitarbeiterService.list();
+function buildUniqueActivityKeys(items) {
+    const seenKeys = new Map();
 
-    const offeneAuftraege = auftraegeService.getAll().filter(auftrag => auftrag.status === "offen").length;
+    return items.map((item, index) => {
+        const baseKey = String(
+            item.key
+            || [item.title, item.date, item.text, item.to].filter(Boolean).join("-")
+            || `activity-${index}`
+        );
+        const occurrence = seenKeys.get(baseKey) || 0;
+        seenKeys.set(baseKey, occurrence + 1);
+
+        return {
+            ...item,
+            key: occurrence === 0 ? baseKey : `${baseKey}-${occurrence + 1}`
+        };
+    });
+}
+
+function withFallback<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (error instanceof Error && error.message.startsWith("Keine Berechtigung")) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
+function loadIf<T>(enabled: boolean, reader: () => T, fallback: T) {
+    if (!enabled) {
+        return fallback;
+    }
+
+    return withFallback(reader, fallback);
+}
+
+function buildTask(title, count, text, to, action) {
+    if (count <= 0) {
+        return null;
+    }
+
+    return { title, text, to, action };
+}
+
+function buildStatusItem(label, count, emptyValue, activeSuffix) {
+    return {
+        label,
+        value: count === 0 ? emptyValue : `${count} ${activeSuffix}`,
+        tone: count === 0 ? "good" : "warn"
+    };
+}
+
+function buildTeacherAlert(label, count) {
+    return {
+        label,
+        count,
+        tone: count > 0 ? "warn" : "good"
+    };
+}
+
+function Dashboard() {
+    const today = getBerlinDate();
+    useStorageSyncRefresh([
+        "auftraege", "angebote", "bestellungen", "kundenanfragen", "vertriebsdokumente",
+        "zahlungen", "mahnungen", "freigaben", "artikel", "urlaubsantraege",
+        "krankmeldungen", "arbeitszeiten", "schulungen", "bewerber", "mitarbeiter"
+    ]);
+
+    const { user, hasAccess, hasFullAccess } = useAuth();
+    const isTeacherView = hasFullAccess();
+    const canReadVerkauf = hasAccess(ACCESS.VERKAUF);
+    const canReadBuchhaltung = hasAccess(ACCESS.BUCHHALTUNG);
+    const canReadEinkauf = hasAccess(ACCESS.EINKAUF);
+    const canReadArtikel = hasAccess(ACCESS.ARTIKEL);
+    const canReadGf = hasAccess(ACCESS.GESCHAEFTSFUEHRUNG);
+    const canReadLogistik = hasAccess(ACCESS.LOGISTIK);
+    const canReadPersonal = hasAccess(ACCESS.PERSONALWESEN);
+
+    const auftraege = loadIf(canReadVerkauf, () => auftraegeService.getAll(), []);
+    const angebote = loadIf(canReadVerkauf, () => angeboteService.getAll(), []);
+    const rechnungen = loadIf(canReadBuchhaltung || canReadVerkauf, () => rechnungenService.getAll(), []);
+    const bestellungen = loadIf(canReadEinkauf, () => bestellungenService.list(), []);
+    const artikel = loadIf(canReadArtikel, () => artikelService.getAll(), []);
+    const anfragen = loadIf(canReadVerkauf, () => customerInquiryService.list(), []);
+    const freigaben = loadIf(canReadGf, () => freigabenService.list(), []);
+    const versandauftraege = loadIf(canReadLogistik, () => versandService.list(), []);
+    const vertriebsdokumente = loadIf(canReadVerkauf, () => vertriebsdokumenteService.list(), []);
+    const zahlungen = loadIf(canReadBuchhaltung, () => zahlungenService.list(), []);
+    const urlaubsantraege = loadIf(canReadPersonal, () => urlaubsantraegeService.list(), []);
+    const krankmeldungen = loadIf(canReadPersonal, () => krankmeldungenService.list(), []);
+    const arbeitszeiten = loadIf(canReadPersonal, () => arbeitszeitenService.list(), []);
+    const schulungen = loadIf(canReadPersonal, () => schulungenService.list(), []);
+    const bewerber = loadIf(canReadPersonal, () => bewerberService.list(), []);
+    const mahnungen = loadIf(canReadBuchhaltung, () => mahnungenService.list(), []);
+    const mitarbeiter = loadIf(canReadPersonal, () => mitarbeiterService.list(), []);
+
+    const offeneAuftraege = auftraege.filter(auftrag => auftrag.status === "offen").length;
     const offenePosten = getUnifiedOpenItems(rechnungen, zahlungen).length;
     const offeneDebitorenPosten = rechnungen.filter(item => item.rechnungstyp !== "Eingangsrechnung" && isOpenItem(item)).length
         + zahlungen.filter(item => item.zahlungsart !== "Ausgang" && isPendingPayment(item)).length;
@@ -70,14 +158,13 @@ function Dashboard() {
     const ueberfaelligePosten = rechnungen.filter(isOverdueOpenItem).length + zahlungen.filter(isOverduePayment).length;
     const offeneBewerbungen = bewerber.filter(item => item.status === "eingegangen").length;
     const geplanteSchulungen = schulungen.filter(item => item.status === "geplant").length;
-
-    const bereiche = [
-        { access: "einkauf", title: "Einkauf", text: "Lieferanten vergleichen, Bestellungen anlegen und Wareneingänge bearbeiten.", to: "/themen/einkauf", link: "Zum Einkauf" },
-        { access: "verkauf", title: "Verkauf", text: "Kundenanfragen, Angebote und Aufträge miteinander verknüpfen.", to: "/themen/verkauf", link: "Zum Verkauf" },
-        { access: "buchhaltung", title: "Buchhaltung", text: "Rechnungen, Zahlungen, Mahnungen und Belege einfach einordnen.", to: "/buchhaltung", link: "Zur Buchhaltung" },
-        { access: "personalwesen", title: "Personal", text: "Mitarbeiter, Personalakte und Formulare im Zusammenhang bearbeiten.", to: "/personalwesen", link: "Zum Personal" },
-        { access: "marketing", title: "Marketing", text: "Aktionen, Feedback und Events als Zusatzbereich dokumentieren.", to: "/marketing", link: "Zum Marketing" },
-        { access: "logistik", title: "Logistik", text: "Versand, Lager und Retouren als unterstützende Bereiche nutzen.", to: "/logistik", link: "Zur Logistik" }
+    const kennzahlen = [
+        { label: "Offene Aufträge", value: offeneAuftraege },
+        { label: "Offene Posten gesamt", value: offenePosten },
+        { label: "Offene Posten (Debitor)", value: offeneDebitorenPosten },
+        { label: "Offene Posten (Kreditor)", value: offeneKreditorenPosten },
+        { label: "Offene Anfragen", value: offeneAnfragen },
+        { label: "Offene Freigaben", value: offeneFreigaben }
     ];
 
     const testdatenZuruecksetzen = () => {
@@ -87,24 +174,24 @@ function Dashboard() {
     };
 
     const schuelerAufgaben = [
-        offeneAnfragen > 0 && { title: "Kundenanfragen beantworten", text: `${offeneAnfragen} Anfragen warten auf Bearbeitung oder Rückmeldung.`, to: "/kundenanfragen", action: "Anfragen öffnen" },
-        offeneAuftraege > 0 && { title: "Aufträge weiterbearbeiten", text: `${offeneAuftraege} Aufträge sind noch offen und können geprüft oder versendet werden.`, to: "/auftraege", action: "Aufträge prüfen" },
-        offeneWareneingaengeEinkauf > 0 && { title: "Wareneingänge vorbereiten", text: `${offeneWareneingaengeEinkauf} Bestellungen wurden versendet und koennen jetzt als Wareneingang gebucht werden.`, to: "/wareneingaenge", action: "Wareneingänge ansehen" },
-        offenePosten > 0 && { title: "Offene Posten prüfen", text: `${offenePosten} Posten sind intern noch nicht geklärt oder ausgeglichen.`, to: "/buchhaltung", action: "Offene Posten öffnen" },
-        offeneUrlaubsantraege > 0 && { title: "Personalvorgänge prüfen", text: `${offeneUrlaubsantraege} Urlaubsanträge warten auf eine Entscheidung.`, to: "/urlaubsantraege", action: "Anträge öffnen" },
-        offeneKrankmeldungen > 0 && { title: "Krankmeldungen bestätigen", text: `${offeneKrankmeldungen} Krankmeldungen sind neu eingegangen und sollten in Akte und Status übernommen werden.`, to: "/krankmeldungen", action: "Krankmeldungen öffnen" },
-        offeneFreigaben > 0 && { title: "Freigaben nachvollziehen", text: `${offeneFreigaben} Freigaben können als Führungsentscheidung betrachtet werden.`, to: "/freigaben", action: "Freigaben öffnen" }
+        buildTask("Kundenanfragen beantworten", offeneAnfragen, `${offeneAnfragen} Anfragen warten auf Bearbeitung oder Rückmeldung.`, "/kundenanfragen", "Anfragen öffnen"),
+        buildTask("Aufträge weiterbearbeiten", offeneAuftraege, `${offeneAuftraege} Aufträge sind noch offen und können geprüft oder versendet werden.`, "/auftraege", "Aufträge prüfen"),
+        buildTask("Wareneingänge vorbereiten", offeneWareneingaengeEinkauf, `${offeneWareneingaengeEinkauf} Bestellungen wurden versendet und koennen jetzt als Wareneingang gebucht werden.`, "/wareneingaenge", "Wareneingänge ansehen"),
+        buildTask("Offene Posten prüfen", offenePosten, `${offenePosten} Posten sind intern noch nicht geklärt oder ausgeglichen.`, "/buchhaltung", "Offene Posten öffnen"),
+        buildTask("Personalvorgänge prüfen", offeneUrlaubsantraege, `${offeneUrlaubsantraege} Urlaubsanträge warten auf eine Entscheidung.`, "/urlaubsantraege", "Anträge öffnen"),
+        buildTask("Krankmeldungen bestätigen", offeneKrankmeldungen, `${offeneKrankmeldungen} Krankmeldungen sind neu eingegangen und sollten in Akte und Status übernommen werden.`, "/krankmeldungen", "Krankmeldungen öffnen"),
+        buildTask("Freigaben nachvollziehen", offeneFreigaben, `${offeneFreigaben} Freigaben können als Führungsentscheidung betrachtet werden.`, "/freigaben", "Freigaben öffnen")
     ].filter(Boolean);
 
-    const letzteAktivitaeten = [
-        ...auftraege.map(item => ({ date: item.datum, title: `Auftrag ${item.auftragNr}`, text: `${item.kunde} · Status ${item.status}`, to: "/auftraege" })),
-        ...rechnungen.map(item => ({ date: item.datum, title: `Offener Posten ${item.rechnungsnr}`, text: `${item.kunde} · ${isOpenItem(item) ? "offen" : item.status}`, to: "/rechnungen" })),
-        ...zahlungen.filter(isPendingPayment).map(item => ({ date: item.ausfuehrenAm || item.datum, title: `Geplante Zahlung ${item.rechnungsnr}`, text: `${item.kunde} · ${item.status}`, to: "/zahlungen" })),
-        ...bestellungen.map(item => ({ date: item.datum, title: `Bestellung ${item.bestellNr}`, text: `${item.lieferant} · ${item.status}`, to: "/bestellungen" })),
-        ...versandauftraege.map(item => ({ date: item.datum, title: `Versand ${item.versandNr}`, text: `${item.auftrag} · ${item.status}`, to: "/versand" })),
-        ...anfragen.map(item => ({ date: item.datum, title: `Kundenanfrage ${item.typ}`, text: `${item.kunde} · ${item.status}`, to: "/kundenanfragen" })),
-        ...mahnungen.map(item => ({ date: item.datum, title: `Mahnung ${item.rechnungsnr}`, text: `${item.kunde} · ${item.stufe}`, to: "/mahnungen" }))
-    ].sort((a, b) => dateScore(b.date) - dateScore(a.date)).slice(0, 6);
+    const letzteAktivitaeten = buildUniqueActivityKeys([
+        ...auftraege.map(item => ({ key: `auftrag-${item.id || item.auftragNr || item.datum}`, date: item.datum, title: `Auftrag ${item.auftragNr}`, text: `${item.kunde} · Status ${item.status}`, to: "/auftraege" })),
+        ...rechnungen.map(item => ({ key: `rechnung-${item.id || item.rechnungsnr || item.datum}`, date: item.datum, title: `Offener Posten ${item.rechnungsnr}`, text: `${item.kunde} · ${isOpenItem(item) ? "offen" : item.status}`, to: "/rechnungen" })),
+        ...zahlungen.filter(isPendingPayment).map(item => ({ key: `zahlung-${item.id || item.rechnungsnr || item.datum}`, date: item.ausfuehrenAm || item.datum, title: `Geplante Zahlung ${item.rechnungsnr}`, text: `${item.kunde} · ${item.status}`, to: "/zahlungen" })),
+        ...bestellungen.map(item => ({ key: `bestellung-${item.id || item.bestellNr || item.datum}`, date: item.datum, title: `Bestellung ${item.bestellNr}`, text: `${item.lieferant} · ${item.status}`, to: "/bestellungen" })),
+        ...versandauftraege.map(item => ({ key: `versand-${item.id || item.versandNr || item.datum}`, date: item.datum, title: `Versand ${item.versandNr}`, text: `${item.auftrag} · ${item.status}`, to: "/versand" })),
+        ...anfragen.map(item => ({ key: `anfrage-${item.id || item.vorgangId || item.kunde || item.typ || "unbekannt"}-${item.datum || "ohne-datum"}`, date: item.datum, title: `Kundenanfrage ${item.typ}`, text: `${item.kunde} · ${item.status}`, to: "/kundenanfragen" })),
+        ...mahnungen.map(item => ({ key: `mahnung-${item.id || item.rechnungsnr || item.datum}`, date: item.datum, title: `Mahnung ${item.rechnungsnr}`, text: `${item.kunde} · ${item.stufe}`, to: "/mahnungen" }))
+    ].sort((a, b) => dateScore(b.date) - dateScore(a.date)).slice(0, 6));
 
     const hinweise = isTeacherView ? [
         "Nutze die Fallakten als Arbeitsauftrag und lasse die Ergebnisse auf den Kernseiten dokumentieren.",
@@ -117,10 +204,10 @@ function Dashboard() {
     ];
 
     const unternehmensstatus = [
-        { label: "Vertrieb", value: offeneAuftraege === 0 ? "stabil" : `${offeneAuftraege} offen`, tone: offeneAuftraege === 0 ? "good" : "warn" },
-        { label: "Einkauf", value: offeneBestellungen === 0 ? "geordnet" : `${offeneBestellungen} aktiv`, tone: offeneBestellungen === 0 ? "good" : "warn" },
-        { label: "Buchhaltung", value: offenePosten === 0 ? "ausgeglichen" : `${offenePosten} offen`, tone: offenePosten === 0 ? "good" : "warn" },
-        { label: "Personal", value: offeneZeitbuchungen === 0 ? "aktuell" : `${offeneZeitbuchungen} zu prüfen`, tone: offeneZeitbuchungen === 0 ? "good" : "warn" }
+        buildStatusItem("Vertrieb", offeneAuftraege, "stabil", "offen"),
+        buildStatusItem("Einkauf", offeneBestellungen, "geordnet", "aktiv"),
+        buildStatusItem("Buchhaltung", offenePosten, "ausgeglichen", "offen"),
+        buildStatusItem("Personal", offeneZeitbuchungen, "aktuell", "zu prüfen")
     ];
 
     const lehrkraftKlassen = [
@@ -130,16 +217,21 @@ function Dashboard() {
     ];
 
     const lehrkraftAufgaben = [
-        offeneLehrkraftAnfragen > 0 && { title: "Kundenanfragen beantworten", text: `${offeneLehrkraftAnfragen} externe Anfragen oder Rückmeldungen warten auf Antwort oder Einordnung.`, to: "/lehrkraft/kundenkorrespondenz", action: "Kundenkorrespondenz öffnen" },
-        offeneLehrkraftAngebote > 0 && { title: "Angebote prüfen", text: `${offeneLehrkraftAngebote} Angebote warten auf Annahme, Ablehnung oder Rückmeldung des Kunden.`, to: "/lehrkraft/kundenkorrespondenz", action: "Offene Angebote öffnen" },
-        offeneWarenannahmen > 0 && { title: "Warenannahme rückmelden", text: `${offeneWarenannahmen} Liefer- oder Transportunterlagen warten noch auf die externe Rückmeldung der Lehrkraft.`, to: "/lehrkraft/kundenkorrespondenz", action: "Warenannahmen öffnen" },
-        ueberfaelligePosten > 0 && { title: "Überfällige Posten besprechen", text: `${ueberfaelligePosten} Posten sind am ${today} bereits fällig und eignen sich für Offene-Posten- oder Mahnungsübungen.`, to: "/buchhaltung", action: "Buchhaltung öffnen" },
-        offeneFreigaben > 0 && { title: "Offene Freigaben begleiten", text: `${offeneFreigaben} Freigaben warten auf eine Entscheidung und passen gut zu Führungs- oder Kooperationsfällen.`, to: "/freigaben", action: "Freigaben öffnen" },
-        offeneUrlaubsantraege > 0 && { title: "Personalentscheidungen prüfen", text: `${offeneUrlaubsantraege} Urlaubsanträge können als einfacher Genehmigungsprozess besprochen werden.`, to: "/urlaubsantraege", action: "Urlaubsanträge öffnen" },
-        offeneKrankmeldungen > 0 && { title: "Krankmeldungen mit Aktenbezug prüfen", text: `${offeneKrankmeldungen} Krankmeldungen sind noch nicht bestätigt und eignen sich für Aktenführung und Statusarbeit.`, to: "/krankmeldungen", action: "Krankmeldungen öffnen" },
-        offeneZeitbuchungen > 0 && { title: "Zeitbuchungen freigeben", text: `${offeneZeitbuchungen} Arbeitszeiten sind erfasst, aber noch nicht freigegeben.`, to: "/arbeitszeiten", action: "Arbeitszeiten öffnen" },
-        offeneBewerbungen > 0 && { title: "Bewerberprozess auswerten", text: `${offeneBewerbungen} Bewerbungen sind noch offen und können für Personalgespräche genutzt werden.`, to: "/bewerber", action: "Bewerber öffnen" }
+        buildTask("Kundenanfragen beantworten", offeneLehrkraftAnfragen, `${offeneLehrkraftAnfragen} externe Anfragen oder Rückmeldungen warten auf Antwort oder Einordnung.`, "/lehrkraft/kundenkorrespondenz", "Kundenkorrespondenz öffnen"),
+        buildTask("Angebote prüfen", offeneLehrkraftAngebote, `${offeneLehrkraftAngebote} Angebote warten auf Annahme, Ablehnung oder Rückmeldung des Kunden.`, "/lehrkraft/kundenkorrespondenz", "Offene Angebote öffnen"),
+        buildTask("Warenannahme rückmelden", offeneWarenannahmen, `${offeneWarenannahmen} Liefer- oder Transportunterlagen warten noch auf die externe Rückmeldung der Lehrkraft.`, "/lehrkraft/kundenkorrespondenz", "Warenannahmen öffnen"),
+        buildTask("Überfällige Posten besprechen", ueberfaelligePosten, `${ueberfaelligePosten} Posten sind am ${today} bereits fällig und eignen sich für Offene-Posten- oder Mahnungsübungen.`, "/buchhaltung", "Buchhaltung öffnen"),
+        buildTask("Offene Freigaben begleiten", offeneFreigaben, `${offeneFreigaben} Freigaben warten auf eine Entscheidung und passen gut zu Führungs- oder Kooperationsfällen.`, "/freigaben", "Freigaben öffnen"),
+        buildTask("Personalentscheidungen prüfen", offeneUrlaubsantraege, `${offeneUrlaubsantraege} Urlaubsanträge können als einfacher Genehmigungsprozess besprochen werden.`, "/urlaubsantraege", "Urlaubsanträge öffnen"),
+        buildTask("Krankmeldungen mit Aktenbezug prüfen", offeneKrankmeldungen, `${offeneKrankmeldungen} Krankmeldungen sind noch nicht bestätigt und eignen sich für Aktenführung und Statusarbeit.`, "/krankmeldungen", "Krankmeldungen öffnen"),
+        buildTask("Zeitbuchungen freigeben", offeneZeitbuchungen, `${offeneZeitbuchungen} Arbeitszeiten sind erfasst, aber noch nicht freigegeben.`, "/arbeitszeiten", "Arbeitszeiten öffnen"),
+        buildTask("Bewerberprozess auswerten", offeneBewerbungen, `${offeneBewerbungen} Bewerbungen sind noch offen und können für Personalgespräche genutzt werden.`, "/bewerber", "Bewerber öffnen")
     ].filter(Boolean);
+    const lehrkraftWarnstatus = [
+        buildTeacherAlert("Offene Anfragen", offeneLehrkraftAnfragen),
+        buildTeacherAlert("Offene Angebote", offeneLehrkraftAngebote),
+        buildTeacherAlert("Offene Warenannahmen", offeneWarenannahmen)
+    ];
 
     const bewertungsstand = [
         { label: "Fachlich sicher", value: `${lehrkraftKlassen.filter(item => item.fortschritt >= 75).length} Klassen` },
@@ -166,16 +258,11 @@ function Dashboard() {
                 <h1>Dashboard</h1>
                 <p>Willkommen, {user?.name || user?.username}. Startseite für Aufgaben, betriebliche Zusammenhänge und digitale Arbeitsabläufe.</p>
             </div>
-            {hasPermission("*") && <button className="button-secondary dashboard-reset-button" onClick={testdatenZuruecksetzen}>Testdaten zurücksetzen</button>}
+            {hasFullAccess() && <button className="button-secondary dashboard-reset-button" onClick={testdatenZuruecksetzen}>Testdaten zurücksetzen</button>}
         </div>
 
         <div className="kennzahlen">
-            <div className="kennzahl"><span>Offene Aufträge</span><strong>{offeneAuftraege}</strong></div>
-            <div className="kennzahl"><span>Offene Posten gesamt</span><strong>{offenePosten}</strong></div>
-            <div className="kennzahl"><span>Offene Posten (Debitor)</span><strong>{offeneDebitorenPosten}</strong></div>
-            <div className="kennzahl"><span>Offene Posten (Kreditor)</span><strong>{offeneKreditorenPosten}</strong></div>
-            <div className="kennzahl"><span>Offene Anfragen</span><strong>{offeneAnfragen}</strong></div>
-            <div className="kennzahl"><span>Offene Freigaben</span><strong>{offeneFreigaben}</strong></div>
+            {kennzahlen.map(item => <div key={item.label} className="kennzahl"><span>{item.label}</span><strong>{item.value}</strong></div>)}
         </div>
 
         <section className="dashboard-two-column">
@@ -185,7 +272,7 @@ function Dashboard() {
                     <span>{schuelerAufgaben.length} relevant</span>
                 </div>
                 <div className="task-list">
-                    {schuelerAufgaben.map(task => <div key={task.title} className="task-card">
+                    {schuelerAufgaben.map((task, index) => <div key={`${task.title}-${task.to}-${index}`} className="task-card">
                         <strong>{task.title}</strong>
                         <p>{task.text}</p>
                         <Link to={task.to}>{task.action}</Link>
@@ -215,7 +302,7 @@ function Dashboard() {
                     <span>{letzteAktivitaeten.length} Einträge</span>
                 </div>
                 <div className="activity-list">
-                    {letzteAktivitaeten.map(item => <Link key={`${item.title}-${item.date}`} className="activity-row" to={item.to}>
+                    {letzteAktivitaeten.map(item => <Link key={item.key} className="activity-row" to={item.to}>
                         <span className="activity-date">{item.date}</span>
                         <div>
                             <strong>{item.title}</strong>
@@ -242,7 +329,7 @@ function Dashboard() {
         <section className="prozess-einstiege">
             <h2>Prozesse für die Demo</h2>
             <div className="prozess-grid">
-                {bereiche.filter(bereich => hasAccess(bereich.access)).map(bereich => (
+                {DASHBOARD_AREAS.filter(bereich => hasAccess(bereich.access)).map(bereich => (
                     <article className="prozess-karte" key={bereich.access}>
                         <h3>{bereich.title}</h3>
                         <p>{bereich.text}</p>
@@ -291,21 +378,13 @@ function Dashboard() {
                         <span>Unterrichtsrelevant</span>
                     </div>
                     <div className="status-grid">
-                        <div className={`status-card ${offeneLehrkraftAnfragen > 0 ? "tone-warn" : "tone-good"}`}>
-                            <span>Offene Anfragen</span>
-                            <strong>{offeneLehrkraftAnfragen}</strong>
-                        </div>
-                        <div className={`status-card ${offeneLehrkraftAngebote > 0 ? "tone-warn" : "tone-good"}`}>
-                            <span>Offene Angebote</span>
-                            <strong>{offeneLehrkraftAngebote}</strong>
-                        </div>
-                        <div className={`status-card ${offeneWarenannahmen > 0 ? "tone-warn" : "tone-good"}`}>
-                            <span>Offene Warenannahmen</span>
-                            <strong>{offeneWarenannahmen}</strong>
-                        </div>
+                        {lehrkraftWarnstatus.map(item => <div key={item.label} className={`status-card tone-${item.tone}`}>
+                            <span>{item.label}</span>
+                            <strong>{item.count}</strong>
+                        </div>)}
                     </div>
                     <div className="task-list">
-                        {lehrkraftAufgaben.length === 0 ? <p>Aktuell gibt es keine offenen Lehrkraft-Aufgaben in den Demo-Daten.</p> : lehrkraftAufgaben.map(task => <div key={task.title} className="task-card">
+                        {lehrkraftAufgaben.length === 0 ? <p>Aktuell gibt es keine offenen Lehrkraft-Aufgaben in den Demo-Daten.</p> : lehrkraftAufgaben.map((task, index) => <div key={`${task.title}-${task.to}-${index}`} className="task-card">
                             <strong>{task.title}</strong>
                             <p>{task.text}</p>
                             <Link to={task.to}>{task.action}</Link>

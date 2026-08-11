@@ -1,6 +1,7 @@
-// @ts-nocheck
 // Zentrale Testdaten
 // Nur im Arbeitsspeicher
+
+// Vertrieb und Stammdaten
 
 
 export let kunden = [
@@ -14,6 +15,7 @@ export let kunden = [
         ort: "Lingen",
         segment: "Baumarkt",
         abc: "A",
+        iban: "DE44500105175407324931",
 
         optionen: ["Fahrradbekleidung", "Sicherheitsbekleidung", "Sonderfahrräder", "Lastenbikes"],
         notiz:""
@@ -29,6 +31,7 @@ export let kunden = [
         ort: "Meppen",
         segment: "Tourismus",
         abc: "B",
+        iban: "DE75512108001245126199",
 
         optionen: ["Bikes aller Art", "Leasing", "Reparatur Service"],
 
@@ -51,14 +54,10 @@ export let artikel = [
         artikelTyp: "Baugruppe",
         einkaufspreis: 420,
         verkaufspreis: 799,
-        bestand: 6,
-        beschreibung: "Komplettes Fahrrad als Beispiel für einen zusammengesetzten Artikel.",
-        komponenten: [
-            { artikelId: 4, artikel: "Fahrradrahmen", menge: 1 },
-            { artikelId: 5, artikel: "Lenker", menge: 1 },
-            { artikelId: 6, artikel: "Reifen 28 Zoll", menge: 2 },
-            { artikelId: 7, artikel: "Sattel Komfort", menge: 1 }
-        ]
+        bestand: 4,
+        mindestmenge: 3,
+        bedarfsmeldungBei: 5,
+        beschreibung: "Komplettes Fahrrad als Beispiel fuer einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
     },
 
 
@@ -73,8 +72,9 @@ export let artikel = [
         einkaufspreis: 39.9,
         verkaufspreis: 89.9,
         bestand: 120,
-        beschreibung: "Reflektierende Sicherheitsjacke",
-        komponenten: []
+        mindestmenge: 20,
+        bedarfsmeldungBei: 30,
+        beschreibung: "Reflektierende Sicherheitsjacke mit komfortablem Lagerbestand."
     },
 
     {
@@ -87,9 +87,10 @@ export let artikel = [
         artikelTyp: "Einzelartikel",
         einkaufspreis: 24.5,
         verkaufspreis: 59.99,
-        bestand: 45,
-        beschreibung: "Sicherer Fahrradhelm mit Zertifikat",
-        komponenten: []
+        bestand: 12,
+        mindestmenge: 10,
+        bedarfsmeldungBei: 15,
+        beschreibung: "Sicherer Fahrradhelm mit Zertifikat. Zusaetzliche Menge ist bereits bestellt."
     },
     {
         id: 4,
@@ -101,9 +102,10 @@ export let artikel = [
         artikelTyp: "Komponente",
         einkaufspreis: 120,
         verkaufspreis: 199,
-        bestand: 18,
-        beschreibung: "Rahmen als Einzelkomponente für Schulungsbeispiele.",
-        komponenten: []
+        bestand: 8,
+        mindestmenge: 6,
+        bedarfsmeldungBei: 9,
+        beschreibung: "Rahmen als Einzelkomponente fuer Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
     },
     {
         id: 5,
@@ -115,9 +117,10 @@ export let artikel = [
         artikelTyp: "Komponente",
         einkaufspreis: 18,
         verkaufspreis: 34.9,
-        bestand: 35,
-        beschreibung: "Lenker für Fahrradmontage.",
-        komponenten: []
+        bestand: 9,
+        mindestmenge: 10,
+        bedarfsmeldungBei: 12,
+        beschreibung: "Lenker fuer Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
     },
     {
         id: 6,
@@ -129,9 +132,10 @@ export let artikel = [
         artikelTyp: "Komponente",
         einkaufspreis: 14.5,
         verkaufspreis: 29.9,
-        bestand: 64,
-        beschreibung: "Standardreifen als Lagerkomponente.",
-        komponenten: []
+        bestand: 28,
+        mindestmenge: 20,
+        bedarfsmeldungBei: 25,
+        beschreibung: "Standardreifen als Lagerkomponente mit noch stabilem Bestand."
     },
     {
         id: 7,
@@ -143,10 +147,18 @@ export let artikel = [
         artikelTyp: "Komponente",
         einkaufspreis: 16,
         verkaufspreis: 39,
-        bestand: 29,
-        beschreibung: "Komfortsattel für Schulungsfahrräder.",
-        komponenten: []
+        bestand: 14,
+        mindestmenge: 8,
+        bedarfsmeldungBei: 10,
+        beschreibung: "Komfortsattel fuer Schulungsfahrraeder mit ausreichend freiem Bestand."
     }
+];
+
+export let artikelStueckliste = [
+    { id: 1, hauptartikelId: 1, komponentenartikelId: 4, menge: 1 },
+    { id: 2, hauptartikelId: 1, komponentenartikelId: 5, menge: 1 },
+    { id: 3, hauptartikelId: 1, komponentenartikelId: 6, menge: 2 },
+    { id: 4, hauptartikelId: 1, komponentenartikelId: 7, menge: 1 }
 ];
 
 export let services = [
@@ -207,27 +219,102 @@ export let services = [
     }
 ];
 
+export let nummernkreise = [
+    {
+        id: 1,
+        schluessel: "artikel",
+        bezeichnung: "Artikel",
+        kuerzel: "ART"
+    },
+    {
+        id: 2,
+        schluessel: "service",
+        bezeichnung: "Service",
+        kuerzel: "SER"
+    },
+    {
+        id: 3,
+        schluessel: "angebot",
+        bezeichnung: "Angebot",
+        kuerzel: "ANG"
+    },
+    {
+        id: 4,
+        schluessel: "auftrag",
+        bezeichnung: "Auftrag",
+        kuerzel: "AU"
+    },
+    {
+        id: 5,
+        schluessel: "rechnung",
+        bezeichnung: "Rechnung",
+        kuerzel: "RG"
+    },
+    {
+        id: 6,
+        schluessel: "lieferschein",
+        bezeichnung: "Lieferschein",
+        kuerzel: "LS"
+    },
+    {
+        id: 7,
+        schluessel: "bestellung",
+        bezeichnung: "Bestellung",
+        kuerzel: "EK"
+    },
+    {
+        id: 8,
+        schluessel: "gutschrift",
+        bezeichnung: "Gutschrift",
+        kuerzel: "GS"
+    },
+    {
+        id: 9,
+        schluessel: "mahnung",
+        bezeichnung: "Mahnung",
+        kuerzel: "MH"
+    },
+    {
+        id: 10,
+        schluessel: "zahlung",
+        bezeichnung: "Zahlung",
+        kuerzel: "ZA"
+    }
+];
+
 export let benutzer = [
 
     {
-        id: 1, username: "admin", email: "admin@test.de", password: "admin", rolle: "Admin"
+        id: 1, username: "admin", email: "admin@test.de", password: "admin", rolle: "Admin", name: "Administrator", permissions: ["*"]
     },
 
     {
-        id: 2, username: "lager", email: "lager@test.de", password: "lager", rolle: "Lager"
+        id: 2, username: "lager", email: "lager@test.de", password: "lager", rolle: "Lager", name: "Lager Mitarbeiter", permissions: ["artikel.lesen", "lager.buchen", "lager.lesen", "einkauf.lesen", "einkauf.bearbeiten"]
     },
 
     {
-        id: 3, username: "buchhaltung", email: "buchhaltung@test.de", password: "buchhaltung", rolle: "Buchhaltung"
+        id: 3, username: "buchhaltung", email: "buchhaltung@test.de", password: "buchhaltung", rolle: "Buchhaltung", name: "Buchhaltung", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
     },
     {
-        id: 4, username: "marketing", email: "marketing@test.de", password: "marketing", rolle: "Marketing"
+        id: 4, username: "marketing", email: "marketing@test.de", password: "marketing", rolle: "Marketing", name: "Marketing Mitarbeiter", permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
     },
     {
-        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi"
+        id: 8, username: "einkauf", email: "einkauf@test.de", password: "einkauf", rolle: "Einkauf", name: "Einkauf Mitarbeiter", permissions: ["einkauf.lesen", "einkauf.bearbeiten", "lager.lesen", "lager.bearbeiten", "artikel.lesen", "artikel.bearbeiten"]
     },
     {
-        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior"
+        id: 9, username: "verkauf", email: "verkauf@test.de", password: "verkauf", rolle: "Verkauf", name: "Verkauf Mitarbeiter", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
+    },
+    {
+        id: 10, username: "personalwesen", email: "personalwesen@test.de", password: "personalwesen", rolle: "Personalwesen", name: "Personalwesen Mitarbeiter", permissions: ["personalwesen.lesen", "personalwesen.bearbeiten", "organisation.lesen"]
+    },
+    {
+        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi", name: "Verkauf Azubi", permissions: ["kunde.lesen", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen"]
+    },
+    {
+        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior", name: "Verkauf Senior", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "lager.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
+    },
+    {
+        id: 7, username: "gf", email: "gf@test.de", password: "gf", rolle: "Geschäftsführung", name: "Geschäftsführung", permissions: ["*"]
     }
 
 ];
@@ -237,59 +324,173 @@ export let rollen = [
     {
         id: 1, 
         name: "Admin", 
-        beschreibung: "Vollständiger Zugriff auf alle Funktionen",
-        permissions: ["*"]
+        beschreibung: "Vollständiger Zugriff auf alle Funktionen"
     },
 
     {
         id: 2,
         name: "Lager",
-        beschreibung: "Verwaltung des Lagers und Bestände",
-        permissions: [
-            "artikel.anlegen", "artikel.bearbeiten", "artikel.anzeigen",
-            "lager.anlegen", "lager.bearbeiten", "lager.anzeigen"
-        ]
+        beschreibung: "Verwaltung des Lagers und Bestände"
     },
 
     {
         id: 3,
         name: "Buchhaltung",
-        beschreibung: "Verwaltung von Rechnungen und Kundenkonten",
-        permissions: [
-            "kunde.anlegen", "kunde.bearbeiten", "kunde.anzeigen",
-            "rechnung.anlegen", "rechnung.bearbeiten", "rechnung.anzeigen"
-        ]
+        beschreibung: "Verwaltung von Rechnungen und Kundenkonten"
+    },
+    {
+        id: 4,
+        name: "Marketing",
+        beschreibung: "Marketing und Kampagnenarbeit"
+    },
+    {
+        id: 5,
+        name: "Einkauf",
+        beschreibung: "Einkauf und Lieferantenmanagement"
+    },
+    {
+        id: 6,
+        name: "Verkauf",
+        beschreibung: "Vertrieb und Kundenkommunikation"
+    },
+    {
+        id: 7,
+        name: "Personalwesen",
+        beschreibung: "Mitarbeiter- und Personalarbeit"
+    },
+    {
+        id: 8,
+        name: "Verkauf Azubi",
+        beschreibung: "Verkauf für Auszubildende"
+    },
+    {
+        id: 9,
+        name: "Verkauf Senior",
+        beschreibung: "Erweiterte Verkaufsrolle mit Freigaben"
+    },
+    {
+        id: 10,
+        name: "Geschäftsführung",
+        beschreibung: "Vollzugriff für die Geschäftsführung"
     }
 
 ];
 
 export let rechte = [
-
-    {
-        id: 1, name: "kunde.anlegen", beschreibung: "Neue Kunden erstellen"
-    },
-
-    {
-        id: 2, name: "kunde.bearbeiten", beschreibung: "Kundendaten bearbeiten"
-    },
-
-    {
-        id: 3, name: "artikel.anlegen", beschreibung: "Neue Artikel erstellen"
-    },
-
-    {
-        id: 4, name: "artikel.bearbeiten", beschreibung: "Artikeldaten bearbeiten"
-    },
-
-    {
-        id: 5, name: "rechnung.anlegen", beschreibung: "Neue Rechnungen erstellen"
-    },
-
-    {
-        id: 6, name: "rechnung.bearbeiten", beschreibung: "Rechnungen bearbeiten"
-    }
-
+    { id: 1, name: "*", beschreibung: "Vollzugriff auf alle Funktionen" },
+    { id: 2, name: "organisation.lesen", beschreibung: "Organisationsdaten lesen" },
+    { id: 3, name: "einkauf.lesen", beschreibung: "Einkaufsdaten lesen" },
+    { id: 4, name: "einkauf.bearbeiten", beschreibung: "Einkaufsdaten bearbeiten" },
+    { id: 5, name: "verkauf.lesen", beschreibung: "Verkaufsdaten lesen" },
+    { id: 6, name: "verkauf.bearbeiten", beschreibung: "Verkaufsdaten bearbeiten" },
+    { id: 7, name: "service.lesen", beschreibung: "Servicedaten lesen" },
+    { id: 8, name: "service.bearbeiten", beschreibung: "Servicedaten bearbeiten" },
+    { id: 9, name: "marketing.lesen", beschreibung: "Marketingdaten lesen" },
+    { id: 10, name: "marketing.bearbeiten", beschreibung: "Marketingdaten bearbeiten" },
+    { id: 11, name: "buchhaltung.lesen", beschreibung: "Buchhaltungsdaten lesen" },
+    { id: 12, name: "buchhaltung.bearbeiten", beschreibung: "Buchhaltungsdaten bearbeiten" },
+    { id: 13, name: "logistik.lesen", beschreibung: "Logistikdaten lesen" },
+    { id: 14, name: "logistik.bearbeiten", beschreibung: "Logistikdaten bearbeiten" },
+    { id: 15, name: "personalwesen.lesen", beschreibung: "Personaldaten lesen" },
+    { id: 16, name: "personalwesen.bearbeiten", beschreibung: "Personaldaten bearbeiten" },
+    { id: 17, name: "gf.lesen", beschreibung: "Geschäftsführungsdaten lesen" },
+    { id: 18, name: "gf.bearbeiten", beschreibung: "Geschäftsführungsdaten bearbeiten" },
+    { id: 19, name: "kunde.lesen", beschreibung: "Kundendaten lesen" },
+    { id: 20, name: "kunde.anzeigen", beschreibung: "Kundendaten anzeigen" },
+    { id: 21, name: "kunde.anlegen", beschreibung: "Neue Kunden erstellen" },
+    { id: 22, name: "kunde.bearbeiten", beschreibung: "Kundendaten bearbeiten" },
+    { id: 23, name: "kunde.loeschen", beschreibung: "Kundendaten löschen" },
+    { id: 24, name: "artikel.lesen", beschreibung: "Artikeldaten lesen" },
+    { id: 25, name: "artikel.anzeigen", beschreibung: "Artikeldaten anzeigen" },
+    { id: 26, name: "artikel.anlegen", beschreibung: "Neue Artikel erstellen" },
+    { id: 27, name: "artikel.bearbeiten", beschreibung: "Artikeldaten bearbeiten" },
+    { id: 28, name: "artikel.loeschen", beschreibung: "Artikeldaten löschen" },
+    { id: 29, name: "rechnung.lesen", beschreibung: "Rechnungen lesen" },
+    { id: 30, name: "rechnung.anzeigen", beschreibung: "Rechnungen anzeigen" },
+    { id: 31, name: "rechnung.anlegen", beschreibung: "Neue Rechnungen erstellen" },
+    { id: 32, name: "rechnung.bearbeiten", beschreibung: "Rechnungen bearbeiten" },
+    { id: 33, name: "rechnung.loeschen", beschreibung: "Rechnungen löschen" },
+    { id: 34, name: "lager.lesen", beschreibung: "Lagerdaten lesen" },
+    { id: 35, name: "lager.anzeigen", beschreibung: "Lagerdaten anzeigen" },
+    { id: 36, name: "lager.anlegen", beschreibung: "Neue Lager anlegen" },
+    { id: 37, name: "lager.bearbeiten", beschreibung: "Lagerdaten bearbeiten" },
+    { id: 38, name: "lager.loeschen", beschreibung: "Lagerdaten löschen" },
+    { id: 39, name: "lager.buchen", beschreibung: "Lagerbewegungen buchen" },
+    { id: 40, name: "benutzer.lesen", beschreibung: "Benutzerdaten lesen" },
+    { id: 41, name: "benutzer.anzeigen", beschreibung: "Benutzerdaten anzeigen" },
+    { id: 42, name: "benutzer.anlegen", beschreibung: "Neue Benutzer anlegen" },
+    { id: 43, name: "benutzer.bearbeiten", beschreibung: "Benutzerdaten bearbeiten" },
+    { id: 44, name: "benutzer.loeschen", beschreibung: "Benutzerdaten löschen" },
+    { id: 45, name: "rollen.lesen", beschreibung: "Rollen lesen" },
+    { id: 46, name: "rollen.anzeigen", beschreibung: "Rollen anzeigen" },
+    { id: 47, name: "rollen.anlegen", beschreibung: "Neue Rollen anlegen" },
+    { id: 48, name: "rollen.bearbeiten", beschreibung: "Rollen bearbeiten" },
+    { id: 49, name: "rollen.loeschen", beschreibung: "Rollen löschen" },
+    { id: 50, name: "rechte.lesen", beschreibung: "Rechte lesen" },
+    { id: 51, name: "rechte.anzeigen", beschreibung: "Rechte anzeigen" },
+    { id: 52, name: "rechte.anlegen", beschreibung: "Neue Rechte anlegen" },
+    { id: 53, name: "rechte.bearbeiten", beschreibung: "Rechte bearbeiten" },
+    { id: 54, name: "rechte.loeschen", beschreibung: "Rechte löschen" }
 ];
+
+export let rollenRechte = [
+    { id: 1, rolleId: 1, rolleName: "Admin", rechtName: "*" },
+    { id: 2, rolleId: 2, rolleName: "Lager", rechtName: "artikel.lesen" },
+    { id: 3, rolleId: 2, rolleName: "Lager", rechtName: "lager.buchen" },
+    { id: 4, rolleId: 2, rolleName: "Lager", rechtName: "lager.lesen" },
+    { id: 5, rolleId: 2, rolleName: "Lager", rechtName: "einkauf.lesen" },
+    { id: 6, rolleId: 2, rolleName: "Lager", rechtName: "einkauf.bearbeiten" },
+    { id: 7, rolleId: 3, rolleName: "Buchhaltung", rechtName: "kunde.lesen" },
+    { id: 8, rolleId: 3, rolleName: "Buchhaltung", rechtName: "kunde.anlegen" },
+    { id: 9, rolleId: 3, rolleName: "Buchhaltung", rechtName: "kunde.bearbeiten" },
+    { id: 10, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.lesen" },
+    { id: 11, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.anlegen" },
+    { id: 12, rolleId: 3, rolleName: "Buchhaltung", rechtName: "rechnung.bearbeiten" },
+    { id: 13, rolleId: 3, rolleName: "Buchhaltung", rechtName: "verkauf.lesen" },
+    { id: 14, rolleId: 3, rolleName: "Buchhaltung", rechtName: "verkauf.bearbeiten" },
+    { id: 15, rolleId: 3, rolleName: "Buchhaltung", rechtName: "service.lesen" },
+    { id: 16, rolleId: 3, rolleName: "Buchhaltung", rechtName: "service.bearbeiten" },
+    { id: 17, rolleId: 3, rolleName: "Buchhaltung", rechtName: "organisation.lesen" },
+    { id: 18, rolleId: 3, rolleName: "Buchhaltung", rechtName: "buchhaltung.lesen" },
+    { id: 19, rolleId: 3, rolleName: "Buchhaltung", rechtName: "buchhaltung.bearbeiten" },
+    { id: 20, rolleId: 4, rolleName: "Marketing", rechtName: "marketing.lesen" },
+    { id: 21, rolleId: 4, rolleName: "Marketing", rechtName: "marketing.bearbeiten" },
+    { id: 22, rolleId: 4, rolleName: "Marketing", rechtName: "verkauf.lesen" },
+    { id: 23, rolleId: 5, rolleName: "Einkauf", rechtName: "einkauf.lesen" },
+    { id: 24, rolleId: 5, rolleName: "Einkauf", rechtName: "einkauf.bearbeiten" },
+    { id: 25, rolleId: 5, rolleName: "Einkauf", rechtName: "lager.lesen" },
+    { id: 26, rolleId: 5, rolleName: "Einkauf", rechtName: "lager.bearbeiten" },
+    { id: 27, rolleId: 5, rolleName: "Einkauf", rechtName: "artikel.lesen" },
+    { id: 28, rolleId: 5, rolleName: "Einkauf", rechtName: "artikel.bearbeiten" },
+    { id: 29, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.lesen" },
+    { id: 30, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.anlegen" },
+    { id: 31, rolleId: 6, rolleName: "Verkauf", rechtName: "kunde.bearbeiten" },
+    { id: 32, rolleId: 6, rolleName: "Verkauf", rechtName: "artikel.lesen" },
+    { id: 33, rolleId: 6, rolleName: "Verkauf", rechtName: "verkauf.lesen" },
+    { id: 34, rolleId: 6, rolleName: "Verkauf", rechtName: "verkauf.bearbeiten" },
+    { id: 35, rolleId: 6, rolleName: "Verkauf", rechtName: "service.lesen" },
+    { id: 36, rolleId: 6, rolleName: "Verkauf", rechtName: "service.bearbeiten" },
+    { id: 37, rolleId: 7, rolleName: "Personalwesen", rechtName: "personalwesen.lesen" },
+    { id: 38, rolleId: 7, rolleName: "Personalwesen", rechtName: "personalwesen.bearbeiten" },
+    { id: 39, rolleId: 7, rolleName: "Personalwesen", rechtName: "organisation.lesen" },
+    { id: 40, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "kunde.lesen" },
+    { id: 41, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "artikel.lesen" },
+    { id: 42, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "verkauf.lesen" },
+    { id: 43, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "verkauf.bearbeiten" },
+    { id: 44, rolleId: 8, rolleName: "Verkauf Azubi", rechtName: "service.lesen" },
+    { id: 45, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "kunde.lesen" },
+    { id: 46, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "kunde.anlegen" },
+    { id: 47, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "kunde.bearbeiten" },
+    { id: 48, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "artikel.lesen" },
+    { id: 49, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "verkauf.lesen" },
+    { id: 50, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "verkauf.bearbeiten" },
+    { id: 51, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "service.lesen" },
+    { id: 52, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "service.bearbeiten" },
+    { id: 53, rolleId: 9, rolleName: "Verkauf Senior", rechtName: "lager.lesen" },
+    { id: 54, rolleId: 10, rolleName: "Geschäftsführung", rechtName: "*" }
+];
+
+// Logistik und Einkauf
 
 export let lager = [
 
@@ -324,7 +525,7 @@ export let users = [
         username: "buchhaltung",
         password: "buchhaltung",
         name: "Buchhaltung",
-        permissions: ["kunde.lesen", "kunde.anlegen", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
+        permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
     },
     {
         id: 4,
@@ -335,12 +536,36 @@ export let users = [
         permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
     },
     {
+        id: 8,
+        username: "einkauf",
+        password: "einkauf",
+        name: "Einkauf Mitarbeiter",
+        rolle: "Einkauf",
+        permissions: ["einkauf.lesen", "einkauf.bearbeiten", "lager.lesen", "lager.bearbeiten", "artikel.lesen", "artikel.bearbeiten"]
+    },
+    {
+        id: 9,
+        username: "verkauf",
+        password: "verkauf",
+        name: "Verkauf Mitarbeiter",
+        rolle: "Verkauf",
+        permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "lager.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
+    },
+    {
+        id: 10,
+        username: "personalwesen",
+        password: "personalwesen",
+        name: "Personalwesen Mitarbeiter",
+        rolle: "Personalwesen",
+        permissions: ["personalwesen.lesen", "personalwesen.bearbeiten", "organisation.lesen"]
+    },
+    {
         id: 5,
         username: "verkauf_azubi",
         password: "verkauf",
         name: "Verkauf Azubi",
         rolle: "Verkauf Azubi",
-        permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+        permissions: ["kunde.lesen", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen"]
     },
     {
         id: 6,
@@ -348,7 +573,15 @@ export let users = [
         password: "verkauf",
         name: "Verkauf Senior",
         rolle: "Verkauf Senior",
-        permissions: ["verkauf.lesen", "verkauf.bearbeiten"]
+        permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
+    },
+    {
+        id: 7,
+        username: "gf",
+        password: "gf",
+        name: "Geschäftsführung",
+        rolle: "Geschäftsführung",
+        permissions: ["*"]
     }
 
 ];
@@ -364,6 +597,7 @@ export let lieferanten = [
         plz: "49716",
         ort: "Meppen",
         segment: "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
+        iban: "DE91500105178640732418",
         fuerBts: "Alternativlieferant für Zubehör und Lastenbikes",
         bewertung: 4,
         abc: "B"
@@ -376,6 +610,7 @@ export let lieferanten = [
         plz: "49685",
         ort: "Emstek",
         segment: "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
+        iban: "DE68500500001234567890",
         fuerBts: "",
         bewertung: 5,
         abc: "A"
@@ -388,6 +623,7 @@ export let lieferanten = [
         plz: "",
         ort: "",
         segment: "",
+        iban: "DE30500105170648489890",
         fuerBts: "",
         bewertung: 3,
         abc: "C"
@@ -400,6 +636,7 @@ export let lieferanten = [
         plz: "49809",
         ort: "Lingen",
         segment: "Klassischer Baumarkt mit Fahrradabteilung",
+        iban: "DE02500105170648489901",
         fuerBts: "Soll Lieferant sein und Kunde",
         bewertung: 3,
         abc: "C"
@@ -411,11 +648,31 @@ export let bestellungen = [
         id: 1,
         bestellNr: "EK-2026-001",
         lieferantId: 1,
-        lieferant: "Weber GmbH",
         datum: "2026-07-20",
         status: "angefragt",
-        positionen: [{ artikelId: 3, artikel: "Fahrradhelm", menge: 3 }]
+        anfrageQuelle: "lieferantenvergleich",
+        lehrkraftAngebotAm: "2026-07-21",
+        lehrkraftAngebotPreis: 73.5,
+        lehrkraftLieferzeitTage: 5,
+        lehrkraftAngebotText: "Standardangebot fuer drei Helme aus dem Vergleich."
+    },
+    {
+        id: 2,
+        bestellNr: "EK-2026-002",
+        lieferantId: 2,
+        datum: "2026-08-01",
+        status: "versendet",
+        anfrageQuelle: "bedarfsmeldung",
+        bedarfsmeldungId: "auto-artikel-1",
+        rechnungStatus: "offen",
+        faelligAm: "2026-08-20",
+        anfrageNotiz: "Nachbestellung fuer Citybikes im Zulauf."
     }
+];
+
+export let bestellpositionen = [
+    { id: 1, bestellungId: 1, artikelId: 3, artikelNr: "ART003", menge: 3, einzelpreis: 24.5 },
+    { id: 2, bestellungId: 2, artikelId: 1, artikelNr: "ART001", menge: 5, einzelpreis: 420 }
 ];
 
 export let kategorien = [
@@ -494,6 +751,8 @@ export let kategorien = [
 ];
 
 // Der Verkaufskreislauf bleibt ebenso kompakt: Angebot -> Auftrag.
+// Angebots-, Auftrags- und Kommunikationsdaten
+
 export let angebote = [
     {
         id: 1,
@@ -503,56 +762,67 @@ export let angebote = [
         vorgangId: "anfrage-1",
         anfrageId: 1,
         kundeId: 1,
-        kunde: "Campus Baumarkt GmbH",
         datum: "2026-07-22",
         gueltigBis: "2026-08-05",
         rabattBetrag: 0,
         gesamtbetrag: 1348.5,
-        status: "wartet auf Antwort",
-        positionen: [{ artikelId: 2, artikel: "Sicherheitsjacke", menge: 15, einzelpreis: 89.9 }]
+        status: "wartet auf Antwort"
+    }
+];
+
+export let angebotspositionen = [
+    {
+        id: 1,
+        angebotId: 1,
+        artikelId: 2,
+        leistungTyp: "Artikel",
+        menge: 15,
+        einzelpreis: 89.9
     }
 ];
 
 export let auftraege = [
     {
         id: 1,
-        auftragNr: "VK-2026-1201",
+        auftragNr: "AU-2026-001",
         kundeId: 1,
-        kunde: "Campus Baumarkt GmbH",
+        anfrageId: 1,
+        vorgangId: "anfrage-1",
         datum: "2026-07-25",
         status: "abgerechnet",
         rabattBetrag: 0,
         gesamtbetrag: 1348.5,
         faelligAm: "2026-08-08",
-        positionen: [{ artikelId: 2, artikel: "Sicherheitsjacke", menge: 15, einzelpreis: 89.9 }],
         angebotId: 1
     },
     {
         id: 2,
-        auftragNr: "VK-2026-1202",
+        auftragNr: "AU-2026-002",
         kundeId: 2,
-        kunde: "Emsland Tourismus GmbH",
         datum: "2026-07-20",
         status: "bezahlt",
         rabattBetrag: 0,
         gesamtbetrag: 1799.7,
         faelligAm: "2026-08-03",
-        positionen: [{ artikelId: 3, artikel: "Fahrradhelm", menge: 30, einzelpreis: 59.99 }],
         angebotId: ""
     },
     {
         id: 3,
-        auftragNr: "VK-2026-1203",
+        auftragNr: "AU-2026-003",
         kundeId: 1,
-        kunde: "Campus Baumarkt GmbH",
         datum: "2026-07-26",
         status: "offen",
         rabattBetrag: 0,
         gesamtbetrag: 799,
         faelligAm: "",
-        positionen: [{ artikelId: 1, artikel: "Schulungsfahrrad City", menge: 1, einzelpreis: 799 }],
         angebotId: ""
     }
+];
+
+export let auftragspositionen = [
+    { id: 1, auftragId: 1, artikelId: 2, leistungTyp: "Artikel", menge: 15, einzelpreis: 89.9 },
+    { id: 2, auftragId: 2, artikelId: 3, leistungTyp: "Artikel", menge: 30, einzelpreis: 59.99 },
+    { id: 3, auftragId: 3, artikelId: 1, leistungTyp: "Artikel", menge: 1, einzelpreis: 799 }
 ];
 
 export let reklamationen = [
@@ -560,7 +830,6 @@ export let reklamationen = [
         id: 1,
         reklamationsNr: "REK-2026-001",
         kundeId: 2,
-        kunde: "Emsland Tourismus GmbH",
         datum: "2026-07-24",
         beschreibung: "Ein Fahrradhelm wurde beschädigt geliefert.",
         status: "neu"
@@ -590,7 +859,6 @@ export let kundenanfragen = [
         id: 1,
         typ: "Produktanfrage",
         kundeId: 1,
-        kunde: "Campus Baumarkt GmbH",
         vorgangId: "anfrage-1",
         angebotId: 1,
         kanal: "Telefon",
@@ -606,6 +874,7 @@ export let nachrichten = [
         vorgangId: "anfrage-1",
         anfrageId: 1,
         angebotId: "",
+        kundeId: 1,
         datum: "2026-07-24",
         senderRolle: "Kunde",
         senderName: "Campus Baumarkt GmbH",
@@ -619,6 +888,7 @@ export let nachrichten = [
         vorgangId: "anfrage-1",
         anfrageId: 1,
         angebotId: 1,
+        kundeId: 1,
         datum: "2026-07-25",
         senderRolle: "Verkauf",
         senderName: "Schülerfirma Verkauf",
@@ -629,29 +899,56 @@ export let nachrichten = [
     }
 ];
 
+// Buchhaltung und Fuehrung
+
 export let zahlungen = [
     {
         id: 1,
         auftragId: 2,
-        auftragNr: "VK-2026-1202",
-        rechnungsnr: "RE-2026-1202",
+        rechnungId: 2,
         zahlungsart: "Eingang",
-        kunde: "Emsland Tourismus GmbH",
         datum: "2026-07-22",
         ausfuehrenAm: "2026-07-22",
+        ausfuehrungsdatum: "2026-07-22",
         betrag: 1799.7,
+        name: "Emsland Tourismus GmbH",
+        iban: "DE75512108001245126199",
+        verwendungszweck: "Rechnung RG-2026-002",
         methode: "Überweisung",
         status: "ausgefuehrt"
+    },
+    {
+        id: 2,
+        zahlungsart: "Eingang",
+        datum: "2026-08-06",
+        ausfuehrenAm: "2026-08-06",
+        ausfuehrungsdatum: "2026-08-06",
+        betrag: 1348.5,
+        name: "Campus Baumarkt GmbH",
+        iban: "DE44500105175407324931",
+        verwendungszweck: "Zahlung zu RG-2026-001",
+        methode: "Überweisung",
+        status: "offen"
+    },
+    {
+        id: 3,
+        zahlungsart: "Ausgang",
+        datum: "2026-08-07",
+        ausfuehrenAm: "2026-08-07",
+        ausfuehrungsdatum: "2026-08-07",
+        betrag: 2100,
+        name: "Kalkhoff Werke GmbH",
+        iban: "DE68500500001234567890",
+        verwendungszweck: "Eingangsrechnung ER-2026-002",
+        methode: "Überweisung",
+        status: "offen"
     }
 ];
 
 export let mahnungen = [
     {
         id: 1,
-        auftragId: 1,
-        auftragNr: "VK-2026-1201",
-        rechnungsnr: "RE-2026-1201",
-        kunde: "Campus Baumarkt GmbH",
+        rechnungId: 1,
         datum: "2026-07-23",
         status: "gesendet",
         stufe: "1. Mahnung"
@@ -663,7 +960,7 @@ export let belege = [
         id: 1,
         typ: "Rechnungskopie",
         bezugTyp: "Rechnung",
-        bezug: "RE-2026-1202",
+        rechnungId: 2,
         datum: "2026-07-21",
         status: "archiviert",
         beschreibung: "Digitale Ablage für die erste Beispielrechnung."
@@ -672,7 +969,7 @@ export let belege = [
         id: 2,
         typ: "Zahlungsbeleg",
         bezugTyp: "Rechnung",
-        bezug: "RE-2026-1202",
+        rechnungId: 2,
         datum: "2026-07-22",
         status: "archiviert",
         beschreibung: "Zahlungseingang per Überweisung wurde abgelegt."
@@ -681,7 +978,7 @@ export let belege = [
         id: 3,
         typ: "Mahnschreiben",
         bezugTyp: "Rechnung",
-        bezug: "RE-2026-1201",
+        rechnungId: 1,
         datum: "2026-07-23",
         status: "versendet",
         beschreibung: "1. Mahnung für eine fällige Ausgangsrechnung."
@@ -710,7 +1007,10 @@ export let berichte = [
         status: "fertig",
         zusammenfassung: "3 offene Angebote, 1 neuer Auftrag, 1 Reklamation.",
         zielgruppe: "Lehrkraft",
-        empfohlenAktion: "Angebote und Reklamationen im Unterricht vergleichen."
+        empfohlenAktion: "Angebote und Reklamationen im Unterricht vergleichen.",
+        startdatum: "2026-07-21",
+        enddatum: "2026-07-27",
+        intervall: "Woche"
     },
     {
         id: 2,
@@ -720,17 +1020,20 @@ export let berichte = [
         status: "Entwurf",
         zusammenfassung: "Niedrige Bestände bei Lastenrädern und Helmen.",
         zielgruppe: "Klasse",
-        empfohlenAktion: "Bedarfsmeldung und Bestellung aus dem Lagerstand ableiten."
+        empfohlenAktion: "Bedarfsmeldung und Bestellung aus dem Lagerstand ableiten.",
+        startdatum: "2026-07-01",
+        enddatum: "2026-07-31",
+        intervall: "Monat"
     }
 ];
+
+// Versand und Retouren
 
 export let versandauftraege = [
     {
         id: 1,
         versandNr: "LOG-2026-001",
         auftragId: 1,
-        auftrag: "VK-2026-1201",
-        kunde: "Campus Baumarkt GmbH",
         datum: "2026-07-26",
         status: "in Vorbereitung",
         transport: "Spedition Nord"
@@ -741,13 +1044,15 @@ export let retouren = [
     {
         id: 1,
         retourenNr: "RET-2026-001",
-        kunde: "Emsland Tourismus GmbH",
-        artikel: "Fahrradhelm",
+        kundeId: 2,
+        artikelId: 3,
         datum: "2026-07-25",
         status: "eingegangen",
         grund: "Transportschaden"
     }
 ];
+
+// Personalwesen
 
 export let bewerber = [
     {
@@ -783,7 +1088,6 @@ export let arbeitszeiten = [
     {
         id: 1,
         mitarbeiterId: 1,
-        mitarbeiter: "Tom Berger",
         datum: "2026-07-25",
         von: "08:00",
         bis: "16:30",
@@ -795,7 +1099,6 @@ export let urlaubsantraege = [
     {
         id: 1,
         mitarbeiterId: 2,
-        mitarbeiter: "Mira Koch",
         von: "2026-08-10",
         bis: "2026-08-14",
         tage: 5,
@@ -807,7 +1110,6 @@ export let krankmeldungen = [
     {
         id: 1,
         mitarbeiterId: 1,
-        mitarbeiter: "Tom Berger",
         von: "2026-07-24",
         bis: "2026-07-26",
         grund: "Erkältung",
@@ -830,7 +1132,6 @@ export let personalakten = [
     {
         id: 1,
         mitarbeiterId: 1,
-        mitarbeiter: "Tom Berger",
         dokumentTyp: "Vertragsunterlage",
         titel: "Arbeitsvertrag Fachkraft Lager",
         datum: "2024-08-01",
@@ -840,7 +1141,6 @@ export let personalakten = [
     {
         id: 2,
         mitarbeiterId: 1,
-        mitarbeiter: "Tom Berger",
         dokumentTyp: "Onboarding-Checkliste",
         titel: "Einarbeitung Lager und Sicherheit",
         datum: "2024-08-02",
@@ -850,7 +1150,6 @@ export let personalakten = [
     {
         id: 3,
         mitarbeiterId: 2,
-        mitarbeiter: "Mira Koch",
         dokumentTyp: "Urlaubsantrag",
         titel: "Urlaubsantrag August 2026",
         datum: "2026-07-26",
@@ -860,7 +1159,6 @@ export let personalakten = [
     {
         id: 4,
         mitarbeiterId: 2,
-        mitarbeiter: "Mira Koch",
         dokumentTyp: "Schulungsnachweis",
         titel: "Marketing-Schulung Kampagnenplanung",
         datum: "2026-07-15",
@@ -869,15 +1167,17 @@ export let personalakten = [
     }
 ];
 
+// Dokumente und Finanzen
+
 export let vertriebsdokumente = [
     {
         id: 1,
         auftragId: 1,
-        auftragNr: "VK-2026-1201",
-        kundeId: 1,
-        kunde: "Campus Baumarkt GmbH",
+        angebotId: 1,
+        anfrageId: 1,
+        vorgangId: "anfrage-1",
         dokumentTyp: "Auftragsbestätigung",
-        titel: "Auftragsbestätigung VK-2026-1201",
+        titel: "Auftragsbestätigung AU-2026-001",
         datum: "2026-07-25",
         status: "fertig",
         notiz: "Bestellung bestätigt und Liefertermin angekündigt."
@@ -885,11 +1185,12 @@ export let vertriebsdokumente = [
     {
         id: 2,
         auftragId: 1,
-        auftragNr: "VK-2026-1201",
-        kundeId: 1,
-        kunde: "Campus Baumarkt GmbH",
+        angebotId: 1,
+        anfrageId: 1,
+        vorgangId: "anfrage-1",
         dokumentTyp: "Lieferschein",
-        titel: "Lieferschein für Sicherheitsjacken",
+        dokumentNr: "LS-2026-001",
+        titel: "Lieferschein LS-2026-001",
         datum: "2026-07-26",
         status: "Entwurf",
         notiz: "Wird mit dem Versand abgestimmt."
@@ -900,9 +1201,6 @@ export let einkaufsdokumente = [
     {
         id: 1,
         bestellungId: 1,
-        bestellNr: "EK-2026-001",
-        lieferantId: 1,
-        lieferant: "Weber GmbH",
         dokumentTyp: "Bedarfsmeldung",
         titel: "Bedarfsmeldung Lastenrad Premium",
         datum: "2026-07-18",
@@ -912,9 +1210,6 @@ export let einkaufsdokumente = [
     {
         id: 2,
         bestellungId: 1,
-        bestellNr: "EK-2026-001",
-        lieferantId: 1,
-        lieferant: "Weber GmbH",
         dokumentTyp: "Anfrage",
         titel: "Anfrage Lieferzeit und Staffelpreise",
         datum: "2026-07-19",
@@ -924,9 +1219,6 @@ export let einkaufsdokumente = [
     {
         id: 3,
         bestellungId: 1,
-        bestellNr: "EK-2026-001",
-        lieferantId: 1,
-        lieferant: "Weber GmbH",
         dokumentTyp: "Bestellung",
         titel: "Bestellung EK-2026-001",
         datum: "2026-07-20",
@@ -939,6 +1231,7 @@ export let firmenkonto = [
     {
         id: 1,
         datum: "2024-10-01",
+        konto: "firma",
         betreff: "Stammkapitaleinzahlung",
         info: "",
         soll: 0,
@@ -947,20 +1240,22 @@ export let firmenkonto = [
     },
     {
         id: 2,
-        datum: "",
-        betreff: "",
-        info: "",
+        datum: "2026-07-22",
+        konto: "verkauf",
+        betreff: "Zahlungseingang Rechnung RG-2026-002",
+        info: "Verbleibt bis zum Wochenabschluss auf dem Verkaufskonto",
         soll: 0,
-        haben: 0,
-        saldo: 25000
+        haben: 1799.7,
+        saldo: 1799.7
     },
     {
         id: 3,
-        datum: "",
-        betreff: "",
-        info: "",
-        soll: 0,
+        datum: "2026-07-24",
+        konto: "einkauf",
+        betreff: "Materialeinkauf Sicherheitshelme",
+        info: "Didaktische Beispielausgabe fuer das Einkaufskonto",
+        soll: 420,
         haben: 0,
-        saldo: 25000
+        saldo: -420
     }
 ];

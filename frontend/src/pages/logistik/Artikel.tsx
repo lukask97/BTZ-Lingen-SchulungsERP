@@ -1,4 +1,3 @@
-// @ts-nocheck
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import TextField from "../../components/form/TextField";
@@ -7,15 +6,24 @@ import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
 
-import { getColumns, getAllColumns } from "../../services/core/metadataService";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import artikelService from "../../services/logistik/artikelService";
 import kategorienService from "../../services/logistik/kategorienService";
-import { INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useState, useMemo } from "react";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { naechsteStammdatennummer } from "../../services/core/documentNumbering";
+
+function createKomponentenDraft() {
+    return {
+        komponenteId: "",
+        komponentenMenge: 1
+    };
+}
 
 export default function Artikel() {
+    const syncTick = useStorageSyncRefresh(["artikel", "artikelStueckliste", "kategorien"]);
     const { user } = useAuth();
     const config = PAGE_CONFIG.artikel;
     
@@ -33,16 +41,25 @@ export default function Artikel() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.artikel, artikelService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.artikel, artikelService, {
+        createNewItem: () => ({
+            ...INITIAL_DATA.artikel,
+            artikelNr: naechsteStammdatennummer(artikelService.list().map(item => item.artikelNr), "artikel")
+        }),
+        requiredFields: [
+            { field: "artikelNr", label: "Artikelnummer" },
+            { field: "name", label: "Name" }
+        ]
+    });
 
-    const columns = getColumns(config.tableName, user.username);
-    const allColumns = getAllColumns(config.tableName);
-    const kategorien = useMemo(() => kategorienService.list(), []);
+    const columns = getVisibleTableColumns(config.tableName);
+    const allColumns = getAllTableColumns(config.tableName);
+    const kategorien = useMemo(() => kategorienService.list(), [syncTick]);
 
     const [categoryFilter, setCategoryFilter] = useState("");
-    const [komponenteId, setKomponenteId] = useState("");
-    const [komponentenMenge, setKomponentenMenge] = useState(1);
+    const [komponentenDraft, setKomponentenDraft] = useState(createKomponentenDraft);
 
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
@@ -60,8 +77,8 @@ export default function Artikel() {
     })), [kategorien]);
 
     const komponenteHinzufuegen = () => {
-        const auswahl = allData.find(item => String(item.id) === String(komponenteId));
-        if (!auswahl || Number(komponentenMenge) <= 0) return;
+        const auswahl = allData.find(item => String(item.id) === String(komponentenDraft.komponenteId));
+        if (!auswahl || Number(komponentenDraft.komponentenMenge) <= 0) return;
 
         setCurrentItem(item => {
             const vorhandeneKomponenten = Array.isArray(item.komponenten) ? item.komponenten : [];
@@ -70,7 +87,7 @@ export default function Artikel() {
                 return {
                     ...item,
                     komponenten: vorhandeneKomponenten.map(eintrag => eintrag.artikelId === auswahl.id
-                        ? { ...eintrag, menge: eintrag.menge + Number(komponentenMenge) }
+                        ? { ...eintrag, menge: eintrag.menge + Number(komponentenDraft.komponentenMenge) }
                         : eintrag)
                 };
             }
@@ -79,12 +96,11 @@ export default function Artikel() {
                 komponenten: [...vorhandeneKomponenten, {
                     artikelId: auswahl.id,
                     artikel: auswahl.name,
-                    menge: Number(komponentenMenge)
+                    menge: Number(komponentenDraft.komponentenMenge)
                 }]
             };
         });
-        setKomponenteId("");
-        setKomponentenMenge(1);
+        setKomponentenDraft(createKomponentenDraft());
     };
 
     const komponenteEntfernen = (artikelId) => {
@@ -129,7 +145,7 @@ export default function Artikel() {
             <DataTable
                 title={config.title}
                 tableName={config.tableName}
-                username={user.username}
+                username={user?.username || ""}
                 columns={columns}
                 allColumns={allColumns}
                 data={filteredDisplayData}
@@ -154,13 +170,13 @@ export default function Artikel() {
                 title={editMode ? "Artikel bearbeiten" : "Neuer Artikel"}
                 onClose={handleClose}
             >
-                <Label required>Artikelnummer</Label>
-                <TextField value={currentItem.artikelNr} onChange={v => handleFieldChange("artikelNr", v)} />
+                <Label required glossaryKey="artikelnummer">Artikelnummer</Label>
+                <TextField value={currentItem.artikelNr} onChange={v => handleFieldChange("artikelNr", v)} disabled />
 
                 <Label required>Name</Label>
                 <TextField value={currentItem.name} onChange={v => handleFieldChange("name", v)} />
 
-                <Label>Kategorie</Label>
+                <Label glossaryKey="kategorie">Kategorie</Label>
                 <LookupField value={currentItem.kategorieId || ""} options={kategorienOptionen} onChange={value => {
                     const kategorie = kategorien.find(item => String(item.id) === String(value));
                     setCurrentItem(item => ({
@@ -178,10 +194,10 @@ export default function Artikel() {
                     <option value="Baugruppe">Baugruppe</option>
                 </select>
 
-                <Label>Einkaufspreis</Label>
+                <Label glossaryKey="einkaufspreis">Einkaufspreis</Label>
                 <NumberField value={currentItem.einkaufspreis} min="0" step="0.01" format="currency" onChange={v => handleFieldChange("einkaufspreis", Number(v || 0))} />
 
-                <Label>Verkaufspreis</Label>
+                <Label glossaryKey="verkaufspreis">Verkaufspreis</Label>
                 <NumberField value={currentItem.verkaufspreis} min="0" step="0.01" format="currency" onChange={v => handleFieldChange("verkaufspreis", Number(v || 0))} />
 
                 <div className="form-row">
@@ -191,25 +207,40 @@ export default function Artikel() {
                 <Label>Bestand</Label>
                 <NumberField value={currentItem.bestand} min="0" step="1" onChange={v => handleFieldChange("bestand", Number(v || 0))} />
 
+                <div className="form-row">
+                    <div>
+                        <Label>Sicherheitsbestand</Label>
+                        <NumberField value={currentItem.mindestmenge || 0} min="0" step="1" onChange={v => handleFieldChange("mindestmenge", Number(v || 0))} />
+                    </div>
+                    <div>
+                        <Label>Bedarfsmeldung bei</Label>
+                        <NumberField value={currentItem.bedarfsmeldungBei || 0} min="0" step="1" onChange={v => handleFieldChange("bedarfsmeldungBei", Number(v || 0))} />
+                    </div>
+                </div>
+
+                <div className="form-row">
+                    <p>Der Sicherheitsbestand steuert die Freigabepflicht im Verkauf. Die Bedarfsmeldung taucht im Einkauf auf, sobald der Bestand diesen Wert erreicht oder unterschreitet.</p>
+                </div>
+
                 {currentItem.artikelTyp === "Baugruppe" && <>
                     <div className="form-row bestellposition-hinzufuegen">
                         <div>
-                            <Label>Komponente</Label>
+                            <Label glossaryKey="stueckliste">Komponente</Label>
                             <LookupField
-                                value={komponenteId}
+                                value={komponentenDraft.komponenteId}
                                 options={komponentenOptionen}
-                                onChange={setKomponenteId}
+                                onChange={value => setKomponentenDraft(item => ({ ...item, komponenteId: value }))}
                                 placeholder="Komponente suchen..."
                             />
                         </div>
                         <div>
                             <Label>Menge</Label>
-                            <NumberField value={komponentenMenge} min="1" step="1" onChange={v => setKomponentenMenge(Number(v || 1))} />
+                            <NumberField value={komponentenDraft.komponentenMenge} min="1" step="1" onChange={v => setKomponentenDraft(item => ({ ...item, komponentenMenge: Number(v || 1) }))} />
                         </div>
                         <button type="button" onClick={komponenteHinzufuegen}>Komponente hinzufügen</button>
                     </div>
                     <div className="form-row">
-                        <Label>Stückliste</Label>
+                        <Label glossaryKey="stueckliste">Stückliste</Label>
                         {currentItem.komponenten?.length
                             ? <ul className="positionsliste">
                                 {currentItem.komponenten.map(position => <li key={position.artikelId}>
@@ -232,7 +263,8 @@ export default function Artikel() {
                 </div>
 
                 <div className="form-row">
-                    <button onClick={speichern}>Speichern</button>
+                    {error && <p className="form-error">{error}</p>}
+                    <button type="button" onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>
         </>

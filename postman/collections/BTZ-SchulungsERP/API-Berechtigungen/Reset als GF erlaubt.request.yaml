@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/reset"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', function () {
+        pm.response.to.have.status(200);
+      });
+      const data = pm.response.json();
+      pm.test('Reset erfolgreich', function () {
+        pm.expect(data.ok).to.eql(true);
+      });
+    language: text/javascript
+order: 9000

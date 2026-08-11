@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
@@ -10,8 +9,9 @@ import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import personalaktenService from "../../services/personalwesen/personalaktenService";
-
-const today = "2026-07-26";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 const dokumentOptionen = [
     "Vertragsunterlage",
     "Urlaubsantrag",
@@ -29,24 +29,49 @@ const schnellvorlagen = [
     { typ: "Onboarding-Checkliste", titel: "Onboarding-Checkliste" }
 ];
 
+function createPersonalakteEintrag(mitarbeiterId: string, today: string) {
+    return {
+        mitarbeiterId,
+        dokumentTyp: "Vertragsunterlage",
+        titel: "",
+        datum: today,
+        status: "archiviert",
+        notiz: ""
+    };
+}
+
+function createVorlagenEintrag(
+    dokumentTyp: string,
+    titel: string,
+    mitarbeiterId: string,
+    mitarbeiterName: string | undefined,
+    today: string
+) {
+    return {
+        mitarbeiterId,
+        dokumentTyp,
+        titel: mitarbeiterName ? `${titel} ${mitarbeiterName}` : titel,
+        datum: today,
+        status: dokumentTyp === "Vertragsunterlage" ? "archiviert" : "offen",
+        notiz: dokumentTyp === "Abmahnung" ? "Nur für Schulungszwecke / fiktiver Vorgang." : ""
+    };
+}
+
 export default function Personalakte() {
+    const today = getBerlinDate();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const mitarbeiter = mitarbeiterService.list();
     const mitarbeiterOptionen = mitarbeiter.map(item => ({ value: String(item.id), label: `${item.name} - ${item.abteilung}` }));
     const initialMitarbeiterId = searchParams.get("mitarbeiter") || String(mitarbeiter[0]?.id || "");
     const [selectedMitarbeiterId, setSelectedMitarbeiterId] = useState(initialMitarbeiterId);
-    const [akteneintraege, setAkteneintraege] = useState(personalaktenService.list());
+    const [akteneintraege, setAkteneintraege] = useSyncedServiceData(
+        ["personalakten", "mitarbeiter", "urlaubsantraege", "krankmeldungen", "schulungen"],
+        () => personalaktenService.list()
+    );
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    const [current, setCurrent] = useState({
-        mitarbeiterId: initialMitarbeiterId,
-        dokumentTyp: "Vertragsunterlage",
-        titel: "",
-        datum: today,
-        status: "archiviert",
-        notiz: ""
-    });
+    const [current, setCurrent] = useState(createPersonalakteEintrag(initialMitarbeiterId, today));
 
     const selectedMitarbeiter = mitarbeiter.find(item => String(item.id) === String(selectedMitarbeiterId));
     const daten = useMemo(
@@ -63,27 +88,19 @@ export default function Personalakte() {
     };
 
     const formularNeu = () => {
-        setCurrent({
-            mitarbeiterId: selectedMitarbeiterId || String(mitarbeiter[0]?.id || ""),
-            dokumentTyp: "Vertragsunterlage",
-            titel: "",
-            datum: today,
-            status: "archiviert",
-            notiz: ""
-        });
+        setCurrent(createPersonalakteEintrag(selectedMitarbeiterId || String(mitarbeiter[0]?.id || ""), today));
         setEditMode(false);
         setOpen(true);
     };
 
     const vorlageOeffnen = (dokumentTyp, titel) => {
-        setCurrent({
-            mitarbeiterId: selectedMitarbeiterId || String(mitarbeiter[0]?.id || ""),
+        setCurrent(createVorlagenEintrag(
             dokumentTyp,
-            titel: selectedMitarbeiter ? `${titel} ${selectedMitarbeiter.name}` : titel,
-            datum: today,
-            status: dokumentTyp === "Vertragsunterlage" ? "archiviert" : "offen",
-            notiz: dokumentTyp === "Abmahnung" ? "Nur für Schulungszwecke / fiktiver Vorgang." : ""
-        });
+            titel,
+            selectedMitarbeiterId || String(mitarbeiter[0]?.id || ""),
+            selectedMitarbeiter?.name,
+            today
+        ));
         setEditMode(false);
         setOpen(true);
     };
@@ -95,7 +112,6 @@ export default function Personalakte() {
         const payload = {
             ...current,
             mitarbeiterId: Number(current.mitarbeiterId),
-            mitarbeiter: person.name,
             titel: current.titel.trim(),
             notiz: current.notiz.trim()
         };
@@ -110,6 +126,7 @@ export default function Personalakte() {
         setSelectedMitarbeiterId(String(payload.mitarbeiterId));
         setOpen(false);
         setEditMode(false);
+        setCurrent(createPersonalakteEintrag(String(payload.mitarbeiterId), today));
     };
 
     const bearbeiten = (eintrag) => {
@@ -183,10 +200,10 @@ export default function Personalakte() {
                 { field: "status", title: "Status" },
                 { field: "notiz", title: "Hinweis" }
             ]}
-            toolbarActions={[{ name: "new", label: "Dokument hinterlegen", permission: "personalwesen.bearbeiten", onClick: formularNeu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Dokument hinterlegen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: formularNeu, variant: "secondary" }]}
             rowActions={[
-                { name: "edit", label: "Bearbeiten", permission: "personalwesen.bearbeiten", onClick: bearbeiten, variant: "secondary" },
-                { name: "delete", label: "Löschen", permission: "personalwesen.bearbeiten", onClick: loeschen, variant: "danger" }
+                { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: bearbeiten, variant: "secondary" },
+                { name: "delete", label: "Löschen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: loeschen, variant: "danger" }
             ]}
         />
 
@@ -203,7 +220,7 @@ export default function Personalakte() {
                 <option value="abgeschlossen">Abgeschlossen</option>
             </select></div>
             <div className="form-row"><Label>Hinweis</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
         </Dialog>
     </>;
 }

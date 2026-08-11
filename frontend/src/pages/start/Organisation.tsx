@@ -1,7 +1,10 @@
 import DataTable from "../../components/DataTable";
 import abteilungenService from "../../services/organisation/abteilungenService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 
 export default function Organisation() {
+    useStorageSyncRefresh(["abteilungen"]);
+
     const abteilungen = abteilungenService.getAll().map(abteilung => ({
         ...abteilung,
         aufgabenText: abteilung.aufgaben.join(", ")

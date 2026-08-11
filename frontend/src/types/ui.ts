@@ -14,6 +14,8 @@ export interface LookupOption {
 }
 
 export interface LookupFieldProps {
+    id?: string;
+    name?: string;
     value?: string | number;
     options?: LookupOption[];
     onChange?: (value: string) => void;
@@ -25,6 +27,8 @@ export interface LookupFieldProps {
 }
 
 export interface TextFieldProps {
+    id?: string;
+    name?: string;
     value?: string | number;
     onChange?: (value: string) => void;
     type?: string;
@@ -36,8 +40,11 @@ export interface TextFieldProps {
 }
 
 export interface NumberFieldProps {
+    id?: string;
+    name?: string;
     value?: string | number;
     onChange?: (value: string) => void;
+    onBlur?: () => void;
     type?: string;
     format?: string;
     min?: string | number;
@@ -48,16 +55,20 @@ export interface NumberFieldProps {
 }
 
 export interface TextAreaProps {
+    id?: string;
+    name?: string;
     value?: string;
     onChange: (value: string) => void;
     rows?: number;
     placeholder?: string;
+    onKeyDown?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
 export interface DataTableAction {
     name?: string;
     label: string;
     permission?: string;
+    access?: string;
     onClick?: (...args: any[]) => void;
     isVisible?: (...args: any[]) => boolean;
     isDisabled?: (...args: any[]) => boolean;
@@ -68,6 +79,7 @@ export interface DataTableAction {
 export interface DataTableColumn {
     field: string;
     title: string;
+    helpText?: string;
     visible?: boolean;
     render?: (row: any, value?: any) => ReactNode;
 }
@@ -106,4 +118,7 @@ export interface DataTableProps {
     focusField?: string;
     detailLinkResolver?: (args: { field: string; row: any; value: any }) => string | null;
     rowClassName?: (row: any) => string;
+    selectableRows?: boolean;
+    selectedRowIds?: Array<string | number>;
+    onSelectedRowsChange?: (rowIds: Array<string | number>) => void;
 }

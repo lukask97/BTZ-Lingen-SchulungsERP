@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
@@ -8,33 +7,58 @@ import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
 import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
+import { PERMISSIONS } from "../../constants/permissions";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import einkaufsdokumenteService from "../../services/einkauf/einkaufsdokumenteService";
+import { getBerlinDate } from "../../utils/dateTime";
 import { openDocumentPdf } from "../../utils/documentPdf";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
-const today = "2026-07-26";
 const dokumentTypen = ["Bedarfsmeldung", "Anfrage", "Angebotsvergleich", "Bestellung", "Warenannahmeprotokoll", "Reklamationsschreiben"];
+const euro = (value) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(value || 0));
 
 function createDokumentTitel(dokumentTyp, bestellung) {
     if (!bestellung) return dokumentTyp;
     return `${dokumentTyp} ${bestellung.bestellNr}`;
 }
 
+function createEinkaufsdokument(bestellungId: string, today: string) {
+    return {
+        bestellungId,
+        dokumentTyp: "Bedarfsmeldung",
+        datum: today,
+        notiz: ""
+    };
+}
+
+function createBedarfSummary(bedarf) {
+    const aktuellerBestand = Number(bedarf.aktuellerBestand || 0);
+    const meldebestand = Number(bedarf.meldebestand || 0);
+    const bestellmenge = Number(bedarf.bestellmenge || 0);
+    const einzelpreis = Number(bedarf.einzelpreis || 0);
+
+    return {
+        aktuellerBestand,
+        meldebestand,
+        bedarfErkannt: aktuellerBestand < meldebestand,
+        bestellwert: bestellmenge * einzelpreis
+    };
+}
+
 export default function Einkaufsdokumente() {
+    const today = getBerlinDate();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const bestellungen = bestellungenService.list();
     const initialBestellungId = searchParams.get("bestellung") || String(bestellungen[0]?.id || "");
     const [selectedBestellungId, setSelectedBestellungId] = useState(initialBestellungId);
-    const [dokumente, setDokumente] = useState(einkaufsdokumenteService.list());
+    const [dokumente, setDokumente] = useSyncedServiceData(
+        ["einkaufsdokumente", "bestellungen"],
+        () => einkaufsdokumenteService.list()
+    );
     const [open, setOpen] = useState(false);
     const [bedarf, setBedarf] = useState({ aktuellerBestand: 5, meldebestand: 10, bestellmenge: 3, einzelpreis: 3499 });
-    const [current, setCurrent] = useState({
-        bestellungId: initialBestellungId,
-        dokumentTyp: "Bedarfsmeldung",
-        datum: today,
-        notiz: ""
-    });
+    const [current, setCurrent] = useState(createEinkaufsdokument(initialBestellungId, today));
 
     const bestellOptionen = bestellungen.map(item => ({ value: String(item.id), label: `${item.bestellNr} - ${item.lieferant}` }));
     const selectedBestellung = bestellungen.find(item => String(item.id) === String(selectedBestellungId));
@@ -42,8 +66,23 @@ export default function Einkaufsdokumente() {
         () => dokumente.filter(item => !selectedBestellungId || String(item.bestellungId) === String(selectedBestellungId)),
         [dokumente, selectedBestellungId]
     );
-    const bedarfErkannt = Number(bedarf.aktuellerBestand) < Number(bedarf.meldebestand);
-    const bestellwert = Number(bedarf.bestellmenge || 0) * Number(bedarf.einzelpreis || 0);
+    const bedarfSummary = useMemo(() => createBedarfSummary(bedarf), [bedarf]);
+    const overviewCards = useMemo(
+        () => [
+            { label: "Dokumente", value: gefilterteDokumente.length },
+            { label: "Noch offen", value: gefilterteDokumente.filter(item => item.status !== "versendet").length },
+            { label: "Versendet", value: gefilterteDokumente.filter(item => item.status === "versendet").length }
+        ],
+        [gefilterteDokumente]
+    );
+
+    const resetCurrentDocument = (bestellungId = selectedBestellungId || String(bestellungen[0]?.id || "")) => {
+        setCurrent(createEinkaufsdokument(bestellungId, today));
+    };
+
+    const refreshDokumente = () => {
+        setDokumente(einkaufsdokumenteService.list());
+    };
 
     const bestellungAuswaehlen = (value) => {
         setSelectedBestellungId(value);
@@ -51,12 +90,7 @@ export default function Einkaufsdokumente() {
     };
 
     const neu = () => {
-        setCurrent({
-            bestellungId: selectedBestellungId || String(bestellungen[0]?.id || ""),
-            dokumentTyp: "Bedarfsmeldung",
-            datum: today,
-            notiz: ""
-        });
+        resetCurrentDocument();
         setOpen(true);
     };
 
@@ -69,11 +103,7 @@ export default function Einkaufsdokumente() {
         const payload = {
             ...current,
             bestellungId: Number(current.bestellungId),
-            bestellNr: bestellung.bestellNr,
-            lieferantId: bestellung.lieferantId,
-            lieferant: bestellung.lieferant,
             titel,
-            positionen: bestellung.positionen || [],
             versendetAm: current.versendetAm || "",
             status: current.status || "erstellt",
             notiz: current.notiz.trim()
@@ -81,13 +111,14 @@ export default function Einkaufsdokumente() {
 
         einkaufsdokumenteService.create(payload);
 
-        setDokumente(einkaufsdokumenteService.list());
+        refreshDokumente();
         setOpen(false);
+        resetCurrentDocument();
     };
 
     const loeschen = (dokument) => {
         einkaufsdokumenteService.remove(dokument.id);
-        setDokumente(einkaufsdokumenteService.list());
+        refreshDokumente();
     };
 
     const alsPdf = (dokument) => {
@@ -114,7 +145,7 @@ export default function Einkaufsdokumente() {
             status: "versendet",
             versendetAm: today
         });
-        setDokumente(einkaufsdokumenteService.list());
+        refreshDokumente();
     };
 
     return <>
@@ -124,14 +155,14 @@ export default function Einkaufsdokumente() {
         <section className="module-panel">
             <div className="personalakte-toolbar">
                 <div className="personalakte-select">
-                    <Label>Bestellung auswählen</Label>
+                    <Label glossaryKey="belegbezug">Bestellung auswählen</Label>
                     <LookupField value={selectedBestellungId} options={bestellOptionen} onChange={bestellungAuswaehlen} placeholder="Bestellung suchen..."/>
                 </div>
                 <div className="personalakte-links">
                     <Link className="button-link" to="/bestellungen">Bestellungen öffnen</Link>
                     <Link className="button-link" to="/wareneingaenge">Wareneingänge öffnen</Link>
                     <Link className="button-link" to="/lieferantenvergleich">Lieferantenvergleich</Link>
-                    {selectedBestellung?.status === "eingegangen" && <Link className="button-link" to={`/rechnungen?new=eingangsrechnung&bestellungId=${selectedBestellung.id}&bestellNr=${selectedBestellung.bestellNr}&lieferantId=${selectedBestellung.lieferantId}`}>Eingangsrechnung prüfen</Link>}
+                    {selectedBestellung?.status === "eingegangen" && <Link className="button-link" to={`/eingangsrechnungen?focus=${String(selectedBestellung.bestellNr || "").replace("EK-", "ER-")}`}>Eingangsrechnung prüfen</Link>}
                 </div>
             </div>
             {selectedBestellung && <div className="personalakte-summary">
@@ -142,11 +173,7 @@ export default function Einkaufsdokumente() {
             </div>}
         </section>
 
-        <OverviewCards cards={[
-            { label: "Dokumente", value: gefilterteDokumente.length },
-            { label: "Noch offen", value: gefilterteDokumente.filter(item => item.status !== "versendet").length },
-            { label: "Versendet", value: gefilterteDokumente.filter(item => item.status === "versendet").length }
-        ]}/>
+        <OverviewCards cards={overviewCards}/>
 
         <section className="dashboard-two-column">
             <article className="dashboard-panel">
@@ -170,16 +197,16 @@ export default function Einkaufsdokumente() {
                     <span>Lernhilfe</span>
                 </div>
                 <div className="personalakte-summary">
-                    <div><span>Aktueller Bestand</span><strong>{bedarf.aktuellerBestand}</strong></div>
-                    <div><span>Meldebestand</span><strong>{bedarf.meldebestand}</strong></div>
-                    <div><span>Bedarf erkannt</span><strong>{bedarfErkannt ? "Ja" : "Nein"}</strong></div>
-                    <div><span>Bestellwert</span><strong>{new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(bestellwert)}</strong></div>
+                    <div><span>Aktueller Bestand</span><strong>{bedarfSummary.aktuellerBestand}</strong></div>
+                    <div><span>Meldebestand</span><strong>{bedarfSummary.meldebestand}</strong></div>
+                    <div><span>Bedarf erkannt</span><strong>{bedarfSummary.bedarfErkannt ? "Ja" : "Nein"}</strong></div>
+                    <div><span>Bestellwert</span><strong>{euro(bedarfSummary.bestellwert)}</strong></div>
                 </div>
                 <div className="dashboard-two-column">
                     <div><Label>Aktueller Bestand</Label><NumberField value={bedarf.aktuellerBestand} min="0" onChange={value => setBedarf(item => ({ ...item, aktuellerBestand: Number(value) }))}/></div>
-                    <div><Label>Meldebestand</Label><NumberField value={bedarf.meldebestand} min="0" onChange={value => setBedarf(item => ({ ...item, meldebestand: Number(value) }))}/></div>
-                    <div><Label>Bestellmenge</Label><NumberField value={bedarf.bestellmenge} min="0" onChange={value => setBedarf(item => ({ ...item, bestellmenge: Number(value) }))}/></div>
-                    <div><Label>Einzelpreis</Label><NumberField value={bedarf.einzelpreis} min="0" onChange={value => setBedarf(item => ({ ...item, einzelpreis: Number(value) }))}/></div>
+                    <div><Label glossaryKey="bedarfsmeldung">Meldebestand</Label><NumberField value={bedarf.meldebestand} min="0" onChange={value => setBedarf(item => ({ ...item, meldebestand: Number(value) }))}/></div>
+                    <div><Label glossaryKey="bedarfsmeldung">Bestellmenge</Label><NumberField value={bedarf.bestellmenge} min="0" onChange={value => setBedarf(item => ({ ...item, bestellmenge: Number(value) }))}/></div>
+                    <div><Label glossaryKey="einkaufspreis">Einzelpreis</Label><NumberField value={bedarf.einzelpreis} min="0" onChange={value => setBedarf(item => ({ ...item, einzelpreis: Number(value) }))}/></div>
                 </div>
             </article>
         </section>
@@ -195,11 +222,11 @@ export default function Einkaufsdokumente() {
                 { field: "versendetAm", title: "Versendet am", render: row => row.versendetAm || "-" },
                 { field: "notiz", title: "Hinweis" }
             ]}
-            toolbarActions={[{ name: "new", label: "Dokument erstellen", permission: "einkauf.bearbeiten", onClick: neu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Dokument erstellen", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "pdf", label: "PDF", permission: "einkauf.bearbeiten", onClick: alsPdf, variant: "secondary" },
-                { name: "send", label: "Versenden", permission: "einkauf.bearbeiten", onClick: versenden, variant: "secondary", isVisible: row => row.status !== "versendet" },
-                { name: "delete", label: "Löschen", permission: "einkauf.bearbeiten", onClick: loeschen, variant: "danger" }
+                { name: "pdf", label: "PDF", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: alsPdf, variant: "secondary" },
+                { name: "send", label: "Versenden", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: versenden, variant: "secondary", isVisible: row => row.status !== "versendet" },
+                { name: "delete", label: "Löschen", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: loeschen, variant: "danger" }
             ]}
             detailLinkResolver={({ field, row, value }) => {
                 if ((field === "bestellung" || field === "bestellNr" || field === "bestellungId") && row.bestellungId) return `/bestellungen?focus=${row.bestellungId}`;
@@ -210,15 +237,15 @@ export default function Einkaufsdokumente() {
         />
 
         <Dialog open={open} title="Einkaufsdokument erstellen" onClose={() => setOpen(false)}>
-            <div><Label>Bestellung</Label><LookupField value={current.bestellungId} options={bestellOptionen} onChange={value => setCurrent(item => ({ ...item, bestellungId: value }))} placeholder="Bestellung suchen..."/></div>
-            <div><Label>Dokumenttyp</Label><select value={current.dokumentTyp} onChange={event => setCurrent(item => ({ ...item, dokumentTyp: event.target.value }))}>
+            <div><Label glossaryKey="belegbezug">Bestellung</Label><LookupField value={current.bestellungId} options={bestellOptionen} onChange={value => setCurrent(item => ({ ...item, bestellungId: value }))} placeholder="Bestellung suchen..."/></div>
+            <div><Label glossaryKey="nummernkreis">Dokumenttyp</Label><select value={current.dokumentTyp} onChange={event => setCurrent(item => ({ ...item, dokumentTyp: event.target.value }))}>
                 {dokumentTypen.map(item => <option key={item} value={item}>{item}</option>)}
             </select></div>
             <div className="form-row"><p>Der Dokumenttitel wird automatisch aus Dokumenttyp und Bestellnummer erzeugt.</p></div>
             <div className="form-row"><Label>Vorschau Titel</Label><strong>{createDokumentTitel(current.dokumentTyp, bestellungen.find(item => String(item.id) === String(current.bestellungId)))}</strong></div>
             <div><Label>Datum</Label><input type="date" value={current.datum} onChange={event => setCurrent(item => ({ ...item, datum: event.target.value }))}/></div>
             <div className="form-row"><Label>Hinweis</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>Speichern</button></div>
+            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

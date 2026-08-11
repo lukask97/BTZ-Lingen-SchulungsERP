@@ -3,11 +3,10 @@ import Dialog from "../../components/Dialog";
 import TextField from "../../components/form/TextField";
 import Label from "../../components/form/Label";
 
-import { getColumns, getAllColumns } from "../../services/core/metadataService";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import lagerService from "../../services/logistik/lagerService";
-import { INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useMemo } from "react";
 import OverviewCards from "../../components/OverviewCards";
 
@@ -29,11 +28,16 @@ export default function Lager() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.lager, lagerService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.lager, lagerService, {
+        requiredFields: [
+            { field: "name", label: "Name" }
+        ]
+    });
 
-    const columns = getColumns(config.tableName, user.username);
-    const allColumns = getAllColumns(config.tableName);
+    const columns = getVisibleTableColumns(config.tableName);
+    const allColumns = getAllTableColumns(config.tableName);
 
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
@@ -98,7 +102,8 @@ export default function Lager() {
                 <TextField value={currentItem.kapazitaet} onChange={v => handleFieldChange("kapazitaet", v)} />
 
                 <div className="form-row">
-                    <button onClick={speichern}>Speichern</button>
+                    {error && <p className="form-error">{error}</p>}
+                    <button type="button" onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>
         </>

@@ -40,7 +40,7 @@ export default function Dialog({
                             onClose();
                         }}
                     >
-                        x
+                        ×
                     </button>
                 </div>
 
@@ -48,11 +48,24 @@ export default function Dialog({
                     {children}
                 </div>
 
-                {footer && (
-                    <div className="dialog-footer">
-                        {footer}
-                    </div>
-                )}
+                <div className="dialog-footer">
+                    <button
+                        type="button"
+                        className="dialog-cancel"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onClose();
+                        }}
+                    >
+                        Abbrechen
+                    </button>
+                    {footer && (
+                        <div className="dialog-footer-extra">
+                            {footer}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

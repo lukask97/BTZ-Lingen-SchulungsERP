@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import PermissionButton from "./PermissionButton";
 import Dialog from "./Dialog";
+import HelpHint from "./HelpHint";
 import { saveUserColumns, getUserColumns } from "../services/core/metadataService";
 import type { DataTableColumn, DataTableProps } from "../types/ui";
 
@@ -64,6 +65,26 @@ function normalizeSortValue(value) {
   return String(value ?? "").toLowerCase();
 }
 
+function haveSameColumns(
+  currentColumns: DataTableColumn[],
+  nextColumns: DataTableColumn[]
+) {
+  if (currentColumns.length !== nextColumns.length) return false;
+
+  return currentColumns.every((column, index) => {
+    const nextColumn = nextColumns[index];
+    return (
+      column.field === nextColumn.field &&
+      column.title === nextColumn.title &&
+      column.visible === nextColumn.visible
+    );
+  });
+}
+
+function getTableColSpan(columnCount: number, hasRowActions: boolean) {
+  return columnCount + (hasRowActions ? 1 : 0);
+}
+
 export default function DataTable({
   title = "",
   toolbarContent,
@@ -103,6 +124,9 @@ export default function DataTable({
   focusField = "id",
   detailLinkResolver,
   rowClassName,
+  selectableRows = false,
+  selectedRowIds = [],
+  onSelectedRowsChange,
 }: DataTableProps) {
   const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -113,33 +137,55 @@ export default function DataTable({
 
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<DataTableColumn[]>([]);
+  const columnMenuRef = useRef<HTMLDivElement | null>(null);
+  const tableWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [hasLeftOverflow, setHasLeftOverflow] = useState(false);
+  const [hasRightOverflow, setHasRightOverflow] = useState(false);
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailData, setDetailData] = useState<any>(null);
+
+  const sourceColumns = useMemo(
+    () => (allColumns.length > 0 ? allColumns : columns),
+    [allColumns, columns]
+  );
+  const sourceColumnsSignature = useMemo(
+    () =>
+      sourceColumns
+        .map((column) => `${column.field}:${column.title}:${column.visible !== false}`)
+        .join("|"),
+    [sourceColumns]
+  );
+  const hasRowActions = rowActions.length > 0;
+  const selectionColumnOffset = selectableRows ? 1 : 0;
+  const tableColSpan = getTableColSpan(visibleColumns.length + selectionColumnOffset, hasRowActions);
+  const pageSizeOptions = [10, 25, 50, 100];
 
   /*
         Initialisierung der Spalten
     */
 
   useEffect(() => {
-    if (!columns.length) return;
+    if (!sourceColumns.length) return;
+
+    let nextVisibleColumns = sourceColumns.filter((c) => c.visible !== false);
 
     if (username && tableName) {
       const saved = getUserColumns(username, tableName);
 
       if (saved) {
-        const savedColumns = columns.filter((c) =>
+        nextVisibleColumns = sourceColumns.filter((c) =>
           saved.sichtbareFelder.includes(c.field)
         );
-
-        setVisibleColumns(savedColumns);
-
-        return;
       }
     }
 
-    setVisibleColumns(columns.filter((c) => c.visible !== false));
-  }, [columns, username, tableName]);
+    setVisibleColumns((currentColumns) =>
+      haveSameColumns(currentColumns, nextVisibleColumns)
+        ? currentColumns
+        : nextVisibleColumns
+    );
+  }, [sourceColumnsSignature, username, tableName]);
 
   function searchChange(e) {
     const value = e.target.value;
@@ -184,6 +230,16 @@ export default function DataTable({
       return aValue < bValue ? 1 : -1;
     });
   }, [data, sortField, sortOrder]);
+
+  const columnLabelMap = useMemo(() => {
+    return Object.fromEntries(
+      sourceColumns.map((column) => [column.field, column.title])
+    );
+  }, [sourceColumns]);
+  const detailEntries = useMemo(
+    () => (detailData ? Object.entries(detailData) : []),
+    [detailData]
+  );
 
   function toggleColumn(column) {
     let result;
@@ -290,203 +346,136 @@ export default function DataTable({
     setDetailOpen(true);
   }, [focusRowId, focusField, data]);
 
-  return (
-    <div className="card">
-      <div className="toolbar">
-        <h2>{title}</h2>
+  useEffect(() => {
+    if (!showColumnMenu) return;
 
-        <div className="toolbar-right">
-          {toolbarContent}
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!columnMenuRef.current?.contains(event.target as Node)) {
+        setShowColumnMenu(false);
+      }
+    };
 
-          {searchable && (
-            <input
-              placeholder="Suchen..."
-              value={search}
-              onChange={searchChange}
-            />
-          )}
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [showColumnMenu]);
 
-          {filters.length > 0 &&
-            filters.map((filter) => (
-              <select
-                key={filter.name}
-                value={activeFilters[filter.name] || ""}
-                onChange={(e) =>
-                  handleFilterChange(filter.name, e.target.value)
-                }
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: "4px",
-                  border: "1px solid #ddd",
-                  fontSize: "14px",
-                }}
-              >
-                <option value="">{filter.label}</option>
-                {filter.options.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            ))}
+  useEffect(() => {
+    const wrapper = tableWrapperRef.current;
+    if (!wrapper) return;
 
-          {selectableColumns && (
-            <button
-              className="icon-button"
-              onClick={() => setShowColumnMenu(!showColumnMenu)}
-            >
-              ⚙️
-            </button>
-          )}
+    const updateOverflowState = () => {
+      const maxScrollLeft = wrapper.scrollWidth - wrapper.clientWidth;
+      setHasLeftOverflow(wrapper.scrollLeft > 4);
+      setHasRightOverflow(maxScrollLeft - wrapper.scrollLeft > 4);
+    };
 
-          {showColumnMenu && (
-            <div className="column-popup">
-              <strong>Spalten anzeigen</strong>
+    updateOverflowState();
 
-              {(allColumns.length > 0 ? allColumns : columns).map((column) => (
-                <label key={column.field}>
-                  <input
-                    type="checkbox"
-                    checked={visibleColumns.some(
-                      (c) => c.field === column.field
-                    )}
-                    onChange={() => toggleColumn(column)}
-                  />
+    const resizeObserver = new ResizeObserver(updateOverflowState);
+    resizeObserver.observe(wrapper);
 
-                  {column.title}
-                </label>
-              ))}
-            </div>
-          )}
+    window.addEventListener("resize", updateOverflowState);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateOverflowState);
+    };
+  }, [visibleColumns, data, rowActions]);
 
-          {toolbarActions.map((action) => (
-            <PermissionButton
-              key={action.name}
-              permission={action.permission}
-              variant={resolveActionVariant(action)}
-              className={action.className}
-              onClick={action.onClick}
-            >
-              {action.label}
-            </PermissionButton>
-          ))}
-        </div>
-      </div>
+  function renderToolbarFilters() {
+    if (filters.length === 0) return null;
 
-      <div className="datatable-wrapper">
-        <table className="datatable">
-          <thead>
-            <tr>
-              {visibleColumns.map((column) => (
-                <th key={column.field} onClick={() => sort(column.field)}>
-                  {column.title}
-
-                  {sortField === column.field &&
-                    (sortOrder === "asc" ? " ▲" : " ▼")}
-                </th>
-              ))}
-
-              {rowActions.length > 0 && <th>Aktionen</th>}
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading && (
-              <tr>
-                <td
-                  colSpan={
-                    visibleColumns.length + (rowActions.length > 0 ? 1 : 0)
-                  }
-                >
-                  Laden...
-                </td>
-              </tr>
-            )}
-
-            {!loading && sortedData.length === 0 && (
-              <tr>
-                <td
-                  colSpan={
-                    visibleColumns.length + (rowActions.length > 0 ? 1 : 0)
-                  }
-                >
-                  Keine Daten vorhanden
-                </td>
-              </tr>
-            )}
-
-            {!loading &&
-              sortedData.map((row) => (
-                <tr
-                  key={row.id}
-                  className={[showDetails ? "clickable-row" : "", rowClassName ? rowClassName(row) : ""].filter(Boolean).join(" ")}
-                  onClick={() => openDetails(row)}
-                >
-                  {visibleColumns.map((column) => (
-                    <td key={column.field}>
-                      {column.render
-                        ? column.render(row)
-                        : displayValue(row[column.field])}
-                    </td>
-                  ))}
-
-                  {rowActions.length > 0 && (
-                    <td>
-                      <div className="table-actions">
-                        {rowActions
-                          .filter((action) =>
-                            action.isVisible ? action.isVisible(row) : true
-                          )
-                          .map((action) => (
-                            <PermissionButton
-                              key={action.name}
-                              permission={action.permission}
-                              variant={resolveActionVariant(action)}
-                              className={action.className}
-                              disabled={
-                                action.isDisabled
-                                  ? action.isDisabled(row)
-                                  : false
-                              }
-                              onClick={(e) => {
-                                e.stopPropagation();
-
-                                action.onClick(row);
-                              }}
-                            >
-                              {action.label}
-                            </PermissionButton>
-                          ))}
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-
-      <Dialog
-        open={detailOpen && !!detailData}
-        title="Details"
-        onClose={closeDetails}
+    return filters.map((filter) => (
+      <select
+        key={filter.name}
+        value={activeFilters[filter.name] || ""}
+        onChange={(e) => handleFilterChange(filter.name, e.target.value)}
+        style={{
+          padding: "6px 10px",
+          borderRadius: "4px",
+          border: "1px solid #ddd",
+          fontSize: "14px",
+        }}
       >
-        <div className="form-row detail-summary">
-          <p>
-            Ausgewählter Datensatz mit allen aktuell sichtbaren Informationen.
-          </p>
-        </div>
-        {detailData &&
-          Object.entries(detailData).map(([key, value]) => (
-            <div className="detail-field" key={key}>
-              <span className="detail-label">{formatDetailLabel(key)}</span>
-              <div className="detail-value">
-                {renderDetailValue(key, detailData, value)}
-              </div>
-            </div>
-          ))}
-      </Dialog>
+        <option value="">{filter.label}</option>
+        {filter.options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    ));
+  }
 
+  function renderColumnMenu() {
+    if (!showColumnMenu) return null;
+
+    return (
+      <div className="column-popup" ref={columnMenuRef}>
+        <strong>Spalten anzeigen</strong>
+
+        {sourceColumns.map((column) => (
+          <label key={column.field}>
+            <input
+              type="checkbox"
+              checked={visibleColumns.some((visible) => visible.field === column.field)}
+              onChange={() => toggleColumn(column)}
+            />
+
+            {column.title}
+          </label>
+        ))}
+      </div>
+    );
+  }
+
+  function renderRowActions(row) {
+    const visibleActions = rowActions.filter((action) =>
+      action.isVisible ? action.isVisible(row) : true
+    );
+
+    if (visibleActions.length === 0) return null;
+
+    return (
+      <div className="table-actions">
+        {visibleActions.map((action) => (
+          <PermissionButton
+            key={action.name}
+            permission={action.permission}
+            access={action.access}
+            variant={resolveActionVariant(action)}
+            className={action.className}
+            disabled={action.isDisabled ? action.isDisabled(row) : false}
+            onClick={(e) => {
+              e.stopPropagation();
+              action.onClick(row);
+            }}
+          >
+            {action.label}
+          </PermissionButton>
+        ))}
+      </div>
+    );
+  }
+
+  function toggleRowSelection(rowId) {
+    if (!onSelectedRowsChange) return;
+    const exists = selectedRowIds.some((id) => String(id) === String(rowId));
+    onSelectedRowsChange(
+      exists
+        ? selectedRowIds.filter((id) => String(id) !== String(rowId))
+        : [...selectedRowIds, rowId]
+    );
+  }
+
+  function toggleSelectAllRows() {
+    if (!onSelectedRowsChange) return;
+    const visibleIds = sortedData.map((row) => row.id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedRowIds.some((selectedId) => String(selectedId) === String(id)));
+    onSelectedRowsChange(allSelected ? [] : visibleIds);
+  }
+
+  function renderPagination() {
+    return (
       <div className="pagination">
         <button
           type="button"
@@ -514,17 +503,179 @@ export default function DataTable({
             onPageSizeChange && onPageSizeChange(Number(e.target.value))
           }
         >
-          <option value="10">10</option>
-
-          <option value="25">25</option>
-
-          <option value="50">50</option>
-
-          <option value="100">100</option>
+          {pageSizeOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
         </select>
 
         <span>pro Seite</span>
       </div>
+    );
+  }
+
+  return (
+    <div className="card">
+      <div className="toolbar">
+        <h2>{title}</h2>
+
+        <div className="toolbar-right">
+          {toolbarContent}
+
+          {searchable && (
+            <input
+              placeholder="Suchen..."
+              value={search}
+              onChange={searchChange}
+            />
+          )}
+
+          {renderToolbarFilters()}
+
+          {sourceColumns.length > 0 && (
+            <button
+              className="icon-button"
+              type="button"
+              onClick={() => setShowColumnMenu(!showColumnMenu)}
+            >
+              ⚙️
+            </button>
+          )}
+
+          {renderColumnMenu()}
+
+          {toolbarActions.map((action) => (
+            <PermissionButton
+              key={action.name}
+              permission={action.permission}
+              access={action.access}
+              variant={resolveActionVariant(action)}
+              className={action.className}
+              disabled={action.isDisabled ? action.isDisabled() : false}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </PermissionButton>
+          ))}
+        </div>
+      </div>
+
+      <div
+        ref={tableWrapperRef}
+        className={[
+          "datatable-wrapper",
+          hasLeftOverflow ? "has-left-overflow" : "",
+          hasRightOverflow ? "has-right-overflow" : "",
+        ].filter(Boolean).join(" ")}
+        onScroll={() => {
+          const wrapper = tableWrapperRef.current;
+          if (!wrapper) return;
+          const maxScrollLeft = wrapper.scrollWidth - wrapper.clientWidth;
+          setHasLeftOverflow(wrapper.scrollLeft > 4);
+          setHasRightOverflow(maxScrollLeft - wrapper.scrollLeft > 4);
+        }}
+      >
+        <table className="datatable">
+          <thead>
+            <tr>
+              {selectableRows && (
+                <th className="datatable-selection-column">
+                  <input
+                    type="checkbox"
+                    checked={sortedData.length > 0 && sortedData.every((row) => selectedRowIds.some((id) => String(id) === String(row.id)))}
+                    onChange={toggleSelectAllRows}
+                    aria-label="Alle Zeilen auswählen"
+                  />
+                </th>
+              )}
+              {visibleColumns.map((column) => (
+                <th key={column.field} onClick={() => sort(column.field)}>
+                  <span className="datatable-header">
+                    <span>{column.title}</span>
+                    {column.helpText && <HelpHint text={column.helpText} delay={500} />}
+                    {sortField === column.field &&
+                      <span>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                  </span>
+                </th>
+              ))}
+
+              {hasRowActions && <th className="datatable-actions-column">Aktionen</th>}
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={tableColSpan}>
+                  Laden...
+                </td>
+              </tr>
+            )}
+
+            {!loading && sortedData.length === 0 && (
+              <tr>
+                <td colSpan={tableColSpan}>
+                  Keine Daten vorhanden
+                </td>
+              </tr>
+            )}
+
+            {!loading &&
+              sortedData.map((row) => (
+                <tr
+                  key={row.id}
+                  className={[showDetails ? "clickable-row" : "", rowClassName ? rowClassName(row) : ""].filter(Boolean).join(" ")}
+                  onClick={() => openDetails(row)}
+                >
+                  {selectableRows && (
+                    <td className="datatable-selection-column" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedRowIds.some((id) => String(id) === String(row.id))}
+                        onChange={() => toggleRowSelection(row.id)}
+                        aria-label={`Zeile ${row.id} auswählen`}
+                      />
+                    </td>
+                  )}
+                  {visibleColumns.map((column) => (
+                    <td key={column.field}>
+                      {column.render
+                        ? column.render(row)
+                        : displayValue(row[column.field])}
+                    </td>
+                  ))}
+
+                  {hasRowActions && <td className="datatable-actions-column">{renderRowActions(row)}</td>}
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Dialog
+        open={detailOpen && !!detailData}
+        title="Details"
+        onClose={closeDetails}
+      >
+        <div className="form-row detail-summary">
+          <p>
+            Ausgewählter Datensatz mit allen aktuell sichtbaren Informationen.
+          </p>
+        </div>
+        {detailEntries.map(([key, value]) => (
+            <div className="detail-field" key={key}>
+              <span className="detail-label">
+                {columnLabelMap[key] || formatDetailLabel(key)}
+              </span>
+              <div className="detail-value">
+                {renderDetailValue(key, detailData, value)}
+              </div>
+            </div>
+          ))}
+      </Dialog>
+
+      {renderPagination()}
     </div>
   );
 }

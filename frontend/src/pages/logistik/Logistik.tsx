@@ -4,19 +4,25 @@ import bestellungenService from "../../services/einkauf/bestellungenService";
 import retourenService from "../../services/logistik/retourenService";
 import versandService from "../../services/logistik/versandService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
+import { getOpenGoodsReceiptOrders, getOrdersWithoutShipment } from "../../utils/processFlow";
 
 export default function Logistik() {
+    useStorageSyncRefresh(["artikel", "bestellungen", "versandauftraege", "retouren", "auftraege"]);
+
     const artikel = artikelService.list();
     const bestellungen = bestellungenService.list();
     const versandauftraege = versandService.list();
     const retouren = retourenService.list();
     const auftraege = auftraegeService.list();
+    const vertriebsdokumente = vertriebsdokumenteService.list();
 
     const niedrigeBestaende = artikel.filter(item => Number(item.bestand) < 10).length;
-    const offeneWareneingaenge = bestellungen.filter(item => item.status === "versendet").length;
+    const offeneWareneingaenge = getOpenGoodsReceiptOrders(bestellungen).length;
     const vorbereiteteSendungen = versandauftraege.filter(item => item.status === "in Vorbereitung").length;
     const offeneRetouren = retouren.filter(item => item.status !== "abgeschlossen").length;
-    const offeneAuftraegeOhneVersand = auftraege.filter(auftrag => !versandauftraege.some(item => String(item.auftragId) === String(auftrag.id))).length;
+    const offeneAuftraegeOhneVersand = getOrdersWithoutShipment(auftraege, vertriebsdokumente, versandauftraege).length;
 
     return <>
         <h1>Logistik</h1>
@@ -39,7 +45,7 @@ export default function Logistik() {
                 <ul className="dashboard-note-list">
                     <li>Wareneingaenge aus dem Einkauf pruefen und buchen.</li>
                     <li>Bestaende beobachten und Engpaesse erkennen.</li>
-                    <li>Verplante Mengen aus aktiven Auftraegen mitdenken.</li>
+                    <li>Reservierte Mengen aus aktiven Auftraegen mitdenken.</li>
                     <li>Versandauftraege aus dem Verkauf vorbereiten und abschliessen.</li>
                     <li>Retouren dokumentieren und als Folgeprozess sauber beenden.</li>
                 </ul>
@@ -53,7 +59,7 @@ export default function Logistik() {
                 <ul className="dashboard-note-list">
                     <li>Versendete Bestellungen wirken direkt auf Wareneingaenge und Bestaende.</li>
                     <li>Offene Auftraege fuehren zu Versandauftraegen im Logistikbereich.</li>
-                    <li>Verplante Mengen senken den verfuegbaren Bestand bereits vor dem Versand.</li>
+                    <li>Reservierte Mengen senken den verfuegbaren Bestand bereits vor dem Versand.</li>
                     <li>Retouren koennen Service, Reklamation und Ersatzlieferung ausloesen.</li>
                 </ul>
                 <div className="link-list">

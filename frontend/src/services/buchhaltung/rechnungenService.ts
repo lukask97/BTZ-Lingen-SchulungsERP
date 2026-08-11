@@ -2,12 +2,16 @@ import auftraegeService from "../verkauf/auftraegeService";
 import bestellungenService from "../einkauf/bestellungenService";
 import artikelService from "../logistik/artikelService";
 import { getCustomerName } from "../../utils/customerReferences";
+import { getSupplierName } from "../../utils/supplierReferences";
+import kundenService from "../verkauf/customerService";
+import lieferantenService from "../einkauf/lieferantenService";
+import { getRechnungsnummer as buildInvoiceNumber } from "../core/documentNumbering";
 
 const INVOICE_RELEVANT_STATUSES = ["abgerechnet", "bezahlt", "archiviert"];
 const PURCHASE_INVOICE_RELEVANT_STATUSES = ["eingegangen"];
 
 function toInvoiceNumber(auftragNr: string) {
-    return String(auftragNr || "").replace("VK-", "RE-");
+    return buildInvoiceNumber(auftragNr);
 }
 
 function normalizeInvoiceStatus(status: string) {
@@ -16,6 +20,9 @@ function normalizeInvoiceStatus(status: string) {
 }
 
 function mapOrderToInvoice(auftrag: any) {
+    const kundenname = auftrag.kunde || getCustomerName(auftrag.kundeId, "");
+    const kunde = kundenService.getById(auftrag.kundeId);
+
     return {
         id: auftrag.id,
         auftragId: auftrag.id,
@@ -23,7 +30,8 @@ function mapOrderToInvoice(auftrag: any) {
         rechnungsnr: toInvoiceNumber(auftrag.auftragNr),
         rechnungstyp: "Ausgangsrechnung",
         kundeId: auftrag.kundeId,
-        kunde: getCustomerName(auftrag.kundeId, auftrag.kunde),
+        kunde: kundenname,
+        iban: kunde?.iban || "",
         bestellungId: "",
         bestellNr: "",
         datum: auftrag.datum,
@@ -39,13 +47,26 @@ function toIncomingInvoiceNumber(bestellNr: string) {
 }
 
 function getPurchaseOrderAmount(bestellung: any) {
-    return (bestellung.positionen || []).reduce((summe: number, position: any) => {
-        const artikel = artikelService.getAll().find(item => item.id === position.artikelId);
-        return summe + Number(position.menge || 0) * Number(artikel?.einkaufspreis || 0);
-    }, 0);
+    if (bestellung.gesamtbetrag != null) {
+        return Number(bestellung.gesamtbetrag || 0);
+    }
+
+    try {
+        const artikel = artikelService.getAll();
+        return (bestellung.positionen || []).reduce((summe: number, position: any) => {
+            const artikelEintrag = artikel.find(item => item.id === position.artikelId);
+            const einzelpreis = artikelEintrag?.einkaufspreis ?? position.einzelpreis ?? 0;
+            return summe + Number(position.menge || 0) * Number(einzelpreis || 0);
+        }, 0);
+    } catch {
+        return (bestellung.positionen || []).reduce((summe: number, position: any) => {
+            return summe + Number(position.menge || 0) * Number(position.einzelpreis || 0);
+        }, 0);
+    }
 }
 
 function mapPurchaseOrderToInvoice(bestellung: any) {
+    const lieferant = lieferantenService.getById(bestellung.lieferantId);
     return {
         id: `eingang-${bestellung.id}`,
         auftragId: "",
@@ -55,8 +76,9 @@ function mapPurchaseOrderToInvoice(bestellung: any) {
         rechnungsnr: toIncomingInvoiceNumber(bestellung.bestellNr),
         rechnungstyp: "Eingangsrechnung",
         kundeId: "",
-        kunde: bestellung.lieferant,
+        kunde: bestellung.lieferant || getSupplierName(bestellung.lieferantId, ""),
         lieferantId: bestellung.lieferantId,
+        iban: lieferant?.iban || "",
         datum: bestellung.wareneingangAm || bestellung.datum,
         faelligAm: bestellung.faelligAm || "",
         betrag: getPurchaseOrderAmount(bestellung),

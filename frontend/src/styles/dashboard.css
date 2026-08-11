@@ -61,13 +61,25 @@
 .buchhaltung-liste li { margin: 8px 0; }
 
 .button-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 12px;
-    padding: 8px 14px;
-    border-radius: 4px;
-    background: #1976d2;
-    color: #fff;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid #bfdbfe;
+    background: #fff;
+    color: #1565c0;
     text-decoration: none;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.button-link:hover {
+    background: #eff6ff;
+    color: #0f4fa8;
+    border-color: #93c5fd;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
 .prozess-einstiege { margin-top: 32px; }
@@ -152,10 +164,11 @@
 }
 
 .dashboard-panel {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: linear-gradient(180deg, #fdfefe 0%, #f7fbff 100%);
+    border: 1px solid #dbe4f0;
+    border-radius: 14px;
     padding: 18px;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
 }
 
 .dashboard-panel-header {
@@ -174,6 +187,7 @@
 .dashboard-panel-header span {
     color: #64748b;
     font-size: 13px;
+    font-weight: 600;
 }
 
 .task-list,
@@ -185,10 +199,10 @@
 
 .task-card,
 .teacher-class-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border: 1px solid #dbe4f0;
+    border-radius: 12px;
     padding: 14px;
-    background: #f8fafc;
+    background: rgba(255, 255, 255, 0.78);
 }
 
 .task-card strong,
@@ -214,6 +228,7 @@
     margin: 0;
     padding-left: 18px;
     color: #334155;
+    line-height: 1.55;
 }
 
 .dashboard-note-list li {

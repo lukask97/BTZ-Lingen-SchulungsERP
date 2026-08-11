@@ -4,11 +4,10 @@ import TextField from "../../components/form/TextField";
 import TextArea from "../../components/form/TextArea";
 import Label from "../../components/form/Label";
 
-import { getColumns, getAllColumns } from "../../services/core/metadataService";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import rechteService from "../../services/verwaltung/rechteService";
-import { INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useMemo } from "react";
 
 export default function Rechte() {
@@ -29,11 +28,16 @@ export default function Rechte() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.rechte, rechteService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.rechte, rechteService, {
+        requiredFields: [
+            { field: "name", label: "Name" }
+        ]
+    });
 
-    const columns = getColumns(config.tableName, user.username);
-    const allColumns = getAllColumns(config.tableName);
+    const columns = getVisibleTableColumns(config.tableName);
+    const allColumns = getAllTableColumns(config.tableName);
 
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
@@ -96,7 +100,8 @@ export default function Rechte() {
                 </div>
 
                 <div className="form-row">
-                    <button onClick={speichern}>Speichern</button>
+                    {error && <p className="form-error">{error}</p>}
+                    <button type="button" onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>
         </>

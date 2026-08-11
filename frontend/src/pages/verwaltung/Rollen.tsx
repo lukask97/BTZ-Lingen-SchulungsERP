@@ -4,11 +4,10 @@ import TextField from "../../components/form/TextField";
 import Checkbox from "../../components/form/Checkbox";
 import Label from "../../components/form/Label";
 
-import { getColumns, getAllColumns } from "../../services/core/metadataService";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import rollenService from "../../services/verwaltung/rollenService";
-import { INITIAL_DATA, PAGE_CONFIG, PERMISSION_GROUPS } from "../../constants/schemas";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG, PERMISSION_GROUPS } from "../../constants/schemas";
 import { useMemo } from "react";
 
 export default function Rollen() {
@@ -29,11 +28,16 @@ export default function Rollen() {
         bearbeiten,
         loeschen,
         speichern,
-        handleClose
-    } = useCRUDPage(config.tableName, INITIAL_DATA.rollen, rollenService);
+        handleClose,
+        error
+    } = useCRUDPage(config.tableName, INITIAL_DATA.rollen, rollenService, {
+        requiredFields: [
+            { field: "name", label: "Name" }
+        ]
+    });
 
-    const columns = getColumns(config.tableName, user.username);
-    const allColumns = getAllColumns(config.tableName);
+    const columns = getVisibleTableColumns(config.tableName);
+    const allColumns = getAllTableColumns(config.tableName);
 
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
@@ -149,7 +153,8 @@ export default function Rollen() {
                 </div>
 
                 <div className="form-row">
-                    <button onClick={speichern}>Speichern</button>
+                    {error && <p className="form-error">{error}</p>}
+                    <button type="button" onClick={speichern}>Speichern</button>
                 </div>
             </Dialog>
         </>

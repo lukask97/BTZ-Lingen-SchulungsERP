@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import DataTable from "../../components/DataTable";
@@ -10,12 +9,14 @@ import OverviewCards from "../../components/OverviewCards";
 import angeboteService from "../../services/verkauf/angeboteService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import berichteService from "../../services/gf/berichteService";
-import bestellungenService from "../../services/einkauf/bestellungenService";
+import bestellungenService, { getAutomatischeBedarfsmeldungen } from "../../services/einkauf/bestellungenService";
 import freigabenService from "../../services/gf/freigabenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import reklamationenService from "../../services/verkauf/reklamationenService";
-
-const today = "2026-07-26";
+import artikelService from "../../services/logistik/artikelService";
+import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { PERMISSIONS } from "../../constants/permissions";
+import { getBerlinDate } from "../../utils/dateTime";
 
 const bereichLinks = {
     verkauf: "/themen/verkauf",
@@ -26,96 +27,149 @@ const bereichLinks = {
     personalwesen: "/personalwesen"
 };
 
-function generiereZusammenfassung(bereich) {
-    if (bereich === "verkauf") {
-        const angebote = angeboteService.list().filter(item => !["angenommen", "abgelehnt"].includes(String(item.status || "").toLowerCase())).length;
-        const auftraege = auftraegeService.list().filter(item => item.status === "offen").length;
-        const reklamationen = reklamationenService.list().length;
-        return `${angebote} offene Angebote, ${auftraege} offene Aufträge, ${reklamationen} Reklamationen.`;
-    }
-    if (bereich === "einkauf") {
-        const bestellungen = bestellungenService.list().filter(item => item.status !== "eingegangen").length;
-        const wareneingaenge = bestellungenService.list().filter(item => item.status === "versendet").length;
-        return `${bestellungen} aktive Bestellungen, ${wareneingaenge} Wareneingaenge zur Pruefung offen.`;
-    }
-    if (bereich === "buchhaltung") {
-        const rechnungen = rechnungenService.list().filter(item => item.status === "offen").length;
-        return `${rechnungen} offene Rechnungen und mehrere mögliche Folgeaktionen in Zahlungen oder Mahnungen.`;
-    }
-    if (bereich === "logistik") {
-        const auftraege = auftraegeService.list().filter(item => item.status === "offen").length;
-        const bestellungen = bestellungenService.list().filter(item => item.status === "versendet").length;
-        return `${bestellungen} offene Wareneingaenge, ${auftraege} Auftraege mit moeglichem Versandbezug.`;
-    }
-    if (bereich === "marketing") {
-        const freigaben = freigabenService.list().filter(item => item.bereich === "marketing" && item.status === "offen").length;
-        return `${freigaben} offene marketingbezogene Freigaben, Aktionen können für Unterrichtsgespräche genutzt werden.`;
-    }
-    return "Bereichsbericht mit vereinfachter didaktischer Zusammenfassung.";
-}
+const intervalDays = {
+    Tag: 1,
+    Woche: 7,
+    Monat: 31,
+    Quartal: 92,
+    Jahr: 366
+};
 
-export default function Berichte() {
-    const [berichte, setBerichte] = useState(berichteService.list());
-    const [open, setOpen] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [current, setCurrent] = useState({
+function createEmptyBericht(today: string) {
+    return {
         titel: "",
         bereich: "verkauf",
         datum: today,
         status: "Entwurf",
         zielgruppe: "Lehrkraft",
         zusammenfassung: "",
-        empfohlenAktion: ""
-    });
+        empfohlenAktion: "",
+        startdatum: today,
+        enddatum: today,
+        intervall: "Tag"
+    };
+}
+
+function isDateInRange(value: string, start: string, end: string) {
+    if (!value) return false;
+    return value >= start && value <= end;
+}
+
+function buildIntervalLabel(startdatum: string, enddatum: string, intervall: string) {
+    return `${intervall} ${startdatum} bis ${enddatum}`;
+}
+
+function generateSummary(bereich: string, startdatum: string, enddatum: string) {
+    if (bereich === "verkauf") {
+        const angebote = angeboteService.list().filter(item => isDateInRange(item.datum, startdatum, enddatum)).length;
+        const auftraege = auftraegeService.list().filter(item => isDateInRange(item.datum, startdatum, enddatum)).length;
+        const reklamationen = reklamationenService.list().filter(item => isDateInRange(item.datum, startdatum, enddatum)).length;
+        return `${angebote} Angebote, ${auftraege} Aufträge und ${reklamationen} Reklamationen im Zeitraum.`;
+    }
+    if (bereich === "einkauf") {
+        const bestellungen = bestellungenService.list().filter(item => isDateInRange(item.datum, startdatum, enddatum));
+        const bedarfe = getAutomatischeBedarfsmeldungen().length;
+        return `${bestellungen.length} Bestellungen im Zeitraum, ${bedarfe} aktuelle Bedarfsmeldungen im Einkauf.`;
+    }
+    if (bereich === "buchhaltung") {
+        const rechnungen = rechnungenService.list().filter(item => isDateInRange(item.datum, startdatum, enddatum));
+        const offen = rechnungen.filter(item => item.status !== "bezahlt").length;
+        return `${rechnungen.length} Rechnungen im Zeitraum, davon ${offen} offen.`;
+    }
+    if (bereich === "logistik") {
+        const artikel = artikelService.getAll();
+        const kritisch = artikel.filter(item => Number(item.bestand || 0) <= Number(item.bedarfsmeldungBei || 0)).length;
+        const bestellungenImZulauf = bestellungenService.list().filter(item => ["angefragt", "bestaetigt", "versendet"].includes(String(item.status || "").toLowerCase())).length;
+        return `${kritisch} kritische Artikelbestände und ${bestellungenImZulauf} Bestellungen im Zulauf.`;
+    }
+    if (bereich === "marketing") {
+        const freigaben = freigabenService.list().filter(item => item.bereich === "marketing" && isDateInRange(item.datum, startdatum, enddatum)).length;
+        return `${freigaben} marketingbezogene Freigaben im gewählten Zeitraum.`;
+    }
+    return "Vereinfachter Zeitraumbericht für Unterricht und Reflexion.";
+}
+
+function generateRecommendation(bereich: string) {
+    if (bereich === "verkauf") return "Offene Vorgänge und Angebotslage mit der Klasse besprechen.";
+    if (bereich === "einkauf") return "Bedarfsmeldungen priorisieren und Bestellungen weiterführen.";
+    if (bereich === "buchhaltung") return "Offene Rechnungen mit Zahlungen und Mahnungen abgleichen.";
+    if (bereich === "logistik") return "Kritische Bestände und Zulauf gemeinsam auswerten.";
+    if (bereich === "marketing") return "Freigaben und Maßnahmen zeitlich einordnen.";
+    return "Bericht im Unterricht als Reflexionsgrundlage nutzen.";
+}
+
+function suggestDateRange(intervall: string, today: string) {
+    const days = intervalDays[intervall] || 1;
+    const end = new Date(today);
+    const start = new Date(today);
+    start.setDate(end.getDate() - (days - 1));
+    return {
+        startdatum: start.toISOString().slice(0, 10),
+        enddatum: end.toISOString().slice(0, 10)
+    };
+}
+
+export default function Berichte() {
+    const today = getBerlinDate();
+    const [berichte, setBerichte] = useSyncedServiceData(
+        ["berichte", "angebote", "auftraege", "bestellungen", "freigaben", "reklamationen", "artikel"],
+        () => berichteService.list()
+    );
+    const [open, setOpen] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [current, setCurrent] = useState(createEmptyBericht(today));
 
     const neu = () => {
+        const range = suggestDateRange("Woche", today);
         setCurrent({
-            titel: "",
-            bereich: "verkauf",
-            datum: today,
-            status: "Entwurf",
-            zielgruppe: "Lehrkraft",
-            zusammenfassung: generiereZusammenfassung("verkauf"),
-            empfohlenAktion: ""
+            ...createEmptyBericht(today),
+            startdatum: range.startdatum,
+            enddatum: range.enddatum,
+            intervall: "Woche"
         });
         setEditMode(false);
         setOpen(true);
     };
 
-    const bearbeiten = (item) => {
+    const bearbeiten = (item: any) => {
         setCurrent({
             ...item,
             datum: item.datum || today,
             zielgruppe: item.zielgruppe || "Lehrkraft",
-            empfohlenAktion: item.empfohlenAktion || ""
+            empfohlenAktion: item.empfohlenAktion || "",
+            startdatum: item.startdatum || item.datum || today,
+            enddatum: item.enddatum || item.datum || today,
+            intervall: item.intervall || "Tag"
         });
         setEditMode(true);
         setOpen(true);
     };
 
-    const speichern = () => {
-        if (!current.titel.trim()) return;
+    const berichtErzeugen = () => {
+        if (!current.titel.trim() || !current.startdatum || !current.enddatum) return;
         const payload = {
             ...current,
+            datum: today,
             titel: current.titel.trim(),
-            zusammenfassung: current.zusammenfassung.trim(),
-            empfohlenAktion: current.empfohlenAktion.trim()
+            zusammenfassung: generateSummary(current.bereich, current.startdatum, current.enddatum),
+            empfohlenAktion: current.empfohlenAktion.trim() || generateRecommendation(current.bereich)
         };
-
-        if (editMode) berichteService.update(current.id, payload);
-        else berichteService.create(payload);
-
+        if (editMode) {
+            berichteService.update(current.id, payload);
+        } else {
+            berichteService.create(payload);
+        }
         setBerichte(berichteService.list());
         setOpen(false);
         setEditMode(false);
     };
 
-    const fertigstellen = (item) => {
+    const fertigstellen = (item: any) => {
         berichteService.update({ ...item, status: "fertig" });
         setBerichte(berichteService.list());
     };
 
-    const loeschen = (item) => {
+    const loeschen = (item: any) => {
         berichteService.remove(item.id);
         setBerichte(berichteService.list());
     };
@@ -129,13 +183,13 @@ export default function Berichte() {
         <section className="dashboard-two-column">
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header">
-                    <h2>Berichte im Unterricht</h2>
-                    <span>Lehrkraftsicht</span>
+                    <h2>Zeitraumberichte</h2>
+                    <span>GF und Lehrkraft</span>
                 </div>
                 <ul className="dashboard-note-list">
-                    <li>Berichte fassen einen Fachbereich knapp zusammen und helfen bei Reflexion oder Auswertung.</li>
-                    <li>Sie müssen nicht vollständig sein, sondern sollen einen Unterrichtsanlass mit Zahlen und Hinweisen schaffen.</li>
-                    <li>Eine empfohlene Folgeaktion macht den Bericht direkt für die Klasse nutzbar.</li>
+                    <li>Berichte werden aus Startdatum, Enddatum und Intervall erzeugt und anschließend gespeichert.</li>
+                    <li>Die Kennzahlen bleiben bewusst einfach, damit sie im Unterricht schnell nachvollziehbar sind.</li>
+                    <li>Jeder gespeicherte Bericht bleibt bearbeitbar und kann später fertiggestellt werden.</li>
                 </ul>
             </article>
 
@@ -147,7 +201,7 @@ export default function Berichte() {
                 <div className="link-list">
                     <Link className="button-link" to="/geschaeftsfuehrung">Geschäftsführung</Link>
                     <Link className="button-link" to="/freigaben">Freigaben</Link>
-                    <Link className="button-link" to="/">Dashboard</Link>
+                    <button type="button" className="button-link" onClick={neu}>Neuen Bericht erzeugen</button>
                 </div>
             </article>
         </section>
@@ -156,25 +210,27 @@ export default function Berichte() {
             selectableColumns={false}
             data={berichte}
             columns={[
-                { field: "datum", title: "Datum" },
+                { field: "datum", title: "Erzeugt am" },
                 { field: "titel", title: "Titel" },
                 { field: "bereich", title: "Bereich", render: row => bereichLinks[row.bereich] ? <Link className="detail-link" to={bereichLinks[row.bereich]}>{row.bereich}</Link> : row.bereich },
+                { field: "intervall", title: "Intervall" },
+                { field: "startdatum", title: "Startdatum" },
+                { field: "enddatum", title: "Enddatum" },
                 { field: "zielgruppe", title: "Zielgruppe" },
                 { field: "status", title: "Status" },
-                { field: "zusammenfassung", title: "Zusammenfassung" },
-                { field: "empfohlenAktion", title: "Empfohlene Aktion" }
+                { field: "zusammenfassung", title: "Zusammenfassung" }
             ]}
             detailLinkResolver={({ field, row }) => field === "bereich" ? bereichLinks[row.bereich] || null : null}
-            toolbarActions={[{ name: "new", label: "Bericht anlegen", permission: "gf.bearbeiten", onClick: neu, variant: "secondary" }]}
+            toolbarActions={[{ name: "new", label: "Bericht erzeugen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "edit", label: "Bearbeiten", permission: "gf.bearbeiten", onClick: bearbeiten, variant: "secondary" },
-                { name: "done", label: "Fertigstellen", permission: "gf.bearbeiten", onClick: fertigstellen, variant: "success", isVisible: row => row.status !== "fertig" },
-                { name: "delete", label: "Löschen", permission: "gf.bearbeiten", onClick: loeschen, variant: "danger" }
+                { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.GF_BEARBEITEN, onClick: bearbeiten, variant: "secondary" },
+                { name: "done", label: "Fertigstellen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: fertigstellen, variant: "success", isVisible: row => row.status !== "fertig" },
+                { name: "delete", label: "Löschen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: loeschen, variant: "danger" }
             ]}
         />
-        <Dialog open={open} title={editMode ? "Bericht bearbeiten" : "Bericht anlegen"} onClose={() => setOpen(false)}>
+        <Dialog open={open} title={editMode ? "Bericht bearbeiten" : "Bericht erzeugen"} onClose={() => setOpen(false)}>
             <div><Label>Titel</Label><TextField value={current.titel} onChange={value => setCurrent(item => ({ ...item, titel: value }))}/></div>
-            <div><Label>Bereich</Label><select value={current.bereich} onChange={event => setCurrent(item => ({ ...item, bereich: event.target.value, zusammenfassung: generiereZusammenfassung(event.target.value) }))}>
+            <div><Label>Bereich</Label><select value={current.bereich} onChange={event => setCurrent(item => ({ ...item, bereich: event.target.value }))}>
                 <option value="verkauf">Verkauf</option>
                 <option value="einkauf">Einkauf</option>
                 <option value="buchhaltung">Buchhaltung</option>
@@ -182,7 +238,21 @@ export default function Berichte() {
                 <option value="marketing">Marketing</option>
                 <option value="personalwesen">Personalwesen</option>
             </select></div>
-            <div><Label>Datum</Label><TextField type="date" value={current.datum} onChange={value => setCurrent(item => ({ ...item, datum: value }))}/></div>
+            <div><Label>Intervall</Label><select value={current.intervall} onChange={event => {
+                const intervall = event.target.value;
+                const range = suggestDateRange(intervall, today);
+                setCurrent(item => ({ ...item, intervall, startdatum: range.startdatum, enddatum: range.enddatum }));
+            }}>
+                <option value="Tag">Tag</option>
+                <option value="Woche">Woche</option>
+                <option value="Monat">Monat</option>
+                <option value="Quartal">Quartal</option>
+                <option value="Jahr">Jahr</option>
+            </select></div>
+            <div className="form-row">
+                <div><Label>Startdatum</Label><TextField type="date" value={current.startdatum} onChange={value => setCurrent(item => ({ ...item, startdatum: value }))}/></div>
+                <div><Label>Enddatum</Label><TextField type="date" value={current.enddatum} onChange={value => setCurrent(item => ({ ...item, enddatum: value }))}/></div>
+            </div>
             <div><Label>Zielgruppe</Label><select value={current.zielgruppe} onChange={event => setCurrent(item => ({ ...item, zielgruppe: event.target.value }))}>
                 <option value="Lehrkraft">Lehrkraft</option>
                 <option value="Klasse">Klasse</option>
@@ -192,9 +262,9 @@ export default function Berichte() {
                 <option value="Entwurf">Entwurf</option>
                 <option value="fertig">fertig</option>
             </select></div>
-            <div className="form-row"><Label>Zusammenfassung</Label><TextArea rows={4} value={current.zusammenfassung} onChange={value => setCurrent(item => ({ ...item, zusammenfassung: value }))}/></div>
+            <div className="form-row"><Label>Vorschau Zeitraum</Label><p>{buildIntervalLabel(current.startdatum, current.enddatum, current.intervall)}</p></div>
             <div className="form-row"><Label>Empfohlene Aktion</Label><TextArea rows={3} value={current.empfohlenAktion} onChange={value => setCurrent(item => ({ ...item, empfohlenAktion: value }))}/></div>
-            <div className="form-row"><button onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
+            <div className="form-row"><button type="button" onClick={berichtErzeugen}>{editMode ? "Bericht speichern" : "Bericht erzeugen und speichern"}</button></div>
         </Dialog>
     </>;
 }

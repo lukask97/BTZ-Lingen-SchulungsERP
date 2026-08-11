@@ -1,17 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
+import { PERMISSIONS } from "../../constants/permissions";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
-
-const today = "2026-07-28";
+import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { getBerlinDate } from "../../utils/dateTime";
+import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 
 function getInvoiceViewStatus(rechnung: any) {
+    const today = getBerlinDate();
     if (rechnung.status === "bezahlt") return "bezahlt";
     if (rechnung.faelligAm && rechnung.faelligAm < today) return "ueberfaellig";
     return "offen";
 }
 
 export default function LehrkraftRechnungen() {
+    useLehrkraftAutomationen();
+    useStorageSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen"]);
+
     const navigate = useNavigate();
     const rechnungen = rechnungenService.list().map(item => ({
         ...item,
@@ -42,8 +48,8 @@ export default function LehrkraftRechnungen() {
                 { field: "sichtStatus", title: "Status" }
             ]}
             rowActions={[
-                { name: "payments", label: "Zahlung öffnen", permission: "gf", onClick: row => navigate(`/lehrkraft/zahlungen?focus=${row.rechnungsnr}`), variant: "secondary" },
-                { name: "documents", label: "Belege", permission: "gf", onClick: row => navigate(`/belege?bezug=${row.rechnungsnr}`), variant: "secondary" }
+                { name: "payments", label: "Zahlung öffnen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: row => navigate(`/lehrkraft/zahlungen?focus=${row.rechnungsnr}`), variant: "secondary" },
+                { name: "documents", label: "Belege", permission: PERMISSIONS.GF_BEARBEITEN, onClick: row => navigate(`/belege?bezug=${row.rechnungsnr}`), variant: "secondary" }
             ]}
         />
     </>;
