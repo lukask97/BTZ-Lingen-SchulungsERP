@@ -1,6 +1,19 @@
-// Dynamisch die Server-IP-Adresse ermitteln
-const SERVER_IP = window.location.hostname; // Nimmt die aktuelle Host-IP oder Domain
-export const BACKEND_ORIGIN = `http://${SERVER_IP}:5000`;
+// Dynamisch die Backend-URL ermitteln - funktioniert lokal, in Codespaces und auf Remote-Servern
+function getBackendOrigin(): string {
+    const currentHostname = window.location.hostname;
+    
+    // Codespaces: Ersetze die Frontend-Port-Nummer durch Backend-Port (5000)
+    // z.B. "jubilant-space-zebra-xxx-5173.app.github.dev" -> "jubilant-space-zebra-xxx-5000.app.github.dev"
+    if (currentHostname.includes('.app.github.dev')) {
+        const backendHostname = currentHostname.replace(/-\d+\.app\.github\.dev/, '-5000.app.github.dev');
+        return `${window.location.protocol}//${backendHostname}`;
+    }
+    
+    // Lokal oder auf anderen Servern: nutze Port 5000
+    return `http://${currentHostname}:5000`;
+}
+
+export const BACKEND_ORIGIN = getBackendOrigin();
 const API_URL = `${BACKEND_ORIGIN}/api`; // Backend-Port 5000 verwenden
 
 const DATABASE_API_URL = `${API_URL}/datenbanken`;
