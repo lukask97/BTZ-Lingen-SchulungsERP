@@ -10,6 +10,10 @@ import { getRechnungsnummer as buildInvoiceNumber } from "../core/documentNumber
 const INVOICE_RELEVANT_STATUSES = ["abgerechnet", "bezahlt", "archiviert"];
 const PURCHASE_INVOICE_RELEVANT_STATUSES = ["eingegangen"];
 
+function isPermissionError(error: unknown) {
+    return error instanceof Error && error.message.startsWith("Keine Berechtigung");
+}
+
 function toInvoiceNumber(auftragNr: string) {
     return buildInvoiceNumber(auftragNr);
 }
@@ -88,13 +92,27 @@ function mapPurchaseOrderToInvoice(bestellung: any) {
 }
 
 function getInvoiceOrders() {
-    return auftraegeService.getAll().filter((auftrag: any) => INVOICE_RELEVANT_STATUSES.includes(auftrag.status));
+    try {
+        return auftraegeService.getAll().filter((auftrag: any) => INVOICE_RELEVANT_STATUSES.includes(auftrag.status));
+    } catch (error) {
+        if (isPermissionError(error)) {
+            return [];
+        }
+        throw error;
+    }
 }
 
 function getIncomingInvoiceOrders() {
-    return bestellungenService.getAll().filter((bestellung: any) =>
-        PURCHASE_INVOICE_RELEVANT_STATUSES.includes(bestellung.status) || bestellung.rechnungStatus === "bezahlt"
-    );
+    try {
+        return bestellungenService.getAll().filter((bestellung: any) =>
+            PURCHASE_INVOICE_RELEVANT_STATUSES.includes(bestellung.status) || bestellung.rechnungStatus === "bezahlt"
+        );
+    } catch (error) {
+        if (isPermissionError(error)) {
+            return [];
+        }
+        throw error;
+    }
 }
 
 const rechnungenService = {

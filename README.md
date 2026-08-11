@@ -1,229 +1,192 @@
-# Installation
+# BTZ-Lingen-SchulungsERP
+
+## Installation
+
+Dieses Projekt bietet zwei sinnvolle Startvarianten:
+
+- Empfohlene Entwicklungsumgebung: Backend und Datenbank in Docker, Frontend lokal mit Vite
+- Vollstaendige Docker-Variante: Frontend, Backend und Datenbank komplett per Docker Compose
+
+Die empfohlene Variante ist fuer die taegliche Entwicklung meist angenehmer, weil:
+
+- Frontend-Hot-Reload lokal schneller ist
+- Browser-Fehler und DevTools direkter sichtbar sind
+- Backend und PostgreSQL trotzdem reproduzierbar in Containern laufen
+
+## Projektstruktur
+
+Die wichtigsten Ordner und Dateien:
+
+- `frontend/`: React-, TypeScript- und Vite-Frontend
+- `backend/`: Flask-Backend mit Auth, REST-Endpunkten und Datenzugriff
+- `database/`: Initiale Datenbankskripte und Setup fuer PostgreSQL
+- `docker/`: Docker-Hilfsdateien, zum Beispiel fuer pgAdmin
+- `docs/`: Projektdokumentation, Demo-Ablauf und fachliche Hinweise
+- `postman/` und `.postman/`: API-Requests und Umgebungen fuer Tests
+- `docker-compose.yml`: Startet die komplette Entwicklungsumgebung
+- `main.py`: Einstiegspunkt auf Projektebene
+- `src/`: weitere Projektquellen ausserhalb des Vite-Frontends
 
 ## Voraussetzungen
 
--   Node.js installiert
--   npm installiert
--   PostgreSQL installiert (später benötigt)
+Fuer die empfohlene Entwicklungsumgebung:
 
-Version prüfen:
+- Docker Desktop
+- Node.js
+- npm
 
-``` bash
+Versionen pruefen:
+
+```bash
+docker --version
 node -v
 npm -v
 ```
 
-------------------------------------------------------------------------
+## Empfohlene Entwicklungsumgebung
 
-# Projekt starten
+In diesem Modus laufen:
 
-## Abhängigkeiten installieren
+- `postgres`, `backend` und optional `pgadmin` in Docker
+- `frontend` lokal auf deinem Rechner
 
-Zuerst ein Terminal im Projektordner öffnen
-``` bash
-cd frontend/
-```
-Im Terminal sollte jetzt etwa folgendes stehen:
-
-``` cmd
-C:\...\BTZ-SchulungsERP\frontend>
-```
+### 1. Backend und Datenbank per Docker starten
 
 Im Projektordner:
 
-``` bash
+```bash
+docker compose up -d postgres backend pgadmin
+```
+
+Danach sind die Dienste standardmaessig erreichbar unter:
+
+- Frontend lokal spaeter unter `http://localhost:5173`
+- Backend unter `http://localhost:5000`
+- pgAdmin unter `http://localhost:5050`
+
+### 2. Frontend lokal installieren
+
+```bash
+cd frontend
 npm install
 ```
 
-## Entwicklungsserver starten
+### 3. Frontend lokal starten
 
-``` bash
+```bash
 npm run dev
 ```
 
-Die Anwendung ist danach erreichbar unter:
+Die Anwendung ist danach unter `http://localhost:5173` erreichbar.
 
-    http://localhost:5173
+## Vollstaendige Docker-Variante
 
-Eine geführte Vorstellung mit Testkonten und Klickpfaden steht in [docs/DEMO.md](docs/DEMO.md).
+In diesem Modus laufen:
 
-------------------------------------------------------------------------
+- `frontend`
+- `backend`
+- `postgres`
+- `pgadmin`
 
-# Backend und Datenbankmodus
+alles zusammen per Docker Compose.
 
-Im Ordner `backend/` liegt jetzt das Flask-Backend fuer den Mehrbenutzerbetrieb.
+### Komplettstart
 
-- Standardmodus ist PostgreSQL ueber Docker Compose
-- Login laeuft sitzungsbasiert ueber das Backend
-- Tabellen werden im DB-Modus ueber REST-Endpunkte gelesen und geschrieben
-- Mehrere Browser koennen gleichzeitig mit unterschiedlichen Benutzern arbeiten
+Im Projektordner:
 
-Details stehen in:
-
-    backend/README_PREVIEW.md
-
-------------------------------------------------------------------------
-
-# Anmeldung
-
-Im Mock-Modus und im DB-Modus werden dieselben Seed-Benutzer verwendet.
-
-Beispiele:
-
-    admin / admin
-    lager / lager
-    buchhaltung / buchhaltung
-    marketing / marketing
-    verkauf_azubi / verkauf
-    verkauf_senior / verkauf
-
-Die Berechtigungen werden im Frontend weiter ueber den AuthContext geprueft.
-
-------------------------------------------------------------------------
-
-# Berechtigungen
-
-Berechtigungen werden über den PermissionService definiert.
-
-Beispiel:
-
-``` js
-{
-    code:"kunde.lesen",
-    text:"Kunden lesen"
-}
+```bash
+docker compose up -d
 ```
 
-Prüfung:
+Danach sind die Dienste standardmaessig erreichbar unter:
 
-``` js
-hasPermission("kunde.lesen")
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5000`
+- pgAdmin: `http://localhost:5050`
+
+Logs ansehen:
+
+```bash
+docker compose logs -f
 ```
 
-------------------------------------------------------------------------
+Stoppen:
 
-# Neue Seite hinzufügen
-
-## 1. Seite erstellen
-
-Beispiel:
-
-    src/pages/NeueSeite.jsx
-
-## 2. Route hinzufügen
-
-In:
-
-    AppRouter.jsx
-
-Beispiel:
-
-``` jsx
-<Route
-    path="neue-seite"
-    element={<NeueSeite/>}
-/>
+```bash
+docker compose down
 ```
 
-## 3. Menü erweitern
+## Docker Watch
 
-In der Sidebar:
-
-``` js
-{
-    title:"Neue Seite",
-    path:"/neue-seite",
-    permission:"seite.lesen"
-}
-```
-
-------------------------------------------------------------------------
-
-# Tabellen verwenden
-
-Beispiel:
-
-``` jsx
-<DataTable
-    title="Kunden"
-    columns={columns}
-    data={kunden}
-/>
-```
-
-Unterstützt:
-
--   Suche
--   Sortierung
--   Pagination
--   Spaltenauswahl
--   Berechtigungen
--   Detailansicht
--   Zeilenaktionen
-
-------------------------------------------------------------------------
-
-# Formulare
-
-Verfügbare Felder:
-
--   TextField
--   Checkbox
--   Label
-
-Beispiel:
-
-``` jsx
-<TextField
-    value={name}
-    onChange={setName}
-/>
-```
-
-------------------------------------------------------------------------
-
-# Produktion bauen
-
-Build erstellen:
-
-``` bash
-npm run build
-```
-
-Die fertigen Dateien befinden sich danach in:
-
-    dist/
-
-------------------------------------------------------------------------
-
-# Hinweise zum Datenmodus
-
-- Standard ohne Umschalten: Backend- und PostgreSQL-Modus
-- Optionaler Mock-Modus im Browser:
-
-``` js
-localStorage.setItem("data-provider", "mock-local-storage");
-location.reload();
-```
-
-- Im Datenbankmodus synchronisieren sich Aenderungen ueber das Backend zwischen Browsern
-- Ein Testdaten-Reset laedt im Datenbankmodus die Seed-Daten neu in PostgreSQL
-
-------------------------------------------------------------------------
-
-# Docker Watch
-
-Fuer die lokale Entwicklung ist `docker compose watch` eingerichtet, damit du Container nicht staendig manuell neu starten musst.
+Fuer containerbasierte Entwicklung ist `docker compose watch` vorbereitet.
 
 Start:
 
-``` bash
+```bash
 docker compose up -d
 docker compose watch
 ```
 
 Verhalten:
 
-- `frontend/` wird in den Container synchronisiert, Vite aktualisiert die Seite automatisch.
-- `backend/` wird in den Container synchronisiert und der Backend-Container bei Aenderungen automatisch neu gestartet.
-- Aenderungen an `backend/requirements.txt`, `frontend/package.json`, `frontend/package-lock.json` oder den jeweiligen `Dockerfile`s loesen einen Rebuild aus.
+- `frontend/` wird in den Container synchronisiert
+- `backend/` wird in den Container synchronisiert und bei Aenderungen neu gestartet
+- Aenderungen an `package.json`, `package-lock.json`, `requirements.txt` oder `Dockerfile`s loesen einen Rebuild aus
+
+Hinweis:
+
+Fuer Frontend-Entwicklung ist die empfohlene Variante mit lokalem Vite-Server in der Regel trotzdem angenehmer als ein Frontend-Container.
+
+## Backend und Datenbankmodus
+
+Im Ordner `backend/` liegt das Flask-Backend fuer den Mehrbenutzerbetrieb.
+
+- Standardmodus ist PostgreSQL ueber Docker Compose
+- Login laeuft sitzungsbasiert ueber das Backend
+- Tabellen werden im DB-Modus ueber REST-Endpunkte gelesen und geschrieben
+- mehrere Browser koennen gleichzeitig mit unterschiedlichen Benutzern arbeiten
+
+Weitere Details stehen in [backend/README_PREVIEW.md](backend/README_PREVIEW.md).
+
+## Anmeldung
+
+Im Mock-Modus und im DB-Modus werden dieselben Seed-Benutzer verwendet.
+
+Beispiele:
+
+```text
+admin / admin
+lager / lager
+buchhaltung / buchhaltung
+marketing / marketing
+verkauf_azubi / verkauf
+verkauf_senior / verkauf
+```
+
+Die Berechtigungen werden im Frontend weiterhin ueber den Auth-Kontext geprueft.
+
+Eine gefuehrte Vorstellung mit Testkonten und Klickpfaden steht in [docs/DEMO.md](docs/DEMO.md).
+
+## Produktion bauen
+
+Frontend-Build erzeugen:
+
+```bash
+cd frontend
+npm run build
+```
+
+Die fertigen Dateien liegen danach in `frontend/dist/`.
+
+## Hinweise zum Datenmodus
+
+- Standard ohne Umschalten: Backend- und PostgreSQL-Modus
+- optionaler Mock-Modus im Browser:
+
+```js
+localStorage.setItem("data-provider", "mock-local-storage");
+location.reload();
+```
+
+- im Datenbankmodus synchronisieren sich Aenderungen ueber das Backend zwischen Browsern
+- ein Testdaten-Reset laedt im Datenbankmodus die Seed-Daten neu in PostgreSQL

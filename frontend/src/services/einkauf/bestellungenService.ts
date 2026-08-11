@@ -11,6 +11,18 @@ const positionService = createPositionTableService(bestellpositionen, {
     parentField: "bestellungId"
 });
 
+function withPermissionFallback<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (error instanceof Error && error.message.startsWith("Keine Berechtigung")) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function hydrateBestellung(item: any = {}) {
     return {
         ...item,
@@ -53,10 +65,16 @@ export function naechsteBestellnummer() {
 
 const service = {
     ...bestellungenService,
-    list: () => bestellungenService.list().map(hydrateBestellung),
-    getAll: () => bestellungenService.list().map(hydrateBestellung),
+    list: () => withPermissionFallback(
+        () => bestellungenService.list().map(hydrateBestellung),
+        []
+    ),
+    getAll: () => withPermissionFallback(
+        () => bestellungenService.list().map(hydrateBestellung),
+        []
+    ),
     getById: (id: any) => {
-        const item = bestellungenService.getById(id);
+        const item = withPermissionFallback(() => bestellungenService.getById(id), undefined);
         return item ? hydrateBestellung(item) : undefined;
     },
     create: (payload: any) => {

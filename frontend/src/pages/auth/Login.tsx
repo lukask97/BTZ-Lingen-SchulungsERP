@@ -103,7 +103,7 @@ export default function Login() {
                 </button>
             </form>
             <div className="quick-logins">
-                <h2>Schnellzugriff:</h2>
+                <h2>Demo Nutzer:</h2>
                 {QUICK_LOGINS.map((user) => (
                     <button
                         key={user.username}

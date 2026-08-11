@@ -150,6 +150,11 @@ def require_table_permission(table_name, action):
     if not user:
         return build_error_response(401, "Nicht angemeldet.")
 
+    # Persoenliche Spalteneinstellungen sollen fuer jeden angemeldeten Nutzer
+    # verfuegbar sein und nicht von Verwaltungsrechten abhaengen.
+    if table_name == "benutzerSpalten":
+        return None
+
     if has_table_permission(user, table_name, action):
         return None
 

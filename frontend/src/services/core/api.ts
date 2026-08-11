@@ -1,16 +1,28 @@
-// Dynamisch die Backend-URL ermitteln - funktioniert lokal, in Codespaces und auf Remote-Servern
+// Dynamisch die Backend-URL ermitteln - funktioniert lokal, in Codespaces und mit VS Code Dev Tunnels.
 function getBackendOrigin(): string {
-    const currentHostname = window.location.hostname;
-    
-    // Codespaces: Ersetze die Frontend-Port-Nummer durch Backend-Port (5000)
-    // z.B. "jubilant-space-zebra-xxx-5173.app.github.dev" -> "jubilant-space-zebra-xxx-5000.app.github.dev"
-    if (currentHostname.includes('.app.github.dev')) {
-        const backendHostname = currentHostname.replace(/-\d+\.app\.github\.dev/, '-5000.app.github.dev');
-        return `${window.location.protocol}//${backendHostname}`;
+    const envBackendOrigin = import.meta.env.VITE_API_URL?.trim();
+    if (envBackendOrigin) {
+        return envBackendOrigin.replace(/\/$/, "");
     }
-    
-    // Lokal oder auf anderen Servern: nutze Port 5000
-    return `http://${currentHostname}:5000`;
+
+    const { protocol, hostname } = window.location;
+
+    // GitHub Codespaces: Frontend-Port durch Backend-Port ersetzen.
+    if (hostname.includes(".app.github.dev")) {
+        const backendHostname = hostname.replace(/-\d+\.app\.github\.dev$/, "-5000.app.github.dev");
+        return `${protocol}//${backendHostname}`;
+    }
+
+    // VS Code Dev Tunnels: Frontend-Port durch Backend-Port ersetzen.
+    if (hostname.includes(".devtunnels.ms")) {
+        const backendHostname = hostname.replace(/-\d+(\.[^.]+\.devtunnels\.ms)$/, "-5000$1");
+        if (backendHostname !== hostname) {
+            return `${protocol}//${backendHostname}`;
+        }
+    }
+
+    // Lokal oder auf anderen Servern: nutze denselben Host mit Backend-Port 5000.
+    return `${protocol}//${hostname}:5000`;
 }
 
 export const BACKEND_ORIGIN = getBackendOrigin();
