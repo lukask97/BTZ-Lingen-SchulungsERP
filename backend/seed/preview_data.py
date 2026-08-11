@@ -102,6 +102,32 @@ PREVIEW_DATA = {
             ]
         }
     ],
+    "lehrkraftOptionen": [
+        {
+            "id": 1,
+            "autoLieferannahmeNach1Tag": False,
+            "autoDebitorenzahlungNach1Tag": False,
+            "debitorenzahlungRegeln": [
+                {"id": "regel-1", "startTag": 0, "endTag": 0, "gewichtung": 1},
+                {"id": "regel-2", "startTag": 3, "endTag": 14, "gewichtung": 35},
+                {"id": "regel-3", "startTag": 15, "endTag": 28, "gewichtung": 61},
+                {"id": "regel-4", "startTag": 29, "endTag": 42, "gewichtung": 2},
+                {"id": "regel-5", "startTag": 43, "endTag": 56, "gewichtung": 1}
+            ]
+        }
+    ],
+    "fristenOptionen": [
+        {
+            "id": 1,
+            "skontoTage": 7,
+            "skontoProzent": 2,
+            "zahlungszielTage": 14,
+            "zahlungserinnerungTage": 3,
+            "mahnung1AbTage": 1,
+            "mahnung2AbTage": 8,
+            "inkassoAbTage": 22
+        }
+    ],
     "nummernkreise": [
         {"id": 1, "schluessel": "angebot", "bezeichnung": "Angebot", "kuerzel": "ANG"},
         {"id": 2, "schluessel": "auftrag", "bezeichnung": "Auftrag", "kuerzel": "AU"},

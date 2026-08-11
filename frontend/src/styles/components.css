@@ -601,8 +601,12 @@ button:disabled {
 
 .number-field input {
     width: 100%;
-    padding: 8px 36px 8px 10px;
+    padding: 8px 10px;
     box-sizing: border-box;
+}
+
+.number-field.number-field-has-suffix input {
+    padding-right: 36px;
 }
 
 .number-field-suffix {
@@ -1321,6 +1325,17 @@ button:disabled {
     justify-content: flex-end;
 }
 
+.thread-reply-box .form-textarea {
+    min-height: 4.8em;
+    resize: vertical;
+}
+
+.thread-reply-hint {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
 .thread-form-grid > div,
 .thread-form-grid-actions > div {
     display: grid;
@@ -1432,6 +1447,58 @@ button:disabled {
 
 .buchhaltung-tab.is-active:hover {
     background: #1565c0;
+}
+
+.lehrkraft-options-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.lehrkraft-rule-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.lehrkraft-rule-card {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #dbe4f0;
+    border-radius: 12px;
+    background: #f8fbff;
+}
+
+.lehrkraft-rule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.lehrkraft-rule-header span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.lehrkraft-rule-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.lehrkraft-rule-header-actions small {
+    color: #64748b;
+}
+
+.lehrkraft-rule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
 }
 
 .firmenkonto-table td:nth-child(4),

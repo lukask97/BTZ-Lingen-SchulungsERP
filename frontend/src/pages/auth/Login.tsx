@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
 import { login as loginService } from "../../services/auth/authService";
+import { BACKEND_ORIGIN } from "../../services/core/api";
 
 const QUICK_LOGINS = [
     { label: "Admin", username: "admin", password: "admin" },
@@ -92,7 +93,7 @@ export default function Login() {
                 )}
                 {authError && (
                     <div className="login-error">
-                        {authError} Backend unter `http://localhost:5000` starten.
+                        {authError} Backend unter `{BACKEND_ORIGIN}` starten.
                     </div>
                 )}
                 {error && <div className="login-error">{error}</div>}

@@ -32,7 +32,7 @@ services:
 
     volumes:
 
-      - ./database/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
       - ./database/init:/docker-entrypoint-initdb.d:ro
 
@@ -61,6 +61,8 @@ services:
 
     volumes:
 
+      - pgadmin_data:/var/lib/pgadmin
+
       - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
 
       - ./docker/pgadmin/pgpassfile:/pgpassfile:ro
@@ -78,11 +80,21 @@ services:
 
       DATABASE_DSN: dbname=erp user=erp password=geheim host=postgres port=5432
 
+      ERP_SECRET_KEY: erp-docker-secret
+
+      ERP_CORS_ORIGINS: "*"
+
+      ERP_SERVER_CONFIG_PATH: /app_data/server-config.json
+
     ports:
 
       - "5000:5000"
 
     restart: unless-stopped
+
+    volumes:
+
+      - backend_app_data:/app_data
 
     develop:
 
@@ -170,3 +182,12 @@ services:
     depends_on:
 
       - backend
+
+
+volumes:
+
+  postgres_data:
+
+  pgadmin_data:
+
+  backend_app_data:

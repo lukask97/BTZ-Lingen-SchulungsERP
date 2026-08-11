@@ -1,4 +1,4 @@
-import { loadData, saveData } from "../mockup/mockStorage";
+import { createCRUDService } from "../core/genericService";
 
 const STORAGE_KEY = "fristenOptionen";
 
@@ -53,21 +53,46 @@ function sanitizeOptions(value: any = {}) {
     };
 }
 
+const baseService = createCRUDService(STORAGE_KEY, [
+    {
+        id: 1,
+        ...DEFAULT_OPTIONS
+    }
+]);
+
+function getStoredOptions() {
+    try {
+        return baseService.getById(1) || baseService.list()[0] || baseService.create({
+            id: 1,
+            ...DEFAULT_OPTIONS
+        });
+    } catch {
+        return baseService.create({
+            id: 1,
+            ...DEFAULT_OPTIONS
+        });
+    }
+}
+
 const fristenOptionenService = {
     get() {
-        return sanitizeOptions(loadData(STORAGE_KEY, DEFAULT_OPTIONS));
+        return sanitizeOptions(getStoredOptions());
     },
     update(partial: any) {
         const nextValue = sanitizeOptions({
             ...this.get(),
             ...partial
         });
-        saveData(STORAGE_KEY, nextValue);
-        return nextValue;
+        return sanitizeOptions(baseService.update(1, {
+            id: 1,
+            ...nextValue
+        }));
     },
     reset() {
-        saveData(STORAGE_KEY, DEFAULT_OPTIONS);
-        return DEFAULT_OPTIONS;
+        return sanitizeOptions(baseService.update(1, {
+            id: 1,
+            ...DEFAULT_OPTIONS
+        }));
     }
 };
 

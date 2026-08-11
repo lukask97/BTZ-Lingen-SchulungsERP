@@ -220,6 +220,15 @@ export default function ThreadChatDialog({
                 </div>
             </div>}
         </div>
+        {showReplyBox && onReplyChange && onReplySend && <div className="form-row thread-section thread-reply-box">
+            <div className="thread-section-header">
+                <Label>{replyLabel || "Nachricht"}</Label>
+            </div>
+            <TextArea rows={3} value={replyValue} onChange={onReplyChange} placeholder={replyPlaceholder} onKeyDown={handleReplyKeyDown}/>
+            <div className="thread-reply-actions">
+                <button type="button" onClick={onReplySend}>Nachricht senden</button>
+            </div>
+        </div>}
         <div className="form-row thread-section">
             <div className="thread-section-header">
                 <Label>{documentsLabel}</Label>
@@ -246,15 +255,6 @@ export default function ThreadChatDialog({
             </div>
             <div className="thread-document-links">
                 {sichereAktionslinks.map(renderActionButton)}
-            </div>
-        </div>}
-        {showReplyBox && onReplyChange && onReplySend && <div className="form-row thread-section">
-            <div className="thread-section-header">
-                <Label>{replyLabel || "Nachricht"}</Label>
-            </div>
-            <TextArea rows={5} value={replyValue} onChange={onReplyChange} placeholder={replyPlaceholder} onKeyDown={handleReplyKeyDown}/>
-            <div className="thread-reply-actions">
-                <button type="button" onClick={onReplySend}>Nachricht senden</button>
             </div>
         </div>}
     </Dialog>;

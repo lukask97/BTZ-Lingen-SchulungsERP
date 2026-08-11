@@ -14,6 +14,8 @@ export interface LookupOption {
 }
 
 export interface LookupFieldProps {
+    id?: string;
+    name?: string;
     value?: string | number;
     options?: LookupOption[];
     onChange?: (value: string) => void;
@@ -25,6 +27,8 @@ export interface LookupFieldProps {
 }
 
 export interface TextFieldProps {
+    id?: string;
+    name?: string;
     value?: string | number;
     onChange?: (value: string) => void;
     type?: string;
@@ -36,8 +40,11 @@ export interface TextFieldProps {
 }
 
 export interface NumberFieldProps {
+    id?: string;
+    name?: string;
     value?: string | number;
     onChange?: (value: string) => void;
+    onBlur?: () => void;
     type?: string;
     format?: string;
     min?: string | number;
@@ -48,6 +55,8 @@ export interface NumberFieldProps {
 }
 
 export interface TextAreaProps {
+    id?: string;
+    name?: string;
     value?: string;
     onChange: (value: string) => void;
     rows?: number;

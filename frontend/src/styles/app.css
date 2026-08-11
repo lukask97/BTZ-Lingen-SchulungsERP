@@ -51,6 +51,26 @@ body {
     border-bottom: 1px solid #ddd;
     padding: 15px 20px;
     margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header h3 {
+    margin: 0;
+}
+
+.mobile-sidebar-button {
+    display: none;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+    padding: 10px 14px;
+    border: 1px solid #cfd7df;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #1f2937;
+    font: inherit;
 }
 
 .sidebar {
@@ -65,6 +85,44 @@ body {
     flex-direction: column;
     gap: 2px;
     overflow: hidden;
+    transition: width 0.2s ease, min-width 0.2s ease, padding 0.2s ease;
+}
+
+.sidebar-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sidebar-collapse-button {
+    width: 32px !important;
+    min-width: 32px;
+    margin-top: 0 !important;
+    padding: 6px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.sidebar.sidebar-collapsed {
+    width: 72px;
+    min-width: 72px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.sidebar.sidebar-collapsed .sidebar-brand {
+    display: none;
+}
+
+.sidebar.sidebar-collapsed .sidebar-menu,
+.sidebar.sidebar-collapsed .sidebar-footer {
+    display: none;
+}
+
+.sidebar.sidebar-collapsed .sidebar-topbar {
+    justify-content: center;
 }
 
 .sidebar-menu {
@@ -386,5 +444,89 @@ body {
 
     .teacher-notes-textarea {
         min-height: 260px;
+    }
+}
+
+@media (max-width: 860px) {
+    .layout {
+        display: block;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .content {
+        height: auto;
+        min-height: 100vh;
+        padding: 72px 12px 12px;
+    }
+
+    .header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding: 12px 14px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .mobile-sidebar-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        z-index: 50;
+        margin: 0;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+    }
+
+    .sidebar:not(.sidebar-collapsed) ~ .content .mobile-sidebar-button {
+        left: min(calc(84vw - 72px), 236px);
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 40;
+        width: min(84vw, 320px);
+        min-width: min(84vw, 320px);
+        height: 100vh;
+        box-shadow: 18px 0 48px rgba(15, 23, 42, 0.18);
+        transition: transform 0.2s ease;
+    }
+
+    .sidebar.sidebar-collapsed {
+        width: min(84vw, 320px);
+        min-width: min(84vw, 320px);
+        padding: 12px;
+        transform: translateX(calc(-100% - 12px));
+    }
+
+    .sidebar.sidebar-collapsed .sidebar-brand,
+    .sidebar.sidebar-collapsed .sidebar-menu,
+    .sidebar.sidebar-collapsed .sidebar-footer {
+        display: block;
+    }
+
+    .sidebar.sidebar-collapsed .sidebar-topbar {
+        justify-content: space-between;
+    }
+
+    .sidebar-collapse-button {
+        width: auto !important;
+        min-width: 0;
+        padding: 6px 10px;
+    }
+
+    .content-shell-teacher {
+        gap: 12px;
+    }
+
+    .module-panel,
+    .teacher-notes-card {
+        padding: 14px;
     }
 }

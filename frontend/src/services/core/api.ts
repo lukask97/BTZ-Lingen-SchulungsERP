@@ -1,6 +1,7 @@
 // Dynamisch die Server-IP-Adresse ermitteln
 const SERVER_IP = window.location.hostname; // Nimmt die aktuelle Host-IP oder Domain
-const API_URL = `http://${SERVER_IP}:5000/api`; // Backend-Port 5000 verwenden
+export const BACKEND_ORIGIN = `http://${SERVER_IP}:5000`;
+const API_URL = `${BACKEND_ORIGIN}/api`; // Backend-Port 5000 verwenden
 
 const DATABASE_API_URL = `${API_URL}/datenbanken`;
 

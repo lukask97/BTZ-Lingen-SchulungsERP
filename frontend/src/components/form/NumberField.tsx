@@ -1,8 +1,12 @@
+import { useEffect, useId, useState } from "react";
 import type { NumberFieldProps } from "../../types/ui";
 
 export default function NumberField({
+    id,
+    name,
     value = "",
     onChange,
+    onBlur,
     type = "number",
     format,
     min,
@@ -11,6 +15,9 @@ export default function NumberField({
     placeholder = "",
     disabled = false
 }: NumberFieldProps) {
+    const generatedId = useId();
+    const fieldId = id || `number-field-${generatedId}`;
+    const fieldName = name || fieldId;
 
     const config = {
         number: {
@@ -34,6 +41,9 @@ export default function NumberField({
     };
 
     const field = config[type] || config.number;
+    const normalizedValue = String(value ?? "");
+    const [draftValue, setDraftValue] = useState(normalizedValue);
+    const [isFocused, setIsFocused] = useState(false);
 
     let suffix = "";
 
@@ -50,18 +60,38 @@ export default function NumberField({
             suffix = "";
     }
 
+    useEffect(() => {
+        if (!isFocused) {
+            setDraftValue(normalizedValue);
+        }
+    }, [isFocused, normalizedValue]);
+
     return (
-        <div className="number-field">
+        <div className={`number-field${suffix ? " number-field-has-suffix" : ""}`}>
 
             <input
+                id={fieldId}
+                name={fieldName}
                 type={field.inputType}
-                value={value}
+                value={draftValue}
                 min={min}
                 max={max}
                 step={step}
                 placeholder={placeholder}
                 disabled={disabled}
-                onChange={e => onChange && onChange(e.target.value)}
+                onChange={e => {
+                    setDraftValue(e.target.value);
+                    onChange && onChange(e.target.value);
+                }}
+                onFocus={() => setIsFocused(true)}
+                onWheel={event => {
+                    if (field.inputType !== "number") return;
+                    event.currentTarget.blur();
+                }}
+                onBlur={() => {
+                    setIsFocused(false);
+                    onBlur && onBlur();
+                }}
             />
 
             {suffix && (

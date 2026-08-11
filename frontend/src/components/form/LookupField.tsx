@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import type { LookupFieldProps, LookupOption } from "../../types/ui";
 
 export default function LookupField({
+    id,
+    name,
     value = "",
     options = [],
     onChange,
@@ -11,6 +13,9 @@ export default function LookupField({
     disabled = false,
     required = false
 }: LookupFieldProps) {
+    const generatedId = useId();
+    const fieldId = id || `lookup-field-${generatedId}`;
+    const fieldName = name || fieldId;
     const [query, setQuery] = useState("");
     const [open, setOpen] = useState(false);
 
@@ -36,6 +41,8 @@ export default function LookupField({
     return <div className="lookup-field">
         <div className="lookup-input-wrapper">
             <input
+                id={fieldId}
+                name={fieldName}
                 value={query}
                 disabled={disabled}
                 required={required}

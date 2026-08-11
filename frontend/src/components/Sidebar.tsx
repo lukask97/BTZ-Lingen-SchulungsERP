@@ -5,6 +5,11 @@ import { NAVIGATION_GROUPS, SCENARIO_MENU, SCENARIO_OVERVIEW } from "../constant
 import { getDataProvider } from "../services/core/api";
 import { subscribeToServerSystemEvents } from "../services/core/serverEvents";
 
+type SidebarProps = {
+    isCollapsed: boolean;
+    onToggleCollapse: () => void;
+};
+
 function getProviderLabel(provider: string) {
     if (provider === "backend-postgres") return "Datenbank";
     if (provider === "backend-preview-memory") return "Backend-Memory";
@@ -19,7 +24,7 @@ function getBackendModeLabel(mode: string) {
 }
 
 
-export default function Sidebar() {
+export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
 
     const {user, logout, hasFullAccess, hasAccess} = useAuth();
     const isAdmin = hasFullAccess();
@@ -69,8 +74,19 @@ export default function Sidebar() {
 
     return (
 
-        <nav className="sidebar">
-            <Link className="sidebar-brand" to="/">ERP</Link>
+        <nav className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`}>
+            <div className="sidebar-topbar">
+                <Link className="sidebar-brand" to="/">ERP</Link>
+                <button
+                    type="button"
+                    className="sidebar-collapse-button"
+                    onClick={onToggleCollapse}
+                    aria-label={isCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
+                    title={isCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
+                >
+                    {isCollapsed ? ">" : "<"}
+                </button>
+            </div>
             <div className="sidebar-menu">
                 {visibleGroups.map(group => <div key={group.title} className="sidebar-group">
                     <div className="sidebar-section-row">

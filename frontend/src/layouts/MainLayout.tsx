@@ -3,6 +3,7 @@ import {
     useLocation
 }
     from "react-router-dom";
+import { useState } from "react";
 
 
 import Sidebar from "../components/Sidebar";
@@ -17,13 +18,20 @@ function MainLayout() {
     useStorageSyncRefresh(SYNC_DATA_KEYS);
     const location = useLocation();
     const isTeacherView = location.pathname.startsWith("/lehrkraft");
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     return (
 
         <div className="layout">
-            <Sidebar/>
+            <Sidebar
+                isCollapsed={isSidebarCollapsed}
+                onToggleCollapse={() => setIsSidebarCollapsed(current => !current)}
+            />
             <div className="content">
-                <Header/>
+                <Header
+                    isSidebarCollapsed={isSidebarCollapsed}
+                    onToggleSidebar={() => setIsSidebarCollapsed(current => !current)}
+                />
                 <div className={isTeacherView ? "content-shell content-shell-teacher" : "content-shell"}>
                     <main>
                         <Outlet/>
