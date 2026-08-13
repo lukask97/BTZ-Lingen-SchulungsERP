@@ -56,13 +56,59 @@ function isLinkValue(value) {
   return !!value && typeof value === "object" && "label" in value && "to" in value;
 }
 
-function normalizeSortValue(value) {
-  if (Array.isArray(value)) return value.map((entry) => normalizeSortValue(entry)).join(", ");
-  if (isLinkValue(value)) return String(value.label || "").toLowerCase();
-  if (value && typeof value === "object") return formatObjectValue(value).toLowerCase();
-  if (typeof value === "number") return value;
+function extractNumericSortValue(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "boolean") return value ? 1 : 0;
-  return String(value ?? "").toLowerCase();
+
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+
+  const normalized = raw
+    .replace(/\s/g, "")
+    .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+    .replace(/,/g, ".")
+    .replace(/[^0-9.+-]/g, "");
+
+  if (!normalized || !/[0-9]/.test(normalized)) return null;
+
+  const numericValue = Number(normalized);
+  return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function normalizeSortValue(value) {
+  if (Array.isArray(value)) {
+    const joined = value.map((entry) => formatObjectValue(entry)).join(", ");
+    return {
+      type: "text",
+      value: joined.toLowerCase()
+    };
+  }
+
+  if (isLinkValue(value)) {
+    const label = String(value.label || "");
+    const numericValue = extractNumericSortValue(label);
+    return numericValue !== null
+      ? { type: "number", value: numericValue }
+      : { type: "text", value: label.toLowerCase() };
+  }
+
+  if (value && typeof value === "object") {
+    const objectText = formatObjectValue(value);
+    const numericValue = extractNumericSortValue(objectText);
+    return numericValue !== null
+      ? { type: "number", value: numericValue }
+      : { type: "text", value: objectText.toLowerCase() };
+  }
+
+  const numericValue = extractNumericSortValue(value);
+  if (numericValue !== null) {
+    return { type: "number", value: numericValue };
+  }
+
+  return {
+    type: "text",
+    value: String(value ?? "").toLowerCase()
+  };
 }
 
 function haveSameColumns(
@@ -221,13 +267,26 @@ export default function DataTable({
       const aValue = normalizeSortValue(a?.[sortField]);
       const bValue = normalizeSortValue(b?.[sortField]);
 
-      if (aValue === bValue) return 0;
+      if (aValue.type === "number" && bValue.type === "number") {
+        if (aValue.value === bValue.value) return 0;
 
-      if (sortOrder === "asc") {
-        return aValue > bValue ? 1 : -1;
+        if (sortOrder === "asc") {
+          return aValue.value > bValue.value ? 1 : -1;
+        }
+
+        return aValue.value < bValue.value ? 1 : -1;
       }
 
-      return aValue < bValue ? 1 : -1;
+      const aComparable = String(aValue.value);
+      const bComparable = String(bValue.value);
+
+      if (aComparable === bComparable) return 0;
+
+      if (sortOrder === "asc") {
+        return aComparable > bComparable ? 1 : -1;
+      }
+
+      return aComparable < bComparable ? 1 : -1;
     });
   }, [data, sortField, sortOrder]);
 

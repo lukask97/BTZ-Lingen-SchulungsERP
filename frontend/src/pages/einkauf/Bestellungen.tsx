@@ -11,6 +11,8 @@ import { PERMISSIONS } from "../../constants/permissions";
 import bestellungenService, { getAutomatischeBedarfsmeldungen, naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
 import artikelService from "../../services/logistik/artikelService";
+import auftraegeService from "../../services/verkauf/auftraegeService";
+import angeboteService from "../../services/verkauf/angeboteService";
 import OverviewCards from "../../components/OverviewCards";
 import { getBerlinDate } from "../../utils/dateTime";
 import { canBookGoodsReceipt, getPurchaseStep, getPurchaseStepLabel } from "../../utils/processFlow";
@@ -54,6 +56,74 @@ function getPositionenText(positionen: any[] = []) {
     }).join(", ");
 }
 
+const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
+
+function istOffenesAngebot(angebot: any) {
+    return ["wartet auf antwort"].includes(String(angebot?.status || "").toLowerCase());
+}
+
+function getVerplanteMengen(auftraege: any[] = []) {
+    return auftraege
+        .filter(auftrag => AKTIVE_AUFTRAGSSTATUS.includes(String(auftrag.status || "").toLowerCase()))
+        .reduce((map, auftrag) => {
+            (auftrag.positionen || [])
+                .filter(position => position.leistungTyp !== "Service" && position.artikelId)
+                .forEach(position => {
+                    const key = String(position.artikelId);
+                    map[key] = Number(map[key] || 0) + Number(position.menge || 0);
+                });
+            return map;
+        }, {});
+}
+
+function getOpenOfferCountByArtikel(angebote: any[] = []) {
+    return angebote
+        .filter(angebot => istOffenesAngebot(angebot))
+        .reduce((map, angebot) => {
+            const artikelIds = new Set(
+                (angebot.positionen || [])
+                    .filter(position => String(position.leistungTyp || "").toLowerCase() !== "service" && position.artikelId)
+                    .map(position => String(position.artikelId))
+            );
+
+            artikelIds.forEach(artikelId => {
+                map[artikelId] = Number(map[artikelId] || 0) + 1;
+            });
+
+            return map;
+        }, {});
+}
+
+function getArtikelInfoText({
+    artikelEintrag,
+    menge,
+    verplanteMengen,
+    offeneEinkaufsmengen,
+    offeneAngeboteJeArtikel,
+    highlightDemand = true
+}: {
+    artikelEintrag: any;
+    menge: number;
+    verplanteMengen: Record<string, number>;
+    offeneEinkaufsmengen: Record<string, number>;
+    offeneAngeboteJeArtikel: Record<string, number>;
+    highlightDemand?: boolean;
+}) {
+    const bestand = Number(artikelEintrag?.bestand || 0);
+    const verplant = Number(verplanteMengen[String(artikelEintrag?.id)] || 0);
+    const verfuegbar = bestand - verplant;
+    const imZulauf = Number(offeneEinkaufsmengen[String(artikelEintrag?.id)] || 0);
+    const inAngeboten = Number(offeneAngeboteJeArtikel[String(artikelEintrag?.id)] || 0);
+    const projected = verfuegbar - Number(menge || 0);
+    const sicherheitsbestand = Number(artikelEintrag?.mindestmenge || 0);
+    const unterschreitetSicherheitsbestand = projected < sicherheitsbestand;
+
+    return {
+        text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Bedarfbestand: ${projected} | Sicherheitsbestand: ${sicherheitsbestand}` : ""}`,
+        istKritisch: Number(menge || 0) > verfuegbar || (highlightDemand && unterschreitetSicherheitsbestand)
+    };
+}
+
 export default function Bestellungen() {
     const today = getBerlinDate();
     const navigate = useNavigate();
@@ -66,11 +136,27 @@ export default function Bestellungen() {
     const [selectedBedarfIds, setSelectedBedarfIds] = useState<Array<string | number>>([]);
     const lieferanten = lieferantenService.getAll();
     const artikel = artikelService.getAll().filter(item => item.istEinkaufbar);
+    const auftraege = auftraegeService.getAll();
+    const angebote = angeboteService.getAll();
     const automatischeBedarfsmeldungen = useMemo(() => getAutomatischeBedarfsmeldungen(), [bestellungen]);
     const bedarfsmeldungen = useMemo(
         () => bestellungen.filter(item => item.status === "bedarf gemeldet"),
         [bestellungen]
     );
+    const verplanteMengen = useMemo(() => getVerplanteMengen(auftraege), [auftraege]);
+    const offeneAngeboteJeArtikel = useMemo(() => getOpenOfferCountByArtikel(angebote), [angebote]);
+    const offeneEinkaufsmengen = useMemo(() => {
+        return bestellungenService.getAll()
+            .filter(item => ["angefragt", "bestaetigt", "versendet"].includes(String(item.status || "").toLowerCase()))
+            .reduce((map: Record<string, number>, item) => {
+                (item.positionen || []).forEach((position: any) => {
+                    const key = String(position.artikelId || "");
+                    if (!key) return;
+                    map[key] = Number(map[key] || 0) + Number(position.menge || 0);
+                });
+                return map;
+            }, {});
+    }, [bestellungen]);
     const [dialogState, setDialogState] = useState(() => createBestellungDialogState(lieferanten, artikel));
     const lieferantenOptionen = lieferanten.map(item => ({ value: String(item.id), label: `${item.lieferantenNr} - ${item.firma}` }));
     const artikelOptionen = artikel.map(item => ({
@@ -411,10 +497,31 @@ export default function Bestellungen() {
             <div className="form-row">
                 <Label required glossaryKey="angebotspositionen">Anfragepositionen</Label>
                 {dialogState.positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">
-                    {dialogState.positionen.map((position, index) => <li key={`${position.artikelNr}-${index}`}>
-                        {position.artikelNr}: {position.artikel} - {position.menge}
-                        <button type="button" className="link-button" onClick={() => setDialogState(items => ({ ...items, positionen: items.positionen.filter((_, positionIndex) => positionIndex !== index) }))}>Entfernen</button>
-                    </li>)}
+                    {dialogState.positionen.map((position, index) => {
+                        const artikelEintrag = artikel.find(item => String(item.id) === String(position.artikelId) || String(item.artikelNr) === String(position.artikelNr));
+                        const info = artikelEintrag
+                            ? getArtikelInfoText({
+                                artikelEintrag,
+                                menge: Number(position.menge || 0),
+                                verplanteMengen,
+                                offeneEinkaufsmengen,
+                                offeneAngeboteJeArtikel,
+                                highlightDemand: false
+                            })
+                            : null;
+
+                        return <li key={`${position.artikelNr}-${index}`}>
+                            <div>{position.artikelNr}: {position.artikel}</div>
+                            <NumberField value={position.menge} min="1" onChange={wert => setDialogState(items => ({
+                                ...items,
+                                positionen: items.positionen.map((entry, positionIndex) => positionIndex === index
+                                    ? { ...entry, menge: Math.max(1, Number(wert || 1)) }
+                                    : entry)
+                            }))}/>
+                            {info && <div><small className={info.istKritisch ? "form-error" : ""}>{info.text}</small></div>}
+                            <button type="button" className="link-button" onClick={() => setDialogState(items => ({ ...items, positionen: items.positionen.filter((_, positionIndex) => positionIndex !== index) }))}>Entfernen</button>
+                        </li>;
+                    })}
                 </ul>}
             </div>
             <div className="form-row">

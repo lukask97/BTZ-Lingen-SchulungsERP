@@ -140,22 +140,30 @@ export function getOffeneBestellmengenProArtikel() {
 }
 
 export function getAutomatischeBedarfsmeldungen() {
+    const offeneBestellmengen = getOffeneBestellmengenProArtikel();
+
     return artikelService.getAll()
         .filter(item => Number(item.bedarfsmeldungBei || 0) > 0)
-        .filter(item => Number(item.bestand || 0) <= Number(item.bedarfsmeldungBei || 0))
+        .filter(item => {
+            const bestand = Number(item.bestand || 0);
+            const imZulauf = Number(offeneBestellmengen[String(item.id)] || 0);
+            const bedarfsmeldungBei = Number(item.bedarfsmeldungBei || 0);
+            return bestand + imZulauf <= bedarfsmeldungBei;
+        })
         .map(item => ({
             id: `auto-artikel-${item.id}`,
             artikelId: item.id,
             artikelNr: item.artikelNr,
             artikel: item.name,
             bestand: Number(item.bestand || 0),
+            imZulauf: Number(offeneBestellmengen[String(item.id)] || 0),
             bedarfsmeldungBei: Number(item.bedarfsmeldungBei || 0),
             mindestmenge: Number(item.mindestmenge || 0),
             empfohleneMenge: Math.max(
                 1,
-                Number(item.mindestmenge || 0) > Number(item.bestand || 0)
-                    ? Number(item.mindestmenge || 0) - Number(item.bestand || 0)
-                    : Number(item.bedarfsmeldungBei || 0) - Number(item.bestand || 0) + 1
+                Number(item.mindestmenge || 0) > (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
+                    ? Number(item.mindestmenge || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
+                    : Number(item.bedarfsmeldungBei || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0)) + 1
             )
         }));
 }
