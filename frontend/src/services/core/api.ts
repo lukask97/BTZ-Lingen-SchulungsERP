@@ -79,6 +79,16 @@ export function setDataProvider(provider: string) {
     window.localStorage.setItem(DATA_PROVIDER_STORAGE_KEY, provider);
 }
 
+export function isPermissionError(error: unknown) {
+    if (!(error instanceof Error)) return false;
+
+    const message = error.message.toLowerCase();
+    return message.startsWith("keine berechtigung")
+        || message.includes("status 403")
+        || message.includes("403")
+        || message.includes("forbidden");
+}
+
 export function syncApiRequest(path: string, options: { method?: string; body?: unknown } = {}) {
     const request = new XMLHttpRequest();
     request.open(options.method || "GET", resolveApiUrl(path), false);

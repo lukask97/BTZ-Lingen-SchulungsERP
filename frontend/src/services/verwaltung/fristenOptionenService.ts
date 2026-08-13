@@ -3,13 +3,14 @@ import { createCRUDService } from "../core/genericService";
 const STORAGE_KEY = "fristenOptionen";
 
 const DEFAULT_OPTIONS = {
-    skontoTage: 7,
-    skontoProzent: 2,
-    zahlungszielTage: 14,
-    zahlungserinnerungTage: 3,
+    skontoTage: 14,
+    skontoProzent: 5,
+    angebotGfFreigabeAbweichungProzent: 10,
+    zahlungszielTage: 28,
+    zahlungserinnerungTage: 21,
     mahnung1AbTage: 1,
-    mahnung2AbTage: 8,
-    inkassoAbTage: 22
+    mahnung2AbTage: 15,
+    inkassoAbTage: 29
 };
 
 function toNonNegativeNumber(value: unknown, fallback: number) {
@@ -27,6 +28,10 @@ function toNonNegativeDecimal(value: unknown, fallback: number) {
 function sanitizeOptions(value: any = {}) {
     const skontoTage = toNonNegativeNumber(value.skontoTage, DEFAULT_OPTIONS.skontoTage);
     const skontoProzent = toNonNegativeDecimal(value.skontoProzent, DEFAULT_OPTIONS.skontoProzent);
+    const angebotGfFreigabeAbweichungProzent = toNonNegativeDecimal(
+        value.angebotGfFreigabeAbweichungProzent,
+        DEFAULT_OPTIONS.angebotGfFreigabeAbweichungProzent
+    );
     const zahlungszielTage = Math.max(
         skontoTage,
         toNonNegativeNumber(value.zahlungszielTage, DEFAULT_OPTIONS.zahlungszielTage)
@@ -45,6 +50,7 @@ function sanitizeOptions(value: any = {}) {
     return {
         skontoTage,
         skontoProzent,
+        angebotGfFreigabeAbweichungProzent,
         zahlungszielTage,
         zahlungserinnerungTage,
         mahnung1AbTage,

@@ -11,9 +11,19 @@ import auftraegeService from "../../services/verkauf/auftraegeService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import abteilungenService from "../../services/organisation/abteilungenService";
+import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
+import { getOrderForOffer } from "../../utils/processFlow";
 
 function normalize(value: string) {
     return String(value || "").trim().toLowerCase();
+}
+
+function safeGetAll<T>(loader: () => T[]) {
+    try {
+        return loader();
+    } catch {
+        return [];
+    }
 }
 
 export default function Suche() {
@@ -21,7 +31,7 @@ export default function Suche() {
     const [query, setQuery] = useState("");
 
     const targets = useMemo(() => {
-        const departmentTargets = abteilungenService.getAll().map(item => ({
+        const departmentTargets = safeGetAll(() => abteilungenService.getAll()).map(item => ({
             id: `abteilung-${item.id}`,
             nummer: item.kuerzel,
             bezeichnung: item.name,
@@ -29,14 +39,29 @@ export default function Suche() {
             ziel: "/organisation",
             fokus: item.kuerzel
         }));
+        const auftraege = safeGetAll(() => auftraegeService.getAll());
+        const angebote = safeGetAll(() => angeboteService.getAll());
+
         return [
-            ...kundenService.getAll().map(item => ({ id: `kunde-${item.id}`, nummer: item.kundenNr, bezeichnung: item.firma, bereich: "Kunden", ziel: `/kunden?focus=${item.id}` })),
-            ...lieferantenService.getAll().map(item => ({ id: `lieferant-${item.id}`, nummer: item.lieferantenNr, bezeichnung: item.firma, bereich: "Lieferanten", ziel: `/lieferanten?focus=${item.id}` })),
-            ...artikelService.getAll().map(item => ({ id: `artikel-${item.id}`, nummer: item.artikelNr, bezeichnung: item.name, bereich: "Artikel", ziel: `/artikel?focus=${item.id}` })),
-            ...angeboteService.getAll().map(item => ({ id: `angebot-${item.id}`, nummer: item.angebotsNr, bezeichnung: item.kunde || "Angebot", bereich: "Angebote", ziel: "/angebote" })),
-            ...auftraegeService.getAll().map(item => ({ id: `auftrag-${item.id}`, nummer: item.auftragNr, bezeichnung: item.kunde || "Auftrag", bereich: "Aufträge", ziel: "/auftraege" })),
-            ...bestellungenService.getAll().map(item => ({ id: `bestellung-${item.id}`, nummer: item.bestellNr, bezeichnung: item.lieferant || "Bestellung", bereich: "Bestellungen", ziel: `/bestellungen?focus=${item.id}` })),
-            ...rechnungenService.getAll().map(item => ({ id: `rechnung-${item.id}`, nummer: item.rechnungsnr, bezeichnung: item.kunde || "Rechnung", bereich: item.rechnungstyp === "Eingangsrechnung" ? "Eingangsrechnungen" : "Ausgangsrechnungen", ziel: `/${item.rechnungstyp === "Eingangsrechnung" ? "eingangsrechnungen" : "ausgangsrechnungen"}?focus=${item.rechnungsnr}` })),
+            ...safeGetAll(() => kundenService.getAll()).map(item => ({ id: `kunde-${item.id}`, nummer: item.kundenNr, bezeichnung: item.firma, bereich: "Kunden", ziel: `/kunden?focus=${item.id}` })),
+            ...safeGetAll(() => lieferantenService.getAll()).map(item => ({ id: `lieferant-${item.id}`, nummer: item.lieferantenNr, bezeichnung: item.firma, bereich: "Lieferanten", ziel: `/lieferanten?focus=${item.id}` })),
+            ...safeGetAll(() => artikelService.getAll()).map(item => ({ id: `artikel-${item.id}`, nummer: item.artikelNr, bezeichnung: item.name, bereich: "Artikel", ziel: `/artikel?focus=${item.id}` })),
+            ...angebote.map(item => {
+                const auftrag = getOrderForOffer(item.id, auftraege);
+                return {
+                    id: `angebot-${item.id}`,
+                    nummer: item.angebotsNr,
+                    bezeichnung: item.kunde || "Angebot",
+                    bereich: "Angebote",
+                    ziel: auftrag ? `/vertriebsdokumente/auftrag/${auftrag.id}` : `/angebote?focus=${item.id}`
+                };
+            }),
+            ...auftraege.map(item => ({ id: `auftrag-${item.id}`, nummer: item.auftragNr, bezeichnung: item.kunde || "Auftrag", bereich: "Auftraege", ziel: `/vertriebsdokumente/auftrag/${item.id}` })),
+            ...safeGetAll(() => vertriebsdokumenteService.getAll())
+                .filter(item => item.auftragId)
+                .map(item => ({ id: `vertriebsdokument-${item.id}`, nummer: item.dokumentNr || item.titel || item.dokumentTyp, bezeichnung: item.kunde || item.dokumentTyp || "Vertriebsdokument", bereich: "Vertriebsdokumente", ziel: `/vertriebsdokumente/auftrag/${item.auftragId}` })),
+            ...safeGetAll(() => bestellungenService.getAll()).map(item => ({ id: `bestellung-${item.id}`, nummer: item.bestellNr, bezeichnung: item.lieferant || "Bestellung", bereich: "Bestellungen", ziel: `/bestellungen?focus=${item.id}` })),
+            ...safeGetAll(() => rechnungenService.getAll()).map(item => ({ id: `rechnung-${item.id}`, nummer: item.rechnungsnr, bezeichnung: item.kunde || "Rechnung", bereich: item.rechnungstyp === "Eingangsrechnung" ? "Eingangsrechnungen" : "Ausgangsrechnungen", ziel: item.auftragId ? `/vertriebsdokumente/auftrag/${item.auftragId}` : `/${item.rechnungstyp === "Eingangsrechnung" ? "eingangsrechnungen" : "ausgangsrechnungen"}?focus=${item.rechnungsnr}` })),
             ...departmentTargets
         ];
     }, []);
@@ -55,21 +80,21 @@ export default function Suche() {
 
     return <>
         <h1>Generelle Suche</h1>
-        <p>Nummern, Kürzel und zentrale Bezeichnungen können hier gesucht werden. Bei einem eindeutigen Treffer wird direkt weitergeleitet.</p>
+        <p>Nummern, Kuerzel und zentrale Bezeichnungen koennen hier gesucht werden. Bei einem eindeutigen Treffer wird direkt weitergeleitet.</p>
         <div className="form-row">
-            <Label>Nummer oder Kürzel</Label>
+            <Label>Nummer oder Kuerzel</Label>
             <TextField value={query} onChange={setQuery} placeholder="z. B. RG-2026-001, ART001 oder BU" />
-            <button type="button" onClick={direktSuche} disabled={results.length !== 1}>Direkt öffnen</button>
+            <button type="button" onClick={direktSuche} disabled={results.length !== 1}>Direkt oeffnen</button>
         </div>
         <DataTable
             title="Treffer"
             selectableColumns={false}
             data={results}
             columns={[
-                { field: "nummer", title: "Nummer / Kürzel" },
+                { field: "nummer", title: "Nummer / Kuerzel" },
                 { field: "bezeichnung", title: "Bezeichnung" },
                 { field: "bereich", title: "Bereich" },
-                { field: "ziel", title: "Aktion", render: row => <button type="button" className="link-button" onClick={() => navigate(row.ziel)}>Öffnen</button> }
+                { field: "ziel", title: "Aktion", render: row => <button type="button" className="link-button" onClick={() => navigate(row.ziel)}>Oeffnen</button> }
             ]}
         />
     </>;

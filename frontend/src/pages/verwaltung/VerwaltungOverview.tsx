@@ -23,6 +23,7 @@ export default function VerwaltungOverview() {
             { to: "/rollen", label: "Rollen" },
             { to: "/rechte", label: "Rechte" },
             { to: "/nummernkreise", label: "Nummernkreise" },
+            { to: "/exporte", label: "Exporte" },
             { to: "/optionen", label: "Optionen" }
         ]}
     />;

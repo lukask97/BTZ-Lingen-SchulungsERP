@@ -11,15 +11,82 @@ import { useCRUDPage } from "../../hooks/useCRUDPage";
 import artikelService from "../../services/logistik/artikelService";
 import kategorienService from "../../services/logistik/kategorienService";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 import { naechsteStammdatennummer } from "../../services/core/documentNumbering";
+import artikelBilderService from "../../services/logistik/artikelBilderService";
+
+const MAX_IMAGE_WIDTH = 1920;
+const MAX_IMAGE_HEIGHT = 1080;
 
 function createKomponentenDraft() {
     return {
         komponenteId: "",
         komponentenMenge: 1
     };
+}
+
+function getCanvasOutputType(fileType = "") {
+    return String(fileType).toLowerCase() === "image/png" ? "image/png" : "image/jpeg";
+}
+
+function loadImageFromFile(file) {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+        const imageUrl = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+            URL.revokeObjectURL(imageUrl);
+            resolve(image);
+        };
+        image.onerror = () => {
+            URL.revokeObjectURL(imageUrl);
+            reject(new Error("Bild konnte nicht geladen werden."));
+        };
+        image.src = imageUrl;
+    });
+}
+
+async function resizeImageFile(file) {
+    const type = String(file.type || "").toLowerCase();
+    if (!["image/jpeg", "image/png"].includes(type)) return null;
+
+    const image = await loadImageFromFile(file);
+    const ratio = Math.min(MAX_IMAGE_WIDTH / image.width, MAX_IMAGE_HEIGHT / image.height, 1);
+    const width = Math.max(1, Math.round(image.width * ratio));
+    const height = Math.max(1, Math.round(image.height * ratio));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+        throw new Error("Canvas-Kontext konnte nicht erstellt werden.");
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+
+    const outputType = getCanvasOutputType(type);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, outputType, outputType === "image/jpeg" ? 0.92 : undefined));
+    if (!blob) {
+        throw new Error("Bild konnte nicht verarbeitet werden.");
+    }
+
+    const extension = outputType === "image/png" ? "png" : "jpg";
+    const baseName = String(file.name || "bild").replace(/\.[^.]+$/, "");
+    return new File([blob], `${baseName}.${extension}`, { type: outputType });
+}
+
+async function createPreviewItems(files = []) {
+    const resizeResults = await Promise.all(files.map(file => resizeImageFile(file).catch(() => null)));
+    return resizeResults
+        .filter(Boolean)
+        .map((file, index) => ({
+            id: `${file.name}-${file.size}-${index}-${Date.now()}`,
+            name: file.name,
+            url: URL.createObjectURL(file),
+            source: "upload",
+            file
+        }));
 }
 
 export default function Artikel() {
@@ -60,10 +127,137 @@ export default function Artikel() {
 
     const [categoryFilter, setCategoryFilter] = useState("");
     const [komponentenDraft, setKomponentenDraft] = useState(createKomponentenDraft);
+    const [bildVorschauen, setBildVorschauen] = useState([]);
+    const [isImageDragActive, setIsImageDragActive] = useState(false);
+    const [bildFehler, setBildFehler] = useState("");
+    const [grossesBild, setGrossesBild] = useState<any>(null);
+    const [isBildSpeichern, setIsBildSpeichern] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
     };
+
+    const resetBildVorschauen = () => {
+        setBildFehler("");
+        setGrossesBild(null);
+        setBildVorschauen(current => {
+            current.forEach(item => {
+                if (item.source === "upload") {
+                    URL.revokeObjectURL(item.url);
+                }
+            });
+            return [];
+        });
+    };
+
+    const uebernehmeBilddateien = async (files) => {
+        const neueVorschauen = await createPreviewItems(Array.from(files || []));
+        if (neueVorschauen.length === 0) {
+            setBildFehler("Es konnten nur JPG- oder PNG-Bilder uebernommen werden.");
+            return;
+        }
+        setBildFehler("");
+
+        setBildVorschauen(current => {
+            const belegteSlots = new Set(current.map(item => Number(item.slot)));
+            const freieSlots = Array.from({ length: 10 }, (_, index) => index).filter(slot => !belegteSlots.has(slot));
+            const uebernahme = neueVorschauen.slice(0, freieSlots.length).map((item, index) => ({
+                ...item,
+                slot: freieSlots[index]
+            }));
+            const naechsteListe = [...current, ...uebernahme];
+            setCurrentItem(item => ({
+                ...item,
+                anzahlBilder: naechsteListe.length
+            }));
+            return naechsteListe;
+        });
+    };
+
+    const ausZwischenablageEinfuegen = async () => {
+        if (!navigator.clipboard?.read) {
+            setBildFehler("Dieser Browser unterstuetzt das Einfuegen aus der Zwischenablage hier nicht.");
+            return;
+        }
+
+        try {
+            const clipboardItems = await navigator.clipboard.read();
+            const bildDateien = [];
+
+            for (const item of clipboardItems) {
+                const bildTyp = item.types.find(type => ["image/png", "image/jpeg"].includes(String(type).toLowerCase()));
+                if (!bildTyp) continue;
+                const blob = await item.getType(bildTyp);
+                const endung = bildTyp === "image/png" ? "png" : "jpg";
+                bildDateien.push(new File([blob], `zwischenablage-${Date.now()}.${endung}`, { type: bildTyp }));
+            }
+
+            if (bildDateien.length === 0) {
+                setBildFehler("In der Zwischenablage wurde kein JPG- oder PNG-Bild gefunden.");
+                return;
+            }
+
+            uebernehmeBilddateien(bildDateien);
+        } catch (error) {
+            setBildFehler("Das Bild konnte nicht aus der Zwischenablage gelesen werden.");
+        }
+    };
+
+    const bildEntfernen = (bildId) => {
+        setBildVorschauen(current => {
+            const gefunden = current.find(item => item.id === bildId);
+            if (gefunden?.source === "upload") {
+                URL.revokeObjectURL(gefunden.url);
+            }
+            const naechsteListe = current.filter(item => item.id !== bildId);
+            if (grossesBild?.id === bildId) {
+                setGrossesBild(null);
+            }
+            setCurrentItem(item => ({
+                ...item,
+                anzahlBilder: naechsteListe.length
+            }));
+            return naechsteListe;
+        });
+    };
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const ladeBilder = async () => {
+            if (!open) return;
+            if (!editMode || !currentItem.id) {
+                resetBildVorschauen();
+                return;
+            }
+
+            try {
+                const bilder = await artikelBilderService.list(currentItem.id);
+                if (!isMounted) return;
+                setBildFehler("");
+                setBildVorschauen(bilder.map((bild) => ({
+                    id: `backend-${bild.slot}-${bild.filename}`,
+                    name: bild.filename,
+                    url: bild.url,
+                    slot: Number(bild.slot),
+                    source: "backend"
+                })));
+                setCurrentItem(item => ({
+                    ...item,
+                    anzahlBilder: bilder.length
+                }));
+            } catch (error) {
+                if (!isMounted) return;
+                setBildFehler(error instanceof Error ? error.message : "Bilder konnten nicht geladen werden.");
+            }
+        };
+
+        ladeBilder();
+        return () => {
+            isMounted = false;
+        };
+    }, [open, editMode, currentItem.id]);
 
     const komponentenOptionen = useMemo(() => allData
         .filter(item => item.id !== currentItem.id)
@@ -112,6 +306,60 @@ export default function Artikel() {
 
     const handleFilterChange = (filters) => {
         setCategoryFilter(filters.kategorie || "");
+    };
+
+    const dialogSchliessen = () => {
+        resetBildVorschauen();
+        handleClose();
+    };
+
+    const speichernMitBildern = async () => {
+        const fehlendeFelder = [
+            { field: "artikelNr", label: "Artikelnummer" },
+            { field: "name", label: "Name" }
+        ].filter(({ field }) => {
+            const value = currentItem?.[field];
+            return value === null || value === undefined || String(value).trim() === "";
+        });
+
+        if (fehlendeFelder.length > 0) {
+            setBildFehler(`Bitte folgende Pflichtfelder ausfuellen: ${fehlendeFelder.map(item => item.label).join(", ")}.`);
+            return;
+        }
+
+        setIsBildSpeichern(true);
+        setBildFehler("");
+
+        try {
+            const gespeicherterArtikel = editMode
+                ? artikelService.update(currentItem)
+                : artikelService.create(currentItem);
+
+            const backendBilder = editMode && gespeicherterArtikel.id
+                ? await artikelBilderService.list(gespeicherterArtikel.id)
+                : [];
+            const backendSlots = new Set(backendBilder.map(item => Number(item.slot)));
+            const aktuelleSlots = new Set(bildVorschauen.map(item => Number(item.slot)));
+
+            for (const slot of backendSlots) {
+                if (!aktuelleSlots.has(slot)) {
+                    await artikelBilderService.remove(gespeicherterArtikel.id, slot);
+                }
+            }
+
+            for (const bild of bildVorschauen) {
+                if (bild.source === "upload" && bild.file) {
+                    await artikelBilderService.upload(gespeicherterArtikel.id, Number(bild.slot), bild.file);
+                }
+            }
+
+            resetBildVorschauen();
+            handleClose();
+        } catch (error) {
+            setBildFehler(error instanceof Error ? error.message : "Bilder konnten nicht gespeichert werden.");
+        } finally {
+            setIsBildSpeichern(false);
+        }
     };
 
     const filteredDisplayData = useMemo(() => {
@@ -168,7 +416,7 @@ export default function Artikel() {
             <Dialog
                 open={open}
                 title={editMode ? "Artikel bearbeiten" : "Neuer Artikel"}
-                onClose={handleClose}
+                onClose={dialogSchliessen}
             >
                 <Label required glossaryKey="artikelnummer">Artikelnummer</Label>
                 <TextField value={currentItem.artikelNr} onChange={v => handleFieldChange("artikelNr", v)} disabled />
@@ -263,9 +511,84 @@ export default function Artikel() {
                 </div>
 
                 <div className="form-row">
-                    {error && <p className="form-error">{error}</p>}
-                    <button type="button" onClick={speichern}>Speichern</button>
+                    <Label>Bilder</Label>
+                    <div
+                        className={`artikelbild-overlay${isImageDragActive ? " is-drag-active" : ""}`}
+                        onDragEnter={event => {
+                            event.preventDefault();
+                            setIsImageDragActive(true);
+                        }}
+                        onDragOver={event => {
+                            event.preventDefault();
+                            setIsImageDragActive(true);
+                        }}
+                        onDragLeave={event => {
+                            event.preventDefault();
+                            if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+                            setIsImageDragActive(false);
+                        }}
+                        onDrop={event => {
+                            event.preventDefault();
+                            setIsImageDragActive(false);
+                            uebernehmeBilddateien(event.dataTransfer.files);
+                        }}
+                    >
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                            multiple
+                            hidden
+                            onChange={event => {
+                                uebernehmeBilddateien(event.target.files);
+                                event.target.value = "";
+                            }}
+                        />
+                        <div className="artikelbild-overlay-header">
+                            <strong>Bis zu 10 Bilder per Drag and Drop</strong>
+                            <span>Erlaubt sind JPG und PNG.</span>
+                        </div>
+                        <div className="artikelbild-overlay-actions">
+                            <div className="thread-document-links">
+                                <button type="button" className="button-secondary" onClick={() => fileInputRef.current?.click()}>
+                                    Bilder auswaehlen
+                                </button>
+                                <button type="button" className="button-secondary" onClick={ausZwischenablageEinfuegen}>
+                                    Aus Zwischenablage einfuegen
+                                </button>
+                            </div>
+                            <small>{bildVorschauen.length}/10 ausgewaehlt</small>
+                        </div>
+                        {bildFehler && <p className="form-error">{bildFehler}</p>}
+                        {bildVorschauen.length === 0
+                            ? <p className="artikelbild-overlay-empty">Ziehe Bilder hier hinein oder waehle sie manuell aus.</p>
+                            : <div className="artikelbild-vorschau-grid">
+                                {bildVorschauen.map((bild, index) => <article key={bild.id} className="artikelbild-vorschau-card">
+                                    <button type="button" className="artikelbild-vorschau-button" onClick={() => setGrossesBild(bild)}>
+                                        <img src={bild.url} alt={bild.name} className="artikelbild-vorschau"/>
+                                    </button>
+                                    <div className="artikelbild-vorschau-meta">
+                                        <strong>Slot {bild.slot}</strong>
+                                        <span>{bild.name}</span>
+                                    </div>
+                                    <button type="button" className="link-button" onClick={() => bildEntfernen(bild.id)}>Loeschen</button>
+                                </article>)}
+                            </div>}
+                    </div>
                 </div>
+
+                <div className="form-row">
+                    {(error || bildFehler) && <p className="form-error">{error || bildFehler}</p>}
+                    <button type="button" onClick={speichernMitBildern} disabled={isBildSpeichern}>
+                        {isBildSpeichern ? "Speichert..." : "Speichern"}
+                    </button>
+                </div>
+            </Dialog>
+
+            <Dialog open={Boolean(grossesBild)} title={grossesBild?.name || "Bildvorschau"} onClose={() => setGrossesBild(null)}>
+                {grossesBild && <div className="form-row artikelbild-dialog-content">
+                    <img src={grossesBild.url} alt={grossesBild.name} className="artikelbild-dialog-preview"/>
+                </div>}
             </Dialog>
         </>
     );

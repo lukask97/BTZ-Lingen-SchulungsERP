@@ -127,6 +127,7 @@ export const NAVIGATION_GROUPS = [
         items: [
             { title: "Benutzer", path: "/benutzer", access: ACCESS.BENUTZER },
             { title: "Nummernkreise", path: "/nummernkreise", access: ACCESS.BENUTZER },
+            { title: "Exporte", path: "/exporte", access: ACCESS.BENUTZER },
             { title: "Optionen", path: "/optionen", access: ACCESS.BENUTZER },
             { title: "Rollen", path: "/rollen", access: ACCESS.ROLLEN }
         ]

@@ -10,7 +10,7 @@ import kundenService from "../../services/verkauf/customerService";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useState, useMemo } from "react";
 import OverviewCards from "../../components/OverviewCards";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 function naechsteKundennummer(kunden = []) {
     const basis = kunden.reduce((maxWert, item) => {
@@ -57,22 +57,17 @@ export default function Kunden() {
     const allColumns = getAllTableColumns(config.tableName);
 
     const [abcFilter, setAbcFilter] = useState("");
-    const [websiteFilter, setWebsiteFilter] = useState("");
-
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
     };
 
     const handleFilterChange = (filters) => {
         setAbcFilter(filters.abc || "");
-        setWebsiteFilter(filters.website || "");
     };
 
     const filteredDisplayData = useMemo(() => {
         let filtered = allData;
         if (abcFilter) filtered = filtered.filter(item => item.abc === abcFilter);
-        if (websiteFilter === "mitWebsite") filtered = filtered.filter(item => !!item.website);
-        if (websiteFilter === "ohneWebsite") filtered = filtered.filter(item => !item.website);
         if (search) {
             filtered = filtered.filter(item =>
                 Object.values(item)
@@ -81,8 +76,14 @@ export default function Kunden() {
                     .includes(search.toLowerCase())
             );
         }
-        return filtered;
-    }, [abcFilter, allData, search, websiteFilter]);
+        return filtered.map(item => ({
+            ...item,
+            vorgaenge: {
+                label: "Vorgaenge und Rechnungen oeffnen",
+                to: `/partnerhistorie?typ=kunde&id=${item.id}`
+            }
+        }));
+    }, [abcFilter, allData, search]);
 
     const kundenFilters = useMemo(() => [
         {
@@ -95,23 +96,21 @@ export default function Kunden() {
                 { value: "Unbestimmt", label: "Unbestimmt" }
             ]
         },
-        {
-            name: "website",
-            label: "Website",
-            options: [
-                { value: "mitWebsite", label: "Mit Website" },
-                { value: "ohneWebsite", label: "Ohne Website" }
-            ]
-        }
     ], []);
 
     return (
         <>
             <OverviewCards cards={[
                 { label: "Kunden gesamt", value: allData.length },
-                { label: "Mit Website", value: allData.filter(item => item.website).length },
                 { label: "A-Kunden", value: allData.filter(item => item.abc === "A").length }
             ]}/>
+            <section className="module-panel">
+                <div className="personalakte-toolbar">
+                    <div className="personalakte-links">
+                        <Link className="button-link" to="/partnerhistorie?typ=kunde">Partnerhistorie oeffnen</Link>
+                    </div>
+                </div>
+            </section>
             <DataTable
                 title={config.title}
                 tableName={config.tableName}

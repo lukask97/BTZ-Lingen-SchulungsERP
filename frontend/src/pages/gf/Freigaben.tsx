@@ -1,11 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import DataTable from "../../components/DataTable";
-import Dialog from "../../components/Dialog";
 import OfferApprovalDialog from "../../components/OfferApprovalDialog";
-import Label from "../../components/form/Label";
-import TextArea from "../../components/form/TextArea";
-import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import freigabenService from "../../services/gf/freigabenService";
 import artikelService from "../../services/logistik/artikelService";
@@ -20,15 +16,6 @@ import { getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
 import { getOffersForVorgang, getVorgangId } from "../../utils/processFlow";
 import { openDocumentPdf } from "../../utils/documentPdf";
 
-const bereichOptionen = [
-    { value: "verkauf", label: "Verkauf" },
-    { value: "einkauf", label: "Einkauf" },
-    { value: "buchhaltung", label: "Buchhaltung" },
-    { value: "marketing", label: "Marketing" },
-    { value: "logistik", label: "Logistik" },
-    { value: "personalwesen", label: "Personalwesen" }
-];
-
 const bereichLinks = {
     verkauf: "/themen/verkauf",
     einkauf: "/themen/einkauf",
@@ -37,18 +24,6 @@ const bereichLinks = {
     logistik: "/logistik",
     personalwesen: "/personalwesen"
 };
-
-function createEmptyFreigabe(today: string) {
-    return {
-        titel: "",
-        bereich: "verkauf",
-        verantwortung: "Geschaeftsfuehrung",
-        status: "offen",
-        datum: today,
-        bezug: "",
-        notiz: ""
-    };
-}
 
 function resolveOfferForFreigabe(item, angebote = []) {
     if (!item) return null;
@@ -78,17 +53,15 @@ function resolveOfferForFreigabe(item, angebote = []) {
 
 export default function Freigaben() {
     const today = getBerlinDate();
+    const navigate = useNavigate();
     const [freigaben, setFreigaben] = useSyncedServiceData(["freigaben"], () => freigabenService.list());
     const [angebote] = useSyncedServiceData(["angebote"], () => angeboteService.getAll());
     const [artikel] = useSyncedServiceData(["artikel"], () => artikelService.getAll());
     const [services] = useSyncedServiceData(["services"], () => servicesService.getAll());
     const [auftraege] = useSyncedServiceData(["auftraege"], () => auftraegeService.getAll());
-    const [open, setOpen] = useState(false);
     const [approvalOpen, setApprovalOpen] = useState(false);
     const [approvalNote, setApprovalNote] = useState("");
     const [selectedFreigabe, setSelectedFreigabe] = useState<any>(null);
-    const [editMode, setEditMode] = useState(false);
-    const [current, setCurrent] = useState(createEmptyFreigabe(today));
 
     const aktuellesAngebot = useMemo(
         () => resolveOfferForFreigabe(selectedFreigabe, angebote),
@@ -131,35 +104,6 @@ export default function Freigaben() {
         () => freigaben.filter(item => String(item.status || "").toLowerCase() !== "freigegeben"),
         [freigaben]
     );
-
-    const neu = () => {
-        setCurrent(createEmptyFreigabe(today));
-        setEditMode(false);
-        setOpen(true);
-    };
-
-    const bearbeiten = item => {
-        setCurrent({ ...item, datum: item.datum || today, bezug: item.bezug || "", notiz: item.notiz || "" });
-        setEditMode(true);
-        setOpen(true);
-    };
-
-    const speichern = () => {
-        if (!current.titel.trim()) return;
-        const payload = {
-            ...current,
-            titel: current.titel.trim(),
-            bezug: current.bezug.trim(),
-            notiz: current.notiz.trim()
-        };
-
-        if (editMode) freigabenService.update(current.id, payload);
-        else freigabenService.create(payload);
-
-        setFreigaben(freigabenService.list());
-        setOpen(false);
-        setEditMode(false);
-    };
 
     const angebotAlsPdf = angebot => {
         if (!angebot) return;
@@ -232,7 +176,7 @@ export default function Freigaben() {
         setApprovalNote("");
     };
 
-    const zurUeberarbeitungZurueckgeben = (item, freigabeStatus = "angefragt", freigabeDecision = "offen") => {
+    const zurUeberarbeitungZurueckgeben = (item, freigabeStatus = "intern_abgelehnt", freigabeDecision = "abgelehnt") => {
         freigabenService.update({ ...item, status: freigabeDecision, notiz: approvalNote.trim() || item.notiz || "" });
         const angebot = resolveOfferForFreigabe(item, angebote);
         if (angebot) {
@@ -261,15 +205,9 @@ export default function Freigaben() {
         setApprovalOpen(false);
         setSelectedFreigabe(null);
         setApprovalNote("");
-    };
-
-    const ablehnen = item => {
-        zurUeberarbeitungZurueckgeben(item, "intern_abgelehnt", "abgelehnt");
-    };
-
-    const loeschen = item => {
-        freigabenService.remove(item.id);
-        setFreigaben(freigabenService.list());
+        if (angebot) {
+            navigate(`/angebote?editOfferId=${angebot.id}`);
+        }
     };
 
     const freigabePruefen = item => {
@@ -348,57 +286,10 @@ export default function Freigaben() {
                 { field: "notiz", title: "Notiz" }
             ]}
             detailLinkResolver={({ field, row }) => field === "bereich" ? bereichLinks[row.bereich] || null : null}
-            toolbarActions={[{ name: "new", label: "Freigabe anlegen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
-                { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.GF_BEARBEITEN, onClick: bearbeiten, variant: "secondary" },
-                { name: "review", label: "Pruefen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: freigabePruefen, variant: "success", isVisible: row => row.status === "offen" && !!resolveOfferForFreigabe(row, angebote) },
-                { name: "approve", label: "Freigeben", permission: PERMISSIONS.GF_BEARBEITEN, onClick: freigeben, variant: "success", isVisible: row => row.status === "offen" && !resolveOfferForFreigabe(row, angebote) },
-                { name: "reject", label: "Ablehnen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: ablehnen, variant: "danger", isVisible: row => row.status === "offen" && !resolveOfferForFreigabe(row, angebote) },
-                { name: "delete", label: "Loeschen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: loeschen, variant: "danger" }
+                { name: "review", label: "Pruefen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: freigabePruefen, variant: "success", isVisible: row => row.status === "offen" && !!resolveOfferForFreigabe(row, angebote) }
             ]}
         />
-        <Dialog open={open} title={editMode ? "Freigabe bearbeiten" : "Freigabe anlegen"} onClose={() => setOpen(false)}>
-            <div className="form-row thread-section">
-                <div className="thread-section-header">
-                    <Label>Stammdaten</Label>
-                </div>
-                <div className="thread-form-grid">
-                    <div><Label>Titel</Label><TextField value={current.titel} onChange={value => setCurrent(item => ({ ...item, titel: value }))}/></div>
-                    <div><Label>Bereich</Label><select value={current.bereich} onChange={event => setCurrent(item => ({ ...item, bereich: event.target.value }))}>
-                        {bereichOptionen.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
-                    </select></div>
-                    <div><Label>Verantwortung</Label><TextField value={current.verantwortung} onChange={value => setCurrent(item => ({ ...item, verantwortung: value }))}/></div>
-                </div>
-            </div>
-            <div className="form-row thread-section">
-                <div className="thread-section-header">
-                    <Label>Vorgangsdaten</Label>
-                </div>
-                <div className="thread-form-grid">
-                    <div><Label>Datum</Label><TextField type="date" value={current.datum} onChange={value => setCurrent(item => ({ ...item, datum: value }))}/></div>
-                    <div><Label>Bezug</Label><TextField value={current.bezug} onChange={value => setCurrent(item => ({ ...item, bezug: value }))}/></div>
-                    <div><Label>Status</Label><select value={current.status} onChange={event => setCurrent(item => ({ ...item, status: event.target.value }))}>
-                        <option value="offen">offen</option>
-                        <option value="freigegeben">freigegeben</option>
-                        <option value="abgelehnt">abgelehnt</option>
-                    </select></div>
-                </div>
-            </div>
-            <div className="form-row thread-section">
-                <div className="thread-section-header">
-                    <Label>Notiz</Label>
-                </div>
-                <TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/>
-            </div>
-            <div className="form-row thread-section thread-dialog-footer">
-                <div className="thread-section-header">
-                    <Label>Aktionen</Label>
-                </div>
-                <div className="thread-document-links">
-                    <button type="button" onClick={speichern}>{editMode ? "Aenderungen speichern" : "Speichern"}</button>
-                </div>
-            </div>
-        </Dialog>
         {selectedFreigabe && aktuellesAngebot && <OfferApprovalDialog
             open={approvalOpen}
             title="Freigabe pruefen"

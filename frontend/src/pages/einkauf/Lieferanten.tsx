@@ -9,7 +9,7 @@ import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG }
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import useAuth from "../../auth/useAuth";
 import OverviewCards from "../../components/OverviewCards";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useMemo, useState } from "react";
 
 export default function Lieferanten() {
@@ -23,25 +23,36 @@ export default function Lieferanten() {
         ]
     });
     const [abcFilter, setAbcFilter] = useState("");
-    const [btsFilter, setBtsFilter] = useState("");
 
     const feldAendern = (feld, wert) => crud.setCurrentItem({ ...crud.currentItem, [feld]: wert });
     const durchschnitt = crud.allData.length
         ? (crud.allData.reduce((summe, item) => summe + Number(item.bewertung || 0), 0) / crud.allData.length).toFixed(1)
-        : "–";
-    const gefilterteDaten = useMemo(() => crud.data.filter(item => {
-        if (abcFilter && item.abc !== abcFilter) return false;
-        if (btsFilter === "mitBts" && !item.fuerBts) return false;
-        if (btsFilter === "ohneBts" && item.fuerBts) return false;
-        return true;
-    }), [abcFilter, btsFilter, crud.data]);
+        : "â€“";
+    const gefilterteDaten = useMemo(() => crud.data
+        .filter(item => {
+            if (abcFilter && item.abc !== abcFilter) return false;
+            return true;
+        })
+        .map(item => ({
+            ...item,
+            vorgaenge: {
+                label: "Bestellungen und Rechnungen oeffnen",
+                to: `/partnerhistorie?typ=lieferant&id=${item.id}`
+            }
+        })), [abcFilter, crud.data]);
 
     return <>
         <OverviewCards cards={[
             { label: "Lieferanten gesamt", value: crud.allData.length },
-            { label: "Mit BTS-Bezug", value: crud.allData.filter(item => item.fuerBts).length },
-            { label: "Ø Bewertung", value: durchschnitt, note: "von 5" }
+            { label: "Ã˜ Bewertung", value: durchschnitt, note: "von 5" }
         ]}/>
+        <section className="module-panel">
+            <div className="personalakte-toolbar">
+                <div className="personalakte-links">
+                    <Link className="button-link" to="/partnerhistorie?typ=lieferant">Partnerhistorie oeffnen</Link>
+                </div>
+            </div>
+        </section>
         <DataTable
             title={config.title}
             tableName={config.tableName}
@@ -61,26 +72,17 @@ export default function Lieferanten() {
                         { value: "C", label: "C-Lieferanten" },
                         { value: "Unbestimmt", label: "Unbestimmt" }
                     ]
-                },
-                {
-                    name: "bts",
-                    label: "BTS-Bezug",
-                    options: [
-                        { value: "mitBts", label: "Mit BTS-Bezug" },
-                        { value: "ohneBts", label: "Ohne BTS-Bezug" }
-                    ]
                 }
             ]}
             onFilter={filters => {
                 setAbcFilter(filters.abc || "");
-                setBtsFilter(filters.bts || "");
             }}
             pageSize={crud.pageSize}
             onPageSizeChange={crud.setPageSize}
             toolbarActions={[{ name: "new", label: "Neuer Lieferant", permission: config.permissionCreate, onClick: crud.neu }]}
             rowActions={[
                 { name: "edit", label: "Bearbeiten", permission: config.permissionEdit, onClick: crud.bearbeiten },
-                { name: "delete", label: "Löschen", permission: config.permissionEdit, onClick: crud.loeschen }
+                { name: "delete", label: "LÃ¶schen", permission: config.permissionEdit, onClick: crud.loeschen }
             ]}
             focusRowId={searchParams.get("focus") || ""}
         />
@@ -90,7 +92,7 @@ export default function Lieferanten() {
             <div><Label>Anschrift</Label><TextField value={crud.currentItem.anschrift || ""} onChange={wert => feldAendern("anschrift", wert)}/></div>
             <div><Label>PLZ</Label><TextField value={crud.currentItem.plz || ""} onChange={wert => feldAendern("plz", wert)}/></div>
             <div><Label>Ort</Label><TextField value={crud.currentItem.ort || ""} onChange={wert => feldAendern("ort", wert)}/></div>
-            <div><Label>Bewertung (1–5)</Label><NumberField value={crud.currentItem.bewertung} min="1" max="5" onChange={wert => feldAendern("bewertung", Number(wert))}/></div>
+            <div><Label>Bewertung (1â€“5)</Label><NumberField value={crud.currentItem.bewertung} min="1" max="5" onChange={wert => feldAendern("bewertung", Number(wert))}/></div>
             <div><Label glossaryKey="abc">ABC</Label><select value={crud.currentItem.abc || "Unbestimmt"} onChange={event => feldAendern("abc", event.target.value)}>
                 <option value="Unbestimmt">Unbestimmt</option>
                 <option value="A">A</option>
@@ -99,7 +101,7 @@ export default function Lieferanten() {
             </select></div>
             <div><Label>IBAN</Label><TextField value={crud.currentItem.iban || ""} onChange={wert => feldAendern("iban", wert)}/></div>
             <div className="form-row"><Label glossaryKey="segment">Segment</Label><TextArea rows={2} value={crud.currentItem.segment || ""} onChange={wert => feldAendern("segment", wert)}/></div>
-            <div className="form-row"><Label>Für BTS</Label><TextArea rows={2} value={crud.currentItem.fuerBts || ""} onChange={wert => feldAendern("fuerBts", wert)}/></div>
+            <div className="form-row"><Label>Notiz</Label><TextArea rows={2} value={crud.currentItem.fuerBts || ""} onChange={wert => feldAendern("fuerBts", wert)}/></div>
             <div className="form-row">
                 {crud.error && <p className="form-error">{crud.error}</p>}
                 <button type="button" onClick={crud.speichern}>Speichern</button>

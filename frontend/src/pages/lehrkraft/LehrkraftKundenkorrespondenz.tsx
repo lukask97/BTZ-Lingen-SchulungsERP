@@ -26,6 +26,14 @@ import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 const jetzt = () => getBerlinTimestamp();
 const OFFER_OPEN_STATUSES = ["wartet auf antwort"];
 
+function naechsteKundennummer(kunden = []) {
+    const basis = kunden.reduce((maxWert, item) => {
+        const match = String(item.kundenNr || "").match(/(\d+)$/);
+        return Math.max(maxWert, Number(match?.[1] || 0));
+    }, 10000);
+    return `DB${String(basis + 1).padStart(5, "0")}`;
+}
+
 const FILTER_OPTIONS = {
     anfragen: [
         { value: "offen", label: "Offen", defaultSelected: true },
@@ -51,7 +59,8 @@ const FILTER_OPTIONS = {
     warenannahme: [
         { value: "offen", label: "Offen", defaultSelected: true },
         { value: "in bearbeitung", label: "In Bearbeitung", defaultSelected: true },
-        { value: "versendet", label: "Versendet", defaultSelected: false }
+        { value: "versendet", label: "Versendet", defaultSelected: false },
+        { value: "entgegengenommen", label: "Entgegengenommen", defaultSelected: true }
     ]
 };
 
@@ -80,7 +89,8 @@ const STATUS_HELP = {
     warenannahme: [
         { label: "Offen", text: "Die Warenannahme oder Bescheinigung ist noch nicht abgeschlossen." },
         { label: "In Bearbeitung", text: "Das Dokument oder der Vorgang wird aktuell bearbeitet." },
-        { label: "Versendet", text: "Die Unterlage wurde versendet und gilt als abgeschlossen." }
+        { label: "Versendet", text: "Die Unterlage wurde versendet und wartet auf Rueckmeldung der Lehrkraft." },
+        { label: "Entgegengenommen", text: "Die Ware oder Unterlage wurde von der Lehrkraft bestaetigt angenommen." }
     ]
 };
 
@@ -102,7 +112,9 @@ function createAnfrageDraft(defaultKundeId = "") {
         typ: "Produktanfrage",
         kundeId: defaultKundeId,
         kanal: "E-Mail",
-        anliegen: ""
+        betreff: "",
+        anliegen: "",
+        neuerKundeName: ""
     };
 }
 
@@ -181,6 +193,7 @@ export default function LehrkraftKundenkorrespondenz() {
         () => kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` })),
         [kunden]
     );
+    const nutztNeuenKunden = String(current.kundeId || "") === "__neu__";
 
     const refreshPageData = () => {
         setRefreshKey(current => current + 1);
@@ -225,10 +238,14 @@ export default function LehrkraftKundenkorrespondenz() {
     );
 
     const anfragenDaten = useMemo(
-        () => anfragen.map(item => ({
-            ...item,
-            statusNormalized: normalizeStatus(item.status)
-        })),
+        () => anfragen.map(item => {
+            const ersteNachricht = listNachrichtenZuVorgang(getVorgangId(item))[0];
+            return {
+                ...item,
+                betreff: ersteNachricht?.betreff || item.typ || "-",
+                statusNormalized: normalizeStatus(item.status)
+            };
+        }),
         [anfragen]
     );
 
@@ -265,7 +282,7 @@ export default function LehrkraftKundenkorrespondenz() {
             { key: "anfragen", label: "Offene Anfragen", value: anfragenDaten.filter(item => item.statusNormalized !== "archiviert").length },
             { key: "angebote", label: "Offene Angebote", value: alleAngebote.filter(item => OFFER_OPEN_STATUSES.includes(item.statusNormalized)).length },
             { key: "zahlungen", label: "Offene Zahlungen", value: zahlungen.filter(item => item.zahlungsart !== "Ausgang" && isPendingPayment(item)).length },
-            { key: "warenannahme", label: "Offene Warenannahme", value: offeneWarenannahmen.filter(item => item.statusNormalized !== "versendet").length }
+            { key: "warenannahme", label: "Offene Warenannahme", value: offeneWarenannahmen.filter(item => !["versendet", "entgegengenommen"].includes(item.statusNormalized)).length }
         ],
         [alleAngebote, anfragenDaten, offeneWarenannahmen, zahlungen]
     );
@@ -289,15 +306,35 @@ export default function LehrkraftKundenkorrespondenz() {
     };
 
     const anfrageSpeichern = () => {
-        const kunde = kunden.find(item => item.id === Number(current.kundeId));
-        if (!kunde || !current.anliegen.trim()) return;
+        const betreff = current.betreff.trim();
+        const anliegen = current.anliegen.trim();
+        if (!betreff || !anliegen) return;
+
+        const bestehenderKunde = kunden.find(item => item.id === Number(current.kundeId));
+        const kunde = nutztNeuenKunden
+            ? kundenService.create({
+                kundenNr: naechsteKundennummer(kundenService.getAll()),
+                firma: current.neuerKundeName.trim(),
+                anschrift: "",
+                plz: "",
+                ort: "",
+                segment: "",
+                abc: "Unbestimmt",
+                iban: "",
+                website: "",
+                optionen: [],
+                notiz: "Von der Lehrkraft direkt bei der ersten Anfrage angelegt."
+            })
+            : bestehenderKunde;
+
+        if (!kunde || (nutztNeuenKunden && !current.neuerKundeName.trim())) return;
         const neueAnfrage = customerInquiryService.create({
             typ: current.typ,
             kundeId: kunde.id,
             kanal: current.kanal,
             status: "offen",
             datum: today,
-            anliegen: current.anliegen.trim(),
+            anliegen,
             vorgangId: ""
         });
         const vorgangId = `anfrage-${neueAnfrage.id}`;
@@ -312,8 +349,8 @@ export default function LehrkraftKundenkorrespondenz() {
             senderRolle: "Kunde",
             senderName: kunde.firma,
             kanal: current.kanal,
-            betreff: current.typ,
-            nachricht: current.anliegen.trim(),
+            betreff,
+            nachricht: anliegen,
             typ: "Anfrage"
         });
         refreshPageData();
@@ -381,6 +418,15 @@ export default function LehrkraftKundenkorrespondenz() {
             ...row,
             status: "versendet",
             versendetAm: today
+        });
+        refreshPageData();
+    };
+
+    const warenannahmeBestaetigen = (row: any) => {
+        vertriebsdokumenteService.update(row.id, {
+            ...row,
+            status: "entgegengenommen",
+            annahmeAm: today
         });
         refreshPageData();
     };
@@ -587,9 +633,9 @@ export default function LehrkraftKundenkorrespondenz() {
                 { field: "datum", title: "Datum" },
                 { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "kanal", title: "Kanal" },
-                { field: "typ", title: "Typ" },
+                { field: "betreff", title: "Betreff" },
                 { field: "status", title: "Status" },
-                { field: "anliegen", title: "Anliegen" }
+                { field: "anliegen", title: "Nachricht" }
             ]}
             detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kunden?focus=${row.kundeId}` : null}
             toolbarActions={[{ name: "new", label: "Anfrage verfassen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neueAnfrage }]}
@@ -664,7 +710,8 @@ export default function LehrkraftKundenkorrespondenz() {
                 { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "dokumentTyp", title: "Dokumenttyp" },
                 { field: "status", title: "Status" },
-                { field: "versendetAm", title: "Versendet am", render: row => row.versendetAm || "-" }
+                { field: "versendetAm", title: "Versendet am", render: row => row.versendetAm || "-" },
+                { field: "annahmeAm", title: "Annahmedatum", render: row => row.annahmeAm || "-" }
             ]}
             detailLinkResolver={({ field, row }) => {
                 if (field === "auftragNr" && row.auftragId) return `/auftraege?focus=${row.auftragId}`;
@@ -672,14 +719,17 @@ export default function LehrkraftKundenkorrespondenz() {
                 return null;
             }}
             rowActions={[
-                { name: "send", label: "Versenden", permission: PERMISSIONS.GF_BEARBEITEN, onClick: dokumentVersenden, variant: "secondary", isVisible: row => row.status !== "versendet" }
+                { name: "send", label: "Versenden", permission: PERMISSIONS.GF_BEARBEITEN, onClick: dokumentVersenden, variant: "secondary", isVisible: row => row.status !== "versendet" && row.status !== "entgegengenommen" },
+                { name: "accept", label: "Ware annehmen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: warenannahmeBestaetigen, variant: "success", isVisible: row => row.status === "versendet" }
             ]}
         />}
 
         <Dialog open={createOpen} title="Kundenanfrage erfassen" onClose={() => setCreateOpen(false)}>
             <div><Label>Typ</Label><select value={current.typ} onChange={event => setCurrent(value => ({ ...value, typ: event.target.value }))}><option>Produktanfrage</option><option>Angebotswunsch</option><option>Support</option><option>Sonstiges</option></select></div>
-            <div><Label>Als Kunde</Label><LookupField value={current.kundeId} options={kundenOptionen} onChange={value => setCurrent(item => ({ ...item, kundeId: value }))} placeholder="Kunde suchen..."/></div>
+            <div><Label>Als Kunde</Label><LookupField value={current.kundeId} options={[{ value: "__neu__", label: "Neuer Kunde..." }, ...kundenOptionen]} onChange={value => setCurrent(item => ({ ...item, kundeId: value }))} placeholder="Kunde suchen..."/></div>
+            {nutztNeuenKunden && <div><Label>Name des neuen Kunden</Label><TextField value={current.neuerKundeName} onChange={value => setCurrent(item => ({ ...item, neuerKundeName: value }))}/></div>}
             <div><Label>Kanal</Label><TextField value={current.kanal} onChange={value => setCurrent(item => ({ ...item, kanal: value }))}/></div>
+            <div><Label>Betreff</Label><TextField value={current.betreff} onChange={value => setCurrent(item => ({ ...item, betreff: value }))}/></div>
             <div className="form-row"><Label>Anliegen</Label><TextArea rows={4} value={current.anliegen} onChange={value => setCurrent(item => ({ ...item, anliegen: value }))}/></div>
             <div className="form-row"><button onClick={anfrageSpeichern}>Speichern</button></div>
         </Dialog>

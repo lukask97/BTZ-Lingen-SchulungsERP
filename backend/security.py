@@ -59,6 +59,14 @@ ACTION_CANDIDATES = {
 }
 
 
+TABLE_ACTION_PERMISSION_OVERRIDES = {
+    "freigaben": {
+        "create": ("gf.bearbeiten", "verkauf.bearbeiten"),
+        "update": ("gf.bearbeiten", "verkauf.bearbeiten"),
+    }
+}
+
+
 def get_current_user():
     user_id = session.get("user_id")
     if not user_id:
@@ -123,6 +131,10 @@ def permission_matches(user_permissions, required_permission):
 
 
 def build_permission_candidates(table_name, action):
+    overrides = TABLE_ACTION_PERMISSION_OVERRIDES.get(table_name, {}).get(action)
+    if overrides:
+        return list(overrides)
+
     access_key = TABLE_ACCESS_MAP.get(table_name)
     if not access_key:
         return []
@@ -149,6 +161,12 @@ def require_table_permission(table_name, action):
     user = get_current_user()
     if not user:
         return build_error_response(401, "Nicht angemeldet.")
+
+    # Lesender API-Zugriff ist fuer alle angemeldeten Nutzer erlaubt.
+    # Die Sichtbarkeit in der Oberflaeche bleibt weiterhin ueber Navigation
+    # und UI-Berechtigungen gesteuert.
+    if action == "read":
+        return None
 
     # Persoenliche Spalteneinstellungen sollen fuer jeden angemeldeten Nutzer
     # verfuegbar sein und nicht von Verwaltungsrechten abhaengen.

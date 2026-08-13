@@ -210,22 +210,16 @@ export default function OfferApprovalDialog({
             <ul className="positionsliste">
                 <li className="thread-offer-item">
                     <div className="thread-offer-row">
-                        <span>{currentOfferLabel} - Aktuelle Fassung</span>
-                        <div className="thread-offer-actions">
-                            <button type="button" className="thread-document-link" onClick={onOpenCurrentOffer}>
-                                Oeffnen
-                            </button>
-                        </div>
+                        <button type="button" className="thread-document-link" onClick={onOpenCurrentOffer}>
+                            {currentOfferLabel} - Aktuelle Fassung
+                        </button>
                     </div>
                 </li>
                 {previousOffers.map(item => <li key={item.id} className="thread-offer-item">
                     <div className="thread-offer-row">
-                        <span>{item.label}</span>
-                        <div className="thread-offer-actions">
-                            <button type="button" className="thread-document-link" onClick={item.onClick}>
-                                Oeffnen
-                            </button>
-                        </div>
+                        <button type="button" className="thread-document-link" onClick={item.onClick}>
+                            {item.label}
+                        </button>
                     </div>
                 </li>)}
             </ul>

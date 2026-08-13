@@ -1,5 +1,6 @@
 import { nummernkreise } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
+import { isPermissionError } from "../core/api";
 
 export type NummernkreisSchluessel =
     | "artikel"
@@ -44,16 +45,6 @@ function isMissingTableError(error: unknown) {
         || error.message.includes("status 404")
         || error.message.includes("404")
         || error.message.toLowerCase().includes("not found");
-}
-
-function isPermissionError(error: unknown) {
-    if (!(error instanceof Error)) return false;
-
-    const message = error.message.toLowerCase();
-    return message.startsWith("keine berechtigung")
-        || message.includes("status 403")
-        || message.includes("403")
-        || message.includes("forbidden");
 }
 
 function normalizeKuerzel(value: string) {

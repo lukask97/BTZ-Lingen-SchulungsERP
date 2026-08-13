@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { LookupFieldProps, LookupOption } from "../../types/ui";
 
 export default function LookupField({
@@ -18,12 +18,28 @@ export default function LookupField({
     const fieldName = name || fieldId;
     const [query, setQuery] = useState("");
     const [open, setOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     const selectedOption = options.find(option => String(option.value) === String(value));
 
     useEffect(() => {
         setQuery(selectedOption?.label || "");
     }, [selectedOption?.label]);
+
+    useEffect(() => {
+        if (!open) return;
+
+        const handlePointerDown = (event: MouseEvent) => {
+            if (!containerRef.current?.contains(event.target as Node)) {
+                setOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handlePointerDown);
+        return () => {
+            document.removeEventListener("mousedown", handlePointerDown);
+        };
+    }, [open]);
 
     const filteredOptions = useMemo(() => {
         const normalizedQuery = query.trim().toLowerCase();
@@ -38,7 +54,7 @@ export default function LookupField({
         if (onChange) onChange(String(option.value));
     };
 
-    return <div className="lookup-field">
+    return <div ref={containerRef} className="lookup-field">
         <div className="lookup-input-wrapper">
             <input
                 id={fieldId}

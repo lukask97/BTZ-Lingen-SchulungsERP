@@ -233,7 +233,7 @@ export default function Auftraege() {
             toolbarActions={[{ name: "new", label: "Neuer Auftrag", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: neu }]}
             rowActions={[
                 { name: "thread", label: "Chat", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => row.anfrageId && navigate(`/kundenanfragen?focus=${row.anfrageId}`), variant: "secondary", isDisabled: row => !row.anfrageId },
-                { name: "confirm", label: "Dokumente", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => navigate(`/vertriebsdokumente?auftrag=${row.id}`), variant: "secondary" }
+                { name: "confirm", label: "Dokumente", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => navigate(`/vertriebsdokumente/auftrag/${row.id}`), variant: "secondary" }
             ]}
         />
         <Dialog open={open} title={draft.sourceInquiryId ? "Direkten Auftrag aus Kundenanfrage anlegen" : "Neuen Auftrag anlegen"} onClose={handleClose}>

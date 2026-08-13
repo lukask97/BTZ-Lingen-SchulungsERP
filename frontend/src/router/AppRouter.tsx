@@ -9,6 +9,7 @@ import Dashboard from "../pages/start/Dashboard";
 import Organisation from "../pages/start/Organisation";
 import Glossar from "../pages/start/Glossar";
 import Suche from "../pages/start/Suche";
+import PartnerHistorie from "../pages/start/PartnerHistorie";
 import LehrkraftOverview from "../pages/lehrkraft/LehrkraftOverview";
 import LehrkraftKundenkorrespondenz from "../pages/lehrkraft/LehrkraftKundenkorrespondenz";
 import LehrkraftLieferantenkorrespondenz from "../pages/lehrkraft/LehrkraftLieferantenkorrespondenz";
@@ -59,6 +60,7 @@ import Berichte from "../pages/gf/Berichte";
 import Freigaben from "../pages/gf/Freigaben";
 import VerwaltungOverview from "../pages/verwaltung/VerwaltungOverview";
 import Benutzer from "../pages/verwaltung/Benutzer";
+import Exporte from "../pages/verwaltung/Exporte";
 import Nummernkreise from "../pages/verwaltung/Nummernkreise";
 import Optionen from "../pages/verwaltung/Optionen";
 import Rollen from "../pages/verwaltung/Rollen";
@@ -134,10 +136,12 @@ function AppRouter() {
                 <Route path="auftraege" element={protectedPage(ACCESS.VERKAUF, <Auftraege/>)}/>
                 <Route path="services" element={protectedPage(ACCESS.SERVICE, <Services/>)}/>
                 <Route path="vertriebsdokumente" element={protectedPage(ACCESS.VERKAUF, <Vertriebsdokumente/>)}/>
+                <Route path="vertriebsdokumente/auftrag/:auftragId" element={protectedPage(ACCESS.VERKAUF, <Vertriebsdokumente/>)}/>
                 <Route path="reklamationen" element={protectedPage(ACCESS.SERVICE, <Reklamationen/>)}/>
                 <Route path="organisation" element={protectedPage(ACCESS.ORGANISATION, <Organisation/>)}/>
                 <Route path="glossar" element={<Glossar/>}/>
                 <Route path="suche" element={<Suche/>}/>
+                <Route path="partnerhistorie" element={protectedAnyPage([ACCESS.KUNDE, ACCESS.EINKAUF, ACCESS.VERKAUF, ACCESS.RECHNUNG, ACCESS.BUCHHALTUNG, ACCESS.GESCHAEFTSFUEHRUNG], <PartnerHistorie/>)}/>
                 <Route path="buchhaltung" element={protectedPage(ACCESS.BUCHHALTUNG, <Buchhaltung/>)}/>
                 <Route path="marketing" element={protectedPage(ACCESS.MARKETING, <Marketing/>)}/>
                 <Route path="logistik" element={protectedPage(ACCESS.LOGISTIK, <Logistik/>)}/>
@@ -188,6 +192,10 @@ function AppRouter() {
                 <Route
                     path="optionen"
                     element={protectedPage(ACCESS.BENUTZER, <Optionen/>)}
+                />
+                <Route
+                    path="exporte"
+                    element={protectedPage(ACCESS.BENUTZER, <Exporte/>)}
                 />
                 <Route
                     path="rollen"

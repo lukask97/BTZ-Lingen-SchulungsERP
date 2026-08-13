@@ -12,7 +12,10 @@ export default function Optionen() {
         setOptionen(fristenOptionenService.get());
     }, [refreshTick]);
 
-    const update = (key: "skontoTage" | "skontoProzent" | "zahlungszielTage" | "zahlungserinnerungTage" | "mahnung1AbTage" | "mahnung2AbTage" | "inkassoAbTage", value: string) => {
+    const update = (
+        key: "skontoTage" | "skontoProzent" | "angebotGfFreigabeAbweichungProzent" | "zahlungszielTage" | "zahlungserinnerungTage" | "mahnung1AbTage" | "mahnung2AbTage" | "inkassoAbTage",
+        value: string
+    ) => {
         const nextValue = fristenOptionenService.update({
             [key]: Number(value || 0)
         });
@@ -25,7 +28,7 @@ export default function Optionen() {
 
     return <>
         <h1>Optionen</h1>
-        <p>Hier werden zentrale Einstellungen fuer Rechnungen gepflegt. Die Werte steuern Zahlungsbedingungen und die Einordnung in den Tabs der Ausgangsrechnungen.</p>
+        <p>Hier werden zentrale Einstellungen fuer Rechnungen und Freigaberegeln gepflegt.</p>
 
         <section className="module-panel">
             <div className="dashboard-panel-header">
@@ -53,9 +56,14 @@ export default function Optionen() {
                         <td>Skonto gilt bis zu dieser Anzahl Tage nach Rechnungszustellung.</td>
                     </tr>
                     <tr>
-                        <td><Label>Fälligkeit in Tagen</Label></td>
+                        <td><Label>GF-Freigabe ab Abweichung in Prozent</Label></td>
+                        <td><NumberField value={optionen.angebotGfFreigabeAbweichungProzent} min="0" step="0.1" format="percent" onChange={value => update("angebotGfFreigabeAbweichungProzent", value)}/></td>
+                        <td>Bei Angeboten wird automatisch eine GF-Freigabe gesetzt, wenn die Abweichung zur Artikelsumme diesen Wert erreicht oder ueberschreitet.</td>
+                    </tr>
+                    <tr>
+                        <td><Label>Faelligkeit in Tagen</Label></td>
                         <td><NumberField value={optionen.zahlungszielTage} min="0" onChange={value => update("zahlungszielTage", value)}/></td>
-                        <td>Die Rechnung ist nach dieser Anzahl Tage ab Zustellung fällig.</td>
+                        <td>Die Rechnung ist nach dieser Anzahl Tage ab Zustellung faellig.</td>
                     </tr>
                     <tr>
                         <td><Label>Zahlungserinnerung ab Tagen</Label></td>
@@ -63,19 +71,19 @@ export default function Optionen() {
                         <td>Ab dieser Anzahl Tage nach Rechnungszustellung erscheint der Vorgang bei Zahlungserinnerung.</td>
                     </tr>
                     <tr>
-                        <td><Label>1. Mahnung ab Tagen</Label></td>
+                        <td><Label>1. Mahnung nach Faelligkeit</Label></td>
                         <td><NumberField value={optionen.mahnung1AbTage} min="0" onChange={value => update("mahnung1AbTage", value)}/></td>
-                        <td>Ab dieser Anzahl Tage nach Rechnungszustellung beginnt die 1. Mahnstufe.</td>
+                        <td>Ab dieser Anzahl Tage nach Faelligkeit beginnt die 1. Mahnstufe.</td>
                     </tr>
                     <tr>
-                        <td><Label>2. Mahnung ab Tagen</Label></td>
+                        <td><Label>2. Mahnung nach Faelligkeit</Label></td>
                         <td><NumberField value={optionen.mahnung2AbTage} min="0" onChange={value => update("mahnung2AbTage", value)}/></td>
-                        <td>Liegt immer nach der 1. Mahnstufe.</td>
+                        <td>Liegt immer nach der 1. Mahnstufe und wird nach Faelligkeit gerechnet.</td>
                     </tr>
                     <tr>
-                        <td><Label>Inkasso ab Tagen</Label></td>
+                        <td><Label>Inkasso nach Faelligkeit</Label></td>
                         <td><NumberField value={optionen.inkassoAbTage} min="0" onChange={value => update("inkassoAbTage", value)}/></td>
-                        <td>Liegt immer nach der 2. Mahnstufe.</td>
+                        <td>Liegt immer nach der 2. Mahnstufe und wird nach Faelligkeit gerechnet.</td>
                     </tr>
                     </tbody>
                 </table>
@@ -87,7 +95,7 @@ export default function Optionen() {
                 <h2>Standardwerte</h2>
                 <span>Aktion</span>
             </div>
-            <p>Damit lassen sich die Rechnungsregeln schnell auf einen Ausgangszustand zuruecksetzen.</p>
+            <p>Damit lassen sich die Regeln schnell auf einen Ausgangszustand zuruecksetzen.</p>
             <button type="button" onClick={reset}>Standardwerte wiederherstellen</button>
         </section>
     </>;

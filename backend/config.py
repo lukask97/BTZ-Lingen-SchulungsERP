@@ -15,3 +15,8 @@ class PreviewConfig:
         "DATABASE_DSN",
         "dbname=erp user=erp password=geheim host=postgres port=5432"
     )
+    ARTICLE_IMAGE_STORAGE_PATH = os.environ.get(
+        "ERP_ARTICLE_IMAGE_STORAGE_PATH",
+        "/app_data/artikelbilder"
+    )
+    ARTICLE_IMAGE_MAX_COUNT = int(os.environ.get("ERP_ARTICLE_IMAGE_MAX_COUNT", "10"))

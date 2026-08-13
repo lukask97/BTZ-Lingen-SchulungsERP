@@ -113,7 +113,7 @@ export function applyLehrkraftAutomationen() {
     if (optionen.autoLieferannahmeNach1Tag) {
         vertriebsdokumenteService.list()
             .filter(istVersanddokument)
-            .filter(item => String(item.status || "").toLowerCase() !== "versendet")
+            .filter(item => !["entgegengenommen"].includes(String(item.status || "").toLowerCase()))
             .forEach(item => {
                 const offset = resolveFixedDistributionOffset(
                     `${item.id}|${item.auftragId || ""}|lieferannahme`,
@@ -127,8 +127,8 @@ export function applyLehrkraftAutomationen() {
                 if (!isOlderThanOneDay(addDaysToIsoDate(String(item.datum || getBerlinDate()), offset))) return;
                 vertriebsdokumenteService.update(item.id, {
                     ...item,
-                    status: "versendet",
-                    versendetAm: getBerlinDate()
+                    status: "entgegengenommen",
+                    annahmeAm: getBerlinDate()
                 });
                 changes += 1;
             });

@@ -88,6 +88,13 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
         return Math.floor(diff / (1000 * 60 * 60 * 24));
     };
 
+    const tageNachFaelligkeit = (rechnung: any) => {
+        if (!rechnung?.faelligAm) return null;
+        const tageBisFaellig = tageBisFaelligkeit(rechnung.faelligAm);
+        if (tageBisFaellig === null) return null;
+        return Math.max(0, -tageBisFaellig);
+    };
+
     const tageBisFaelligkeit = (dateValue: string) => {
         if (!dateValue) return null;
         const start = new Date(`${today}T00:00:00`);
@@ -103,21 +110,24 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
 
     const isErinnerung = (rechnung: any) => {
         const tage = tageSeit(rechnung.datum);
-        return tage !== null && tage >= fristen.zahlungserinnerungTage && tage < fristen.mahnung1AbTage;
+        const tageNachFaellig = tageNachFaelligkeit(rechnung);
+        return tage !== null
+            && tage >= fristen.zahlungserinnerungTage
+            && (tageNachFaellig === null || tageNachFaellig < fristen.mahnung1AbTage);
     };
 
     const isMahnbar1 = (rechnung: any) => {
-        const tage = tageSeit(rechnung.datum);
+        const tage = tageNachFaelligkeit(rechnung);
         return tage !== null && tage >= fristen.mahnung1AbTage && tage < fristen.mahnung2AbTage;
     };
 
     const isMahnbar2 = (rechnung: any) => {
-        const tage = tageSeit(rechnung.datum);
+        const tage = tageNachFaelligkeit(rechnung);
         return tage !== null && tage >= fristen.mahnung2AbTage && tage < fristen.inkassoAbTage;
     };
 
     const isInkasso = (rechnung: any) => {
-        const tage = tageSeit(rechnung.datum);
+        const tage = tageNachFaelligkeit(rechnung);
         return tage !== null && tage >= fristen.inkassoAbTage;
     };
 

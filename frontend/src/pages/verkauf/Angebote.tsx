@@ -30,6 +30,7 @@ import { openDocumentPdf } from "../../utils/documentPdf";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 import freigabenService from "../../services/gf/freigabenService";
+import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
 
 const heute = getBerlinDate();
 const MWST_RATE = 0.19;
@@ -65,6 +66,11 @@ const gesamtNachAbzug = (positionen, preispositionen = [], rabattBetrag = 0) => 
     return Math.max(0, calculateNetto(positionen, preispositionen, rabattBetrag) + calculateMwSt(positionen, preispositionen, rabattBetrag));
 };
 const istOffenesAngebot = angebot => ["wartet auf antwort"].includes(String(angebot?.status || "").toLowerCase());
+
+function hatUnvollstaendigeKundenadresse(kunde) {
+    if (!kunde) return false;
+    return !String(kunde.anschrift || "").trim() || !String(kunde.plz || "").trim() || !String(kunde.ort || "").trim();
+}
 const STATUS_FILTER_OPTIONS = [
     { value: "in vorbereitung", label: "In Vorbereitung", defaultSelected: true },
     { value: "wartet auf antwort", label: "Wartet auf Antwort", defaultSelected: true },
@@ -198,7 +204,8 @@ function createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigab
         angebotsNrDraft: "",
         bearbeiter: defaultBearbeiter,
         selectedTemplateOfferId: "",
-        direktSenden: brauchtFreigabe
+        direktSenden: brauchtFreigabe,
+        freigabeDurchGf: false
     };
 }
 
@@ -295,6 +302,7 @@ export default function Angebote() {
     const [approvalOpen, setApprovalOpen] = useState(false);
     const [approvalOffer, setApprovalOffer] = useState<any>(null);
     const [approvalNote, setApprovalNote] = useState("");
+    const [pendingEditOffer, setPendingEditOffer] = useState<any>(null);
     const [selectedStatuses, setSelectedStatuses] = useState(getDefaultStatusFilter);
 
     const canReadLogistik = hasAccess(ACCESS.LOGISTIK);
@@ -326,6 +334,7 @@ export default function Angebote() {
     const inquiryIdFromQuery = searchParams.get("anfrageId") || "";
     const kundeIdFromQuery = searchParams.get("kundeId") || "";
     const templateOfferIdFromQuery = searchParams.get("templateOfferId") || "";
+    const editOfferIdFromQuery = searchParams.get("editOfferId") || "";
     const defaultKundeId = String(kunden[0]?.id || "");
     const defaultLeistungId = leistungen[0] ? `${leistungen[0].leistungTyp}:${leistungen[0].id}` : "";
     const istErfahrenerVerkaeufer = useMemo(() => {
@@ -341,6 +350,14 @@ export default function Angebote() {
     const brauchtFreigabe = !istErfahrenerVerkaeufer;
     const defaultBearbeiter = String(user?.username || benutzer[0]?.username || benutzer[0]?.id || "");
     const [draft, setDraft] = useState(() => createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigabe));
+    const optionen = fristenOptionenService.get();
+    const positionsZwischensumme = calculatePositionenTotal(draft.positionenDraft);
+    const nettoGesamtImDialog = calculateNetto(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag);
+    const abweichungZurZwischensumme =
+        positionsZwischensumme > 0
+            ? Math.abs(nettoGesamtImDialog - positionsZwischensumme) / positionsZwischensumme
+            : 0;
+    const gfFreigabeSchwelle = Number(optionen.angebotGfFreigabeAbweichungProzent || 10) / 100;
 
     const sendeAngebotAnKunden = (angebot) => {
         if (!angebot?.anfrageId) return;
@@ -393,7 +410,8 @@ export default function Angebote() {
             angebotsNrDraft: `${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`,
             bearbeiter: defaultBearbeiter,
             selectedTemplateOfferId: String(templateOfferId || ""),
-            direktSenden: brauchtFreigabe
+            direktSenden: brauchtFreigabe,
+            freigabeDurchGf: false
         });
         setOpen(true);
     };
@@ -441,7 +459,8 @@ export default function Angebote() {
             angebotsNrDraft: angebot.angebotsNr || "",
             bearbeiter: String(angebot.bearbeiter || defaultBearbeiter),
             selectedTemplateOfferId: "",
-            direktSenden: Boolean(angebot.direktSendenGewuenscht)
+            direktSenden: Boolean(angebot.direktSendenGewuenscht),
+            freigabeDurchGf: String(angebot.freigabeStatus || "") === "weitergeleitet"
         });
         setOpen(true);
     };
@@ -450,6 +469,19 @@ export default function Angebote() {
         if (newMode !== "fromInquiry") return;
         initialisiereDialog(inquiryIdFromQuery, kundeIdFromQuery, templateOfferIdFromQuery);
     }, [newMode, inquiryIdFromQuery, kundeIdFromQuery, templateOfferIdFromQuery, defaultLeistungId, brauchtFreigabe]);
+
+    useEffect(() => {
+        if (!editOfferIdFromQuery || open || approvalOpen) return;
+        const angebot = angebote.find(item => String(item.id) === String(editOfferIdFromQuery));
+        if (!angebot) return;
+        angebotBearbeiten(angebot);
+    }, [editOfferIdFromQuery, angebote, open, approvalOpen]);
+
+    useEffect(() => {
+        if (!pendingEditOffer || approvalOpen) return;
+        angebotBearbeiten(pendingEditOffer);
+        setPendingEditOffer(null);
+    }, [approvalOpen, pendingEditOffer]);
 
     const angebotColumns = [
         { field: "angebotsNr", title: "Angebotsnummer", render: row => <button type="button" className="thread-inline-link" onClick={event => {
@@ -521,6 +553,10 @@ export default function Angebote() {
     };
 
     const anfrageImDialog = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId));
+    const kundeImDialog = useMemo(
+        () => kunden.find(item => String(item.id) === String(draft.kundeId || anfrageImDialog?.kundeId || "")) || null,
+        [anfrageImDialog, draft.kundeId, kunden]
+    );
     const chatNachrichten = anfrageImDialog?.vorgangId ? listNachrichtenZuVorgang(anfrageImDialog.vorgangId) : [];
     const weiterleitungsAusschnitt = chatNachrichten;
     const bearbeiterLabel = bearbeiterOptionen.find(item => item.value === String(draft.bearbeiter))?.label || "Noch nicht zugewiesen";
@@ -599,6 +635,9 @@ export default function Angebote() {
         const vorgangId = getVorgangId(anfrage) || (draft.sourceInquiryId ? `anfrage-${draft.sourceInquiryId}` : `angebot-${Date.now()}`);
         const mindestmengenWarnungen = getMindestmengenWarnungen(draft.positionenDraft);
         const mindestmengenFreigabeNoetig = mindestmengenWarnungen.length > 0;
+        const automatischeGfFreigabe = mindestmengenFreigabeNoetig || (positionsZwischensumme > 0 && abweichungZurZwischensumme >= gfFreigabeSchwelle);
+        const gfFreigabeAktiv = draft.freigabeDurchGf || automatischeGfFreigabe;
+        const gfFreigabeNoetig = gfFreigabeAktiv;
 
         if (!kunde || draft.positionenDraft.length === 0) {
             setDraft(current => ({ ...current, fehler: "Bitte einen Kunden und mindestens eine Position auswaehlen." }));
@@ -612,23 +651,32 @@ export default function Angebote() {
                 return;
             }
 
-            angeboteService.update({
+            const freigabeDirektErteilen = (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (brauchtFreigabe ? false : draft.direktSenden);
+            const freigabeNoetig = !freigabeDirektErteilen;
+            const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
+
+            const aktualisiert = {
                 ...bestehendesAngebot,
                 kundeId: kunde.id,
                 gueltigBis: draft.gueltigBis,
                 rabattBetrag: Number(draft.rabattBetrag || 0),
                 verguenstigungsGrund: draft.verguenstigungsGrund.trim(),
                 gesamtbetrag: gesamtNachAbzug(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag),
-                status: "in Vorbereitung",
+                status,
                 positionen: draft.positionenDraft,
                 preispositionen: draft.preispositionenDraft,
                 bearbeiter: draft.bearbeiter,
-                direktSendenGewuenscht: false,
-                freigabeStatus: mindestmengenFreigabeNoetig ? "weitergeleitet" : "angefragt",
+                direktSendenGewuenscht: freigabeDirektErteilen,
+                freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
                 freigabeNotiz: mindestmengenFreigabeNoetig
                     ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
-                    : ""
-            });
+                    : gfFreigabeNoetig
+                        ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
+                    : "",
+                freigegebenVon: freigabeDirektErteilen ? (user?.username || "") : String(bestehendesAngebot.freigegebenVon || "")
+            };
+
+            angeboteService.update(aktualisiert);
 
             nachrichtenService.create({
                 vorgangId: bestehendesAngebot.vorgangId || vorgangId,
@@ -640,9 +688,15 @@ export default function Angebote() {
                 senderRolle: "Verkauf",
                 senderName: user?.name || user?.username || "Schuelerfirma Verkauf",
                 betreff: `Angebot ${bestehendesAngebot.angebotsNr} ueberarbeitet`,
-                nachricht: "Das Angebot wurde nach der internen Rueckmeldung ueberarbeitet und erneut zur Freigabe vorbereitet.",
+                nachricht: freigabeDirektErteilen
+                    ? "Das Angebot wurde ueberarbeitet und direkt an den Kunden gesendet."
+                    : "Das Angebot wurde nach der internen Rueckmeldung ueberarbeitet und erneut zur Freigabe vorbereitet.",
                 typ: "Interne Freigabe"
             });
+
+            if (freigabeDirektErteilen && !freigabeNoetig) {
+                sendeAngebotAnKunden(aktualisiert);
+            }
 
             setRefreshKey(value => value + 1);
             handleClose();
@@ -650,7 +704,7 @@ export default function Angebote() {
         }
 
         const revisionInfo = naechsteAngebotsrevision(vorgangId);
-        const freigabeDirektErteilen = mindestmengenFreigabeNoetig ? false : (brauchtFreigabe ? false : draft.direktSenden);
+        const freigabeDirektErteilen = (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (brauchtFreigabe ? false : draft.direktSenden);
         const freigabeNoetig = !freigabeDirektErteilen;
         const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
         const neuesAngebot = angeboteService.add({
@@ -670,17 +724,19 @@ export default function Angebote() {
             preispositionen: draft.preispositionenDraft,
             bearbeiter: draft.bearbeiter,
             direktSendenGewuenscht: freigabeDirektErteilen,
-            freigabeStatus: freigabeNoetig ? (mindestmengenFreigabeNoetig ? "weitergeleitet" : "angefragt") : "freigegeben",
+            freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
             freigabeAngefragtVon: user?.username || draft.bearbeiter,
             freigegebenVon: freigabeDirektErteilen ? (user?.username || "") : "",
             freigabeNotiz: mindestmengenFreigabeNoetig
                 ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                : gfFreigabeNoetig
+                    ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
                 : ""
         });
 
-        if (mindestmengenFreigabeNoetig) {
+        if (mindestmengenFreigabeNoetig || gfFreigabeNoetig) {
             freigabenService.create({
-                titel: `Sicherheitsbestandsfreigabe ${neuesAngebot.angebotsNr}`,
+                titel: `${mindestmengenFreigabeNoetig ? "Sicherheitsbestandsfreigabe" : "Preisfreigabe"} ${neuesAngebot.angebotsNr}`,
                 bereich: "verkauf",
                 verantwortung: "Geschaeftsfuehrung",
                 status: "offen",
@@ -688,7 +744,9 @@ export default function Angebote() {
                 bezug: neuesAngebot.angebotsNr,
                 angebotId: neuesAngebot.id,
                 vorgangId,
-                notiz: `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                notiz: mindestmengenFreigabeNoetig
+                    ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                    : `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
             });
         }
 
@@ -726,7 +784,7 @@ export default function Angebote() {
     const handleClose = () => {
         setOpen(false);
         setEditingOfferId("");
-        setDraft(current => ({ ...current, fehler: "", selectedTemplateOfferId: "", direktSenden: brauchtFreigabe }));
+        setDraft(current => ({ ...current, fehler: "", selectedTemplateOfferId: "", direktSenden: brauchtFreigabe, freigabeDurchGf: false }));
         if (newMode) {
             navigate("/angebote", { replace: true });
         }
@@ -745,7 +803,7 @@ export default function Angebote() {
     const ueberarbeitungen = neuesteAngebote.filter(item =>
         item.statusNormalized === "in vorbereitung" && String(item.freigabeStatus || "") === "intern_abgelehnt"
     );
-    const freigabeOffenAngebote = freizugebendeAngebote.filter(item => !["intern_abgelehnt", "freigegeben"].includes(String(item.freigabeStatus || "")));
+    const freigabeOffenAngebote = freizugebendeAngebote.filter(item => !["intern_abgelehnt", "freigegeben", "weitergeleitet"].includes(String(item.freigabeStatus || "")));
     const alleAngebote = neuesteAngebote.filter(item => selectedStatuses.includes(item.statusNormalized));
     const zumChatNavigieren = row => {
         const anfrage = getInquiryForOffer(row, anfragen);
@@ -802,6 +860,35 @@ export default function Angebote() {
     };
     const angebotInternAblehnen = (angebot) => {
         angebotZurUeberarbeitungZurueckgeben(angebot, "in Vorbereitung", "intern_abgelehnt");
+    };
+    const angebotZurUeberarbeitungBearbeiten = (angebot) => {
+        if (!approvalNote.trim()) return;
+        const aktualisiert = {
+            ...angebot,
+            freigabeStatus: "intern_abgelehnt",
+            freigabeNotiz: approvalNote.trim(),
+            status: "in Vorbereitung",
+            direktSendenGewuenscht: false
+        };
+        angeboteService.update(aktualisiert);
+        nachrichtenService.create({
+            vorgangId: angebot.vorgangId || "",
+            anfrageId: angebot.anfrageId || "",
+            angebotId: angebot.id,
+            kundeId: angebot.kundeId || "",
+            datum: heute,
+            zeitpunkt: getBerlinTimestamp(),
+            senderRolle: "Verkauf Freigabe",
+            senderName: user?.name || user?.username || "Verkauf Senior",
+            betreff: `Ueberarbeitung ${angebot.angebotsNr}`,
+            nachricht: `Bitte Angebot ${angebot.angebotsNr} ueberarbeiten. Hinweis: ${approvalNote.trim()}`,
+            typ: "Interne Freigabe"
+        });
+        setRefreshKey(value => value + 1);
+        setPendingEditOffer(aktualisiert);
+        setApprovalOpen(false);
+        setApprovalOffer(null);
+        setApprovalNote("");
     };
     const angebotAnGfWeiterleiten = (angebot) => {
         if (!approvalNote.trim()) return;
@@ -860,9 +947,11 @@ export default function Angebote() {
             ? "Alle Angebote"
             : "Laufende Angebote";
     const mindestmengenWarnungenImDialog = getMindestmengenWarnungen(draft.positionenDraft);
-    const sperrgrundText = mindestmengenWarnungenImDialog.length > 0
-        ? `Das Angebot kann nicht freigegeben werden: ${mindestmengenWarnungenImDialog.map(item => `${item.artikel} unterschreitet den Sicherheitsbestand von ${item.sicherheitsbestand}`).join(", ")}.`
-        : "";
+    const sicherheitsbestandFreigabeImDialog = mindestmengenWarnungenImDialog.length > 0;
+    const preisabweichungFreigabeImDialog = positionsZwischensumme > 0 && abweichungZurZwischensumme >= gfFreigabeSchwelle;
+    const automatischeGfFreigabeImDialog = sicherheitsbestandFreigabeImDialog || preisabweichungFreigabeImDialog;
+    const gfFreigabeAktivImDialog = draft.freigabeDurchGf || automatischeGfFreigabeImDialog;
+    const sperrgrundText = "";
 
     return <>
         <SalesFlowBar currentStep="angebote"/>
@@ -1147,17 +1236,25 @@ export default function Angebote() {
                 <div className="thread-section-header">
                     <Label glossaryKey="freigabe">Freigabe</Label>
                 </div>
+                {hatUnvollstaendigeKundenadresse(kundeImDialog) && <p className="form-error">
+                    Beim Kunden fehlen Adressdaten. Bitte vor dem Versenden des Angebots Anschrift, PLZ und Ort beim Kunden nachfragen.
+                </p>}
                 <div className="offer-send-checkbox-row">
-                    <Checkbox checked={!brauchtFreigabe && draft.direktSenden} onChange={value => setDraft(item => ({ ...item, direktSenden: value }))} disabled={brauchtFreigabe || mindestmengenWarnungenImDialog.length > 0}>
+                    <Checkbox checked={!brauchtFreigabe && draft.direktSenden} onChange={value => setDraft(item => ({ ...item, direktSenden: value, freigabeDurchGf: value ? false : item.freigabeDurchGf }))} disabled={brauchtFreigabe || gfFreigabeAktivImDialog}>
                         Freigabe direkt erteilen
                     </Checkbox>
+                    <Checkbox checked={gfFreigabeAktivImDialog} onChange={value => setDraft(item => ({ ...item, freigabeDurchGf: value, direktSenden: value ? false : item.direktSenden }))} disabled={automatischeGfFreigabeImDialog || draft.direktSenden}>
+                        Freigabe durch GF
+                    </Checkbox>
                 </div>
-                {(brauchtFreigabe || sperrgrundText) && <div className="form-error">
+                {brauchtFreigabe && <div className="form-error">
                     {brauchtFreigabe && <p>Du hast keine Berechtigung zur eigenstaendigen Freigabe.</p>}
-                    {sperrgrundText && <p>{sperrgrundText}</p>}
                 </div>}
-                {!draft.direktSenden && <p className="thread-template-hint">
-                    Ohne Haken bleibt das Angebot in der internen Freigabe und wird noch nicht an den Kunden gesendet.
+                {sicherheitsbestandFreigabeImDialog && <p className="form-error">
+                    Die GF-Freigabe wurde automatisch gesetzt, da ein Artikel unter den Sicherheitsbestand geraet.
+                </p>}
+                {preisabweichungFreigabeImDialog && <p className="form-error">
+                    Die GF-Freigabe wurde automatisch gesetzt, weil die Abweichung zur Artikelsumme den Grenzwert von {Number(optionen.angebotGfFreigabeAbweichungProzent || 10).toFixed(1)} % erreicht oder ueberschreitet.
                 </p>}
             </div>
             {draft.fehler && <p className="form-error">{draft.fehler}</p>}
@@ -1202,7 +1299,7 @@ export default function Angebote() {
             noteValue={approvalNote}
             onNoteChange={setApprovalNote}
             onApprove={() => angebotFreigeben(approvalOffer)}
-            onRevise={() => angebotZurUeberarbeitungZurueckgeben(approvalOffer)}
+            onRevise={() => angebotZurUeberarbeitungBearbeiten(approvalOffer)}
             onReject={() => angebotInternAblehnen(approvalOffer)}
             onForward={() => angebotAnGfWeiterleiten(approvalOffer)}
         />}

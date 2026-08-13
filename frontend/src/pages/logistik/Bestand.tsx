@@ -17,7 +17,7 @@ const FARBEN = [
     { key: "weiss", label: "Weiß", beschreibung: "Normal, kein aktueller Handlungsbedarf.", chipClass: "stock-legend-chip-normal", rowClass: "" },
     { key: "orange", label: "Orange", beschreibung: "Bedarfsmeldung erreicht oder unterschritten.", chipClass: "stock-legend-chip-warning", rowClass: "datatable-row-critical-light" },
     { key: "rot", label: "Rot", beschreibung: "Sicherheitsbestand unterschritten.", chipClass: "stock-legend-chip-critical", rowClass: "datatable-row-critical-dark" },
-    { key: "blau", label: "Blau", beschreibung: "Artikel ist nachbestellt und im Zulauf. Diese Farbe hat die hoechste Prioritaet.", chipClass: "stock-legend-chip-order", rowClass: "datatable-row-inbound" }
+    { key: "blau", label: "Blau", beschreibung: "Artikel ist nachbestellt und im Zulauf.", chipClass: "stock-legend-chip-order", rowClass: "datatable-row-inbound" }
 ];
 
 function getFarbstatus({ imZulauf, verfuegbar, mindestmenge, bedarfsmeldungBei }) {

@@ -1,6 +1,6 @@
 import { loadData, saveData } from "../mockup/mockStorage";
 import type { CrudService, EntityWithId } from "../../types/crud";
-import { buildDatabasePath, isDatabaseModeEnabled, syncApiRequest } from "./api";
+import { buildDatabasePath, isDatabaseModeEnabled, isPermissionError, syncApiRequest } from "./api";
 import { getCachedTableData, invalidateTableCache, setCachedTableData } from "./dataCache";
 
 /**
@@ -14,18 +14,30 @@ export function createCRUDService<T extends EntityWithId>(tableName: string, ini
     const useBackend = () => isDatabaseModeEnabled();
     let tableData = useBackend() ? [] as T[] : loadData(tableName, initialData);
 
+    const getFallbackData = () => loadData(tableName, initialData);
+
     const reload = (force = false) => {
         if (useBackend()) {
-            if (!force) {
-                const cached = getCachedTableData<T>(tableName);
-                if (cached) {
-                    tableData = cached;
+            try {
+                if (!force) {
+                    const cached = getCachedTableData<T>(tableName);
+                    if (cached) {
+                        tableData = cached;
+                        return tableData;
+                    }
+                }
+
+                const result = syncApiRequest(buildDatabasePath(`/${tableName}`));
+                tableData = setCachedTableData(tableName, result.items || []);
+                return tableData;
+            } catch (error) {
+                if (isPermissionError(error)) {
+                    tableData = getFallbackData();
                     return tableData;
                 }
+
+                throw error;
             }
-            const result = syncApiRequest(buildDatabasePath(`/${tableName}`));
-            tableData = setCachedTableData(tableName, result.items || []);
-            return tableData;
         }
         tableData = loadData(tableName, initialData);
         return tableData;
@@ -61,8 +73,16 @@ export function createCRUDService<T extends EntityWithId>(tableName: string, ini
                     return loadedItem;
                 }
 
-                const result = syncApiRequest(buildDatabasePath(`/${tableName}/${id}`));
-                return result.item;
+                try {
+                    const result = syncApiRequest(buildDatabasePath(`/${tableName}/${id}`));
+                    return result.item;
+                } catch (error) {
+                    if (isPermissionError(error)) {
+                        return getFallbackData().find(item => String(item.id) === String(id));
+                    }
+
+                    throw error;
+                }
             }
             return reload().find(item => String(item.id) === String(id));
         },

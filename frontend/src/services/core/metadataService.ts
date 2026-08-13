@@ -3,17 +3,7 @@ import { benutzerSpalten } from "../mockup/mockMetaData";
 import {
     loadData, saveData
 } from "../mockup/mockStorage";
-import { buildDatabasePath, isDatabaseModeEnabled, syncApiRequest } from "./api";
-
-function isPermissionError(error) {
-    if (!(error instanceof Error)) return false;
-
-    const message = error.message.toLowerCase();
-    return message.startsWith("keine berechtigung")
-        || message.includes("status 403")
-        || message.includes("403")
-        || message.includes("forbidden");
-}
+import { buildDatabasePath, isDatabaseModeEnabled, isPermissionError, syncApiRequest } from "./api";
 
 function getUserColumnSettings() {
     if (isDatabaseModeEnabled()) {

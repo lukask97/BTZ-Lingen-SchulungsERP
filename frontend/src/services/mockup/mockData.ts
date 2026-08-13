@@ -37,6 +37,51 @@ export let kunden = [
 
         website: "https://www.emsland.com/",
         notiz:""
+    },
+
+    {
+        id: 3,
+        kundenNr: "DB10003",
+        firma: "Nordrad Campus Service",
+        anschrift: "LindenstraÃŸe 22",
+        plz: "48529",
+        ort: "Nordhorn",
+        segment: "Dienstleistung",
+        abc: "B",
+        iban: "DE31500105170648489890",
+        optionen: ["Service", "Wartung", "Abholung"],
+        website: "https://www.nordrad-campus.de/",
+        notiz:"Servicekunde mit regelmaeÃŸigen Wartungsanfragen."
+    },
+
+    {
+        id: 4,
+        kundenNr: "DB10004",
+        firma: "Stadtwerke Lingen Mobilitaet",
+        anschrift: "KaiserstraÃŸe 14",
+        plz: "49808",
+        ort: "Lingen",
+        segment: "Oeffentliche Einrichtung",
+        abc: "A",
+        iban: "DE98500105179876543210",
+        optionen: ["Flottenkunden", "Lastenbikes", "Sicherheitsausstattung"],
+        website: "https://www.stadtwerke-lingen.de/",
+        notiz:"Potenzial fuer groessere Flottenbestellungen."
+    },
+
+    {
+        id: 5,
+        kundenNr: "DB10005",
+        firma: "Jugendwerkstatt Ems-Vechte",
+        anschrift: "WerkstraÃŸe 7",
+        plz: "48431",
+        ort: "Rheine",
+        segment: "Bildung",
+        abc: "C",
+        iban: "DE12500105171234567890",
+        optionen: ["Schulungsfahrraeder", "Helme", "Projektmaterial"],
+        website: "",
+        notiz:"Neuer Projektkunde mit wiederkehrendem Trainingsbedarf."
     }
 
 ];
@@ -763,10 +808,80 @@ export let angebote = [
         anfrageId: 1,
         kundeId: 1,
         datum: "2026-07-22",
-        gueltigBis: "2026-08-05",
+        gueltigBis: "2026-08-04",
         rabattBetrag: 0,
         gesamtbetrag: 1348.5,
+        status: "ueberarbeitet"
+    },
+    {
+        id: 2,
+        angebotsNr: "ANG-2026-001.1",
+        angebotsBasisNr: "ANG-2026-001",
+        revision: 1,
+        vorgangId: "anfrage-1",
+        anfrageId: 1,
+        kundeId: 1,
+        datum: "2026-07-24",
+        gueltigBis: "2026-08-06",
+        rabattBetrag: 0,
+        gesamtbetrag: 1348.5,
+        status: "angenommen"
+    },
+    {
+        id: 3,
+        angebotsNr: "ANG-2026-002.0",
+        angebotsBasisNr: "ANG-2026-002",
+        revision: 0,
+        vorgangId: "anfrage-2",
+        anfrageId: 2,
+        kundeId: 2,
+        datum: "2026-07-28",
+        gueltigBis: "2026-08-11",
+        rabattBetrag: 50,
+        gesamtbetrag: 1749.7,
+        status: "angenommen"
+    },
+    {
+        id: 4,
+        angebotsNr: "ANG-2026-003.0",
+        angebotsBasisNr: "ANG-2026-003",
+        revision: 0,
+        vorgangId: "anfrage-3",
+        anfrageId: 3,
+        kundeId: 1,
+        datum: "2026-08-05",
+        gueltigBis: "2026-08-19",
+        rabattBetrag: 0,
+        gesamtbetrag: 799,
         status: "wartet auf Antwort"
+    },
+    {
+        id: 5,
+        angebotsNr: "ANG-2026-004.0",
+        angebotsBasisNr: "ANG-2026-004",
+        revision: 0,
+        vorgangId: "anfrage-4",
+        anfrageId: 4,
+        kundeId: 3,
+        datum: "2026-08-02",
+        gueltigBis: "2026-08-16",
+        rabattBetrag: 0,
+        gesamtbetrag: 390,
+        status: "angenommen"
+    },
+    {
+        id: 6,
+        angebotsNr: "ANG-2026-005.0",
+        angebotsBasisNr: "ANG-2026-005",
+        revision: 0,
+        vorgangId: "anfrage-5",
+        anfrageId: 5,
+        kundeId: 5,
+        datum: "2026-08-11",
+        gueltigBis: "2026-08-25",
+        rabattBetrag: 25,
+        gesamtbetrag: 953.97,
+        status: "in Vorbereitung"
     }
 ];
 
@@ -778,6 +893,54 @@ export let angebotspositionen = [
         leistungTyp: "Artikel",
         menge: 15,
         einzelpreis: 89.9
+    },
+    {
+        id: 2,
+        angebotId: 2,
+        artikelId: 2,
+        leistungTyp: "Artikel",
+        menge: 15,
+        einzelpreis: 89.9
+    },
+    {
+        id: 3,
+        angebotId: 3,
+        artikelId: 3,
+        leistungTyp: "Artikel",
+        menge: 30,
+        einzelpreis: 59.99
+    },
+    {
+        id: 4,
+        angebotId: 4,
+        artikelId: 1,
+        leistungTyp: "Artikel",
+        menge: 1,
+        einzelpreis: 799
+    },
+    {
+        id: 5,
+        angebotId: 5,
+        serviceId: 2,
+        leistungTyp: "Service",
+        menge: 6,
+        einzelpreis: 65
+    },
+    {
+        id: 6,
+        angebotId: 6,
+        artikelId: 1,
+        leistungTyp: "Artikel",
+        menge: 1,
+        einzelpreis: 799
+    },
+    {
+        id: 7,
+        angebotId: 6,
+        artikelId: 3,
+        leistungTyp: "Artikel",
+        menge: 3,
+        einzelpreis: 59.99
     }
 ];
 
@@ -793,36 +956,69 @@ export let auftraege = [
         rabattBetrag: 0,
         gesamtbetrag: 1348.5,
         faelligAm: "2026-08-08",
-        angebotId: 1
+        angebotId: 2
     },
     {
         id: 2,
         auftragNr: "AU-2026-002",
         kundeId: 2,
-        datum: "2026-07-20",
+        anfrageId: 2,
+        vorgangId: "anfrage-2",
+        datum: "2026-07-30",
         status: "bezahlt",
-        rabattBetrag: 0,
-        gesamtbetrag: 1799.7,
-        faelligAm: "2026-08-03",
-        angebotId: ""
+        rabattBetrag: 50,
+        gesamtbetrag: 1749.7,
+        faelligAm: "2026-08-10",
+        angebotId: 3
     },
     {
         id: 3,
         auftragNr: "AU-2026-003",
         kundeId: 1,
-        datum: "2026-07-26",
+        anfrageId: 3,
+        vorgangId: "anfrage-3",
+        datum: "2026-08-08",
         status: "offen",
         rabattBetrag: 0,
         gesamtbetrag: 799,
-        faelligAm: "",
-        angebotId: ""
+        faelligAm: "2026-08-22",
+        angebotId: 4
+    },
+    {
+        id: 4,
+        auftragNr: "AU-2026-004",
+        kundeId: 3,
+        anfrageId: 4,
+        vorgangId: "anfrage-4",
+        datum: "2026-08-03",
+        status: "offen",
+        rabattBetrag: 0,
+        gesamtbetrag: 390,
+        faelligAm: "2026-08-17",
+        angebotId: 5
+    },
+    {
+        id: 5,
+        auftragNr: "AU-2026-005",
+        kundeId: 5,
+        anfrageId: 5,
+        vorgangId: "anfrage-5",
+        datum: "2026-08-12",
+        status: "offen",
+        rabattBetrag: 25,
+        gesamtbetrag: 953.97,
+        faelligAm: "2026-08-26",
+        angebotId: 6
     }
 ];
 
 export let auftragspositionen = [
     { id: 1, auftragId: 1, artikelId: 2, leistungTyp: "Artikel", menge: 15, einzelpreis: 89.9 },
     { id: 2, auftragId: 2, artikelId: 3, leistungTyp: "Artikel", menge: 30, einzelpreis: 59.99 },
-    { id: 3, auftragId: 3, artikelId: 1, leistungTyp: "Artikel", menge: 1, einzelpreis: 799 }
+    { id: 3, auftragId: 3, artikelId: 1, leistungTyp: "Artikel", menge: 1, einzelpreis: 799 },
+    { id: 4, auftragId: 4, serviceId: 2, leistungTyp: "Service", menge: 6, einzelpreis: 65 },
+    { id: 5, auftragId: 5, artikelId: 1, leistungTyp: "Artikel", menge: 1, einzelpreis: 799 },
+    { id: 6, auftragId: 5, artikelId: 3, leistungTyp: "Artikel", menge: 3, einzelpreis: 59.99 }
 ];
 
 export let reklamationen = [
@@ -866,6 +1062,29 @@ export let kundenanfragen = [
         datum: "2026-07-24",
         anliegen: "Frage nach Lieferzeiten für Sicherheitsjacken."
     }
+    ,
+    {
+        id: 4,
+        typ: "Serviceanfrage",
+        kundeId: 3,
+        vorgangId: "anfrage-4",
+        angebotId: 5,
+        kanal: "E-Mail",
+        status: "erledigt",
+        datum: "2026-08-01",
+        anliegen: "Bitte Angebot fuer eine mobile Wartung von sechs Fahrraedern erstellen."
+    },
+    {
+        id: 5,
+        typ: "Projektanfrage",
+        kundeId: 5,
+        vorgangId: "anfrage-5",
+        angebotId: 6,
+        kanal: "Telefon",
+        status: "offen",
+        datum: "2026-08-10",
+        anliegen: "Anfrage fuer Helme und Schulungsfahrraeder fuer ein Herbstprojekt."
+    }
 ];
 
 export let nachrichten = [
@@ -895,6 +1114,65 @@ export let nachrichten = [
         kanal: "E-Mail",
         betreff: "Angebot ANG-2026-001.0",
         nachricht: "Ein erstes Angebot wurde erstellt und an den Kunden zur Prüfung weitergegeben.",
+        typ: "Angebot"
+    }
+    ,
+    {
+        id: 3,
+        vorgangId: "anfrage-4",
+        anfrageId: 4,
+        angebotId: "",
+        kundeId: 3,
+        datum: "2026-08-01",
+        senderRolle: "Kunde",
+        senderName: "Nordrad Campus Service",
+        kanal: "E-Mail",
+        betreff: "Mobile Wartung fuer sechs Fahrraeder",
+        nachricht: "Bitte senden Sie uns ein Angebot fuer eine mobile Wartung von sechs Fahrraedern vor Ort.",
+        typ: "Anfrage"
+    },
+    {
+        id: 4,
+        vorgangId: "anfrage-4",
+        anfrageId: 4,
+        angebotId: 5,
+        auftragId: 4,
+        kundeId: 3,
+        datum: "2026-08-02",
+        senderRolle: "Verkauf",
+        senderName: "Schuelerfirma Verkauf",
+        kanal: "E-Mail",
+        betreff: "Angebot ANG-2026-004.0",
+        nachricht: "Das Serviceangebot wurde erstellt und vom Kunden direkt bestaetigt.",
+        typ: "Angebot"
+    },
+    {
+        id: 5,
+        vorgangId: "anfrage-5",
+        anfrageId: 5,
+        angebotId: "",
+        kundeId: 5,
+        datum: "2026-08-10",
+        senderRolle: "Kunde",
+        senderName: "Jugendwerkstatt Ems-Vechte",
+        kanal: "Telefon",
+        betreff: "Projektanfrage Herbst",
+        nachricht: "Wir planen ein Herbstprojekt und benoetigen Schulungsfahrraeder sowie mehrere Helme.",
+        typ: "Anfrage"
+    },
+    {
+        id: 6,
+        vorgangId: "anfrage-5",
+        anfrageId: 5,
+        angebotId: 6,
+        auftragId: 5,
+        kundeId: 5,
+        datum: "2026-08-11",
+        senderRolle: "Verkauf",
+        senderName: "Schuelerfirma Verkauf",
+        kanal: "E-Mail",
+        betreff: "Angebot ANG-2026-005.0",
+        nachricht: "Das Angebot ist intern vorbereitet und wartet noch auf die finale Freigabe vor dem Versand.",
         typ: "Angebot"
     }
 ];
@@ -1037,6 +1315,22 @@ export let versandauftraege = [
         datum: "2026-07-26",
         status: "in Vorbereitung",
         transport: "Spedition Nord"
+    },
+    {
+        id: 2,
+        versandNr: "LOG-2026-002",
+        auftragId: 2,
+        datum: "2026-07-31",
+        status: "versendet",
+        transport: "Hauszustellung"
+    },
+    {
+        id: 3,
+        versandNr: "LOG-2026-004",
+        auftragId: 4,
+        datum: "2026-08-04",
+        status: "versendet",
+        transport: "Serviceteam mobil"
     }
 ];
 
@@ -1194,6 +1488,85 @@ export let vertriebsdokumente = [
         datum: "2026-07-26",
         status: "Entwurf",
         notiz: "Wird mit dem Versand abgestimmt."
+    },
+    {
+        id: 3,
+        auftragId: 2,
+        angebotId: 3,
+        anfrageId: 2,
+        vorgangId: "anfrage-2",
+        dokumentTyp: "AuftragsbestÃ¤tigung",
+        titel: "AuftragsbestÃ¤tigung AU-2026-002",
+        datum: "2026-07-30",
+        status: "versendet",
+        versendetAm: "2026-07-30",
+        notiz: "Kunde hat die Auftragsbestaetigung am selben Tag erhalten."
+    },
+    {
+        id: 4,
+        auftragId: 2,
+        angebotId: 3,
+        anfrageId: 2,
+        vorgangId: "anfrage-2",
+        dokumentTyp: "Lieferschein",
+        dokumentNr: "LS-2026-002",
+        titel: "Lieferschein LS-2026-002",
+        datum: "2026-07-31",
+        status: "entgegengenommen",
+        versendetAm: "2026-07-31",
+        annahmeAm: "2026-08-01",
+        notiz: "Lieferung wurde beim Kunden angenommen."
+    },
+    {
+        id: 5,
+        auftragId: 2,
+        angebotId: 3,
+        anfrageId: 2,
+        vorgangId: "anfrage-2",
+        dokumentTyp: "Warenbegleitpapier",
+        titel: "Warenbegleitpapier AU-2026-002",
+        datum: "2026-07-31",
+        status: "versendet",
+        versendetAm: "2026-07-31",
+        notiz: "Begleitpapier fuer die Helm-Lieferung."
+    },
+    {
+        id: 6,
+        auftragId: 4,
+        angebotId: 5,
+        anfrageId: 4,
+        vorgangId: "anfrage-4",
+        dokumentTyp: "AuftragsbestÃ¤tigung",
+        titel: "AuftragsbestÃ¤tigung AU-2026-004",
+        datum: "2026-08-03",
+        status: "versendet",
+        versendetAm: "2026-08-03",
+        notiz: "Serviceauftrag wurde direkt bestaetigt."
+    },
+    {
+        id: 7,
+        auftragId: 4,
+        angebotId: 5,
+        anfrageId: 4,
+        vorgangId: "anfrage-4",
+        dokumentTyp: "Transportpapier",
+        titel: "Transportpapier AU-2026-004",
+        datum: "2026-08-04",
+        status: "versendet",
+        versendetAm: "2026-08-04",
+        notiz: "Einsatzunterlagen fuer das mobile Serviceteam."
+    },
+    {
+        id: 8,
+        auftragId: 5,
+        angebotId: 6,
+        anfrageId: 5,
+        vorgangId: "anfrage-5",
+        dokumentTyp: "AuftragsbestÃ¤tigung",
+        titel: "AuftragsbestÃ¤tigung AU-2026-005",
+        datum: "2026-08-12",
+        status: "erstellt",
+        notiz: "Liegt vorbereitet vor und wartet auf den Versand nach Abschluss der Freigabe."
     }
 ];
 
