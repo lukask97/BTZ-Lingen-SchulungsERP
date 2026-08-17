@@ -26,10 +26,10 @@ export default function Logistik() {
 
     return <>
         <h1>Logistik</h1>
-        <p>Modul fuer Bestand, Wareneingang, Versand und Retouren. Die Seite macht sichtbar, wie Material- und Warenbewegungen zwischen Einkauf, Lager und Vertrieb zusammenhaengen.</p>
+        <p>Modul für Bestand, Wareneingang, Versand und Retouren. Die Seite macht sichtbar, wie Material- und Warenbewegungen zwischen Einkauf, Lager und Vertrieb zusammenhängen.</p>
 
         <div className="kennzahlen">
-            <div className="kennzahl"><span>Niedrige Bestaende</span><strong>{niedrigeBestaende}</strong><small>Bestand beobachten</small></div>
+            <div className="kennzahl"><span>Niedrige Bestände</span><strong>{niedrigeBestaende}</strong><small>Bestand beobachten</small></div>
             <div className="kennzahl"><span>Offene Wareneingänge</span><strong>{offeneWareneingaenge}</strong><small>Einkauf abschließen</small></div>
             <div className="kennzahl"><span>Versandaufträge</span><strong>{versandauftraege.length}</strong><small>{vorbereiteteSendungen} in Vorbereitung</small></div>
             <div className="kennzahl"><span>Aufträge ohne Versand</span><strong>{offeneAuftraegeOhneVersand}</strong><small>Vertrieb übergeben</small></div>
@@ -43,10 +43,10 @@ export default function Logistik() {
                     <span>Lernkette</span>
                 </div>
                 <ul className="dashboard-note-list">
-                    <li>Wareneingaenge aus dem Einkauf pruefen und buchen.</li>
-                    <li>Bestaende beobachten und Engpaesse erkennen.</li>
-                    <li>Reservierte Mengen aus aktiven Auftraegen mitdenken.</li>
-                    <li>Versandauftraege aus dem Verkauf vorbereiten und abschliessen.</li>
+                    <li>Wareneingänge aus dem Einkauf prüfen und buchen.</li>
+                    <li>Bestände beobachten und Engpässe erkennen.</li>
+                    <li>Reservierte Mengen aus aktiven Aufträgen mitdenken.</li>
+                    <li>Versandaufträge aus dem Verkauf vorbereiten und abschließen.</li>
                     <li>Retouren dokumentieren und als Folgeprozess sauber beenden.</li>
                 </ul>
             </article>
@@ -57,16 +57,16 @@ export default function Logistik() {
                     <span>Bereichsübergreifend</span>
                 </div>
                 <ul className="dashboard-note-list">
-                    <li>Versendete Bestellungen wirken direkt auf Wareneingaenge und Bestaende.</li>
-                    <li>Offene Auftraege fuehren zu Versandauftraegen im Logistikbereich.</li>
-                    <li>Reservierte Mengen senken den verfuegbaren Bestand bereits vor dem Versand.</li>
-                    <li>Retouren koennen Service, Reklamation und Ersatzlieferung ausloesen.</li>
+                    <li>Versendete Bestellungen wirken direkt auf Wareneingänge und Bestände.</li>
+                    <li>Offene Aufträge führen zu Versandaufträgen im Logistikbereich.</li>
+                    <li>Reservierte Mengen senken den verfügbaren Bestand bereits vor dem Versand.</li>
+                    <li>Retouren können Service, Reklamation und Ersatzlieferung auslösen.</li>
                 </ul>
                 <div className="link-list">
-                    <Link className="button-link" to="/bestand">Bestand oeffnen</Link>
-                    <Link className="button-link" to="/kategorien">Kategorien oeffnen</Link>
-                    <Link className="button-link" to="/wareneingaenge">Wareneingaenge oeffnen</Link>
-                    <Link className="button-link" to="/versand">Versand oeffnen</Link>
+                    <Link className="button-link" to="/bestand">Bestand öffnen</Link>
+                    <Link className="button-link" to="/kategorien">Kategorien öffnen</Link>
+                    <Link className="button-link" to="/wareneingaenge">Wareneingänge öffnen</Link>
+                    <Link className="button-link" to="/versand">Versand öffnen</Link>
                 </div>
             </article>
         </section>
@@ -77,7 +77,7 @@ export default function Logistik() {
                 <Link className="button-link" to="/bestand">Bestand</Link>
                 <Link className="button-link" to="/artikel">Artikel</Link>
                 <Link className="button-link" to="/kategorien">Kategorien</Link>
-                <Link className="button-link" to="/wareneingaenge">Wareneingaenge</Link>
+                <Link className="button-link" to="/wareneingaenge">Wareneingänge</Link>
                 <Link className="button-link" to="/versand">Versand</Link>
                 <Link className="button-link" to="/retouren">Retouren</Link>
             </div>

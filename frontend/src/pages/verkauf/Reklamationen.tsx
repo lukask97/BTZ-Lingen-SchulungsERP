@@ -4,6 +4,7 @@ import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import reklamationenService, { naechsteReklamationsnummer } from "../../services/verkauf/reklamationenService";
 import kundenService from "../../services/verkauf/customerService";
@@ -34,7 +35,7 @@ export default function Reklamationen() {
         const kunde = kunden.find(item => item.id === Number(kundeId));
         if (!kunde || !beschreibung.trim()) {
             setFehler("Bitte einen Kunden und eine Beschreibung angeben.");
-            return;
+            return false;
         }
         reklamationenService.add({
             reklamationsNr: naechsteReklamationsnummer(),
@@ -44,7 +45,7 @@ export default function Reklamationen() {
             status: "neu"
         });
         setReklamationen(reklamationenService.getAll());
-        setOffen(false);
+        return true;
     };
 
     const ersatzlieferungPlanen = reklamation => {
@@ -64,22 +65,26 @@ export default function Reklamationen() {
         ]}/>
         <DataTable title="Reklamationen" selectableColumns={false} data={reklamationen.filter(item => !statusFilter || item.status === statusFilter)}
             columns={[
-                { field: "reklamationsNr", title: "Nummer" }, { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "reklamationsNr", title: "Nummer" }, { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "datum", title: "Datum" }, { field: "beschreibung", title: "Beschreibung" },
                 { field: "status", title: "Status" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kunden?focus=${row.kundeId}` : null}
+            detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kundenfocus=${row.kundeId}` : null}
             toolbarActions={[{ name: "new", label: "Reklamation erfassen", permission: PERMISSIONS.SERVICE_BEARBEITEN, onClick: neu }]}
             rowActions={[{ name: "replacement", label: "Ersatzlieferung planen", permission: PERMISSIONS.SERVICE_BEARBEITEN, onClick: ersatzlieferungPlanen }]}
             filters={[{ name: "status", label: "Status", options: [{ value: "neu", label: "Neu" }, { value: "Ersatzlieferung geplant", label: "Ersatzlieferung geplant" }] }]}
             onFilter={filters => setStatusFilter(filters.status || "")}
         />
-        <Dialog open={offen} title="Reklamation erfassen" onClose={() => setOffen(false)}>
+        <Dialog
+            open={offen}
+            title="Reklamation erfassen"
+            onClose={() => setOffen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOffen(false)}>Reklamation speichern</SaveButton>}
+        >
             <div><Label required>Kunde</Label><LookupField value={kundeId} options={kundenOptionen} onChange={setKundeId} placeholder="Kunde suchen..."/></div>
             <div><Label>Datum</Label><input type="date" value={heute()} disabled/></div>
-            <div className="form-row"><Label required>Beschreibung</Label><TextArea rows={4} value={beschreibung} placeholder="Was ist passiert?" onChange={setBeschreibung}/>
+            <div className="form-row"><Label required>Beschreibung</Label><TextArea rows={4} value={beschreibung} placeholder="Was ist passiert" onChange={setBeschreibung}/>
                 {fehler && <p className="form-error">{fehler}</p>}</div>
-            <div className="form-row"><button type="button" onClick={speichern}>Reklamation speichern</button></div>
         </Dialog>
     </>;
 }

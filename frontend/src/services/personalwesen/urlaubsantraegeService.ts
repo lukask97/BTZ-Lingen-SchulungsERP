@@ -8,7 +8,7 @@ function hydrateEntry(item: any = {}) {
     const mitarbeiter = item.mitarbeiterId ? mitarbeiterService.getById(item.mitarbeiterId) : null;
     return {
         ...item,
-        mitarbeiter: mitarbeiter?.name || item.mitarbeiter || ""
+        mitarbeiter: mitarbeiter.name || item.mitarbeiter || ""
     };
 }
 
@@ -27,7 +27,7 @@ export default {
     },
     create: (payload: any) => hydrateEntry(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateEntry(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return hydrateEntry(baseService.update(splitPayload(idOrItem)));
         }

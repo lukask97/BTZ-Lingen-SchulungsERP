@@ -5,22 +5,22 @@ const NOTE_CONFIG = {
     kunden: {
         key: "lehrkraftNotizenKunden",
         title: "Lehrkraft-Notizen Kunden",
-        hint: "Hier kann die Lehrkraft Testideen fuer Kundenkorrespondenz, Angebote und externe Zahlungen festhalten.",
+        hint: "Hier kann die Lehrkraft Testideen für Kundenkorrespondenz, Angebote und externe Zahlungen festhalten.",
         defaultNote: [
-            "Ideen fuer Kundentests:",
-            "- Angebot erst nach Ablauf der Gueltigkeit annehmen lassen.",
-            "- Rueckfrage des Kunden absichtlich offen lassen.",
-            "- Zahlung extern verspaetet oder gar nicht bestaetigen."
+            "Ideen für Kundentests:",
+            "- Angebot erst nach Ablauf der Gültigkeit annehmen lassen.",
+            "- Rückfrage des Kunden absichtlich offen lassen.",
+            "- Zahlung extern verspätet oder gar nicht bestätigen."
         ].join("\n")
     },
     lieferanten: {
         key: "lehrkraftNotizenLieferanten",
         title: "Lehrkraft-Notizen Lieferanten",
-        hint: "Hier kann die Lehrkraft Testideen fuer Lieferantenkorrespondenz und externe Rechnungen festhalten.",
+        hint: "Hier kann die Lehrkraft Testideen für Lieferantenkorrespondenz und externe Rechnungen festhalten.",
         defaultNote: [
-            "Ideen fuer Lieferantentests:",
-            "- Rechnung gegenueber der Schuelerfirma bewusst nicht bezahlen.",
-            "- Lieferbestaetigung unvollstaendig lassen.",
+            "Ideen für Lieferantentests:",
+            "- Rechnung gegenüber der Schülerfirma bewusst nicht bezahlen.",
+            "- Lieferbestätigung unvollständig lassen.",
             "- Frist oder Mahnung als Testfall vorbereiten."
         ].join("\n")
     }
@@ -57,10 +57,11 @@ export default function TeacherNotesPanel() {
                     {noteConfig.hint}
                 </p>
                 <textarea
+                    name={`teacher-notes-${noteConfig.key}`}
                     className="teacher-notes-textarea"
                     value={note}
                     onChange={(event) => setNote(event.target.value)}
-                    placeholder="Notizen fuer Unterricht, Prueffragen und geplante Sonderfaelle eintragen..."
+                    placeholder="Notizen für Unterricht, Prüffragen und geplante Sonderfälle eintragen..."
                 />
             </div>
         </aside>

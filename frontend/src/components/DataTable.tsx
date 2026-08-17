@@ -65,7 +65,7 @@ function extractNumericSortValue(value) {
 
   const normalized = raw
     .replace(/\s/g, "")
-    .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+    .replace(/\.(?=\d{3}(\D|$))/g, "")
     .replace(/,/g, ".")
     .replace(/[^0-9.+-]/g, "");
 
@@ -88,7 +88,7 @@ function normalizeSortValue(value) {
     const label = String(value.label || "");
     const numericValue = extractNumericSortValue(label);
     return numericValue !== null
-      ? { type: "number", value: numericValue }
+       ? { type: "number", value: numericValue }
       : { type: "text", value: label.toLowerCase() };
   }
 
@@ -96,7 +96,7 @@ function normalizeSortValue(value) {
     const objectText = formatObjectValue(value);
     const numericValue = extractNumericSortValue(objectText);
     return numericValue !== null
-      ? { type: "number", value: numericValue }
+       ? { type: "number", value: numericValue }
       : { type: "text", value: objectText.toLowerCase() };
   }
 
@@ -264,8 +264,8 @@ export default function DataTable({
     if (!sortField) return data;
 
     return [...data].sort((a, b) => {
-      const aValue = normalizeSortValue(a?.[sortField]);
-      const bValue = normalizeSortValue(b?.[sortField]);
+      const aValue = normalizeSortValue(a[sortField]);
+      const bValue = normalizeSortValue(b[sortField]);
 
       if (aValue.type === "number" && bValue.type === "number") {
         if (aValue.value === bValue.value) return 0;
@@ -446,6 +446,7 @@ export default function DataTable({
     return filters.map((filter) => (
       <select
         key={filter.name}
+        name={`filter-${filter.name}`}
         value={activeFilters[filter.name] || ""}
         onChange={(e) => handleFilterChange(filter.name, e.target.value)}
         style={{
@@ -475,6 +476,7 @@ export default function DataTable({
         {sourceColumns.map((column) => (
           <label key={column.field}>
             <input
+              name={`column-${column.field}`}
               type="checkbox"
               checked={visibleColumns.some((visible) => visible.field === column.field)}
               onChange={() => toggleColumn(column)}
@@ -557,6 +559,7 @@ export default function DataTable({
         </button>
 
         <select
+          name="page-size"
           value={pageSize}
           onChange={(e) =>
             onPageSizeChange && onPageSizeChange(Number(e.target.value))
@@ -584,6 +587,7 @@ export default function DataTable({
 
           {searchable && (
             <input
+              name="table-search"
               placeholder="Suchen..."
               value={search}
               onChange={searchChange}
@@ -641,6 +645,7 @@ export default function DataTable({
               {selectableRows && (
                 <th className="datatable-selection-column">
                   <input
+                    name="select-all-rows"
                     type="checkbox"
                     checked={sortedData.length > 0 && sortedData.every((row) => selectedRowIds.some((id) => String(id) === String(row.id)))}
                     onChange={toggleSelectAllRows}
@@ -690,6 +695,7 @@ export default function DataTable({
                   {selectableRows && (
                     <td className="datatable-selection-column" onClick={(e) => e.stopPropagation()}>
                       <input
+                        name={`select-row-${row.id}`}
                         type="checkbox"
                         checked={selectedRowIds.some((id) => String(id) === String(row.id))}
                         onChange={() => toggleRowSelection(row.id)}

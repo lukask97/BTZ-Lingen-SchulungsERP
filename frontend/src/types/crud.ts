@@ -1,5 +1,5 @@
 export interface EntityWithId {
-    id?: number | string | null;
+    id: number | string | null;
     [key: string]: unknown;
 }
 
@@ -9,13 +9,13 @@ export interface CrudService<T extends EntityWithId> {
     getById: (id: number | string) => T | undefined;
     create: (item: Partial<T> & Record<string, unknown>) => T;
     add: (item: Partial<T> & Record<string, unknown>) => T;
-    update: (idOrItem: number | string | (Partial<T> & Record<string, unknown>), payload?: Partial<T>) => T;
+    update: (idOrItem: number | string | (Partial<T> & Record<string, unknown>), payload: Partial<T>) => T;
     remove: (id: number | string) => void;
     delete: (id: number | string) => void;
-    removeMany?: (ids: Array<number | string>) => void;
-    deleteMultiple?: (ids: Array<number | string>) => void;
-    search?: (query: string) => T[];
-    sortBy?: (field: keyof T | string, order?: string) => T[];
+    removeMany: (ids: Array<number | string>) => void;
+    deleteMultiple: (ids: Array<number | string>) => void;
+    search: (query: string) => T[];
+    sortBy: (field: keyof T | string, order: string) => T[];
 }
 
 export interface CrudValidationField {
@@ -24,8 +24,8 @@ export interface CrudValidationField {
 }
 
 export interface UseCrudPageOptions<T extends EntityWithId> {
-    requiredFields?: CrudValidationField[];
-    createNewItem?: () => T;
+    requiredFields: CrudValidationField[];
+    createNewItem: () => T;
 }
 
 export interface UseCrudPageResult<T extends EntityWithId> {
@@ -44,6 +44,7 @@ export interface UseCrudPageResult<T extends EntityWithId> {
     neu: () => void;
     bearbeiten: (item: T) => void;
     loeschen: (item: T) => void;
-    speichern: () => void;
+    speichern: () => boolean;
+    refreshData: () => void;
     handleClose: () => void;
 }

@@ -145,7 +145,7 @@ export default function LehrkraftOptionen() {
 
     return <>
         <h1>Lehrkraft-Optionen</h1>
-        <p>Diese Hilfsseite steuert automatische Vereinfachungen fuer die Lehrkraftsicht. Ziel ist, dass Standardfaelle moeglichst ohne Zusatzarbeit abgefangen werden und die Lehrkraft nur noch bei echten Ausnahmen eingreifen muss.</p>
+        <p>Diese Hilfsseite steuert automatische Vereinfachungen für die Lehrkraftsicht. Ziel ist, dass Standardfälle möglichst ohne Zusatzarbeit abgefangen werden und die Lehrkraft nur noch bei echten Ausnahmen eingreifen muss.</p>
         <div className="kennzahlen" role="tablist" aria-label="Lehrkraft-Optionen">
             {tabs.map(tab => <button
                 key={tab.key}
@@ -162,14 +162,14 @@ export default function LehrkraftOptionen() {
                 <h2>Lieferannahme</h2>
                 <span>{optionen.autoLieferannahmeNach1Tag ? "Ein" : "Aus"}</span>
             </div>
-            <p>Wenn aktiv, werden Lieferannahmen in der Kundenkorrespondenz automatisch bestaetigt. Die Verteilung ist fest: 1 Tag = 25 %, 2 Tage = 50 %, 3 Tage = 25 %.</p>
+            <p>Wenn aktiv, werden Lieferannahmen in der Kundenkorrespondenz automatisch bestätigt. Die Verteilung ist fest: 1 Tag = 25 %, 2 Tage = 50 %, 3 Tage = 25 %.</p>
             <div className="lehrkraft-options-actions">
                 <button type="button" onClick={() => toggle("autoLieferannahmeNach1Tag")}>
                     {optionen.autoLieferannahmeNach1Tag ? "Ausschalten" : "Einschalten"}
                 </button>
             </div>
             <ul className="dashboard-note-list">
-                <li>Typische Standardreaktionen laufen ohne zusaetzliche Lehrkraft-Klicks durch.</li>
+                <li>Typische Standardreaktionen laufen ohne zusätzliche Lehrkraft-Klicks durch.</li>
                 <li>Der Ablauf bleibt didaktisch steuerbar, weil die Funktion jederzeit deaktiviert werden kann.</li>
                 <li>Die Annahme erfolgt bewusst nicht sofort, sondern mit realistischer 1/2/3-Tage-Verteilung.</li>
             </ul>
@@ -181,13 +181,13 @@ export default function LehrkraftOptionen() {
                     <h2>Debitorenzahlungen</h2>
                     <span>{optionen.autoDebitorenzahlungNach1Tag ? "Ein" : "Aus"}</span>
                 </div>
-                <p>Wenn aktiv, legt das System fuer uebermittelte Ausgangsrechnungen automatisch eine terminierte Ueberweisung an. Die spaetere Ausfuehrung folgt dann der gewichteten Tagesverteilung. Eine Regel mit <strong>0</strong> simuliert bewusst den Fall, dass keine Zahlung eingeht und spaeter eine Inkasso-Weiterleitung noetig wird.</p>
+                <p>Wenn aktiv, legt das System für übermittelte Ausgangsrechnungen automatisch eine terminierte Überweisung an. Die spätere Ausführung folgt dann der gewichteten Tagesverteilung. Eine Regel mit <strong>0</strong> simuliert bewusst den Fall, dass keine Zahlung eingeht und später eine Inkasso-Weiterleitung nötig wird.</p>
                 <div className="lehrkraft-options-actions">
                     <button type="button" onClick={() => toggle("autoDebitorenzahlungNach1Tag")}>
                         {optionen.autoDebitorenzahlungNach1Tag ? "Ausschalten" : "Einschalten"}
                     </button>
                     <button type="button" className="button-secondary" onClick={addRegel}>
-                        Regel hinzufuegen
+                        Regel hinzufügen
                     </button>
                 </div>
             </section>
@@ -197,7 +197,7 @@ export default function LehrkraftOptionen() {
                     <h2>Gewichtete Zahlungsregeln</h2>
                     <span>Erweiterbar</span>
                 </div>
-                <p>Beispiel: <code>1-3 | 10</code> bedeutet 10 Anteile fuer Zahlungen zwischen Tag 1 und 3. Innerhalb der Spanne wird gleich verteilt. <code>0 | 1</code> bedeutet: in 1 Anteil findet gar keine Zahlung statt.</p>
+                <p>Beispiel: <code>1-3 | 10</code> bedeutet 10 Anteile für Zahlungen zwischen Tag 1 und 3. Innerhalb der Spanne wird gleich verteilt. <code>0 | 1</code> bedeutet: in 1 Anteil findet gar keine Zahlung statt.</p>
                 <div className="lehrkraft-rule-list">
                     {regeln.map((regel, index) => {
                         const anteil = gesamtgewicht > 0 ? ((regel.gewichtung / gesamtgewicht) * 100).toFixed(1) : "0.0";
@@ -205,7 +205,7 @@ export default function LehrkraftOptionen() {
                             <div className="lehrkraft-rule-header">
                                 <strong>{formatRuleLabel(regel)}</strong>
                                 <div className="lehrkraft-rule-header-actions">
-                                    <small>{regel.gewichtung} von {gesamtgewicht} Faellen ({anteil} %)</small>
+                                    <small>{regel.gewichtung} von {gesamtgewicht} Fällen ({anteil} %)</small>
                                     <button type="button" className="button-danger" onClick={() => removeRegel(regel.id)} disabled={regeln.length <= 1}>
                                         Entfernen
                                     </button>
@@ -215,7 +215,7 @@ export default function LehrkraftOptionen() {
                                 <div>
                                     <Label>Von Tag</Label>
                                     <NumberField
-                                        value={regelDrafts.find(item => item.id === regel.id)?.startTag ?? String(regel.startTag)}
+                                        value={regelDrafts.find(item => item.id === regel.id)?.startTag || String(regel.startTag)}
                                         min="0"
                                         onChange={value => updateRegel(regel.id, "startTag", value)}
                                         onBlur={() => commitRegel(regel.id, "startTag")}
@@ -224,7 +224,7 @@ export default function LehrkraftOptionen() {
                                 <div>
                                     <Label>Bis Tag</Label>
                                     <NumberField
-                                        value={regelDrafts.find(item => item.id === regel.id)?.endTag ?? String(regel.endTag)}
+                                        value={regelDrafts.find(item => item.id === regel.id)?.endTag || String(regel.endTag)}
                                         min="0"
                                         onChange={value => updateRegel(regel.id, "endTag", value)}
                                         onBlur={() => commitRegel(regel.id, "endTag")}
@@ -233,7 +233,7 @@ export default function LehrkraftOptionen() {
                                 <div>
                                     <Label>Gewichtung</Label>
                                     <NumberField
-                                        value={regelDrafts.find(item => item.id === regel.id)?.gewichtung ?? String(regel.gewichtung)}
+                                        value={regelDrafts.find(item => item.id === regel.id)?.gewichtung || String(regel.gewichtung)}
                                         min="1"
                                         onChange={value => updateRegel(regel.id, "gewichtung", value)}
                                         onBlur={() => commitRegel(regel.id, "gewichtung")}
@@ -251,10 +251,10 @@ export default function LehrkraftOptionen() {
                     <span>Entlastung</span>
                 </div>
                 <ul className="dashboard-note-list">
-                    <li>Sobald eine Ausgangsrechnung vorliegt, wird automatisch eine geplante Ueberweisung mit Termin erzeugt.</li>
-                    <li>Wiederkehrende Zahlungseingaenge werden automatisch ueber realistische Zeitfenster verteilt.</li>
-                    <li>Ausreisser wie Nichtzahlung lassen sich bewusst mit einer 0-Regel simulieren, ohne einzelne Vorgaenge manuell offen zu halten.</li>
-                    <li>Die Lehrkraft muss dadurch weniger Belege einzeln nachfassen und kann staerker auf didaktische Sonderfaelle schauen.</li>
+                    <li>Sobald eine Ausgangsrechnung vorliegt, wird automatisch eine geplante Überweisung mit Termin erzeugt.</li>
+                    <li>Wiederkehrende Zahlungseingänge werden automatisch über realistische Zeitfenster verteilt.</li>
+                    <li>Ausreißer wie Nichtzahlung lassen sich bewusst mit einer 0-Regel simulieren, ohne einzelne Vorgänge manuell offen zu halten.</li>
+                    <li>Die Lehrkraft muss dadurch weniger Belege einzeln nachfassen und kann stärker auf didaktische Sonderfälle schauen.</li>
                 </ul>
             </section>
         </>}

@@ -4,7 +4,7 @@ const SALES_FLOW_STEPS = [
     { key: "kundenanfragen", label: "Kundenanfrage", to: "/kundenanfragen" },
     { key: "angebote", label: "Angebot", to: "/angebote" },
     { key: "auftraege", label: "Auftrag", to: "/auftraege" },
-    { key: "auftragsbestaetigung", label: "Auftragsbestaetigung", to: "/vertriebsdokumente" },
+    { key: "auftragsbestaetigung", label: "Auftragsbestätigung", to: "/vertriebsdokumente" },
     { key: "lieferschein", label: "Lieferschein", to: "/vertriebsdokumente" },
     { key: "versand", label: "Versand", to: "/versand" },
     { key: "rechnungen", label: "Rechnung", to: "/rechnungen" }
@@ -18,20 +18,22 @@ export default function SalesFlowBar({ currentStep }: SalesFlowBarProps) {
     const currentIndex = SALES_FLOW_STEPS.findIndex(step => step.key === currentStep);
     const previousStep = currentIndex > 0 ? SALES_FLOW_STEPS[currentIndex - 1] : null;
     const nextStep = currentIndex >= 0 && currentIndex < SALES_FLOW_STEPS.length - 1 ? SALES_FLOW_STEPS[currentIndex + 1] : null;
+    const previousTarget = previousStep?.to || "#";
+    const nextTarget = nextStep?.to || "#";
 
     return <section className="sales-flow-bar">
         <div className="sales-flow-header">
             <div>
                 <strong>Verkaufsfluss</strong>
-                <p className="module-hint">Fuehrt Schritt fuer Schritt von der Kundenanfrage bis zur Rechnung.</p>
+                <p className="module-hint">Führt Schritt für Schritt von der Kundenanfrage bis zur Rechnung.</p>
             </div>
             <div className="sales-flow-actions">
-                <Link className={`button-secondary sales-flow-button${!previousStep ? " is-disabled" : ""}`} to={previousStep?.to || "#"} onClick={event => {
+                <Link className={`button-secondary sales-flow-button${!previousStep ? " is-disabled" : ""}`} to={previousTarget} onClick={event => {
                     if (!previousStep) event.preventDefault();
                 }}>
-                    Zurueck
+                    Zurück
                 </Link>
-                <Link className={`sales-flow-button${!nextStep ? " is-disabled" : ""}`} to={nextStep?.to || "#"} onClick={event => {
+                <Link className={`sales-flow-button${!nextStep ? " is-disabled" : ""}`} to={nextTarget} onClick={event => {
                     if (!nextStep) event.preventDefault();
                 }}>
                     Weiter

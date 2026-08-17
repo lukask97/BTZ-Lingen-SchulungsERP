@@ -5,6 +5,7 @@ import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
 import { PERMISSIONS } from "../../constants/permissions";
@@ -134,7 +135,7 @@ export default function Einkaufsdokumente() {
             partnerValue: dokument.lieferant,
             positions: (bestellung?.positionen || dokument.positionen || []).map(position => ({
                 ...position,
-                einzelpreis: position.einzelpreis ?? 0
+                einzelpreis: position.einzelpreis || 0
             }))
         });
     };
@@ -162,14 +163,14 @@ export default function Einkaufsdokumente() {
                     <Link className="button-link" to="/bestellungen">Bestellungen öffnen</Link>
                     <Link className="button-link" to="/wareneingaenge">Wareneingänge öffnen</Link>
                     <Link className="button-link" to="/lieferantenvergleich">Lieferantenvergleich</Link>
-                    {selectedBestellung?.status === "eingegangen" && <Link className="button-link" to={`/eingangsrechnungen?focus=${String(selectedBestellung.bestellNr || "").replace("EK-", "ER-")}`}>Eingangsrechnung prüfen</Link>}
+                    {selectedBestellung?.status === "eingegangen" && <Link className="button-link" to={`/eingangsrechnungenfocus=${String(selectedBestellung.bestellNr || "").replace("EK-", "ER-")}`}>Eingangsrechnung prüfen</Link>}
                 </div>
             </div>
             {selectedBestellung && <div className="personalakte-summary">
                 <div><span>Bestellung</span><strong>{selectedBestellung.bestellNr}</strong></div>
                 <div><span>Lieferant</span><strong>{selectedBestellung.lieferant}</strong></div>
                 <div><span>Status</span><strong>{selectedBestellung.status}</strong></div>
-                <div><span>Positionen</span><strong>{selectedBestellung.positionen.length}</strong></div>
+                <div><span>Positionen</span><strong>{selectedBestellung.positionen?.length || 0}</strong></div>
             </div>}
         </section>
 
@@ -236,7 +237,12 @@ export default function Einkaufsdokumente() {
             }}
         />
 
-        <Dialog open={open} title="Einkaufsdokument erstellen" onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title="Einkaufsdokument erstellen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label glossaryKey="belegbezug">Bestellung</Label><LookupField value={current.bestellungId} options={bestellOptionen} onChange={value => setCurrent(item => ({ ...item, bestellungId: value }))} placeholder="Bestellung suchen..."/></div>
             <div><Label glossaryKey="nummernkreis">Dokumenttyp</Label><select value={current.dokumentTyp} onChange={event => setCurrent(item => ({ ...item, dokumentTyp: event.target.value }))}>
                 {dokumentTypen.map(item => <option key={item} value={item}>{item}</option>)}
@@ -245,7 +251,6 @@ export default function Einkaufsdokumente() {
             <div className="form-row"><Label>Vorschau Titel</Label><strong>{createDokumentTitel(current.dokumentTyp, bestellungen.find(item => String(item.id) === String(current.bestellungId)))}</strong></div>
             <div><Label>Datum</Label><input type="date" value={current.datum} onChange={event => setCurrent(item => ({ ...item, datum: event.target.value }))}/></div>
             <div className="form-row"><Label>Hinweis</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

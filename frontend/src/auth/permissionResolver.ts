@@ -1,27 +1,27 @@
 type RoleLike = {
-    id?: number | string | null;
-    name?: string;
-    permissions?: string[];
+    id: number | string | null;
+    name: string;
+    permissions: string[];
 };
 
 type RolePermissionLike = {
-    rolleId?: number | string | null;
-    rollenId?: number | string | null;
-    rolleName?: string;
-    rechtName?: string;
-    permission?: string;
+    rolleId: number | string | null;
+    rollenId: number | string | null;
+    rolleName: string;
+    rechtName: string;
+    permission: string;
 };
 
 type UserLike = {
-    rolle?: string;
-    rolleId?: number | string | null;
-    permissions?: string[];
+    rolle: string;
+    rolleId: number | string | null;
+    permissions: string[];
 };
 
 function normalizePermissionList(values: unknown[]) {
     return Array.from(new Set(
         values
-            .map(value => String(value || "").trim())
+            .map(value => String(value ?? "").trim())
             .filter(Boolean)
     ));
 }
@@ -35,7 +35,7 @@ export function resolveRolePermissions(
     const byRoleAssignments = rolePermissions
         .filter(item =>
             String(item.rolleId ?? item.rollenId ?? "") === String(role.id ?? "")
-            || String(item.rolleName || "").toLowerCase() === String(role.name || "").toLowerCase()
+            || String(item.rolleName ?? "").toLowerCase() === String(role.name ?? "").toLowerCase()
         )
         .map(item => item.rechtName || item.permission || "");
 
@@ -54,7 +54,7 @@ export function resolveUserPermissions(
 
     const matchingRole = roles.find(role =>
         String(role.id ?? "") === String(user.rolleId ?? "")
-        || String(role.name || "").toLowerCase() === String(user.rolle || "").toLowerCase()
+        || String(role.name ?? "").toLowerCase() === String(user.rolle ?? "").toLowerCase()
     );
 
     return normalizePermissionList([

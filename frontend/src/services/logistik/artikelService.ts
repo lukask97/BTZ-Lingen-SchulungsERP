@@ -24,10 +24,10 @@ function withPermissionFallback<T>(reader: () => T, fallback: T) {
 function hydrateKomponenten(item = {}) {
     return stuecklisteService.listByParent(item.id || "")
         .map(position => ({
-            artikelId: position.komponentenartikelId ?? position.artikelId,
+            artikelId: position.komponentenartikelId || position.artikelId,
             artikel: withPermissionFallback(
-                () => baseService.list().find(entry => String(entry.id) === String(position.komponentenartikelId ?? position.artikelId))?.name || "",
-                artikel.find(entry => String(entry.id) === String(position.komponentenartikelId ?? position.artikelId))?.name || ""
+                () => baseService.list().find(entry => String(entry.id) === String(position.komponentenartikelId || position.artikelId))?.name || "",
+                artikel.find(entry => String(entry.id) === String(position.komponentenartikelId || position.artikelId))?.name || ""
             ),
             menge: Number(position.menge || 0)
         }));
@@ -35,28 +35,28 @@ function hydrateKomponenten(item = {}) {
 
 export function normalizeArtikel(item = {}) {
     const komponenten = Array.isArray(item.komponenten) ? item.komponenten : hydrateKomponenten(item);
-    const basisPreis = Number(item.preis ?? 0);
-    const einkaufspreis = Number(item.einkaufspreis ?? basisPreis);
-    const verkaufspreis = Number(item.verkaufspreis ?? basisPreis);
+    const basisPreis = Number(item.preis || 0);
+    const einkaufspreis = Number(item.einkaufspreis || basisPreis);
+    const verkaufspreis = Number(item.verkaufspreis || basisPreis);
     const kategoriePfad = getKategoriePfad(item.kategorieId, item.kategoriePfad || item.kategorie || "");
     const kategorie = kategoriePfad.split(" > ")[0] || item.kategorie || "";
     return {
         ...item,
-        kategorieId: item.kategorieId ?? "",
+        kategorieId: item.kategorieId || "",
         kategorie,
         kategoriePfad,
         artikelTyp: item.artikelTyp || (komponenten.length > 0 ? "Baugruppe" : "Einzelartikel"),
         einkaufspreis,
         verkaufspreis,
-        bestand: Number(item.bestand ?? 0),
-        mindestmenge: Number(item.mindestmenge ?? 0),
-        bedarfsmeldungBei: Number(item.bedarfsmeldungBei ?? 0),
+        bestand: Number(item.bestand || 0),
+        mindestmenge: Number(item.mindestmenge || 0),
+        bedarfsmeldungBei: Number(item.bedarfsmeldungBei || 0),
         komponenten,
         istEinkaufbar: einkaufspreis > 0,
         istVerkaeuflich: verkaufspreis > 0,
         beschaffungsart: einkaufspreis > 0 ? "Zukauf" : "Herstellung",
         verkaufsstatus: verkaufspreis > 0 ? "Verkaufbar" : "Nicht verkaufbar",
-        bedarfsmeldungAktiv: Number(item.bedarfsmeldungBei ?? 0) > 0 && Number(item.bestand ?? 0) <= Number(item.bedarfsmeldungBei ?? 0)
+        bedarfsmeldungAktiv: Number(item.bedarfsmeldungBei || 0) > 0 && Number(item.bestand || 0) <= Number(item.bedarfsmeldungBei || 0)
     };
 }
 
@@ -139,8 +139,8 @@ const artikelService = {
     sortBy: (field, order = "asc") => withPermissionFallback(
         () => baseService.sortBy(field, order).map(normalizeArtikel),
         [...artikelService.list()].sort((a, b) => {
-            const aValue = String(a?.[field] ?? "");
-            const bValue = String(b?.[field] ?? "");
+            const aValue = String(a[field] ?? "");
+            const bValue = String(b[field] ?? "");
             return order === "desc" ? bValue.localeCompare(aValue) : aValue.localeCompare(bValue);
         })
     )

@@ -38,7 +38,7 @@ export default function LehrkraftOverview() {
 
     return <>
         <h1>Lehrkraft</h1>
-        <p>Diese Sicht buendelt die wichtigsten Unterlagen und Kommunikationsflaechen fuer Unterricht, Kontrolle und Versand. Die Bearbeitung bleibt in den vorhandenen Fachseiten, aber hier ist der Einstieg fuer die Lehrkraft kompakter zusammengefasst.</p>
+        <p>Diese Sicht bündelt die wichtigsten Unterlagen und Kommunikationsflächen für Unterricht, Kontrolle und Versand. Die Bearbeitung bleibt in den vorhandenen Fachseiten, aber hier ist der Einstieg für die Lehrkraft kompakter zusammengefasst.</p>
 
         <OverviewCards cards={[
             { label: "Kundenanfragen offen", value: offeneAnfragen },
@@ -55,14 +55,14 @@ export default function LehrkraftOverview() {
                     <h2>Kundenkorrespondenz</h2>
                     <span>Verkauf</span>
                 </div>
-                <p>Hier sieht die Lehrkraft, ob sie auf Kundenanfragen reagieren, Angebote beantworten oder eine Warenannahme beziehungsweise Transportbescheinigung bestaetigen muss.</p>
+                <p>Hier sieht die Lehrkraft, ob sie auf Kundenanfragen reagieren, Angebote beantworten oder eine Warenannahme beziehungsweise Transportbescheinigung bestätigen muss.</p>
                 <ul className="dashboard-note-list">
-                    <li>{offeneAnfragen} Anfragen oder Rueckmeldungen sind noch nicht abgeschlossen.</li>
-                    <li>{offeneAngebote} Angebote warten noch auf Annahme, Ablehnung oder Rueckfrage.</li>
+                    <li>{offeneAnfragen} Anfragen oder Rückmeldungen sind noch nicht abgeschlossen.</li>
+                    <li>{offeneAngebote} Angebote warten noch auf Annahme, Ablehnung oder Rückfrage.</li>
                     <li>{offeneWarenannahmen} Warenannahmen oder Transportunterlagen sind noch offen.</li>
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Kundenkorrespondenz oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Kundenkorrespondenz öffnen</Link>
                     <Link className="button-link" to="/lehrkraft/optionen">Lehrkraft-Optionen</Link>
                 </div>
             </article>
@@ -72,15 +72,15 @@ export default function LehrkraftOverview() {
                     <h2>Lieferantenkorrespondenz</h2>
                     <span>Einkauf</span>
                 </div>
-                <p>Hier bestaetigt die Lehrkraft Einkaufsanfragen der Schuelerfirma und markiert die Bestellung anschliessend als versendet. Eine zusaetzliche Dokumentkette ist dafuer nicht noetig.</p>
+                <p>Hier bestätigt die Lehrkraft Einkaufsanfragen der Schülerfirma und markiert die Bestellung anschließend als versendet. Eine zusätzliche Dokumentkette ist dafür nicht nötig.</p>
                 <ul className="dashboard-note-list">
-                    <li>{offeneLieferantenanfragen} Anfragen warten auf Bestaetigung.</li>
-                    <li>{bestaetigteBestellungen} bestaetigte Bestellungen koennen versendet werden.</li>
-                    <li>{versendeteBestellungen} Bestellungen warten auf Wareneingang in der Schuelerfirma.</li>
+                    <li>{offeneLieferantenanfragen} Anfragen warten auf Bestätigung.</li>
+                    <li>{bestaetigteBestellungen} bestätigte Bestellungen können versendet werden.</li>
+                    <li>{versendeteBestellungen} Bestellungen warten auf Wareneingang in der Schülerfirma.</li>
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Lieferantenkorrespondenz oeffnen</Link>
-                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Bestellungen oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Lieferantenkorrespondenz öffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Bestellungen öffnen</Link>
                 </div>
             </article>
         </section>
@@ -91,13 +91,13 @@ export default function LehrkraftOverview() {
                     <h2>Zahlungen extern</h2>
                     <span>Kunden</span>
                 </div>
-                <p>Hier sieht die Lehrkraft, welche Zahlungen von Kunden gegenueber der Schuelerfirma noch erwartet oder erst geplant sind. Dieser Bereich gehoert zur Kundenkorrespondenz.</p>
+                <p>Hier sieht die Lehrkraft, welche Zahlungen von Kunden gegenüber der Schülerfirma noch erwartet oder erst geplant sind. Dieser Bereich gehört zur Kundenkorrespondenz.</p>
                 <ul className="dashboard-note-list">
-                    <li>Die Schuelerfirma fuehrt die Zahlung nicht selbst aus, sondern dokumentiert Zahlungserwartung, Eingang oder Klaerung.</li>
-                    <li>{offeneDebitorenzahlungen} Debitorenzahlungen sind noch offen oder noch nicht ausgefuehrt.</li>
+                    <li>Die Schülerfirma führt die Zahlung nicht selbst aus, sondern dokumentiert Zahlungserwartung, Eingang oder Klärung.</li>
+                    <li>{offeneDebitorenzahlungen} Debitorenzahlungen sind noch offen oder noch nicht ausgeführt.</li>
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/lehrkraft/zahlungen">Zahlungen extern oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/zahlungen">Zahlungen extern öffnen</Link>
                     <Link className="button-link" to="/lehrkraft/kundenkorrespondenz">Zur Kundenkorrespondenz</Link>
                     <Link className="button-link" to="/lehrkraft/optionen">Automatik verwalten</Link>
                 </div>
@@ -108,13 +108,13 @@ export default function LehrkraftOverview() {
                     <h2>Rechnungen extern</h2>
                     <span>Lieferanten</span>
                 </div>
-                <p>Diese Sicht dient als kompakter Einstieg in Rechnungen, offene Posten und Belegbezug gegenueber der Schuelerfirma. Dieser Bereich gehoert zur Lieferantenkorrespondenz.</p>
+                <p>Diese Sicht dient als kompakter Einstieg in Rechnungen, offene Posten und Belegbezug gegenüber der Schülerfirma. Dieser Bereich gehört zur Lieferantenkorrespondenz.</p>
                 <ul className="dashboard-note-list">
-                    <li>{offeneRechnungenZurSchuelerfirma} Rechnungen sind noch offen oder noch nicht vollstaendig ausgeglichen.</li>
+                    <li>{offeneRechnungenZurSchuelerfirma} Rechnungen sind noch offen oder noch nicht vollständig ausgeglichen.</li>
                     <li>Belege, Zahlungen und Mahnungen bleiben direkt mit dem Vorgang verbunden.</li>
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/lehrkraft/rechnungen">Rechnungen extern oeffnen</Link>
+                    <Link className="button-link" to="/lehrkraft/rechnungen">Rechnungen extern öffnen</Link>
                     <Link className="button-link" to="/lehrkraft/lieferantenkorrespondenz">Zur Lieferantenkorrespondenz</Link>
                 </div>
             </article>

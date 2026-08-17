@@ -1,15 +1,15 @@
 type CatalogImage = {
     url: string;
-    filename?: string;
+    filename: string;
 };
 
 type CatalogArticle = {
     artikelNr: string;
     name: string;
     verkaufspreis: number;
-    beschreibung?: string;
-    kategoriePfad?: string;
-    bilder?: CatalogImage[];
+    beschreibung: string;
+    kategoriePfad: string;
+    bilder: CatalogImage[];
 };
 
 function safe(value: unknown) {
@@ -38,7 +38,7 @@ export function openArticleCatalogPdf({
         if (!map.has(key)) {
             map.set(key, []);
         }
-        map.get(key)?.push(article);
+        map.get(key).push(article);
         return map;
     }, new Map<string, CatalogArticle[]>());
 
@@ -80,7 +80,7 @@ export function openArticleCatalogPdf({
 <head>
     <meta charset="UTF-8" />
     <title>${safe(title)}</title>
-    <style>
+    ? <style>
         :root {
             color-scheme: light;
         }

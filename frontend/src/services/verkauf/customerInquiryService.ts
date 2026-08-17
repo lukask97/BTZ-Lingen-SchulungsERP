@@ -38,7 +38,7 @@ export default {
     },
     create: (payload: any) => hydrateInquiry(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateInquiry(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return hydrateInquiry(baseService.update(splitPayload(idOrItem)));
         }

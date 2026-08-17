@@ -24,9 +24,9 @@ export default function Transportverzoegerung() {
             "Den Status der Kommunikation nach Bearbeitung prüfen."
         ]}
         teacherChecks={[
-            "Ist die Kundenkommunikation getrennt vom Auftrag sichtbar?",
-            "Wurde die Verzögerung konkret benannt?",
-            "Ist die angebotene Alternativlieferung nachvollziehbar beschrieben?"
+            "Ist die Kundenkommunikation getrennt vom Auftrag sichtbar",
+            "Wurde die Verzögerung konkret benannt",
+            "Ist die angebotene Alternativlieferung nachvollziehbar beschrieben"
         ]}
         completionChecks={[
             "Die Kundenanfrage ist erfasst.",

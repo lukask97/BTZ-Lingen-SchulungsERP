@@ -3,6 +3,7 @@ import Dialog from "../../components/Dialog";
 import TextField from "../../components/form/TextField";
 import Checkbox from "../../components/form/Checkbox";
 import Label from "../../components/form/Label";
+import SaveButton from "../../components/SaveButton";
 
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
@@ -116,6 +117,7 @@ export default function Rollen() {
                 open={open}
                 title={editMode ? "Rolle bearbeiten" : "Neue Rolle"}
                 onClose={handleClose}
+                footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Speichern</SaveButton>}
             >
                 <Label required>Name</Label>
                 <TextField value={currentItem.name} onChange={v => handleFieldChange("name", v)} />
@@ -152,10 +154,7 @@ export default function Rollen() {
                     </div>
                 </div>
 
-                <div className="form-row">
-                    {error && <p className="form-error">{error}</p>}
-                    <button type="button" onClick={speichern}>Speichern</button>
-                </div>
+                <div className="form-row">{error && <p className="form-error">{error}</p>}</div>
             </Dialog>
         </>
     );

@@ -9,7 +9,7 @@ export const addRecht = (recht) => rechteService.add(recht);
 export const updateRecht = (recht) => rechteService.update(recht);
 export const deleteRecht = (id) => {
     const recht = rechteService.getById(id);
-    if (recht?.name) {
+    if (recht.name) {
         rollenRechteService.getAll()
             .filter(item => item.rechtName === recht.name)
             .forEach(item => {

@@ -54,7 +54,7 @@ export default function Geschaeftsfuehrung() {
                 </div>
                 <ul className="dashboard-note-list">
                     <li>Viele offene Aufträge beeinflussen Versand, Rechnungen und Freigaben.</li>
-                    <li>Aktive Bestellungen oder Engpaesse wirken auf Lager und Lieferfaehigkeit.</li>
+                    <li>Aktive Bestellungen oder Engpässe wirken auf Lager und Lieferfähigkeit.</li>
                     <li>Offene Rechnungen und Mahnungen sind Hinweise auf Zahlungs- oder Prozessprobleme.</li>
                 </ul>
                 <div className="link-list">

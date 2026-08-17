@@ -22,8 +22,8 @@ function normalizeReturn(item: any = {}) {
         ...item,
         kundeId: item.kundeId || "",
         kunde: getCustomerName(item.kundeId, item.kunde || ""),
-        artikelId: item.artikelId || artikel?.id || "",
-        artikel: artikel?.name || item.artikel || ""
+        artikelId: item.artikelId || artikel.id || "",
+        artikel: artikel.name || item.artikel || ""
     };
 }
 
@@ -43,7 +43,7 @@ const retourenService = {
     },
     create: (payload: any) => normalizeReturn(baseService.create(splitPayload(payload))),
     add: (payload: any) => normalizeReturn(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return normalizeReturn(baseService.update(splitPayload(idOrItem)));
         }

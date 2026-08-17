@@ -1,4 +1,4 @@
-// Zentrale Testdaten
+﻿// Zentrale Testdaten
 // Nur im Arbeitsspeicher
 
 // Vertrieb und Stammdaten
@@ -43,7 +43,7 @@ export let kunden = [
         id: 3,
         kundenNr: "DB10003",
         firma: "Nordrad Campus Service",
-        anschrift: "LindenstraÃŸe 22",
+        anschrift: "Lindenstraße 22",
         plz: "48529",
         ort: "Nordhorn",
         segment: "Dienstleistung",
@@ -51,35 +51,35 @@ export let kunden = [
         iban: "DE31500105170648489890",
         optionen: ["Service", "Wartung", "Abholung"],
         website: "https://www.nordrad-campus.de/",
-        notiz:"Servicekunde mit regelmaeÃŸigen Wartungsanfragen."
+        notiz:"Servicekunde mit regelmäßigen Wartungsanfragen."
     },
 
     {
         id: 4,
         kundenNr: "DB10004",
-        firma: "Stadtwerke Lingen Mobilitaet",
-        anschrift: "KaiserstraÃŸe 14",
+        firma: "Stadtwerke Lingen Mobilität",
+        anschrift: "Kaiserstraße 14",
         plz: "49808",
         ort: "Lingen",
-        segment: "Oeffentliche Einrichtung",
+        segment: "Öffentliche Einrichtung",
         abc: "A",
         iban: "DE98500105179876543210",
         optionen: ["Flottenkunden", "Lastenbikes", "Sicherheitsausstattung"],
         website: "https://www.stadtwerke-lingen.de/",
-        notiz:"Potenzial fuer groessere Flottenbestellungen."
+        notiz:"Potenzial für größere Flottenbestellungen."
     },
 
     {
         id: 5,
         kundenNr: "DB10005",
         firma: "Jugendwerkstatt Ems-Vechte",
-        anschrift: "WerkstraÃŸe 7",
+        anschrift: "Werkstraße 7",
         plz: "48431",
         ort: "Rheine",
         segment: "Bildung",
         abc: "C",
         iban: "DE12500105171234567890",
-        optionen: ["Schulungsfahrraeder", "Helme", "Projektmaterial"],
+        optionen: ["Schulungsfahrräder", "Helme", "Projektmaterial"],
         website: "",
         notiz:"Neuer Projektkunde mit wiederkehrendem Trainingsbedarf."
     }
@@ -94,15 +94,15 @@ export let artikel = [
         artikelNr: "ART001",
         name: "Schulungsfahrrad City",
         kategorieId: 4,
-        kategorie: "Fahrraeder",
-        kategoriePfad: "Fahrraeder > Citybike",
+        kategorie: "Fahrräder",
+        kategoriePfad: "Fahrräder > Citybike",
         artikelTyp: "Baugruppe",
         einkaufspreis: 420,
         verkaufspreis: 799,
         bestand: 4,
         mindestmenge: 3,
         bedarfsmeldungBei: 5,
-        beschreibung: "Komplettes Fahrrad als Beispiel fuer einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
+        beschreibung: "Komplettes Fahrrad als Beispiel für einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
     },
 
 
@@ -127,15 +127,15 @@ export let artikel = [
         artikelNr: "ART003",
         name: "Fahrradhelm",
         kategorieId: 8,
-        kategorie: "Zubehoer",
-        kategoriePfad: "Zubehoer > Helm",
+        kategorie: "Zubehör",
+        kategoriePfad: "Zubehör > Helm",
         artikelTyp: "Einzelartikel",
         einkaufspreis: 24.5,
         verkaufspreis: 59.99,
         bestand: 12,
         mindestmenge: 10,
         bedarfsmeldungBei: 15,
-        beschreibung: "Sicherer Fahrradhelm mit Zertifikat. Zusaetzliche Menge ist bereits bestellt."
+        beschreibung: "Sicherer Fahrradhelm mit Zertifikat. Zusätzliche Menge ist bereits bestellt."
     },
     {
         id: 4,
@@ -150,7 +150,7 @@ export let artikel = [
         bestand: 8,
         mindestmenge: 6,
         bedarfsmeldungBei: 9,
-        beschreibung: "Rahmen als Einzelkomponente fuer Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
+        beschreibung: "Rahmen als Einzelkomponente für Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
     },
     {
         id: 5,
@@ -165,7 +165,7 @@ export let artikel = [
         bestand: 9,
         mindestmenge: 10,
         bedarfsmeldungBei: 12,
-        beschreibung: "Lenker fuer Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
+        beschreibung: "Lenker für Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
     },
     {
         id: 6,
@@ -195,7 +195,7 @@ export let artikel = [
         bestand: 14,
         mindestmenge: 8,
         bedarfsmeldungBei: 10,
-        beschreibung: "Komfortsattel fuer Schulungsfahrraeder mit ausreichend freiem Bestand."
+        beschreibung: "Komfortsattel für Schulungsfahrräder mit ausreichend freiem Bestand."
     }
 ];
 
@@ -643,7 +643,7 @@ export let lieferanten = [
         ort: "Meppen",
         segment: "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
         iban: "DE91500105178640732418",
-        fuerBts: "Alternativlieferant für Zubehör und Lastenbikes",
+        fürBts: "Alternativlieferant für Zubehör und Lastenbikes",
         bewertung: 4,
         abc: "B"
     },
@@ -656,7 +656,7 @@ export let lieferanten = [
         ort: "Emstek",
         segment: "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
         iban: "DE68500500001234567890",
-        fuerBts: "",
+        fürBts: "",
         bewertung: 5,
         abc: "A"
     },
@@ -669,7 +669,7 @@ export let lieferanten = [
         ort: "",
         segment: "",
         iban: "DE30500105170648489890",
-        fuerBts: "",
+        fürBts: "",
         bewertung: 3,
         abc: "C"
     },
@@ -682,7 +682,7 @@ export let lieferanten = [
         ort: "Lingen",
         segment: "Klassischer Baumarkt mit Fahrradabteilung",
         iban: "DE02500105170648489901",
-        fuerBts: "Soll Lieferant sein und Kunde",
+        fürBts: "Soll Lieferant sein und Kunde",
         bewertung: 3,
         abc: "C"
     }
@@ -699,7 +699,7 @@ export let bestellungen = [
         lehrkraftAngebotAm: "2026-07-21",
         lehrkraftAngebotPreis: 73.5,
         lehrkraftLieferzeitTage: 5,
-        lehrkraftAngebotText: "Standardangebot fuer drei Helme aus dem Vergleich."
+        lehrkraftAngebotText: "Standardangebot für drei Helme aus dem Vergleich."
     },
     {
         id: 2,
@@ -711,7 +711,7 @@ export let bestellungen = [
         bedarfsmeldungId: "auto-artikel-1",
         rechnungStatus: "offen",
         faelligAm: "2026-08-20",
-        anfrageNotiz: "Nachbestellung fuer Citybikes im Zulauf."
+        anfrageNotiz: "Nachbestellung für Citybikes im Zulauf."
     }
 ];
 
@@ -723,15 +723,15 @@ export let bestellpositionen = [
 export let kategorien = [
     {
         id: 1,
-        name: "Fahrraeder",
+        name: "Fahrräder",
         parentId: "",
-        beschreibung: "Komplette Fahrraeder und fahrbereite Baugruppen."
+        beschreibung: "Komplette Fahrräder und fahrbereite Baugruppen."
     },
     {
         id: 4,
         name: "Citybike",
         parentId: 1,
-        beschreibung: "Komplette City- und Schulungsfahrraeder."
+        beschreibung: "Komplette City- und Schulungsfahrräder."
     },
     {
         id: 5,
@@ -743,11 +743,11 @@ export let kategorien = [
         id: 6,
         name: "Sicherheitsbekleidung",
         parentId: 5,
-        beschreibung: "Warn- und Schutzkleidung fuer den Einsatz."
+        beschreibung: "Warn- und Schutzkleidung für den Einsatz."
     },
     {
         id: 7,
-        name: "Zubehoer",
+        name: "Zubehör",
         parentId: "",
         beschreibung: "Zusatzprodukte rund ums Fahrrad."
     },
@@ -755,7 +755,7 @@ export let kategorien = [
         id: 8,
         name: "Helm",
         parentId: 7,
-        beschreibung: "Helme und Schutzzubehoer."
+        beschreibung: "Helme und Schutzzubehör."
     },
     {
         id: 9,
@@ -791,7 +791,7 @@ export let kategorien = [
         id: 14,
         name: "Fahrradkette",
         parentId: 9,
-        beschreibung: "Antriebskomponenten wie Ketten und Kettenraeeder."
+        beschreibung: "Antriebskomponenten wie Ketten und Kettenräder."
     }
 ];
 
@@ -811,7 +811,7 @@ export let angebote = [
         gueltigBis: "2026-08-04",
         rabattBetrag: 0,
         gesamtbetrag: 1348.5,
-        status: "ueberarbeitet"
+        status: "überarbeitet"
     },
     {
         id: 2,
@@ -1072,7 +1072,7 @@ export let kundenanfragen = [
         kanal: "E-Mail",
         status: "erledigt",
         datum: "2026-08-01",
-        anliegen: "Bitte Angebot fuer eine mobile Wartung von sechs Fahrraedern erstellen."
+        anliegen: "Bitte Angebot für eine mobile Wartung von sechs Fahrrädern erstellen."
     },
     {
         id: 5,
@@ -1083,7 +1083,7 @@ export let kundenanfragen = [
         kanal: "Telefon",
         status: "offen",
         datum: "2026-08-10",
-        anliegen: "Anfrage fuer Helme und Schulungsfahrraeder fuer ein Herbstprojekt."
+        anliegen: "Anfrage für Helme und Schulungsfahrräder für ein Herbstprojekt."
     }
 ];
 
@@ -1127,8 +1127,8 @@ export let nachrichten = [
         senderRolle: "Kunde",
         senderName: "Nordrad Campus Service",
         kanal: "E-Mail",
-        betreff: "Mobile Wartung fuer sechs Fahrraeder",
-        nachricht: "Bitte senden Sie uns ein Angebot fuer eine mobile Wartung von sechs Fahrraedern vor Ort.",
+        betreff: "Mobile Wartung für sechs Fahrräder",
+        nachricht: "Bitte senden Sie uns ein Angebot für eine mobile Wartung von sechs Fahrrädern vor Ort.",
         typ: "Anfrage"
     },
     {
@@ -1140,10 +1140,10 @@ export let nachrichten = [
         kundeId: 3,
         datum: "2026-08-02",
         senderRolle: "Verkauf",
-        senderName: "Schuelerfirma Verkauf",
+        senderName: "Schülerfirma Verkauf",
         kanal: "E-Mail",
         betreff: "Angebot ANG-2026-004.0",
-        nachricht: "Das Serviceangebot wurde erstellt und vom Kunden direkt bestaetigt.",
+        nachricht: "Das Serviceangebot wurde erstellt und vom Kunden direkt bestätigt.",
         typ: "Angebot"
     },
     {
@@ -1157,7 +1157,7 @@ export let nachrichten = [
         senderName: "Jugendwerkstatt Ems-Vechte",
         kanal: "Telefon",
         betreff: "Projektanfrage Herbst",
-        nachricht: "Wir planen ein Herbstprojekt und benoetigen Schulungsfahrraeder sowie mehrere Helme.",
+        nachricht: "Wir planen ein Herbstprojekt und benötigen Schulungsfahrräder sowie mehrere Helme.",
         typ: "Anfrage"
     },
     {
@@ -1169,7 +1169,7 @@ export let nachrichten = [
         kundeId: 5,
         datum: "2026-08-11",
         senderRolle: "Verkauf",
-        senderName: "Schuelerfirma Verkauf",
+        senderName: "Schülerfirma Verkauf",
         kanal: "E-Mail",
         betreff: "Angebot ANG-2026-005.0",
         nachricht: "Das Angebot ist intern vorbereitet und wartet noch auf die finale Freigabe vor dem Versand.",
@@ -1177,7 +1177,7 @@ export let nachrichten = [
     }
 ];
 
-// Buchhaltung und Fuehrung
+// Buchhaltung und Führung
 
 export let zahlungen = [
     {
@@ -1495,12 +1495,12 @@ export let vertriebsdokumente = [
         angebotId: 3,
         anfrageId: 2,
         vorgangId: "anfrage-2",
-        dokumentTyp: "AuftragsbestÃ¤tigung",
-        titel: "AuftragsbestÃ¤tigung AU-2026-002",
+        dokumentTyp: "Auftragsbestätigung",
+        titel: "Auftragsbestätigung AU-2026-002",
         datum: "2026-07-30",
         status: "versendet",
         versendetAm: "2026-07-30",
-        notiz: "Kunde hat die Auftragsbestaetigung am selben Tag erhalten."
+        notiz: "Kunde hat die Auftragsbestätigung am selben Tag erhalten."
     },
     {
         id: 4,
@@ -1528,7 +1528,7 @@ export let vertriebsdokumente = [
         datum: "2026-07-31",
         status: "versendet",
         versendetAm: "2026-07-31",
-        notiz: "Begleitpapier fuer die Helm-Lieferung."
+        notiz: "Begleitpapier für die Helm-Lieferung."
     },
     {
         id: 6,
@@ -1536,12 +1536,12 @@ export let vertriebsdokumente = [
         angebotId: 5,
         anfrageId: 4,
         vorgangId: "anfrage-4",
-        dokumentTyp: "AuftragsbestÃ¤tigung",
-        titel: "AuftragsbestÃ¤tigung AU-2026-004",
+        dokumentTyp: "Auftragsbestätigung",
+        titel: "Auftragsbestätigung AU-2026-004",
         datum: "2026-08-03",
         status: "versendet",
         versendetAm: "2026-08-03",
-        notiz: "Serviceauftrag wurde direkt bestaetigt."
+        notiz: "Serviceauftrag wurde direkt bestätigt."
     },
     {
         id: 7,
@@ -1554,7 +1554,7 @@ export let vertriebsdokumente = [
         datum: "2026-08-04",
         status: "versendet",
         versendetAm: "2026-08-04",
-        notiz: "Einsatzunterlagen fuer das mobile Serviceteam."
+        notiz: "Einsatzunterlagen für das mobile Serviceteam."
     },
     {
         id: 8,
@@ -1562,8 +1562,8 @@ export let vertriebsdokumente = [
         angebotId: 6,
         anfrageId: 5,
         vorgangId: "anfrage-5",
-        dokumentTyp: "AuftragsbestÃ¤tigung",
-        titel: "AuftragsbestÃ¤tigung AU-2026-005",
+        dokumentTyp: "Auftragsbestätigung",
+        titel: "Auftragsbestätigung AU-2026-005",
         datum: "2026-08-12",
         status: "erstellt",
         notiz: "Liegt vorbereitet vor und wartet auf den Versand nach Abschluss der Freigabe."
@@ -1626,9 +1626,48 @@ export let firmenkonto = [
         datum: "2026-07-24",
         konto: "einkauf",
         betreff: "Materialeinkauf Sicherheitshelme",
-        info: "Didaktische Beispielausgabe fuer das Einkaufskonto",
+        info: "Didaktische Beispielausgabe für das Einkaufskonto",
         soll: 420,
         haben: 0,
         saldo: -420
+    }
+];
+
+export let unternehmen = [
+    {
+        id: 1,
+        firmenname: "UEF Lin",
+        branche: "Gross- & Einzelhandel Sport, Freizeit, Rad",
+        steuernummer: "88 888 89480",
+        ustIdNr: "DE194227226",
+        handelsregisterNr: "HRB 5985",
+        betriebsNr: "11129381",
+        unternehmerNr: "",
+        strasse: "Schwarzer Weg 16",
+        plzOrt: "49809 Lingen (Ems)",
+        bundesland: "Niedersachsen",
+        telefon: "0591-97304-58",
+        mail: "de01BTS@zuef-edu.de",
+        unternehmensNr: "123456789123 001",
+        amtsgericht: "Lingen (EMS)",
+        finanzamtNr: "",
+        firmaKontoname: "UEF Lin",
+        firmaBankName: "Ruhrtal-Bank",
+        firmaIban: "DE36360440810021070851",
+        firmaKontoNr: "210 708 51",
+        firmaBic: "RUHRDEE0",
+        firmaBlz: "360 440 81",
+        verkaufKontoname: "UEF Lin-VK",
+        verkaufBankName: "Ruhrtal-Bank",
+        verkaufIban: "DE36360440810021070852",
+        verkaufKontoNr: "210 708 52",
+        verkaufBic: "RUHRDEE0",
+        verkaufBlz: "360 440 81",
+        einkaufKontoname: "UEF Lin-EK",
+        einkaufBankName: "Ruhrtal-Bank",
+        einkaufIban: "DE36360440810021070853",
+        einkaufKontoNr: "210 708 53",
+        einkaufBic: "RUHRDEE0",
+        einkaufBlz: "360 440 81"
     }
 ];

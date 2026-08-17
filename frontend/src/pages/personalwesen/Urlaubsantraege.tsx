@@ -5,6 +5,7 @@ import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
@@ -49,11 +50,11 @@ export default function Urlaubsantraege() {
     };
 
     const speichern = () => {
-        if (!current.mitarbeiterId) return;
+        if (!current.mitarbeiterId) return false;
         urlaubsantraegeService.create(current);
         setAntraege(urlaubsantraegeService.list());
-        setOpen(false);
         setCurrent(createUrlaubsantrag(today));
+        return true;
     };
 
     const genehmigen = (antrag) => {
@@ -83,7 +84,7 @@ export default function Urlaubsantraege() {
                 { field: "tage", title: "Tage" },
                 { field: "status", title: "Status" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalakte?mitarbeiter=${row.mitarbeiterId}` : null}
+            detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalaktemitarbeiter=${row.mitarbeiterId}` : null}
             toolbarActions={[{ name: "new", label: "Antrag anlegen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
                 { name: "details", label: "Akte öffnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
@@ -91,12 +92,16 @@ export default function Urlaubsantraege() {
                 { name: "reject", label: "Ablehnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: ablehnen, variant: "danger", isVisible: row => row.status === "offen" }
             ]}
         />
-        <Dialog open={open} title="Urlaubsantrag anlegen" onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title="Urlaubsantrag anlegen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Mitarbeiter</Label><LookupField value={current.mitarbeiterId} options={mitarbeiterOptionen} onChange={mitarbeiterAuswaehlen} placeholder="Mitarbeiter suchen..."/></div>
             <div><Label>Von</Label><TextField type="date" value={current.von} onChange={value => setCurrent(item => ({ ...item, von: value }))}/></div>
             <div><Label>Bis</Label><TextField type="date" value={current.bis} onChange={value => setCurrent(item => ({ ...item, bis: value }))}/></div>
             <div><Label>Tage</Label><NumberField value={current.tage} min="1" onChange={value => setCurrent(item => ({ ...item, tage: Number(value) }))}/></div>
-            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

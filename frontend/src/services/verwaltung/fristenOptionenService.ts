@@ -9,8 +9,8 @@ const DEFAULT_OPTIONS = {
     zahlungszielTage: 28,
     zahlungserinnerungTage: 21,
     mahnung1AbTage: 1,
-    mahnung2AbTage: 15,
-    inkassoAbTage: 29
+    mahnung2AbTage: 8,
+    inkassoAbTage: 22
 };
 
 function toNonNegativeNumber(value: unknown, fallback: number) {

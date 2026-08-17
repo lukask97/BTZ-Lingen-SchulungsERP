@@ -22,13 +22,13 @@ function toNonNegativeInteger(value: any, fallback: number) {
 }
 
 function sanitizePaymentRule(rule: any, index: number) {
-    const startTag = toNonNegativeInteger(rule?.startTag, 0);
-    const endTagRaw = toNonNegativeInteger(rule?.endTag, startTag);
+    const startTag = toNonNegativeInteger(rule.startTag, 0);
+    const endTagRaw = toNonNegativeInteger(rule.endTag, startTag);
     const endTag = endTagRaw < startTag ? startTag : endTagRaw;
-    const gewichtung = Math.max(1, toNonNegativeInteger(rule?.gewichtung, 1));
+    const gewichtung = Math.max(1, toNonNegativeInteger(rule.gewichtung, 1));
 
     return {
-        id: String(rule?.id || `regel-${index + 1}`),
+        id: String(rule.id || `regel-${index + 1}`),
         startTag,
         endTag,
         gewichtung

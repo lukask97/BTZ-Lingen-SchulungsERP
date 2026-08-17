@@ -5,6 +5,7 @@ import TextField from "../../components/form/TextField";
 import TextArea from "../../components/form/TextArea";
 import Label from "../../components/form/Label";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import servicesService from "../../services/verkauf/servicesService";
@@ -74,7 +75,7 @@ export default function Services() {
         <DataTable
             title={config.title}
             tableName={config.tableName}
-            username={user?.username || ""}
+            username={user.username || ""}
             columns={columns}
             allColumns={allColumns}
             data={filteredDisplayData}
@@ -90,7 +91,12 @@ export default function Services() {
                 { name: "delete", label: "Löschen", permission: config.permissionEdit, onClick: loeschen }
             ]}
         />
-        <Dialog open={open} title={editMode ? "Service bearbeiten" : "Neuer Service"} onClose={handleClose}>
+        <Dialog
+            open={open}
+            title={editMode ? "Service bearbeiten" : "Neuer Service"}
+            onClose={handleClose}
+            footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Speichern</SaveButton>}
+        >
             <Label required glossaryKey="servicenummer">Servicenummer</Label>
             <TextField value={currentItem.serviceNr} onChange={v => change("serviceNr", v)} disabled />
             <Label required>Name</Label>
@@ -123,10 +129,7 @@ export default function Services() {
                 <Label>Beschreibung</Label>
                 <TextArea rows={2} value={currentItem.beschreibung} onChange={v => change("beschreibung", v)} />
             </div>
-            <div className="form-row">
-                {error && <p className="form-error">{error}</p>}
-                <button type="button" onClick={speichern}>Speichern</button>
-            </div>
+            <div className="form-row">{error && <p className="form-error">{error}</p>}</div>
         </Dialog>
     </>;
 }

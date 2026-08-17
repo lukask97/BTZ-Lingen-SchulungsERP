@@ -1,159 +1,116 @@
+import { createCRUDService } from "../core/genericService";
 import auftraegeService from "../verkauf/auftraegeService";
 import bestellungenService from "../einkauf/bestellungenService";
-import artikelService from "../logistik/artikelService";
-import { getCustomerName } from "../../utils/customerReferences";
-import { getSupplierName } from "../../utils/supplierReferences";
 import kundenService from "../verkauf/customerService";
 import lieferantenService from "../einkauf/lieferantenService";
-import { getRechnungsnummer as buildInvoiceNumber } from "../core/documentNumbering";
+import { getCustomerName } from "../../utils/customerReferences";
+import { getSupplierName } from "../../utils/supplierReferences";
 
-const INVOICE_RELEVANT_STATUSES = ["abgerechnet", "bezahlt", "archiviert"];
-const PURCHASE_INVOICE_RELEVANT_STATUSES = ["eingegangen"];
+const baseService = createCRUDService("rechnungen", []);
 
-function isPermissionError(error: unknown) {
-    return error instanceof Error && error.message.startsWith("Keine Berechtigung");
-}
-
-function toInvoiceNumber(auftragNr: string) {
-    return buildInvoiceNumber(auftragNr);
-}
-
-function normalizeInvoiceStatus(status: string) {
-    if (status === "bezahlt" || status === "archiviert") return "bezahlt";
-    return "offen";
-}
-
-function mapOrderToInvoice(auftrag: any) {
-    const kundenname = auftrag.kunde || getCustomerName(auftrag.kundeId, "");
-    const kunde = kundenService.getById(auftrag.kundeId);
+function normalizeInvoice(item: any = {}) {
+    const kunde = item.kundeId ? kundenService.getById(item.kundeId) : null;
+    const lieferant = item.lieferantId ? lieferantenService.getById(item.lieferantId) : null;
+    const outgoingInvoice = item.rechnungstyp !== "Eingangsrechnung";
+    const partnerName = outgoingInvoice
+        ? getCustomerName(item.kundeId, item.kunde || kunde?.firma || "")
+        : getSupplierName(item.lieferantId, item.kunde || lieferant?.firma || "");
+    const auftrag = item.auftragId ? auftraegeService.getById(item.auftragId) : null;
+    const bestellung = item.bestellungId ? bestellungenService.getById(item.bestellungId) : null;
 
     return {
-        id: auftrag.id,
-        auftragId: auftrag.id,
-        auftragNr: auftrag.auftragNr,
-        rechnungsnr: toInvoiceNumber(auftrag.auftragNr),
-        rechnungstyp: "Ausgangsrechnung",
-        kundeId: auftrag.kundeId,
-        kunde: kundenname,
-        iban: kunde?.iban || "",
-        bestellungId: "",
-        bestellNr: "",
-        datum: auftrag.datum,
-        faelligAm: auftrag.faelligAm || "",
-        betrag: Number(auftrag.gesamtbetrag || 0),
-        status: normalizeInvoiceStatus(auftrag.status),
-        mahnstufe: "-"
+        ...item,
+        auftragId: item.auftragId || "",
+        auftragNr: item.auftragId ? (auftrag?.auftragNr || item.auftragNr || "") : (item.auftragNr || ""),
+        bestellungId: item.bestellungId || "",
+        bestellNr: item.bestellungId ? (bestellung?.bestellNr || item.bestellNr || "") : (item.bestellNr || ""),
+        kundeId: item.kundeId || "",
+        lieferantId: item.lieferantId || "",
+        kunde: partnerName,
+        iban: outgoingInvoice ? (kunde?.iban || item.iban || "") : (lieferant?.iban || item.iban || ""),
+        faelligAm: item.faelligAm || "",
+        betrag: Number(item.betrag || 0),
+        mahnstufe: item.mahnstufe || "-"
     };
 }
 
-function toIncomingInvoiceNumber(bestellNr: string) {
-    return String(bestellNr || "").replace("EK-", "ER-");
-}
+function splitPayload(payload: any = {}) {
+    const {
+        kunde,
+        iban,
+        auftragNr,
+        bestellNr,
+        mahnstufe,
+        ...basePayload
+    } = payload;
 
-function getPurchaseOrderAmount(bestellung: any) {
-    if (bestellung.gesamtbetrag != null) {
-        return Number(bestellung.gesamtbetrag || 0);
-    }
-
-    try {
-        const artikel = artikelService.getAll();
-        return (bestellung.positionen || []).reduce((summe: number, position: any) => {
-            const artikelEintrag = artikel.find(item => item.id === position.artikelId);
-            const einzelpreis = artikelEintrag?.einkaufspreis ?? position.einzelpreis ?? 0;
-            return summe + Number(position.menge || 0) * Number(einzelpreis || 0);
-        }, 0);
-    } catch {
-        return (bestellung.positionen || []).reduce((summe: number, position: any) => {
-            return summe + Number(position.menge || 0) * Number(position.einzelpreis || 0);
-        }, 0);
-    }
-}
-
-function mapPurchaseOrderToInvoice(bestellung: any) {
-    const lieferant = lieferantenService.getById(bestellung.lieferantId);
     return {
-        id: `eingang-${bestellung.id}`,
-        auftragId: "",
-        auftragNr: "",
-        bestellungId: bestellung.id,
-        bestellNr: bestellung.bestellNr,
-        rechnungsnr: toIncomingInvoiceNumber(bestellung.bestellNr),
-        rechnungstyp: "Eingangsrechnung",
-        kundeId: "",
-        kunde: bestellung.lieferant || getSupplierName(bestellung.lieferantId, ""),
-        lieferantId: bestellung.lieferantId,
-        iban: lieferant?.iban || "",
-        datum: bestellung.wareneingangAm || bestellung.datum,
-        faelligAm: bestellung.faelligAm || "",
-        betrag: getPurchaseOrderAmount(bestellung),
-        status: bestellung.rechnungStatus === "bezahlt" ? "bezahlt" : "offen",
-        mahnstufe: "-"
+        ...basePayload,
+        auftragId: basePayload.auftragId || "",
+        bestellungId: basePayload.bestellungId || "",
+        kundeId: basePayload.kundeId || "",
+        lieferantId: basePayload.lieferantId || "",
+        faelligAm: basePayload.faelligAm || ""
     };
 }
 
-function getInvoiceOrders() {
-    try {
-        return auftraegeService.getAll().filter((auftrag: any) => INVOICE_RELEVANT_STATUSES.includes(auftrag.status));
-    } catch (error) {
-        if (isPermissionError(error)) {
-            return [];
-        }
-        throw error;
+function syncSourceDocument(invoice: any) {
+    if (invoice.rechnungstyp === "Eingangsrechnung" && invoice.bestellungId) {
+        const bestellung = bestellungenService.getById(invoice.bestellungId);
+        if (!bestellung) return;
+        bestellungenService.update({
+            ...bestellung,
+            rechnungStatus: invoice.status === "bezahlt" ? "bezahlt" : "offen",
+            faelligAm: invoice.faelligAm || bestellung.faelligAm || ""
+        });
+        return;
     }
-}
 
-function getIncomingInvoiceOrders() {
-    try {
-        return bestellungenService.getAll().filter((bestellung: any) =>
-            PURCHASE_INVOICE_RELEVANT_STATUSES.includes(bestellung.status) || bestellung.rechnungStatus === "bezahlt"
-        );
-    } catch (error) {
-        if (isPermissionError(error)) {
-            return [];
-        }
-        throw error;
+    if (invoice.auftragId) {
+        const auftrag = auftraegeService.getById(invoice.auftragId);
+        if (!auftrag) return;
+        auftraegeService.update({
+            ...auftrag,
+            status: invoice.status === "bezahlt" ? "bezahlt" : "abgerechnet",
+            faelligAm: invoice.faelligAm || auftrag.faelligAm || ""
+        });
     }
 }
 
 const rechnungenService = {
     list() {
-        return [
-            ...getInvoiceOrders().map(mapOrderToInvoice),
-            ...getIncomingInvoiceOrders().map(mapPurchaseOrderToInvoice)
-        ];
+        return baseService.list().map(normalizeInvoice);
     },
     getAll() {
-        return this.list();
+        return baseService.list().map(normalizeInvoice);
     },
     getById(id: number | string) {
-        return this.list().find(item => String(item.id) === String(id));
+        const item = baseService.getById(id);
+        return item ? normalizeInvoice(item) : undefined;
     },
-    create() {
-        return null;
+    create(payload: any) {
+        const created = baseService.create(splitPayload(payload));
+        const normalized = normalizeInvoice(created);
+        syncSourceDocument(normalized);
+        return normalized;
     },
-    add() {
-        return null;
+    add(payload: any) {
+        return this.create(payload);
     },
-    update(item: any) {
-        if (item.rechnungstyp === "Eingangsrechnung") {
-            const bestellung = bestellungenService.getById(item.bestellungId);
-            if (!bestellung) return null;
-            const nextBestellung = {
-                ...bestellung,
-                rechnungStatus: item.status === "bezahlt" ? "bezahlt" : "offen",
-                faelligAm: item.faelligAm ?? bestellung.faelligAm ?? ""
-            };
-            bestellungenService.update(nextBestellung);
-            return mapPurchaseOrderToInvoice(nextBestellung);
-        }
-        const auftrag = auftraegeService.getById(item.auftragId ?? item.id);
-        if (!auftrag) return null;
-        const nextStatus = item.status === "bezahlt" ? "bezahlt" : "abgerechnet";
-        auftraegeService.update({ ...auftrag, status: nextStatus, faelligAm: item.faelligAm ?? auftrag.faelligAm ?? "" });
-        return mapOrderToInvoice({ ...auftrag, status: nextStatus, faelligAm: item.faelligAm ?? auftrag.faelligAm ?? "" });
+    update(idOrItem: any, payload: any) {
+        const updated = typeof idOrItem === "object"
+             ? baseService.update(splitPayload(idOrItem))
+            : baseService.update(idOrItem, splitPayload(payload));
+        const normalized = normalizeInvoice(updated);
+        syncSourceDocument(normalized);
+        return normalized;
     },
-    remove() {},
-    delete() {},
+    remove(id: number | string) {
+        return baseService.remove(id);
+    },
+    delete(id: number | string) {
+        return baseService.remove(id);
+    },
     search(query: string) {
         return this.list().filter(item =>
             Object.values(item).join(" ").toLowerCase().includes(query.toLowerCase())
@@ -163,6 +120,11 @@ const rechnungenService = {
 
 export const getRechnungen = () => rechnungenService.getAll();
 export const updateRechnung = (rechnung: any) => rechnungenService.update(rechnung);
-export const getRechnungsnummer = (auftragNr: string) => toInvoiceNumber(auftragNr);
+export const getRechnungsnummer = (auftragNr: string) => {
+    const prefix = String(auftragNr || "").trim();
+    if (prefix.startsWith("AU-")) return prefix.replace("AU-", "RG-");
+    if (prefix.startsWith("VK-")) return prefix.replace("VK-", "RG-");
+    return "RG-0000-001";
+};
 
 export default rechnungenService;

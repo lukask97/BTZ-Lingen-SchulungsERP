@@ -24,9 +24,9 @@ export default function ServiceSzenario() {
             "Falls sinnvoll, den Prüfhinweis für den Rest der Lieferung dokumentieren."
         ]}
         teacherChecks={[
-            "Ist die Problembeschreibung konkret genug?",
-            "Wurde nicht nur reklamiert, sondern auch eine Folgeaktion ausgelöst?",
-            "Bleibt der Zusammenhang zwischen Problem und Ersatzlieferung klar sichtbar?"
+            "Ist die Problembeschreibung konkret genug",
+            "Wurde nicht nur reklamiert, sondern auch eine Folgeaktion ausgelöst",
+            "Bleibt der Zusammenhang zwischen Problem und Ersatzlieferung klar sichtbar"
         ]}
         completionChecks={[
             "Eine Reklamation ist angelegt.",

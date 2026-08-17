@@ -3,6 +3,7 @@ import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import { PERMISSIONS } from "../../constants/permissions";
 import Label from "../../components/form/Label";
+import SaveButton from "../../components/SaveButton";
 import TextField from "../../components/form/TextField";
 import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
@@ -29,14 +30,14 @@ export default function Marketing() {
     const editieren = item => { setAktion({ ...item }); setBearbeiten(true); setFehler(""); setOffen(true); };
     const speichern = () => {
         if (!aktion.titel.trim()) {
-            setFehler("Bitte das Pflichtfeld Titel ausfuellen.");
-            return;
+            setFehler("Bitte das Pflichtfeld Titel ausfüllen.");
+            return false;
         }
         if (bearbeiten) marketingService.update(aktion);
         else marketingService.add({ ...aktion, titel: aktion.titel.trim() });
         setAktionen(marketingService.getAll());
         setFehler("");
-        setOffen(false);
+        return true;
     };
     const aendern = (feld, wert) => {
         if (fehler) setFehler("");
@@ -108,15 +109,19 @@ export default function Marketing() {
             ]}
             onFilter={filters => { setStatusFilter(filters.status || ""); setTypFilter(filters.typ || ""); }}
         />
-        <Dialog open={offen} title={bearbeiten ? "Marketingaktion bearbeiten" : "Neue Marketingaktion"} onClose={() => { setOffen(false); setFehler(""); }}>
-            <div><Label>Art</Label><select value={aktion.typ} onChange={event => aendern("typ", event.target.value)}><option>Kampagne</option><option>Kundenaktion</option><option>Newsletter</option><option>Event</option><option>Kundenfeedback</option></select></div>
+        <Dialog
+            open={offen}
+            title={bearbeiten ? "Marketingaktion bearbeiten" : "Neue Marketingaktion"}
+            onClose={() => { setOffen(false); setFehler(""); }}
+            footer={<SaveButton onSave={speichern} onSuccess={() => { setOffen(false); setFehler(""); }}>Speichern</SaveButton>}
+        >
+            <div><Label>Art</Label><select name="marketing-art" value={aktion.typ} onChange={event => aendern("typ", event.target.value)}><option>Kampagne</option><option>Kundenaktion</option><option>Newsletter</option><option>Event</option><option>Kundenfeedback</option></select></div>
             <div><Label required>Titel</Label><TextField value={aktion.titel} onChange={wert => aendern("titel", wert)}/></div>
-            <div><Label>Datum</Label><input type="date" value={aktion.datum} onChange={event => aendern("datum", event.target.value)}/></div>
-            <div><Label>Status</Label><select value={aktion.status} onChange={event => aendern("status", event.target.value)}><option>Entwurf</option><option>geplant</option><option>läuft</option><option>durchgeführt</option></select></div>
+            <div><Label>Datum</Label><input name="marketing-datum" type="date" value={aktion.datum} onChange={event => aendern("datum", event.target.value)}/></div>
+            <div><Label>Status</Label><select name="marketing-status" value={aktion.status} onChange={event => aendern("status", event.target.value)}><option>Entwurf</option><option>geplant</option><option>läuft</option><option>durchgeführt</option></select></div>
             <div className="form-row"><Label>Beschreibung</Label><TextArea rows={3} value={aktion.beschreibung} onChange={wert => aendern("beschreibung", wert)}/></div>
             <div className="form-row">
                 {fehler && <p className="form-error">{fehler}</p>}
-                <button type="button" onClick={speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

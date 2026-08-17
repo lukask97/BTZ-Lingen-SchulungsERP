@@ -20,7 +20,7 @@ function resolvePath(category, allCategories) {
 
 function resolveDepth(category, allCategories) {
     let depth = 0;
-    let currentParentId = category?.parentId;
+    let currentParentId = category.parentId;
 
     while (currentParentId) {
         const parent = allCategories.find(item => String(item.id) === String(currentParentId));
@@ -36,7 +36,7 @@ function resolveRootCategory(category, allCategories) {
     if (!category) return null;
 
     let current = category;
-    while (current?.parentId) {
+    while (current.parentId) {
         const parent = allCategories.find(item => String(item.id) === String(current.parentId));
         if (!parent) break;
         current = parent;
@@ -51,7 +51,7 @@ export function normalizeKategorie(item = {}, allCategories = baseService.list()
     const depth = resolveDepth(item, allCategories);
     return {
         ...item,
-        parentId: item.parentId ?? "",
+        parentId: item.parentId || "",
         parentName: parent?.name || "",
         pfad: resolvePath(item, allCategories),
         ebene: depth,
@@ -96,7 +96,7 @@ const kategorienService = {
 
 export function getKategoriePfad(kategorieId, fallback = "") {
     const kategorie = kategorienService.getById(kategorieId);
-    return kategorie?.pfad || fallback;
+    return kategorie.pfad || fallback;
 }
 
 export default kategorienService;

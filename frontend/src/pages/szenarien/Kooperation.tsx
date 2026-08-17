@@ -24,9 +24,9 @@ export default function Kooperation() {
             "Den Zusammenhang zwischen Aktion und Freigabe klar benennen."
         ]}
         teacherChecks={[
-            "Wird der Partner Stadtwerke Lingen in der Aktion sichtbar genannt?",
-            "Ist die Freigabe nicht allgemein, sondern klar auf diese Maßnahme bezogen?",
-            "Lassen sich Aktion und Freigabe inhaltlich miteinander verbinden?"
+            "Wird der Partner Stadtwerke Lingen in der Aktion sichtbar genannt",
+            "Ist die Freigabe nicht allgemein, sondern klar auf diese Maßnahme bezogen",
+            "Lassen sich Aktion und Freigabe inhaltlich miteinander verbinden"
         ]}
         completionChecks={[
             "Eine Marketingaktion zur Kooperation ist vorhanden.",

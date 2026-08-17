@@ -3,6 +3,7 @@ import { useState } from "react";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
+import SaveButton from "../../components/SaveButton";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
@@ -25,11 +26,11 @@ export default function Mitarbeiter() {
     const [current, setCurrent] = useState(createMitarbeiter(today));
 
     const speichern = () => {
-        if (!current.name.trim()) return;
+        if (!current.name.trim()) return false;
         mitarbeiterService.create(current);
         setMitarbeiter(mitarbeiterService.list());
-        setOpen(false);
         setCurrent(createMitarbeiter(today));
+        return true;
     };
 
     return <>
@@ -52,7 +53,12 @@ export default function Mitarbeiter() {
             toolbarActions={[{ name: "new", label: "Mitarbeiter anlegen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: () => setOpen(true), variant: "secondary" }]}
             rowActions={[{ name: "details", label: "Akte öffnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: item => navigate(`/personalakte?mitarbeiter=${item.id}`), variant: "secondary" }]}
         />
-        <Dialog open={open} title="Mitarbeiter anlegen" onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title="Mitarbeiter anlegen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Name</Label><TextField value={current.name} onChange={value => setCurrent(item => ({ ...item, name: value }))}/></div>
             <div><Label>Abteilung</Label><TextField value={current.abteilung} onChange={value => setCurrent(item => ({ ...item, abteilung: value }))}/></div>
             <div><Label>Rolle</Label><TextField value={current.rolle} onChange={value => setCurrent(item => ({ ...item, rolle: value }))}/></div>
@@ -62,7 +68,6 @@ export default function Mitarbeiter() {
                 <option value="in Einarbeitung">In Einarbeitung</option>
                 <option value="beurlaubt">Beurlaubt</option>
             </select></div>
-            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

@@ -101,7 +101,7 @@ function hydrateAuftraege(items: any[] = []) {
                 artikel: referenz?.name || position.artikel || "",
                 artikelTyp: istService ? "Dienstleistung" : (referenz?.artikelTyp || position.artikelTyp || "Einzelartikel"),
                 leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
-                einzelpreis: Number(position.einzelpreis ?? referenz?.verkaufspreis ?? referenz?.preis ?? 0)
+                einzelpreis: Number(position.einzelpreis || referenz?.verkaufspreis || referenz?.preis || 0)
             };
             const { auftragId, ...rest } = hydrated;
             return rest;
@@ -152,7 +152,7 @@ function hydratePosition(position: any = {}) {
         artikel: referenz?.name || position.artikel || "",
         artikelTyp: istService ? "Dienstleistung" : (referenz?.artikelTyp || position.artikelTyp || "Einzelartikel"),
         leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
-        einzelpreis: Number(position.einzelpreis ?? referenz?.verkaufspreis ?? referenz?.preis ?? 0)
+        einzelpreis: Number(position.einzelpreis || referenz?.verkaufspreis || referenz?.preis || 0)
     };
 }
 
@@ -176,7 +176,7 @@ const auftraegeService = {
         positionService.replaceForParent(created.id, positionen);
         return hydrateAuftrag(created);
     },
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             const { basePayload, positionen } = splitPayload(idOrItem);
             const updated = baseService.update(basePayload);

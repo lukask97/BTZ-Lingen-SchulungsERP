@@ -2,17 +2,30 @@ import { useEffect, useState } from "react";
 import type { CrudService, EntityWithId, UseCrudPageOptions, UseCrudPageResult } from "../types/crud";
 import { subscribeToStorageSync } from "../services/mockup/mockStorage";
 
-/**
- * Generischer Hook für alle CRUD-Seiten
- */
+function isRecoverableFetchError(error: unknown) {
+    return error instanceof Error && (
+        error.message.toLowerCase().includes("failed to fetch")
+        || error.message.toLowerCase().includes("backend nicht erreichbar")
+        || error.message.toLowerCase().includes("networkerror")
+    );
+}
+
 export function useCRUDPage<T extends EntityWithId>(
     tableName: string,
     initialData: T,
     services: CrudService<T>,
     options: UseCrudPageOptions<T> = {}
 ): UseCrudPageResult<T> {
-    // States
-    const [data, setData] = useState(services.list());
+    const [data, setData] = useState<T[]>(() => {
+        try {
+            return services.list();
+        } catch (error) {
+            if (isRecoverableFetchError(error)) {
+                return [];
+            }
+            throw error;
+        }
+    });
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [pageSize, setPageSize] = useState(10);
@@ -20,15 +33,26 @@ export function useCRUDPage<T extends EntityWithId>(
     const [currentItem, setCurrentItem] = useState(initialData);
     const [error, setError] = useState("");
 
+    const refreshData = () => {
+        try {
+            setData(services.list());
+        } catch (error) {
+            if (isRecoverableFetchError(error)) {
+                setData([]);
+                return;
+            }
+            throw error;
+        }
+    };
+
     useEffect(() => {
-        setData(services.list());
+        refreshData();
 
         return subscribeToStorageSync([tableName], () => {
-            setData(services.list());
+            refreshData();
         });
     }, [services, tableName]);
 
-    // Filterung nach Suchtext
     const filteredData = data.filter(item =>
         Object.values(item)
             .join(" ")
@@ -36,7 +60,6 @@ export function useCRUDPage<T extends EntityWithId>(
             .includes(search.toLowerCase())
     );
 
-    // Neue Aktion
     const neu = () => {
         setEditMode(false);
         setCurrentItem(structuredClone(options.createNewItem ? options.createNewItem() : initialData));
@@ -44,7 +67,6 @@ export function useCRUDPage<T extends EntityWithId>(
         setOpen(true);
     };
 
-    // Bearbeiten-Aktion
     const bearbeiten = (item: T) => {
         setEditMode(true);
         setCurrentItem(structuredClone(item));
@@ -52,25 +74,23 @@ export function useCRUDPage<T extends EntityWithId>(
         setOpen(true);
     };
 
-    // Löschen-Aktion
     const loeschen = (item: T) => {
-        if (confirm(`Möchten Sie diesen Eintrag wirklich löschen?`)) {
+        if (confirm("Möchten Sie diesen Eintrag wirklich löschen")) {
             services.remove(item.id ?? "");
-            setData(services.list());
+            refreshData();
         }
     };
 
-    // Speichern-Aktion
     const speichern = () => {
         const fehlendeFelder = (options.requiredFields || []).filter(({ field }) => {
-            const value = currentItem?.[field];
+            const value = currentItem[field];
             if (Array.isArray(value)) return value.length === 0;
             return value === null || value === undefined || String(value).trim() === "";
         });
 
         if (fehlendeFelder.length > 0) {
             setError(`Bitte folgende Pflichtfelder ausfuellen: ${fehlendeFelder.map(item => item.label).join(", ")}.`);
-            return;
+            return false;
         }
 
         if (editMode) {
@@ -78,19 +98,17 @@ export function useCRUDPage<T extends EntityWithId>(
         } else {
             services.create(currentItem);
         }
-        setData(services.list());
+        refreshData();
         setError("");
-        setOpen(false);
+        return true;
     };
 
-    // Schließen Dialog
     const handleClose = () => {
         setOpen(false);
         setError("");
     };
 
     return {
-        // States
         data: filteredData,
         allData: data,
         open,
@@ -99,8 +117,6 @@ export function useCRUDPage<T extends EntityWithId>(
         search,
         currentItem,
         error,
-        
-        // Setter
         setOpen,
         setPageSize,
         setSearch,
@@ -108,12 +124,11 @@ export function useCRUDPage<T extends EntityWithId>(
             setCurrentItem(value);
             if (error) setError("");
         },
-        
-        // Actions
         neu,
         bearbeiten,
         loeschen,
         speichern,
+        refreshData,
         handleClose
     };
 }

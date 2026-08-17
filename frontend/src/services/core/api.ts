@@ -1,6 +1,6 @@
 // Dynamisch die Backend-URL ermitteln - funktioniert lokal, in Codespaces und mit VS Code Dev Tunnels.
 function getBackendOrigin(): string {
-    const envBackendOrigin = import.meta.env.VITE_API_URL?.trim();
+    const envBackendOrigin = String(import.meta.env.VITE_API_URL || "").trim();
     if (envBackendOrigin) {
         return envBackendOrigin.replace(/\/$/, "");
     }
@@ -47,7 +47,23 @@ export function getApiConfig() {
 }
 
 export function buildDatabasePath(path: string) {
+    if (/^https?:\/\//.test(path)) {
+        return path;
+    }
+
     return `${DATABASE_API_URL}${path}`;
+}
+
+function parseApiPayload(responseText: string) {
+    if (!responseText) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(responseText);
+    } catch {
+        return null;
+    }
 }
 
 function resolveApiUrl(path: string) {
@@ -89,17 +105,31 @@ export function isPermissionError(error: unknown) {
         || message.includes("forbidden");
 }
 
-export function syncApiRequest(path: string, options: { method?: string; body?: unknown } = {}) {
+export function syncApiRequest(path: string, options: { method: string; body: unknown } = {}) {
     const request = new XMLHttpRequest();
     request.open(options.method || "GET", resolveApiUrl(path), false);
     request.withCredentials = true;
     request.setRequestHeader("Content-Type", "application/json");
-    request.send(options.body ? JSON.stringify(options.body) : null);
+    try {
+        request.send(options.body ? JSON.stringify(options.body) : null);
+    } catch (error) {
+        const message = error instanceof Error ? error.message.toLowerCase() : "";
+        if (
+            message.includes("failed to fetch")
+            || message.includes("failed to load")
+            || message.includes("networkerror")
+            || message.includes("xmlhttprequest")
+            || message.includes("cors")
+        ) {
+            throw new Error(`Backend unter ${BACKEND_ORIGIN} nicht erreichbar.`);
+        }
+        throw error;
+    }
 
-    const data = request.responseText ? JSON.parse(request.responseText) : null;
+    const data = parseApiPayload(request.responseText);
 
     if (request.status < 200 || request.status >= 300) {
-        const message = data?.message || `API request failed with status ${request.status}`;
+        const message = data.message || `API request failed with status ${request.status}`;
         throw new Error(message);
     }
 
@@ -107,20 +137,34 @@ export function syncApiRequest(path: string, options: { method?: string; body?: 
 }
 
 export async function apiRequest(path: string, options: RequestInit = {}) {
-    const response = await fetch(resolveApiUrl(path), {
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-            ...(options.headers || {})
-        },
-        ...options
-    });
+    let response: Response;
+    try {
+        response = await fetch(resolveApiUrl(path), {
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+                ...(options.headers || {})
+            },
+            ...options
+        });
+    } catch (error) {
+        const message = error instanceof Error ? error.message.toLowerCase() : "";
+        if (
+            message.includes("failed to fetch")
+            || message.includes("failed to load")
+            || message.includes("networkerror")
+            || message.includes("cors")
+        ) {
+            throw new Error(`Backend unter ${BACKEND_ORIGIN} nicht erreichbar.`);
+        }
+        throw error;
+    }
 
     const text = await response.text();
-    const data = text ? JSON.parse(text) : null;
+    const data = parseApiPayload(text);
 
     if (!response.ok) {
-        const message = data?.message || `API request failed with status ${response.status}`;
+        const message = data.message || `API request failed with status ${response.status}`;
         throw new Error(message);
     }
 

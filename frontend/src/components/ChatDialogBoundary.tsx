@@ -33,8 +33,8 @@ export default class ChatDialogBoundary extends Component<ChatDialogBoundaryProp
         if (this.state.hasError) {
             return <Dialog open={this.props.open} title={this.props.title} onClose={this.props.onClose}>
                 <div className="form-row">
-                    <p>Der Nachrichtenverlauf konnte fuer diesen Vorgang nicht geladen werden.</p>
-                    <p>Bitte den Dialog schliessen und den Vorgang erneut oeffnen.</p>
+                    <p>Der Nachrichtenverlauf konnte für diesen Vorgang nicht geladen werden.</p>
+                    <p>Bitte den Dialog schließen und den Vorgang erneut öffnen.</p>
                 </div>
             </Dialog>;
         }

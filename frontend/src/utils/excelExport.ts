@@ -8,7 +8,7 @@ type ExcelColumn = {
 function sanitizeFileName(value: string) {
     return String(value || "export")
         .trim()
-        .replace(/[\\/:*?"<>|]+/g, "_")
+        .replace(/[\\/:*"<>|]+/g, "_")
         .replace(/\s+/g, "_");
 }
 

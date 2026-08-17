@@ -4,6 +4,7 @@ import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
@@ -44,7 +45,7 @@ export default function Krankmeldungen() {
     };
 
     const speichern = () => {
-        if (!current.mitarbeiterId || !current.grund.trim()) return;
+        if (!current.mitarbeiterId || !current.grund.trim()) return false;
 
         const neueMeldung = krankmeldungenService.create({
             ...current,
@@ -63,8 +64,8 @@ export default function Krankmeldungen() {
         }
 
         setMeldungen(krankmeldungenService.list());
-        setOpen(false);
         setCurrent(createKrankmeldung(today));
+        return true;
     };
 
     const bestaetigen = (meldung) => {
@@ -95,7 +96,7 @@ export default function Krankmeldungen() {
                 { field: "grund", title: "Grund" },
                 { field: "status", title: "Status" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalakte?mitarbeiter=${row.mitarbeiterId}` : null}
+            detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalaktemitarbeiter=${row.mitarbeiterId}` : null}
             toolbarActions={[{ name: "new", label: "Krankmeldung erfassen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
                 { name: "details", label: "Akte öffnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
@@ -103,12 +104,16 @@ export default function Krankmeldungen() {
                 { name: "done", label: "Abschließen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: abschliessen, variant: "success", isVisible: row => row.status === "bestätigt" }
             ]}
         />
-        <Dialog open={open} title="Krankmeldung erfassen" onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title="Krankmeldung erfassen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Mitarbeiter</Label><LookupField value={current.mitarbeiterId} options={mitarbeiterOptionen} onChange={mitarbeiterAuswaehlen} placeholder="Mitarbeiter suchen..."/></div>
             <div><Label>Von</Label><TextField type="date" value={current.von} onChange={value => setCurrent(item => ({ ...item, von: value }))}/></div>
             <div><Label>Bis</Label><TextField type="date" value={current.bis} onChange={value => setCurrent(item => ({ ...item, bis: value }))}/></div>
             <div className="form-row"><Label>Grund / Hinweis</Label><TextArea rows={3} value={current.grund} onChange={value => setCurrent(item => ({ ...item, grund: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

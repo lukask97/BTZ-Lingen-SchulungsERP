@@ -24,9 +24,9 @@ export default function RegionaleBestellung() {
             "Im Auftrag Liefertermin und Transport in der Notiz dokumentieren."
         ]}
         teacherChecks={[
-            "Wurde erst der Kunde geprüft und dann der Verkaufsvorgang angelegt?",
-            "Ist der Liefertermin Mittwoch, 29. Juli 2026 nachvollziehbar eingetragen?",
-            "Ist die Transportlösung im Datensatz sichtbar dokumentiert?"
+            "Wurde erst der Kunde geprüft und dann der Verkaufsvorgang angelegt",
+            "Ist der Liefertermin Mittwoch, 29. Juli 2026 nachvollziehbar eingetragen",
+            "Ist die Transportlösung im Datensatz sichtbar dokumentiert"
         ]}
         completionChecks={[
             "Ein offenes Angebot für den richtigen Kunden ist vorhanden.",

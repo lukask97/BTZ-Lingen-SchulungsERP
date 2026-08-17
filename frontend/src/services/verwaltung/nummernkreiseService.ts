@@ -125,7 +125,7 @@ const nummernkreiseService = {
     getBySchluessel: (schluessel: NummernkreisSchluessel) => listWithFallback().find(item => item.schluessel === schluessel),
     create: (payload: Nummernkreis) => baseService.create(normalizeNummernkreis(payload)),
     add: (payload: Nummernkreis) => baseService.create(normalizeNummernkreis(payload)),
-    update: (idOrItem: number | string | Nummernkreis, payload?: Partial<Nummernkreis>) => {
+    update: (idOrItem: number | string | Nummernkreis, payload: Partial<Nummernkreis>) => {
         if (typeof idOrItem === "object") {
             return baseService.update(normalizeNummernkreis(idOrItem));
         }

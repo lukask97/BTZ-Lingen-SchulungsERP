@@ -5,6 +5,7 @@ import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import { PERMISSIONS } from "../../constants/permissions";
@@ -19,13 +20,16 @@ import { canBookGoodsReceipt, getPurchaseStep, getPurchaseStepLabel } from "../.
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 function createBestellungDialogState(lieferanten: any[], artikel: any[]) {
+    const ersterLieferant = lieferanten[0];
+    const ersterArtikel = artikel[0];
+
     return {
         anfrageQuelle: "bedarfsmeldung",
         bedarfsmeldungId: "",
-        lieferantId: lieferanten[0]?.id ? String(lieferanten[0].id) : "",
-        artikelId: artikel[0]?.id ? String(artikel[0].id) : "",
-        artikelNr: artikel[0]?.artikelNr || "",
-        artikelBezeichnung: artikel[0]?.name || "",
+        lieferantId: ersterLieferant?.id ? String(ersterLieferant.id) : "",
+        artikelId: ersterArtikel?.id ? String(ersterArtikel.id) : "",
+        artikelNr: ersterArtikel?.artikelNr || "",
+        artikelBezeichnung: ersterArtikel?.name || "",
         menge: 1,
         positionen: [],
         notiz: "",
@@ -39,13 +43,13 @@ function normalizeText(value: any) {
 }
 
 function getAnfrageQuelleLabel(bestellung: any) {
-    if (bestellung?.anfrageQuelle === "lieferantenvergleich") return "Lieferantenvergleich";
+    if (bestellung.anfrageQuelle === "lieferantenvergleich") return "Lieferantenvergleich";
     return "Bedarfsmeldung";
 }
 
 function getAngebotsStatusLabel(bestellung: any) {
-    return bestellung?.lehrkraftAngebotAm
-        ? `Angebot ${bestellung.lehrkraftAngebotAm}`
+    return bestellung.lehrkraftAngebotAm
+         ? `Angebot ${bestellung.lehrkraftAngebotAm}`
         : "Noch kein Angebot";
 }
 
@@ -59,7 +63,7 @@ function getPositionenText(positionen: any[] = []) {
 const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
 
 function istOffenesAngebot(angebot: any) {
-    return ["wartet auf antwort"].includes(String(angebot?.status || "").toLowerCase());
+    return ["wartet auf antwort"].includes(String(angebot.status || "").toLowerCase());
 }
 
 function getVerplanteMengen(auftraege: any[] = []) {
@@ -107,19 +111,19 @@ function getArtikelInfoText({
     verplanteMengen: Record<string, number>;
     offeneEinkaufsmengen: Record<string, number>;
     offeneAngeboteJeArtikel: Record<string, number>;
-    highlightDemand?: boolean;
+    highlightDemand: boolean;
 }) {
-    const bestand = Number(artikelEintrag?.bestand || 0);
-    const verplant = Number(verplanteMengen[String(artikelEintrag?.id)] || 0);
+    const bestand = Number(artikelEintrag.bestand || 0);
+    const verplant = Number(verplanteMengen[String(artikelEintrag.id)] || 0);
     const verfuegbar = bestand - verplant;
-    const imZulauf = Number(offeneEinkaufsmengen[String(artikelEintrag?.id)] || 0);
-    const inAngeboten = Number(offeneAngeboteJeArtikel[String(artikelEintrag?.id)] || 0);
+    const imZulauf = Number(offeneEinkaufsmengen[String(artikelEintrag.id)] || 0);
+    const inAngeboten = Number(offeneAngeboteJeArtikel[String(artikelEintrag.id)] || 0);
     const projected = verfuegbar - Number(menge || 0);
-    const sicherheitsbestand = Number(artikelEintrag?.mindestmenge || 0);
+    const sicherheitsbestand = Number(artikelEintrag.mindestmenge || 0);
     const unterschreitetSicherheitsbestand = projected < sicherheitsbestand;
 
     return {
-        text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Bedarfbestand: ${projected} | Sicherheitsbestand: ${sicherheitsbestand}` : ""}`,
+        text: `Verfügbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Bedarfbestand: ${projected} | Sicherheitsbestand: ${sicherheitsbestand}` : ""}`,
         istKritisch: Number(menge || 0) > verfuegbar || (highlightDemand && unterschreitetSicherheitsbestand)
     };
 }
@@ -161,7 +165,7 @@ export default function Bestellungen() {
     const lieferantenOptionen = lieferanten.map(item => ({ value: String(item.id), label: `${item.lieferantenNr} - ${item.firma}` }));
     const artikelOptionen = artikel.map(item => ({
         value: String(item.id),
-        label: `${item.artikelNr} - ${item.name} [${item.artikelTyp}] (EK: ${Number(item.einkaufspreis ?? item.preis ?? 0).toFixed(2)} EUR, Bestand: ${item.bestand})`
+        label: `${item.artikelNr} - ${item.name} [${item.artikelTyp}] (EK: ${Number(item.einkaufspreis || item.preis || 0).toFixed(2)} EUR, Bestand: ${item.bestand})`
     }));
     const bedarfOptionen = bedarfsmeldungen.map(item => ({
         value: String(item.id),
@@ -183,7 +187,7 @@ export default function Bestellungen() {
         setDialogState(current => ({
             ...current,
             bedarfsmeldungId,
-            positionen: bedarfsmeldung?.positionen?.map(position => ({
+            positionen: (bedarfsmeldung?.positionen || []).map(position => ({
                 artikelId: position.artikelId || "",
                 artikelNr: position.artikelNr || "",
                 artikel: position.artikel || "",
@@ -191,34 +195,34 @@ export default function Bestellungen() {
                 einzelpreis: Number(position.einzelpreis || 0)
             })) || [],
             notiz: bedarfsmeldung
-                ? `Uebernommen aus Bedarfsmeldung ${bedarfsmeldung.bestellNr}.`
+                 ? `Übernommen aus Bedarfsmeldung ${bedarfsmeldung.bestellNr}.`
                 : current.notiz,
             fehler: ""
         }));
     };
 
-    const neu = (vorgaben?: any) => {
+    const neu = (vorgaben: any) => {
         const basis = createBestellungDialogState(lieferanten, artikel);
         const naechsterDialog = {
             ...basis,
-            anfrageQuelle: vorgaben?.anfrageQuelle || basis.anfrageQuelle,
-            lieferantId: vorgaben?.lieferantId || basis.lieferantId
+            anfrageQuelle: vorgaben.anfrageQuelle || basis.anfrageQuelle,
+            lieferantId: vorgaben.lieferantId || basis.lieferantId
         };
         setDialogState(naechsterDialog);
-        if (vorgaben?.bedarfsmeldungId) {
+        if (vorgaben.bedarfsmeldungId) {
             const bedarfsmeldung = bedarfsmeldungen.find(item => String(item.id) === String(vorgaben.bedarfsmeldungId));
             setDialogState({
             ...naechsterDialog,
             bedarfsmeldungId: String(vorgaben.bedarfsmeldungId),
-            positionen: (vorgaben?.positionen || bedarfsmeldung?.positionen || []).map(position => ({
+            positionen: (vorgaben.positionen || bedarfsmeldung?.positionen || []).map(position => ({
                 artikelId: position.artikelId || "",
                 artikelNr: position.artikelNr || "",
                 artikel: position.artikel || "",
                 menge: Number(position.menge || 0),
                 einzelpreis: Number(position.einzelpreis || 0)
             })) || [],
-            notiz: vorgaben?.notiz || (bedarfsmeldung
-                ? `Uebernommen aus Bedarfsmeldung ${bedarfsmeldung.bestellNr}.`
+            notiz: vorgaben.notiz || (bedarfsmeldung
+                 ? `Übernommen aus Bedarfsmeldung ${bedarfsmeldung.bestellNr}.`
                 : "")
         });
         }
@@ -320,12 +324,12 @@ export default function Bestellungen() {
     const speichern = () => {
         const lieferant = lieferanten.find(item => item.id === Number(dialogState.lieferantId));
         if (dialogState.anfrageQuelle === "lieferantenvergleich" && !lieferant) {
-            setDialogState(current => ({ ...current, fehler: "Bitte fuer den Lieferantenvergleich einen Lieferanten auswaehlen." }));
-            return;
+            setDialogState(current => ({ ...current, fehler: "Bitte für den Lieferantenvergleich einen Lieferanten auswählen." }));
+            return false;
         }
         if (dialogState.positionen.length === 0) {
             setDialogState(current => ({ ...current, fehler: "Bitte mindestens eine Position erfassen." }));
-            return;
+            return false;
         }
 
         bestellungenService.add({
@@ -339,8 +343,8 @@ export default function Bestellungen() {
             positionen: dialogState.positionen
         });
         setBestellungen(bestellungenService.getAll());
-        setOffen(false);
         setDialogState(createBestellungDialogState(lieferanten, artikel));
+        return true;
     };
 
     const data = bestellungen
@@ -424,9 +428,9 @@ export default function Bestellungen() {
             title="Bestellungen"
             columns={[
                 { field: "bestellNr", title: "Bestellnummer" },
-                { field: "anfrageQuelleLabel", title: "Ausloeser" },
+                { field: "anfrageQuelleLabel", title: "Auslöser" },
                 { field: "artikelnummernText", title: "Artikelnummern" },
-                { field: "lieferantAnzeige", title: "Lieferant", render: row => row.lieferantId ? <Link className="detail-link" to={`/lieferanten?focus=${row.lieferantId}`}>{row.lieferant}</Link> : row.lieferantAnzeige },
+                { field: "lieferantAnzeige", title: "Lieferant", render: row => row.lieferantId ? <Link className="detail-link" to={`/lieferantenfocus=${row.lieferantId}`}>{row.lieferant}</Link> : row.lieferantAnzeige },
                 { field: "status", title: "Status" },
                 { field: "angebotsStatus", title: "Lehrkraftangebot" },
                 { field: "prozess", title: "Prozess" },
@@ -435,7 +439,7 @@ export default function Bestellungen() {
             data={data}
             selectableColumns={false}
             focusRowId={searchParams.get("focus") || ""}
-            detailLinkResolver={({ field, row }) => field === "lieferantAnzeige" && row.lieferantId ? `/lieferanten?focus=${row.lieferantId}` : null}
+            detailLinkResolver={({ field, row }) => field === "lieferantAnzeige" && row.lieferantId ? `/lieferantenfocus=${row.lieferantId}` : null}
             searchable
             onSearch={setSuchbegriff}
             filters={[
@@ -445,14 +449,14 @@ export default function Bestellungen() {
                     options: [
                         { value: "bedarf gemeldet", label: "Bedarf gemeldet" },
                         { value: "angefragt", label: "Angefragt" },
-                        { value: "bestaetigt", label: "Bestaetigt" },
+                        { value: "bestaetigt", label: "Bestätigt" },
                         { value: "versendet", label: "Versendet" },
                         { value: "eingegangen", label: "Eingegangen" }
                     ]
                 },
                 {
                     name: "quelle",
-                    label: "Ausloeser",
+                    label: "Auslöser",
                     options: [
                         { value: "bedarfsmeldung", label: "Bedarfsmeldung" },
                         { value: "lieferantenvergleich", label: "Lieferantenvergleich" }
@@ -469,16 +473,21 @@ export default function Bestellungen() {
                 { name: "goods", label: "Wareneingang", permission: PERMISSIONS.LAGER_BUCHEN, onClick: row => navigate(`/wareneingaenge?focus=${row.id}`), variant: "secondary", isVisible: row => canBookGoodsReceipt(row) }
             ]}
         />
-        <Dialog open={offen} title="Neue Einkaufsanfrage" onClose={() => setOffen(false)}>
-            <div><Label required glossaryKey="ausloeser">Ausloeser</Label>
+        <Dialog
+            open={offen}
+            title="Neue Einkaufsanfrage"
+            onClose={() => setOffen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOffen(false)}>Anfrage speichern</SaveButton>}
+        >
+            <div><Label required glossaryKey="ausloeser">Auslöser</Label>
                 <select value={dialogState.anfrageQuelle} onChange={event => setDialogState(item => ({ ...item, anfrageQuelle: event.target.value, fehler: "" }))}>
                     <option value="bedarfsmeldung">Aufgrund einer Bedarfsmeldung</option>
                     <option value="lieferantenvergleich">Aufgrund eines Lieferantenvergleichs</option>
                 </select>
             </div>
             {dialogState.anfrageQuelle === "bedarfsmeldung" && <div>
-                <Label glossaryKey="bedarfsmeldung">Bestehende Bedarfsmeldung uebernehmen</Label>
-                <LookupField value={dialogState.bedarfsmeldungId} options={bedarfOptionen} onChange={bedarfsmeldungUebernehmen} placeholder="Bedarfsmeldung auswaehlen..."/>
+                <Label glossaryKey="bedarfsmeldung">Bestehende Bedarfsmeldung übernehmen</Label>
+                <LookupField value={dialogState.bedarfsmeldungId} options={bedarfOptionen} onChange={bedarfsmeldungUebernehmen} placeholder="Bedarfsmeldung auswählen..."/>
             </div>}
             <div><Label glossaryKey="lieferantenvergleich">{dialogState.anfrageQuelle === "lieferantenvergleich" ? "Lieferant aus Vergleich" : "Lieferant (optional)"}</Label>
                 <LookupField value={dialogState.lieferantId} options={lieferantenOptionen} onChange={value => setDialogState(item => ({ ...item, lieferantId: value, fehler: "" }))} placeholder="Lieferant suchen..."/>
@@ -493,7 +502,7 @@ export default function Bestellungen() {
                 <div><Label glossaryKey="angebotspositionen">Menge</Label><NumberField value={dialogState.menge} min="1" onChange={wert => setDialogState(item => ({ ...item, menge: Number(wert) }))}/></div>
                 <button type="button" onClick={positionHinzufuegen}>Position hinzufügen</button>
             </div>
-            <div className="form-row"><p>Die Schuelerfirma kann hier direkt Artikelnummer und benoetigte Menge erfassen. Die Lehrkraft sieht damit spaeter schon die wesentlichen Angaben fuer ihr Angebot.</p></div>
+            <div className="form-row"><p>Die Schülerfirma kann hier direkt Artikelnummer und benötigte Menge erfassen. Die Lehrkraft sieht damit später schon die wesentlichen Angaben für ihr Angebot.</p></div>
             <div className="form-row">
                 <Label required glossaryKey="angebotspositionen">Anfragepositionen</Label>
                 {dialogState.positionen.length === 0 ? <p>Noch keine Position vorhanden.</p> : <ul className="positionsliste">
@@ -525,11 +534,10 @@ export default function Bestellungen() {
                 </ul>}
             </div>
             <div className="form-row">
-                <Label>Hinweis fuer die Lehrkraft</Label>
+                <Label>Hinweis für die Lehrkraft</Label>
                 <TextArea rows={3} value={dialogState.notiz} onChange={wert => setDialogState(item => ({ ...item, notiz: wert }))}/>
                 {dialogState.fehler && <p className="form-error">{dialogState.fehler}</p>}
             </div>
-            <div className="form-row"><button type="button" onClick={speichern}>Anfrage speichern</button></div>
         </Dialog>
     </>;
 }

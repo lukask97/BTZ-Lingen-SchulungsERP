@@ -14,7 +14,7 @@ const LEGACY_PREFIXES: Record<NummernkreisSchluessel, string[]> = {
     zahlung: ["ZA"]
 };
 
-function getYearFromDate(dateValue?: string) {
+function getYearFromDate(dateValue: string) {
     const source = dateValue || getBerlinDate();
     return Number(String(source).slice(0, 4)) || new Date().getFullYear();
 }
@@ -32,13 +32,13 @@ function getAcceptedPrefixes(schluessel: NummernkreisSchluessel) {
 }
 
 function escapeRegex(value: string) {
-    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return value.replace(/[.*+^${}()|[\]\\]/g, "\\$&");
 }
 
 function buildPattern(prefixes: string[], includeRevision = false) {
     const prefixGroup = prefixes.map(escapeRegex).join("|");
-    return new RegExp(`^(?:${prefixGroup})-(\\d{4})-(\\d+)${
-        includeRevision ? "(?:\\.(\\d+))?" : ""
+    return new RegExp(`^(:${prefixGroup})-(\\d{4})-(\\d+)${
+        includeRevision ? "(:\\.(\\d+))" : ""
     }$`, "i");
 }
 
@@ -61,7 +61,7 @@ function getMaxSequence(values: Array<string | undefined>, schluessel: Nummernkr
     }, 0);
 }
 
-export function formatDocumentNumber(schluessel: NummernkreisSchluessel, sequence: number, dateValue?: string) {
+export function formatDocumentNumber(schluessel: NummernkreisSchluessel, sequence: number, dateValue: string) {
     return `${getNumberPrefix(schluessel)}-${getYearFromDate(dateValue)}-${padSequence(sequence)}`;
 }
 
@@ -73,17 +73,17 @@ export function formatOfferNumber(angebotsBasisNr: string, revision: number) {
     return `${angebotsBasisNr}.${Number(revision || 0)}`;
 }
 
-export function naechsteAuftragsnummer(auftraege: any[] = [], dateValue?: string) {
+export function naechsteAuftragsnummer(auftraege: any[] = [], dateValue: string) {
     const year = getYearFromDate(dateValue);
-    const sequence = getMaxSequence(auftraege.map(item => item?.auftragNr), "auftrag", year) + 1;
+    const sequence = getMaxSequence(auftraege.map(item => item.auftragNr), "auftrag", year) + 1;
     return formatDocumentNumber("auftrag", sequence, dateValue);
 }
 
-export function naechsteAngebotsrevision(angebote: any[] = [], vorgangId: string, dateValue?: string) {
+export function naechsteAngebotsrevision(angebote: any[] = [], vorgangId: string, dateValue: string) {
     const eintraege = angebote.filter(item => item.vorgangId === vorgangId);
     if (eintraege.length === 0) {
         const year = getYearFromDate(dateValue);
-        const sequence = getMaxSequence(angebote.map(item => item?.angebotsBasisNr || item?.angebotsNr), "angebot", year) + 1;
+        const sequence = getMaxSequence(angebote.map(item => item.angebotsBasisNr || item.angebotsNr), "angebot", year) + 1;
         const angebotsBasisNr = formatDocumentNumber("angebot", sequence, dateValue);
         return {
             angebotsBasisNr,
@@ -92,7 +92,7 @@ export function naechsteAngebotsrevision(angebote: any[] = [], vorgangId: string
         };
     }
 
-    const basis = String(eintraege[0].angebotsBasisNr || "").split(".")[0];
+    const basis = String(eintraege[0]?.angebotsBasisNr || "").split(".")[0];
     const revision = Math.max(...eintraege.map(item => Number(item.revision || parseNumber(String(item.angebotsNr || ""), "angebot", true)?.revision || 0))) + 1;
 
     return {
@@ -102,7 +102,7 @@ export function naechsteAngebotsrevision(angebote: any[] = [], vorgangId: string
     };
 }
 
-export function getRechnungsnummer(auftragNr: string, dateValue?: string) {
+export function getRechnungsnummer(auftragNr: string, dateValue: string) {
     const parsed = parseNumber(String(auftragNr || ""), "auftrag");
     if (parsed) {
         return `${getNumberPrefix("rechnung")}-${parsed.year}-${padSequence(parsed.sequence)}`;
@@ -111,7 +111,7 @@ export function getRechnungsnummer(auftragNr: string, dateValue?: string) {
     return formatDocumentNumber("rechnung", 1, dateValue);
 }
 
-export function getLieferscheinnummer(auftragNr: string, dateValue?: string) {
+export function getLieferscheinnummer(auftragNr: string, dateValue: string) {
     const parsed = parseNumber(String(auftragNr || ""), "auftrag");
     if (parsed) {
         return `${getNumberPrefix("lieferschein")}-${parsed.year}-${padSequence(parsed.sequence)}`;
@@ -123,11 +123,11 @@ export function getLieferscheinnummer(auftragNr: string, dateValue?: string) {
 export function naechsteStammdatennummer(values: Array<string | undefined>, schluessel: "artikel" | "service") {
     const prefixes = getAcceptedPrefixes(schluessel);
     const prefixGroup = prefixes.map(escapeRegex).join("|");
-    const pattern = new RegExp(`^(?:${prefixGroup})(\\d+)$`, "i");
+    const pattern = new RegExp(`^(:${prefixGroup})(\\d+)$`, "i");
     const maxSequence = values.reduce((maxValue, currentValue) => {
         const match = String(currentValue || "").trim().match(pattern);
         if (!match) return maxValue;
-        return Math.max(maxValue, Number(match[1] || 0));
+        return Math.max(maxValue, Number(match[2] || 0));
     }, 0);
 
     return formatMasterDataNumber(schluessel, maxSequence + 1);

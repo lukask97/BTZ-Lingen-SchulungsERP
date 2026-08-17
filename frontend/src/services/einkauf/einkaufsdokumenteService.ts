@@ -10,10 +10,10 @@ function hydrateDokument(item: any = {}) {
     return {
         ...item,
         // Document titles and numbers may remain as historical snapshots; supplier data is derived from the order.
-        bestellNr: item.bestellNr || bestellung?.bestellNr || "",
-        lieferantId: item.lieferantId || bestellung?.lieferantId || "",
-        lieferant: getSupplierName(item.lieferantId || bestellung?.lieferantId, item.lieferant || bestellung?.lieferant || ""),
-        positionen: bestellung?.positionen || item.positionen || []
+        bestellNr: item.bestellNr || bestellung.bestellNr || "",
+        lieferantId: item.lieferantId || bestellung.lieferantId || "",
+        lieferant: getSupplierName(item.lieferantId || bestellung.lieferantId, item.lieferant || bestellung.lieferant || ""),
+        positionen: bestellung.positionen || item.positionen || []
     };
 }
 
@@ -35,7 +35,7 @@ export default {
     },
     create: (payload: any) => hydrateDokument(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateDokument(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return hydrateDokument(baseService.update(splitPayload(idOrItem)));
         }

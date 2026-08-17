@@ -65,7 +65,7 @@ export function getUnifiedOpenItems(rechnungen: any[] = [], zahlungen: any[] = [
             faelligAm: rechnung.faelligAm || "",
             betrag: Number(rechnung.betrag || 0),
             ampel: getOpenItemStatus(rechnung),
-            link: `/${rechnung.rechnungstyp === "Eingangsrechnung" ? "eingangsrechnungen" : "ausgangsrechnungen"}?focus=${rechnung.rechnungsnr}`
+            link: `/${rechnung.rechnungstyp === "Eingangsrechnung" ? "eingangsrechnungen" : "ausgangsrechnungen"}focus=${rechnung.rechnungsnr}`
         }));
 
     const offeneZahlungen = zahlungen
@@ -80,7 +80,7 @@ export function getUnifiedOpenItems(rechnungen: any[] = [], zahlungen: any[] = [
             faelligAm: zahlung.ausfuehrenAm || zahlung.datum || "",
             betrag: Number(zahlung.betrag || 0),
             ampel: getPaymentOpenItemStatus(zahlung),
-            link: `/${zahlung.zahlungsart === "Ausgang" ? "eingangsrechnungen" : "ausgangsrechnungen"}${zahlung.rechnungsnr ? `?focus=${zahlung.rechnungsnr}` : ""}`
+            link: `/${zahlung.zahlungsart === "Ausgang" ? "eingangsrechnungen" : "ausgangsrechnungen"}${zahlung.rechnungsnr ? `focus=${zahlung.rechnungsnr}` : ""}`
         }));
 
     return [...offeneRechnungen, ...offeneZahlungen];

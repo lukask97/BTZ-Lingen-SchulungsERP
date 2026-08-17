@@ -32,7 +32,7 @@ export default function Dialog({
                     <h2>{title}</h2>
                     <button
                         type="button"
-                        aria-label="Dialog schliessen"
+                        aria-label="Dialog schließen"
                         className="dialog-close"
                         onClick={(e) => {
                             e.preventDefault();
@@ -49,6 +49,11 @@ export default function Dialog({
                 </div>
 
                 <div className="dialog-footer">
+                    {footer && (
+                        <div className="dialog-footer-extra">
+                            {footer}
+                        </div>
+                    )}
                     <button
                         type="button"
                         className="dialog-cancel"
@@ -60,11 +65,6 @@ export default function Dialog({
                     >
                         Abbrechen
                     </button>
-                    {footer && (
-                        <div className="dialog-footer-extra">
-                            {footer}
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

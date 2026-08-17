@@ -19,7 +19,7 @@ export default function Lieferantenvergleich() {
         });
     };
 
-    const bester = [...lieferanten].sort((a, b) => Number(b.bewertung || 0) - Number(a.bewertung || 0))[0];
+    const bester = [...lieferanten].sort((a, b) => Number(b.bewertung || 0) - Number(a.bewertung || 0))[0] || null;
 
     return <>
         <OverviewCards cards={[
@@ -35,7 +35,7 @@ export default function Lieferantenvergleich() {
                 { field: "firma", title: "Lieferant" },
                 { field: "segment", title: "Segment" },
                 { field: "bewertung", title: "Bewertung" },
-                { field: "fuerBts", title: "Fuer BTS" },
+                { field: "fuerBts", title: "Notiz" },
                 { field: "abc", title: "ABC" }
             ]}
             rowActions={[

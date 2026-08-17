@@ -17,6 +17,7 @@ import { openDocumentPdf } from "../../utils/documentPdf";
 import useAuth from "../../auth/useAuth";
 import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 import { getOffersForVorgang, getOrderForOffer, getVorgangId } from "../../utils/processFlow";
+import { getUserDisplayNameWithRole } from "../../utils/userDisplay";
 
 function sortByRevisionAscending(a: any, b: any) {
     return Number(a.revision || 0) - Number(b.revision || 0);
@@ -34,8 +35,8 @@ function getThreadMessages(threadItem: any, fallbackDate: string) {
             datum: threadItem.beantwortetAm || threadItem.datum || fallbackDate,
             zeitpunkt: `${threadItem.beantwortetAm || threadItem.datum || fallbackDate}T12:00:00`,
             senderRolle: "Verkauf",
-            senderName: "Schuelerfirma Verkauf",
-            betreff: "Antwort der Schuelerfirma",
+            senderName: "Schülerfirma Verkauf",
+            betreff: "Antwort der Schülerfirma",
             nachricht: threadItem.antwort
         }].sort((a, b) => String(a.zeitpunkt || a.datum).localeCompare(String(b.zeitpunkt || b.datum)));
     }
@@ -58,11 +59,7 @@ export default function Kundenanfragen() {
     const [selectedOfferId, setSelectedOfferId] = useState<string>("");
     const angebote = angeboteService.getAll();
     const auftraege = auftraegeService.getAll();
-    const verkaufAbsenderName = user?.name
-        ? `${user.name} - Schuelerfirma Verkauf`
-        : user?.username
-            ? `${user.username} - Schuelerfirma Verkauf`
-            : "Schuelerfirma Verkauf";
+    const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
 
     const refreshInquiryState = () => {
         setAnfragen(customerInquiryService.list());
@@ -92,9 +89,9 @@ export default function Kundenanfragen() {
         if (!angebot) return;
         openDocumentPdf({
             title: `Angebot ${angebot.angebotsNr}`,
-            subject: "Automatisch erzeugtes Angebotsdokument fuer den Schulungseinsatz.",
+            subject: "Automatisch erzeugtes Angebotsdokument für den Schulungseinsatz.",
             date: angebot.datum,
-            note: angebot.verguenstigungsGrund || "Kein zusaetzlicher Hinweis hinterlegt.",
+            note: angebot.verguenstigungsGrund || "Kein zusätzlicher Hinweis hinterlegt.",
             referenceLabel: "Angebot",
             referenceValue: angebot.angebotsNr,
             partnerLabel: "Kunde",
@@ -107,10 +104,11 @@ export default function Kundenanfragen() {
     };
 
     const angebotSenden = () => {
-        const angebot = getSelectedOffer(angeboteZuVorgang(threadItem?.vorgangId));
+        if (!threadItem?.vorgangId) return;
+        const angebot = getSelectedOffer(angeboteZuVorgang(threadItem.vorgangId));
         if (!threadItem || !angebot || angebotWurdeBereitsGesendet(angebot)) return;
 
-        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Pruefung zu.`;
+        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Prüfung zu.`;
         const aktualisierteAnfrage = {
             ...threadItem,
             status: "beantwortet",
@@ -140,8 +138,9 @@ export default function Kundenanfragen() {
     };
 
     const aktualisiereAngebotsstatus = (angebot, status) => {
+        if (!threadItem) return;
         const vorgangAngebote = angeboteZuVorgang(angebot.vorgangId);
-        let neuerAuftragId = threadItem?.auftragId || "";
+        let neuerAuftragId = threadItem.auftragId || "";
 
         if (status === "angenommen") {
             const bestehenderAuftrag = getOrderForOffer(angebot.id, auftraegeService.list());
@@ -178,8 +177,8 @@ export default function Kundenanfragen() {
         const aktualisierteAnfrage = {
             ...threadItem,
             angebotId: angebot.id,
-            auftragId: status === "angenommen" ? neuerAuftragId : (threadItem?.auftragId || ""),
-            status: status === "angenommen" ? "erledigt" : threadItem?.status
+            auftragId: status === "angenommen" ? neuerAuftragId : (threadItem.auftragId || ""),
+            status: status === "angenommen" ? "erledigt" : threadItem.status
         };
 
         customerInquiryService.update(aktualisierteAnfrage);
@@ -209,7 +208,7 @@ export default function Kundenanfragen() {
             senderRolle: "Verkauf",
             senderName: verkaufAbsenderName,
             kanal: threadItem.kanal || "E-Mail",
-            betreff: "Antwort der Schuelerfirma",
+            betreff: "Antwort der Schülerfirma",
             nachricht: replyText.trim(),
             typ: "Antwort"
         });
@@ -221,6 +220,7 @@ export default function Kundenanfragen() {
 
     const offene = anfragen.filter(item => item.status === "offen").length;
     const wartetAufRueckmeldung = anfragen.filter(item => item.status === "beantwortet").length;
+    const threadVorgangId = String(threadItem?.vorgangId || "");
     const istLaufenderAuftrag = (auftragId) => {
         if (!auftragId) return false;
         const auftrag = auftraege.find(item => String(item.id) === String(auftragId));
@@ -231,15 +231,15 @@ export default function Kundenanfragen() {
         return istLaufenderAuftrag(item.auftragId);
     }).length;
     const vorgangAngebote = useMemo(
-        () => threadItem?.vorgangId ? angeboteZuVorgang(threadItem.vorgangId) : [],
-        [threadItem, angebote]
+        () => threadVorgangId ? angeboteZuVorgang(threadVorgangId) : [],
+        [threadVorgangId, angebote]
     );
     const dashboardTabs = useMemo(() => ([
         { key: "offen", label: "Offene Anfragen", value: offene },
-        { key: "rueckmeldung", label: "Warte auf Rueckmeldung", value: wartetAufRueckmeldung },
+        { key: "rueckmeldung", label: "Warte auf Rückmeldung", value: wartetAufRueckmeldung },
         {
             key: "auftraege",
-            label: "Laufende Auftraege",
+            label: "Laufende Aufträge",
             value: laufendeAuftraege
         },
         { key: "alle", label: "Alle", value: anfragen.length }
@@ -267,7 +267,7 @@ export default function Kundenanfragen() {
         ...(kannAngebotErstellen ? [{
             id: "prepare-offer",
             label: aktuellesAngebot?.status === "abgelehnt" ? "Neues Angebot vorbereiten" : "Angebot erstellen",
-            onClick: () => navigate(`/angebote?new=fromInquiry&kundeId=${threadItem.kundeId}&anfrageId=${threadItem.id}`)
+            onClick: () => navigate(`/angebote?new=fromInquiry&kundeId=${threadItem?.kundeId || ""}&anfrageId=${threadItem?.id || ""}`)
         }] : []),
         ...(kannAngebotSenden ? [{
             id: "send-offer",
@@ -278,7 +278,7 @@ export default function Kundenanfragen() {
 
     useEffect(() => subscribeToStorageSync(["kundenanfragen", "nachrichten", "angebote", "auftraege", "kunden"], () => {
         refreshInquiryState();
-        if (threadItem) {
+        if (threadItem?.id) {
             const aktuelleAnfrage = customerInquiryService.list().find(item => String(item.id) === String(threadItem.id));
             if (aktuelleAnfrage) setThreadItem(aktuelleAnfrage);
         }
@@ -294,11 +294,11 @@ export default function Kundenanfragen() {
     }, [focusId]);
 
     useEffect(() => {
-        if (!threadItem?.vorgangId) {
+        if (!threadVorgangId) {
             setSelectedOfferId("");
             return;
         }
-        const alleAngebote = angeboteZuVorgang(threadItem.vorgangId);
+        const alleAngebote = angeboteZuVorgang(threadVorgangId);
         if (alleAngebote.length === 0) {
             setSelectedOfferId("");
             return;
@@ -307,7 +307,7 @@ export default function Kundenanfragen() {
         if (!existiert) {
             setSelectedOfferId(String(alleAngebote[alleAngebote.length - 1].id));
         }
-    }, [threadItem, angebote, selectedOfferId]);
+    }, [threadVorgangId, angebote, selectedOfferId]);
 
     return <>
         <SalesFlowBar currentStep="kundenanfragen"/>
@@ -319,11 +319,11 @@ export default function Kundenanfragen() {
         </div>
         <DataTable
             title={activeTab === "offen"
-                ? "Offene Anfragen"
+                 ? "Offene Anfragen"
                 : activeTab === "rueckmeldung"
-                    ? "Warte auf Rueckmeldung"
+                     ? "Warte auf Rückmeldung"
                     : activeTab === "auftraege"
-                        ? "Laufende Auftraege"
+                         ? "Laufende Aufträge"
                         : "Alle Kundenanfragen"}
             selectableColumns={false}
             data={sichtbareAnfragen}
@@ -336,7 +336,7 @@ export default function Kundenanfragen() {
                     render: row => {
                         const kundenname = getCustomerName(row.kundeId, row.kunde);
                         if (row.kundeId && canReadCustomers) {
-                            return <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{kundenname}</Link>;
+                            return <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{kundenname}</Link>;
                         }
 
                         return kundenname;
@@ -419,9 +419,9 @@ export default function Kundenanfragen() {
                         </div>
                     </div>
                 </> : null}
-                replyLabel="Antwort der Schuelerfirma"
+                replyLabel="Antwort der Schülerfirma"
                 replyValue={replyText}
-                replyPlaceholder="Antwort, Rueckfrage oder Information an den Kunden direkt im Chat erfassen..."
+                replyPlaceholder="Antwort, Rückfrage oder Information an den Kunden direkt im Chat erfassen..."
                 onReplyChange={setReplyText}
                 onReplySend={antwortSpeichern}
                 showReplyBox

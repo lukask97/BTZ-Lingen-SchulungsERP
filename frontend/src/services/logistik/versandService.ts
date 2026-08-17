@@ -10,8 +10,8 @@ function hydrateVersand(item: any = {}) {
     return {
         ...item,
         // Shipping records keep only the order reference; labels are derived for display.
-        auftrag: item.auftrag || auftrag?.auftragNr || "",
-        kunde: getCustomerName(auftrag?.kundeId, item.kunde || auftrag?.kunde || "")
+        auftrag: item.auftrag || auftrag.auftragNr || "",
+        kunde: getCustomerName(auftrag.kundeId, item.kunde || auftrag.kunde || "")
     };
 }
 
@@ -30,7 +30,7 @@ export default {
     },
     create: (payload: any) => hydrateVersand(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateVersand(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return hydrateVersand(baseService.update(splitPayload(idOrItem)));
         }

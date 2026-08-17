@@ -7,12 +7,12 @@ import { formatTimestampForDisplay } from "../utils/dateTime";
 
 type ThreadMessage = {
     id: string | number;
-    datum?: string;
-    zeitpunkt?: string;
-    senderRolle?: string;
-    senderName?: string;
-    betreff?: string;
-    nachricht?: string;
+    datum: string;
+    zeitpunkt: string;
+    senderRolle: string;
+    senderName: string;
+    betreff: string;
+    nachricht: string;
 };
 
 type ThreadOffer = {
@@ -70,27 +70,27 @@ type ThreadChatDialogProps = {
     open: boolean;
     title: string;
     onClose: () => void;
-    vorgangId?: string;
+    vorgangId: string;
     kundeLabel: string;
-    statusLabel?: string;
-    anliegen?: string;
+    statusLabel: string;
+    anliegen: string;
     offers: ThreadOffer[];
     messages: ThreadMessage[];
     ownRole: string;
-    offerHrefResolver?: (offer: ThreadOffer) => string;
-    offerClickResolver?: (offer: ThreadOffer) => void;
-    documentLinks?: ThreadDocumentLink[];
-    headerActionLink?: ThreadActionLink;
-    actionLinks?: ThreadActionLink[];
-    customActionSection?: JSX.Element | null;
-    replyLabel?: string;
-    replyValue?: string;
-    replyPlaceholder?: string;
-    onReplyChange?: (value: string) => void;
-    onReplySend?: () => void;
-    showReplyBox?: boolean;
-    documentsLabel?: string;
-    actionSectionLabel?: string;
+    offerHrefResolver: (offer: ThreadOffer) => string;
+    offerClickResolver: (offer: ThreadOffer) => void;
+    documentLinks: ThreadDocumentLink[];
+    headerActionLink: ThreadActionLink;
+    actionLinks: ThreadActionLink[];
+    customActionSection: JSX.Element | null;
+    replyLabel: string;
+    replyValue: string;
+    replyPlaceholder: string;
+    onReplyChange: (value: string) => void;
+    onReplySend: () => void;
+    showReplyBox: boolean;
+    documentsLabel: string;
+    actionSectionLabel: string;
 };
 
 export default function ThreadChatDialog({
@@ -136,8 +136,9 @@ export default function ThreadChatDialog({
     );
 
     useEffect(() => {
-        if (!open || !chatWrapperRef.current) return;
-        chatWrapperRef.current.scrollTop = chatWrapperRef.current.scrollHeight;
+        const wrapper = chatWrapperRef.current;
+        if (!open || !wrapper) return;
+        wrapper.scrollTop = wrapper.scrollHeight;
     }, [open, sichereNachrichten.length, chatExpanded]);
 
     function handleReplyKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {

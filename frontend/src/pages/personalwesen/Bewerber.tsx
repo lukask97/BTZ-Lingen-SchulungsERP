@@ -3,6 +3,7 @@ import { useState } from "react";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
@@ -37,11 +38,11 @@ export default function Bewerber() {
     const [current, setCurrent] = useState(createBewerber(today));
 
     const speichern = () => {
-        if (!current.name.trim()) return;
+        if (!current.name.trim()) return false;
         bewerberService.create(current);
         setBewerber(bewerberService.list());
-        setOpen(false);
         setCurrent(createBewerber(today));
+        return true;
     };
 
     const einladen = (item) => {
@@ -102,18 +103,22 @@ export default function Bewerber() {
                 { field: "status", title: "Status" },
                 { field: "notiz", title: "Notiz" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "name" && row.mitarbeiterId ? `/personalakte?mitarbeiter=${row.mitarbeiterId}` : null}
+            detailLinkResolver={({ field, row }) => field === "name" && row.mitarbeiterId ? `/personalaktemitarbeiter=${row.mitarbeiterId}` : null}
             toolbarActions={[{ name: "new", label: "Bewerber anlegen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: () => setOpen(true), variant: "secondary" }]}
             rowActions={[
                 { name: "invite", label: "Zum Gespräch einladen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: einladen, variant: "success", isVisible: row => row.status === "eingegangen" },
                 { name: "hire", label: "Als Mitarbeiter übernehmen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: uebernehmen, variant: "secondary", isVisible: row => row.status === "eingeladen" || row.status === "übernommen" }
             ]}
         />
-        <Dialog open={open} title="Bewerber anlegen" onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title="Bewerber anlegen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Name</Label><TextField value={current.name} onChange={value => setCurrent(item => ({ ...item, name: value }))}/></div>
             <div><Label>Stelle</Label><TextField value={current.stelle} onChange={value => setCurrent(item => ({ ...item, stelle: value }))}/></div>
             <div className="form-row"><Label>Notiz</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

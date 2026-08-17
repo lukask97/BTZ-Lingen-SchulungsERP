@@ -2,6 +2,7 @@ import { useState } from "react";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
+import SaveButton from "../../components/SaveButton";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import schulungenService from "../../services/personalwesen/schulungenService";
@@ -20,11 +21,11 @@ export default function Schulungen() {
     const [current, setCurrent] = useState(createSchulung(today));
 
     const speichern = () => {
-        if (!current.titel.trim()) return;
+        if (!current.titel.trim()) return false;
         schulungenService.create(current);
         setSchulungen(schulungenService.list());
-        setOpen(false);
         setCurrent(createSchulung(today));
+        return true;
     };
 
     const starten = (schulung) => {
@@ -52,11 +53,15 @@ export default function Schulungen() {
             toolbarActions={[{ name: "new", label: "Schulung planen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: () => { setCurrent(createSchulung(today)); setOpen(true); }, variant: "secondary" }]}
             rowActions={[{ name: "start", label: "Als laufend markieren", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: starten, variant: "success", isVisible: row => row.status === "geplant" }]}
         />
-        <Dialog open={open} title="Schulung planen" onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title="Schulung planen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Titel</Label><TextField value={current.titel} onChange={value => setCurrent(item => ({ ...item, titel: value }))}/></div>
             <div><Label>Zielgruppe</Label><TextField value={current.zielgruppe} onChange={value => setCurrent(item => ({ ...item, zielgruppe: value }))}/></div>
             <div><Label>Ort</Label><TextField value={current.ort} onChange={value => setCurrent(item => ({ ...item, ort: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

@@ -9,7 +9,7 @@ async function parseJsonResponse(response: Response) {
     const data = text ? JSON.parse(text) : null;
 
     if (!response.ok) {
-        const message = data?.message || `API request failed with status ${response.status}`;
+        const message = data.message || `API request failed with status ${response.status}`;
         throw new Error(message);
     }
 
@@ -52,7 +52,7 @@ const artikelBilderService = {
         const data = await parseJsonResponse(response);
         return {
             ...(data.item || {}),
-            url: resolveImageUrl(String(data.item?.url || ""))
+            url: resolveImageUrl(String(data.item.url || ""))
         };
     },
 

@@ -10,6 +10,7 @@ import kundenService from "../../services/verkauf/customerService";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useState, useMemo } from "react";
 import OverviewCards from "../../components/OverviewCards";
+import SaveButton from "../../components/SaveButton";
 import { Link, useSearchParams } from "react-router-dom";
 
 function naechsteKundennummer(kunden = []) {
@@ -79,7 +80,7 @@ export default function Kunden() {
         return filtered.map(item => ({
             ...item,
             vorgaenge: {
-                label: "Vorgaenge und Rechnungen oeffnen",
+                label: "Vorgänge und Rechnungen öffnen",
                 to: `/partnerhistorie?typ=kunde&id=${item.id}`
             }
         }));
@@ -107,7 +108,7 @@ export default function Kunden() {
             <section className="module-panel">
                 <div className="personalakte-toolbar">
                     <div className="personalakte-links">
-                        <Link className="button-link" to="/partnerhistorie?typ=kunde">Partnerhistorie oeffnen</Link>
+                        <Link className="button-link" to="/partnerhistorie?typ=kunde">Partnerhistorie öffnen</Link>
                     </div>
                 </div>
             </section>
@@ -139,6 +140,7 @@ export default function Kunden() {
                 open={open}
                 title={editMode ? "Kunde bearbeiten" : "Neuer Kunde"}
                 onClose={handleClose}
+                footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Speichern</SaveButton>}
             >
                 <Label required glossaryKey="kundennummer">Kundennummer</Label>
                 <TextField value={currentItem.kundenNr} onChange={v => handleFieldChange("kundenNr", v)} />
@@ -174,7 +176,7 @@ export default function Kunden() {
 
                 <Label>Optionen</Label>
                 <TextField
-                    value={currentItem.optionen?.join(", ") || ""}
+                    value={currentItem.optionen.join(", ") || ""}
                     onChange={v => handleFieldChange("optionen", v.split(",").map(x => x.trim()).filter(Boolean))}
                 />
 
@@ -188,10 +190,7 @@ export default function Kunden() {
                     />
                 </div>
 
-                <div className="form-row">
-                    {error && <p className="form-error">{error}</p>}
-                    <button type="button" onClick={speichern}>Speichern</button>
-                </div>
+                <div className="form-row">{error && <p className="form-error">{error}</p>}</div>
             </Dialog>
         </>
     );
