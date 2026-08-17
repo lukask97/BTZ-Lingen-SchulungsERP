@@ -330,36 +330,33 @@ export let nummernkreise = [
 export let benutzer = [
 
     {
-        id: 1, username: "admin", email: "admin@test.de", password: "admin", rolle: "Admin", name: "Administrator", permissions: ["*"]
+        id: 1, username: "admin", email: "admin@test.de", password: "admin", rolle: "Admin", vorname: "Test", nachname: "Admin", permissions: ["*"]
     },
 
     {
-        id: 2, username: "lager", email: "lager@test.de", password: "lager", rolle: "Lager", name: "Lager Mitarbeiter", permissions: ["artikel.lesen", "lager.buchen", "lager.lesen", "einkauf.lesen", "einkauf.bearbeiten"]
+        id: 2, username: "lager", email: "lager@test.de", password: "lager", rolle: "Lager", vorname: "Lager", nachname: "Leo", permissions: ["artikel.lesen", "lager.buchen", "lager.lesen", "einkauf.lesen", "einkauf.bearbeiten"]
     },
 
     {
-        id: 3, username: "buchhaltung", email: "buchhaltung@test.de", password: "buchhaltung", rolle: "Buchhaltung", name: "Buchhaltung", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
+        id: 3, username: "buchhaltung", email: "buchhaltung@test.de", password: "buchhaltung", rolle: "Buchhaltung", vorname: "Bilanz", nachname: "Britta", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
     },
     {
-        id: 4, username: "marketing", email: "marketing@test.de", password: "marketing", rolle: "Marketing", name: "Marketing Mitarbeiter", permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
+        id: 4, username: "marketing", email: "marketing@test.de", password: "marketing", rolle: "Marketing", vorname: "Marketing", nachname: "Mara", permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
     },
     {
-        id: 8, username: "einkauf", email: "einkauf@test.de", password: "einkauf", rolle: "Einkauf", name: "Einkauf Mitarbeiter", permissions: ["einkauf.lesen", "einkauf.bearbeiten", "lager.lesen", "lager.bearbeiten", "artikel.lesen", "artikel.bearbeiten"]
+        id: 8, username: "einkauf", email: "einkauf@test.de", password: "einkauf", rolle: "Einkauf", vorname: "Einkauf", nachname: "Eva", permissions: ["einkauf.lesen", "einkauf.bearbeiten", "lager.lesen", "lager.bearbeiten", "artikel.lesen", "artikel.bearbeiten"]
     },
     {
-        id: 9, username: "verkauf", email: "verkauf@test.de", password: "verkauf", rolle: "Verkauf", name: "Verkauf Mitarbeiter", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
+        id: 10, username: "personalwesen", email: "personalwesen@test.de", password: "personalwesen", rolle: "Personalwesen", vorname: "HR", nachname: "Hannah", permissions: ["personalwesen.lesen", "personalwesen.bearbeiten", "organisation.lesen"]
     },
     {
-        id: 10, username: "personalwesen", email: "personalwesen@test.de", password: "personalwesen", rolle: "Personalwesen", name: "Personalwesen Mitarbeiter", permissions: ["personalwesen.lesen", "personalwesen.bearbeiten", "organisation.lesen"]
+        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi", vorname: "Azubi", nachname: "Alex", permissions: ["kunde.lesen", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen"]
     },
     {
-        id: 5, username: "verkauf_azubi", email: "verkauf.azubi@test.de", password: "verkauf", rolle: "Verkauf Azubi", name: "Verkauf Azubi", permissions: ["kunde.lesen", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen"]
+        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior", vorname: "Senior", nachname: "Sascha", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "lager.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
     },
     {
-        id: 6, username: "verkauf_senior", email: "verkauf.senior@test.de", password: "verkauf", rolle: "Verkauf Senior", name: "Verkauf Senior", permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "lager.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
-    },
-    {
-        id: 7, username: "gf", email: "gf@test.de", password: "gf", rolle: "Geschäftsführung", name: "Geschäftsführung", permissions: ["*"]
+        id: 7, username: "gf", email: "gf@test.de", password: "gf", rolle: "Geschäftsführung", vorname: "Chef", nachname: "Carsten", permissions: ["*"]
     }
 
 ];
@@ -552,7 +549,7 @@ export let lager = [
 export let users = [
 
     {
-        id: 1, username: "admin", password: "admin", name: "Administrator", permissions: ["*"]
+        id: 1, username: "admin", password: "admin", vorname: "Test", nachname: "Admin", permissions: ["*"]
     },
 
 
@@ -560,7 +557,8 @@ export let users = [
         id: 2,
         username: "lager",
         password: "lager",
-        name: "Lager Mitarbeiter",
+        vorname: "Lager",
+        nachname: "Leo",
         permissions: ["artikel.lesen", "lager.buchen", "lager.lesen", "einkauf.lesen", "einkauf.bearbeiten"]
     },
 
@@ -569,14 +567,16 @@ export let users = [
         id: 3,
         username: "buchhaltung",
         password: "buchhaltung",
-        name: "Buchhaltung",
+        vorname: "Bilanz",
+        nachname: "Britta",
         permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "rechnung.lesen", "rechnung.anlegen", "rechnung.bearbeiten", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten", "organisation.lesen", "buchhaltung.lesen", "buchhaltung.bearbeiten"]
     },
     {
         id: 4,
         username: "marketing",
         password: "marketing",
-        name: "Marketing Mitarbeiter",
+        vorname: "Marketing",
+        nachname: "Mara",
         rolle: "Marketing",
         permissions: ["marketing.lesen", "marketing.bearbeiten", "verkauf.lesen"]
     },
@@ -584,23 +584,17 @@ export let users = [
         id: 8,
         username: "einkauf",
         password: "einkauf",
-        name: "Einkauf Mitarbeiter",
+        vorname: "Einkauf",
+        nachname: "Eva",
         rolle: "Einkauf",
         permissions: ["einkauf.lesen", "einkauf.bearbeiten", "lager.lesen", "lager.bearbeiten", "artikel.lesen", "artikel.bearbeiten"]
-    },
-    {
-        id: 9,
-        username: "verkauf",
-        password: "verkauf",
-        name: "Verkauf Mitarbeiter",
-        rolle: "Verkauf",
-        permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "lager.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
     },
     {
         id: 10,
         username: "personalwesen",
         password: "personalwesen",
-        name: "Personalwesen Mitarbeiter",
+        vorname: "HR",
+        nachname: "Hannah",
         rolle: "Personalwesen",
         permissions: ["personalwesen.lesen", "personalwesen.bearbeiten", "organisation.lesen"]
     },
@@ -608,7 +602,8 @@ export let users = [
         id: 5,
         username: "verkauf_azubi",
         password: "verkauf",
-        name: "Verkauf Azubi",
+        vorname: "Azubi",
+        nachname: "Alex",
         rolle: "Verkauf Azubi",
         permissions: ["kunde.lesen", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen"]
     },
@@ -616,7 +611,8 @@ export let users = [
         id: 6,
         username: "verkauf_senior",
         password: "verkauf",
-        name: "Verkauf Senior",
+        vorname: "Senior",
+        nachname: "Sascha",
         rolle: "Verkauf Senior",
         permissions: ["kunde.lesen", "kunde.anlegen", "kunde.bearbeiten", "artikel.lesen", "verkauf.lesen", "verkauf.bearbeiten", "service.lesen", "service.bearbeiten"]
     },
@@ -624,7 +620,8 @@ export let users = [
         id: 7,
         username: "gf",
         password: "gf",
-        name: "Geschäftsführung",
+        vorname: "Chef",
+        nachname: "Carsten",
         rolle: "Geschäftsführung",
         permissions: ["*"]
     }
@@ -882,6 +879,118 @@ export let angebote = [
         rabattBetrag: 25,
         gesamtbetrag: 953.97,
         status: "in Vorbereitung"
+    },
+    {
+        id: 7,
+        angebotsNr: "ANG-2026-006.0",
+        angebotsBasisNr: "ANG-2026-006",
+        revision: 0,
+        vorgangId: "anfrage-6",
+        anfrageId: 6,
+        kundeId: 1,
+        datum: "2026-03-10",
+        gueltigBis: "2026-03-24",
+        rabattBetrag: 0,
+        gesamtbetrag: 179.98,
+        status: "angenommen"
+    },
+    {
+        id: 8,
+        angebotsNr: "ANG-2026-007.0",
+        angebotsBasisNr: "ANG-2026-007",
+        revision: 0,
+        vorgangId: "anfrage-7",
+        anfrageId: 7,
+        kundeId: 1,
+        datum: "2026-03-28",
+        gueltigBis: "2026-04-11",
+        rabattBetrag: 0,
+        gesamtbetrag: 1598,
+        status: "angenommen"
+    },
+    {
+        id: 9,
+        angebotsNr: "ANG-2026-008.0",
+        angebotsBasisNr: "ANG-2026-008",
+        revision: 0,
+        vorgangId: "anfrage-8",
+        anfrageId: 8,
+        kundeId: 1,
+        datum: "2026-04-17",
+        gueltigBis: "2026-05-01",
+        rabattBetrag: 20,
+        gesamtbetrag: 519.4,
+        status: "angenommen"
+    },
+    {
+        id: 10,
+        angebotsNr: "ANG-2026-009.0",
+        angebotsBasisNr: "ANG-2026-009",
+        revision: 0,
+        vorgangId: "anfrage-9",
+        anfrageId: 9,
+        kundeId: 1,
+        datum: "2026-05-06",
+        gueltigBis: "2026-05-20",
+        rabattBetrag: 0,
+        gesamtbetrag: 390,
+        status: "angenommen"
+    },
+    {
+        id: 11,
+        angebotsNr: "ANG-2026-010.0",
+        angebotsBasisNr: "ANG-2026-010",
+        revision: 0,
+        vorgangId: "anfrage-10",
+        anfrageId: 10,
+        kundeId: 1,
+        datum: "2026-05-21",
+        gueltigBis: "2026-06-04",
+        rabattBetrag: 0,
+        gesamtbetrag: 269.7,
+        status: "angenommen"
+    },
+    {
+        id: 12,
+        angebotsNr: "ANG-2026-011.0",
+        angebotsBasisNr: "ANG-2026-011",
+        revision: 0,
+        vorgangId: "anfrage-11",
+        anfrageId: 11,
+        kundeId: 1,
+        datum: "2026-06-09",
+        gueltigBis: "2026-06-23",
+        rabattBetrag: 0,
+        gesamtbetrag: 89,
+        status: "angenommen"
+    },
+    {
+        id: 13,
+        angebotsNr: "ANG-2026-012.0",
+        angebotsBasisNr: "ANG-2026-012",
+        revision: 0,
+        vorgangId: "anfrage-12",
+        anfrageId: 12,
+        kundeId: 1,
+        datum: "2026-06-26",
+        gueltigBis: "2026-07-10",
+        rabattBetrag: 0,
+        gesamtbetrag: 119.98,
+        status: "angenommen"
+    },
+    {
+        id: 14,
+        angebotsNr: "ANG-2026-013.0",
+        angebotsBasisNr: "ANG-2026-013",
+        revision: 0,
+        vorgangId: "anfrage-13",
+        anfrageId: 13,
+        kundeId: 1,
+        datum: "2026-07-08",
+        gueltigBis: "2026-07-22",
+        rabattBetrag: 0,
+        gesamtbetrag: 799,
+        status: "angenommen"
     }
 ];
 
@@ -941,6 +1050,70 @@ export let angebotspositionen = [
         leistungTyp: "Artikel",
         menge: 3,
         einzelpreis: 59.99
+    },
+    {
+        id: 8,
+        angebotId: 7,
+        artikelId: 3,
+        leistungTyp: "Artikel",
+        menge: 3,
+        einzelpreis: 59.99
+    },
+    {
+        id: 9,
+        angebotId: 8,
+        artikelId: 1,
+        leistungTyp: "Artikel",
+        menge: 2,
+        einzelpreis: 799
+    },
+    {
+        id: 10,
+        angebotId: 9,
+        artikelId: 2,
+        leistungTyp: "Artikel",
+        menge: 6,
+        einzelpreis: 89.9
+    },
+    {
+        id: 11,
+        angebotId: 10,
+        serviceId: 2,
+        leistungTyp: "Service",
+        menge: 6,
+        einzelpreis: 65
+    },
+    {
+        id: 12,
+        angebotId: 11,
+        artikelId: 2,
+        leistungTyp: "Artikel",
+        menge: 3,
+        einzelpreis: 89.9
+    },
+    {
+        id: 13,
+        angebotId: 12,
+        serviceId: 2,
+        leistungTyp: "Service",
+        menge: 1,
+        einzelpreis: 89
+    },
+    {
+        id: 14,
+        angebotId: 13,
+        artikelId: 3,
+        leistungTyp: "Artikel",
+        menge: 2,
+        einzelpreis: 59.99
+    },
+    {
+        id: 15,
+        angebotId: 14,
+        artikelId: 1,
+        leistungTyp: "Artikel",
+        menge: 1,
+        einzelpreis: 799
     }
 ];
 
@@ -1009,6 +1182,110 @@ export let auftraege = [
         gesamtbetrag: 953.97,
         faelligAm: "2026-08-26",
         angebotId: 6
+    },
+    {
+        id: 6,
+        auftragNr: "AU-2026-006",
+        kundeId: 1,
+        anfrageId: 6,
+        vorgangId: "anfrage-6",
+        datum: "2026-03-12",
+        status: "bezahlt",
+        rabattBetrag: 0,
+        gesamtbetrag: 179.98,
+        faelligAm: "2026-03-26",
+        angebotId: 7
+    },
+    {
+        id: 7,
+        auftragNr: "AU-2026-007",
+        kundeId: 1,
+        anfrageId: 7,
+        vorgangId: "anfrage-7",
+        datum: "2026-04-02",
+        status: "bezahlt",
+        rabattBetrag: 0,
+        gesamtbetrag: 1598,
+        faelligAm: "2026-04-16",
+        angebotId: 8
+    },
+    {
+        id: 8,
+        auftragNr: "AU-2026-008",
+        kundeId: 1,
+        anfrageId: 8,
+        vorgangId: "anfrage-8",
+        datum: "2026-04-22",
+        status: "abgerechnet",
+        rabattBetrag: 20,
+        gesamtbetrag: 519.4,
+        faelligAm: "2026-05-06",
+        angebotId: 9
+    },
+    {
+        id: 9,
+        auftragNr: "AU-2026-009",
+        kundeId: 1,
+        anfrageId: 9,
+        vorgangId: "anfrage-9",
+        datum: "2026-05-09",
+        status: "bezahlt",
+        rabattBetrag: 0,
+        gesamtbetrag: 390,
+        faelligAm: "2026-05-23",
+        angebotId: 10
+    },
+    {
+        id: 10,
+        auftragNr: "AU-2026-010",
+        kundeId: 1,
+        anfrageId: 10,
+        vorgangId: "anfrage-10",
+        datum: "2026-05-27",
+        status: "abgerechnet",
+        rabattBetrag: 0,
+        gesamtbetrag: 269.7,
+        faelligAm: "2026-06-10",
+        angebotId: 11
+    },
+    {
+        id: 11,
+        auftragNr: "AU-2026-011",
+        kundeId: 1,
+        anfrageId: 11,
+        vorgangId: "anfrage-11",
+        datum: "2026-06-12",
+        status: "bezahlt",
+        rabattBetrag: 0,
+        gesamtbetrag: 89,
+        faelligAm: "2026-06-26",
+        angebotId: 12
+    },
+    {
+        id: 12,
+        auftragNr: "AU-2026-012",
+        kundeId: 1,
+        anfrageId: 12,
+        vorgangId: "anfrage-12",
+        datum: "2026-07-01",
+        status: "bezahlt",
+        rabattBetrag: 0,
+        gesamtbetrag: 119.98,
+        faelligAm: "2026-07-15",
+        angebotId: 13
+    },
+    {
+        id: 13,
+        auftragNr: "AU-2026-013",
+        kundeId: 1,
+        anfrageId: 13,
+        vorgangId: "anfrage-13",
+        datum: "2026-07-12",
+        status: "abgerechnet",
+        rabattBetrag: 0,
+        gesamtbetrag: 799,
+        faelligAm: "2026-07-26",
+        angebotId: 14
     }
 ];
 
@@ -1018,7 +1295,15 @@ export let auftragspositionen = [
     { id: 3, auftragId: 3, artikelId: 1, leistungTyp: "Artikel", menge: 1, einzelpreis: 799 },
     { id: 4, auftragId: 4, serviceId: 2, leistungTyp: "Service", menge: 6, einzelpreis: 65 },
     { id: 5, auftragId: 5, artikelId: 1, leistungTyp: "Artikel", menge: 1, einzelpreis: 799 },
-    { id: 6, auftragId: 5, artikelId: 3, leistungTyp: "Artikel", menge: 3, einzelpreis: 59.99 }
+    { id: 6, auftragId: 5, artikelId: 3, leistungTyp: "Artikel", menge: 3, einzelpreis: 59.99 },
+    { id: 7, auftragId: 6, artikelId: 3, leistungTyp: "Artikel", menge: 3, einzelpreis: 59.99 },
+    { id: 8, auftragId: 7, artikelId: 1, leistungTyp: "Artikel", menge: 2, einzelpreis: 799 },
+    { id: 9, auftragId: 8, artikelId: 2, leistungTyp: "Artikel", menge: 6, einzelpreis: 89.9 },
+    { id: 10, auftragId: 9, serviceId: 2, leistungTyp: "Service", menge: 6, einzelpreis: 65 },
+    { id: 11, auftragId: 10, artikelId: 2, leistungTyp: "Artikel", menge: 3, einzelpreis: 89.9 },
+    { id: 12, auftragId: 11, serviceId: 2, leistungTyp: "Service", menge: 1, einzelpreis: 89 },
+    { id: 13, auftragId: 12, artikelId: 3, leistungTyp: "Artikel", menge: 2, einzelpreis: 59.99 },
+    { id: 14, auftragId: 13, artikelId: 1, leistungTyp: "Artikel", menge: 1, einzelpreis: 799 }
 ];
 
 export let reklamationen = [
@@ -1061,8 +1346,29 @@ export let kundenanfragen = [
         status: "in Bearbeitung",
         datum: "2026-07-24",
         anliegen: "Frage nach Lieferzeiten für Sicherheitsjacken."
-    }
-    ,
+    },
+    {
+        id: 2,
+        typ: "Bestandsanfrage",
+        kundeId: 2,
+        vorgangId: "anfrage-2",
+        angebotId: 3,
+        kanal: "E-Mail",
+        status: "angenommen",
+        datum: "2026-07-28",
+        anliegen: "Bitte Angebot über 30 Fahrradhelme mit kurzfristiger Lieferung senden."
+    },
+    {
+        id: 3,
+        typ: "Produktanfrage",
+        kundeId: 1,
+        vorgangId: "anfrage-3",
+        angebotId: 4,
+        kanal: "Telefon",
+        status: "offen",
+        datum: "2026-08-05",
+        anliegen: "Wir benötigen kurzfristig ein Schulungsfahrrad für eine Vorführung."
+    },
     {
         id: 4,
         typ: "Serviceanfrage",
@@ -1084,6 +1390,94 @@ export let kundenanfragen = [
         status: "offen",
         datum: "2026-08-10",
         anliegen: "Anfrage für Helme und Schulungsfahrräder für ein Herbstprojekt."
+    },
+    {
+        id: 6,
+        typ: "Nachbestellung",
+        kundeId: 1,
+        vorgangId: "anfrage-6",
+        angebotId: 7,
+        kanal: "E-Mail",
+        status: "angenommen",
+        datum: "2026-03-09",
+        anliegen: "Bitte drei zusätzliche Helme für den Frühjahrsworkshop anbieten."
+    },
+    {
+        id: 7,
+        typ: "Projektanfrage",
+        kundeId: 1,
+        vorgangId: "anfrage-7",
+        angebotId: 8,
+        kanal: "Telefon",
+        status: "angenommen",
+        datum: "2026-03-27",
+        anliegen: "Zwei Schulungsfahrräder für eine interne Aktion werden benötigt."
+    },
+    {
+        id: 8,
+        typ: "Bekleidungsanfrage",
+        kundeId: 1,
+        vorgangId: "anfrage-8",
+        angebotId: 9,
+        kanal: "E-Mail",
+        status: "angenommen",
+        datum: "2026-04-16",
+        anliegen: "Bitte Sicherheitsjacken für eine kleine Besuchergruppe kalkulieren."
+    },
+    {
+        id: 9,
+        typ: "Serviceanfrage",
+        kundeId: 1,
+        vorgangId: "anfrage-9",
+        angebotId: 10,
+        kanal: "Telefon",
+        status: "angenommen",
+        datum: "2026-05-05",
+        anliegen: "Wartung von sechs Schulungsrädern vor einem Aktionstag."
+    },
+    {
+        id: 10,
+        typ: "Produktanfrage",
+        kundeId: 1,
+        vorgangId: "anfrage-10",
+        angebotId: 11,
+        kanal: "E-Mail",
+        status: "angenommen",
+        datum: "2026-05-20",
+        anliegen: "Drei Sicherheitsjacken für neue Teilnehmende anfragen."
+    },
+    {
+        id: 11,
+        typ: "Serviceanfrage",
+        kundeId: 1,
+        vorgangId: "anfrage-11",
+        angebotId: 12,
+        kanal: "Telefon",
+        status: "angenommen",
+        datum: "2026-06-08",
+        anliegen: "Kurze Wartung eines Vorführrads anfragen."
+    },
+    {
+        id: 12,
+        typ: "Nachbestellung",
+        kundeId: 1,
+        vorgangId: "anfrage-12",
+        angebotId: 13,
+        kanal: "E-Mail",
+        status: "angenommen",
+        datum: "2026-06-25",
+        anliegen: "Zwei weitere Helme für Sommertermine werden benötigt."
+    },
+    {
+        id: 13,
+        typ: "Produktanfrage",
+        kundeId: 1,
+        vorgangId: "anfrage-13",
+        angebotId: 14,
+        kanal: "Telefon",
+        status: "angenommen",
+        datum: "2026-07-07",
+        anliegen: "Ein zusätzliches Schulungsfahrrad für den Juli bestellen."
     }
 ];
 
@@ -1178,6 +1572,45 @@ export let nachrichten = [
 ];
 
 // Buchhaltung und Führung
+
+export let rechnungen = [
+    {
+        id: 1,
+        auftragId: 1,
+        kundeId: 1,
+        rechnungsnr: "RG-2026-001",
+        rechnungstyp: "Ausgangsrechnung",
+        datum: "2026-07-18",
+        faelligAm: "2026-08-06",
+        betrag: 1348.5,
+        status: "offen",
+        mahnstufe: "1. Mahnung"
+    },
+    {
+        id: 2,
+        auftragId: 2,
+        kundeId: 2,
+        rechnungsnr: "RG-2026-002",
+        rechnungstyp: "Ausgangsrechnung",
+        datum: "2026-07-21",
+        faelligAm: "2026-07-22",
+        betrag: 1799.7,
+        status: "bezahlt",
+        mahnstufe: "-"
+    },
+    {
+        id: 3,
+        bestellungId: 2,
+        lieferantId: 2,
+        rechnungsnr: "ER-2026-002",
+        rechnungstyp: "Eingangsrechnung",
+        datum: "2026-08-07",
+        faelligAm: "2026-08-21",
+        betrag: 2100,
+        status: "offen",
+        mahnstufe: "-"
+    }
+];
 
 export let zahlungen = [
     {
@@ -1630,6 +2063,35 @@ export let firmenkonto = [
         soll: 420,
         haben: 0,
         saldo: -420
+    }
+];
+
+export let lehrkraftOptionen = [
+    {
+        id: 1,
+        autoLieferannahmeNach1Tag: false,
+        autoDebitorenzahlungNach1Tag: false,
+        debitorenzahlungRegeln: [
+            { id: "regel-1", startTag: 0, endTag: 0, gewichtung: 1 },
+            { id: "regel-2", startTag: 3, endTag: 14, gewichtung: 35 },
+            { id: "regel-3", startTag: 15, endTag: 28, gewichtung: 61 },
+            { id: "regel-4", startTag: 29, endTag: 42, gewichtung: 2 },
+            { id: "regel-5", startTag: 43, endTag: 56, gewichtung: 1 }
+        ]
+    }
+];
+
+export let fristenOptionen = [
+    {
+        id: 1,
+        skontoTage: 7,
+        skontoProzent: 2,
+        angebotGfFreigabeAbweichungProzent: 10,
+        zahlungszielTage: 14,
+        zahlungserinnerungTage: 3,
+        mahnung1AbTage: 1,
+        mahnung2AbTage: 8,
+        inkassoAbTage: 22
     }
 ];
 

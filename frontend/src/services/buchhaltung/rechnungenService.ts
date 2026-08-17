@@ -8,15 +8,35 @@ import { getSupplierName } from "../../utils/supplierReferences";
 
 const baseService = createCRUDService("rechnungen", []);
 
+function safeLookup<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (
+            error instanceof Error
+            && (
+                error.message.startsWith("Keine Berechtigung")
+                || error.message.includes("nicht gefunden")
+                || error.message.includes("nicht vorbereitet")
+                || error.message.toLowerCase().includes("api request failed with status 404")
+            )
+        ) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function normalizeInvoice(item: any = {}) {
-    const kunde = item.kundeId ? kundenService.getById(item.kundeId) : null;
-    const lieferant = item.lieferantId ? lieferantenService.getById(item.lieferantId) : null;
+    const kunde = item.kundeId ? safeLookup(() => kundenService.getById(item.kundeId), null) : null;
+    const lieferant = item.lieferantId ? safeLookup(() => lieferantenService.getById(item.lieferantId), null) : null;
     const outgoingInvoice = item.rechnungstyp !== "Eingangsrechnung";
     const partnerName = outgoingInvoice
         ? getCustomerName(item.kundeId, item.kunde || kunde?.firma || "")
         : getSupplierName(item.lieferantId, item.kunde || lieferant?.firma || "");
-    const auftrag = item.auftragId ? auftraegeService.getById(item.auftragId) : null;
-    const bestellung = item.bestellungId ? bestellungenService.getById(item.bestellungId) : null;
+    const auftrag = item.auftragId ? safeLookup(() => auftraegeService.getById(item.auftragId), null) : null;
+    const bestellung = item.bestellungId ? safeLookup(() => bestellungenService.getById(item.bestellungId), null) : null;
 
     return {
         ...item,
@@ -56,7 +76,7 @@ function splitPayload(payload: any = {}) {
 
 function syncSourceDocument(invoice: any) {
     if (invoice.rechnungstyp === "Eingangsrechnung" && invoice.bestellungId) {
-        const bestellung = bestellungenService.getById(invoice.bestellungId);
+        const bestellung = safeLookup(() => bestellungenService.getById(invoice.bestellungId), null);
         if (!bestellung) return;
         bestellungenService.update({
             ...bestellung,
@@ -67,7 +87,7 @@ function syncSourceDocument(invoice: any) {
     }
 
     if (invoice.auftragId) {
-        const auftrag = auftraegeService.getById(invoice.auftragId);
+        const auftrag = safeLookup(() => auftraegeService.getById(invoice.auftragId), null);
         if (!auftrag) return;
         auftraegeService.update({
             ...auftrag,

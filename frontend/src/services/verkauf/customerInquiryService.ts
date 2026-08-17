@@ -16,6 +16,26 @@ function withPermissionFallback<T>(reader: () => T, fallback: T) {
     }
 }
 
+function withSafeLookup<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (
+            error instanceof Error
+            && (
+                error.message.startsWith("Keine Berechtigung")
+                || error.message.includes("nicht gefunden")
+                || error.message.includes("nicht vorbereitet")
+                || error.message.toLowerCase().includes("api request failed with status 404")
+            )
+        ) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function hydrateInquiry(item: any = {}) {
     return {
         ...item,
@@ -33,7 +53,7 @@ export default {
     list: () => baseService.list().map(hydrateInquiry),
     getAll: () => baseService.list().map(hydrateInquiry),
     getById: (id: any) => {
-        const item = baseService.getById(id);
+        const item = withSafeLookup(() => baseService.getById(id), undefined);
         return item ? hydrateInquiry(item) : undefined;
     },
     create: (payload: any) => hydrateInquiry(baseService.create(splitPayload(payload))),

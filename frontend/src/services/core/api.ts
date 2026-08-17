@@ -129,7 +129,7 @@ export function syncApiRequest(path: string, options: { method: string; body: un
     const data = parseApiPayload(request.responseText);
 
     if (request.status < 200 || request.status >= 300) {
-        const message = data.message || `API request failed with status ${request.status}`;
+        const message = data?.message || `API request failed with status ${request.status}`;
         throw new Error(message);
     }
 
@@ -164,7 +164,7 @@ export async function apiRequest(path: string, options: RequestInit = {}) {
     const data = parseApiPayload(text);
 
     if (!response.ok) {
-        const message = data.message || `API request failed with status ${response.status}`;
+        const message = data?.message || `API request failed with status ${response.status}`;
         throw new Error(message);
     }
 

@@ -17,7 +17,6 @@ import versandService from "../../services/logistik/versandService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { ACCESS } from "../../constants/permissions";
-import { resetTestData } from "../../services/mockup/mockStorage";
 import useAuth from "../../auth/useAuth";
 import { getBerlinDate } from "../../utils/dateTime";
 import { getUnifiedOpenItems, isOpenItem, isOverdueOpenItem, isPendingPayment, isOverduePayment } from "../../utils/openItems";
@@ -69,6 +68,8 @@ function withFallback<T>(reader: () => T, fallback: T) {
                 || message.includes("networkerror")
                 || message.includes("api request failed with status 5")
                 || message.includes("internal server error")
+                || message.includes("api request failed with status 404")
+                || message.includes("nicht vorbereitet")
             )
         ) {
             return fallback;
@@ -178,12 +179,6 @@ function Dashboard() {
         { label: "Offene Freigaben", value: offeneFreigaben }
     ];
 
-    const testdatenZuruecksetzen = () => {
-        if (!confirm("Alle lokalen Testdaten werden zurückgesetzt. Fortfahren")) return;
-        resetTestData();
-        window.location.reload();
-    };
-
     const schuelerAufgaben = [
         buildTask("Kundenanfragen beantworten", offeneAnfragen, `${offeneAnfragen} Anfragen warten auf Bearbeitung oder Rückmeldung.`, "/kundenanfragen", "Anfragen öffnen"),
         buildTask("Aufträge weiterbearbeiten", offeneAuftraege, `${offeneAuftraege} Aufträge sind noch offen und können geprüft oder versendet werden.`, "/auftraege", "Aufträge prüfen"),
@@ -269,7 +264,6 @@ function Dashboard() {
                 <h1>Dashboard</h1>
                 <p>Willkommen, {user.name || user.username}. Startseite für Aufgaben, betriebliche Zusammenhänge und digitale Arbeitsabläufe.</p>
             </div>
-            {hasFullAccess() && <button className="button-secondary dashboard-reset-button" onClick={testdatenZuruecksetzen}>Testdaten zurücksetzen</button>}
         </div>
 
         <div className="kennzahlen">

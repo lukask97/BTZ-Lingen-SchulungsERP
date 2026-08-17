@@ -58,6 +58,8 @@ import ABCAnalyse from "../pages/buchhaltung/ABCAnalyse";
 import Geschaeftsfuehrung from "../pages/gf/Geschaeftsfuehrung";
 import Berichte from "../pages/gf/Berichte";
 import Freigaben from "../pages/gf/Freigaben";
+import AdminOverview from "../pages/admin/AdminOverview";
+import Backup from "../pages/admin/Backup";
 import VerwaltungOverview from "../pages/verwaltung/VerwaltungOverview";
 import Benutzer from "../pages/verwaltung/Benutzer";
 import Exporte from "../pages/verwaltung/Exporte";
@@ -123,6 +125,8 @@ function AppRouter() {
                 <Route path="themen/einkauf" element={protectedPage(ACCESS.EINKAUF, <EinkaufOverview/>)}/>
                 <Route path="themen/verkauf" element={protectedPage(ACCESS.VERKAUF, <VerkaufOverview/>)}/>
                 <Route path="themen/verwaltung" element={protectedPage(ACCESS.BENUTZER, <VerwaltungOverview/>)}/>
+                <Route path="admin" element={protectedPage(ACCESS.BENUTZER, <AdminOverview/>)}/>
+                <Route path="admin/backup" element={protectedPage(ACCESS.BENUTZER, <Backup/>)}/>
                 <Route path="themen/szenarien" element={<SzenarienOverview/>}/>
                 <Route path="lieferanten" element={protectedPage(ACCESS.EINKAUF, <Lieferanten/>)}/>
                 <Route path="lieferantenvergleich" element={protectedPage(ACCESS.EINKAUF, <Lieferantenvergleich/>)}/>

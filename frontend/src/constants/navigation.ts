@@ -120,6 +120,19 @@ export const NAVIGATION_GROUPS = [
         ]
     },
     {
+        key: "admin",
+        title: "Admin",
+        overviewPath: "/admin",
+        access: ACCESS.BENUTZER,
+        items: [
+            { title: "Admin", path: "/admin", access: ACCESS.BENUTZER },
+            { title: "Benutzer", path: "/benutzer", access: ACCESS.BENUTZER },
+            { title: "Rollen", path: "/rollen", access: ACCESS.ROLLEN },
+            { title: "Rechte", path: "/rechte", access: ACCESS.RECHTE },
+            { title: "Backup", path: "/admin/backup", access: ACCESS.BENUTZER }
+        ]
+    },
+    {
         key: "verwaltung",
         title: "Verwaltung",
         overviewPath: "/themen/verwaltung",

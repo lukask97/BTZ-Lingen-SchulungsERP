@@ -9,10 +9,26 @@ import lieferantenService from "../einkauf/lieferantenService";
 
 const baseService = createCRUDService("zahlungen", zahlungen);
 
+function safeGetInvoiceById(rechnungId: number | string) {
+    try {
+        return rechnungenService.getById(rechnungId) || null;
+    } catch {
+        return null;
+    }
+}
+
+function safeFindInvoiceByNumber(rechnungsnr: string) {
+    try {
+        return rechnungenService.list().find(entry => entry.rechnungsnr === rechnungsnr) || null;
+    } catch {
+        return null;
+    }
+}
+
 function normalizePayment(item: any = {}) {
-    const rechnung = item.rechnungId ? rechnungenService.getById(item.rechnungId) : null;
+    const rechnung = item.rechnungId ? safeGetInvoiceById(item.rechnungId) : null;
     const bestellung = item.bestellungId ? bestellungenService.getById(item.bestellungId) : null;
-    const referenceInvoice = rechnung || (item.rechnungsnr ? rechnungenService.list().find(entry => entry.rechnungsnr === item.rechnungsnr) : null);
+    const referenceInvoice = rechnung || (item.rechnungsnr ? safeFindInvoiceByNumber(item.rechnungsnr) : null);
     const supplierIban = referenceInvoice?.lieferantId ? lieferantenService.getById(referenceInvoice.lieferantId)?.iban || "" : "";
     const customerIban = referenceInvoice?.kundeId ? kundenService.getById(referenceInvoice.kundeId)?.iban || "" : "";
 
@@ -56,7 +72,7 @@ function splitPayload(payload: any = {}) {
 
 function updateReferencedInvoiceStatus(payment: any, invoiceStatus = "bezahlt") {
     if (!payment.rechnungId) return;
-    const rechnung = rechnungenService.getById(payment.rechnungId);
+    const rechnung = safeGetInvoiceById(payment.rechnungId);
     if (!rechnung) return;
     rechnungenService.update({
         ...rechnung,
@@ -81,7 +97,7 @@ const zahlungenService = {
     delete: (id) => baseService.remove(id),
     matchToInvoice: (paymentId: number | string, rechnungId: number | string) => {
         const payment = baseService.getById(paymentId);
-        const rechnung = rechnungenService.getById(rechnungId);
+        const rechnung = safeGetInvoiceById(rechnungId);
         if (!payment || !rechnung) return null;
         const updated = normalizePayment(baseService.update({
             ...payment,

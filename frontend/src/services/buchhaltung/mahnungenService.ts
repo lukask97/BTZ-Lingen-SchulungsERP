@@ -5,9 +5,25 @@ import { getCustomerName } from "../../utils/customerReferences";
 
 const baseService = createCRUDService("mahnungen", mahnungen);
 
+function safeGetInvoiceById(rechnungId: number | string) {
+    try {
+        return rechnungenService.getById(rechnungId) || null;
+    } catch {
+        return null;
+    }
+}
+
+function safeFindInvoiceByNumber(rechnungsnr: string) {
+    try {
+        return rechnungenService.list().find(entry => entry.rechnungsnr === rechnungsnr) || null;
+    } catch {
+        return null;
+    }
+}
+
 function hydrateMahnung(item: any = {}) {
-    const rechnung = item.rechnungId ? rechnungenService.getById(item.rechnungId) : null;
-    const referenceInvoice = rechnung || (item.rechnungsnr ? rechnungenService.list().find(entry => entry.rechnungsnr === item.rechnungsnr) : null);
+    const rechnung = item.rechnungId ? safeGetInvoiceById(item.rechnungId) : null;
+    const referenceInvoice = rechnung || (item.rechnungsnr ? safeFindInvoiceByNumber(item.rechnungsnr) : null);
 
     return {
         ...item,

@@ -4,6 +4,7 @@ import useAuth from "../auth/useAuth";
 import { NAVIGATION_GROUPS, SCENARIO_MENU, SCENARIO_OVERVIEW } from "../constants/navigation";
 import { getDataProvider } from "../services/core/api";
 import { subscribeToServerSystemEvents } from "../services/core/serverEvents";
+import { getUserFullName } from "../utils/userDisplay";
 
 type SidebarProps = {
     isCollapsed: boolean;
@@ -11,14 +12,14 @@ type SidebarProps = {
 };
 
 function getProviderLabel(provider: string) {
-    if (provider === "backend-postgres") return "Datenbank";
+    if (provider === "backend-postgres" || provider === "postgres" || provider === "database") return "JSONB-Postgres";
     if (provider === "backend-preview-memory") return "Backend-Memory";
     if (provider === "mock-local-storage") return "Mockup";
     return provider;
 }
 
 function getBackendModeLabel(mode: string) {
-    if (mode === "postgres") return "Datenbank";
+    if (mode === "postgres" || mode === "backend-postgres" || mode === "database") return "JSONB-Postgres";
     if (mode === "memory") return "Backend-Memory";
     return mode;
 }
@@ -128,8 +129,12 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
 
             <div className="sidebar-footer">
                 <div className="sidebar-user">
-                    Angemeldet als:
-                    <strong>{user.username}</strong>
+                    angemeldet als:
+                    <strong>{getUserFullName(user)}</strong>
+                </div>
+                <div className="sidebar-user">
+                    Rolle:
+                    <strong>{user.rolle || "-"}</strong>
                 </div>
                 <div className="sidebar-user">
                     Modus:

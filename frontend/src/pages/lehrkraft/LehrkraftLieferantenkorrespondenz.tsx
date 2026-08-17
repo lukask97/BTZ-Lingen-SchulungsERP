@@ -36,11 +36,11 @@ function getPositionenText(positionen: any[] = []) {
 
 function createOfferDraft(row: any = null) {
     return {
-        bestellungId: row.id || "",
-        lieferantId: row.lieferantId ? String(row.lieferantId) : "",
-        preis: Number(row.lehrkraftAngebotPreis || 0),
-        lieferzeitTage: Number(row.lehrkraftLieferzeitTage || 7),
-        nachricht: row.lehrkraftAngebotText || ""
+        bestellungId: row?.id || "",
+        lieferantId: row?.lieferantId ? String(row.lieferantId) : "",
+        preis: Number(row?.lehrkraftAngebotPreis || 0),
+        lieferzeitTage: Number(row?.lehrkraftLieferzeitTage || 7),
+        nachricht: row?.lehrkraftAngebotText || ""
     };
 }
 

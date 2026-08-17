@@ -5,8 +5,28 @@ import { getCustomerName } from "../../utils/customerReferences";
 
 const baseService = createCRUDService("vertriebsdokumente", vertriebsdokumente);
 
+function withSafeReferenceFallback<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (
+            error instanceof Error
+            && (
+                error.message.startsWith("Keine Berechtigung")
+                || error.message.includes("nicht gefunden")
+                || error.message.includes("nicht vorbereitet")
+                || error.message.toLowerCase().includes("api request failed with status 404")
+            )
+        ) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function resolveProcessReferences(item: any = {}) {
-    const auftrag = item.auftragId ? auftraegeService.getById(item.auftragId) : null;
+    const auftrag = item.auftragId ? withSafeReferenceFallback(() => auftraegeService.getById(item.auftragId), null) : null;
     return {
         auftrag,
         angebotId: item.angebotId || auftrag?.angebotId || "",

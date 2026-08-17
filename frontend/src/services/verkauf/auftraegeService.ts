@@ -25,12 +25,32 @@ function withPermissionFallback<T>(reader: () => T, fallback: T) {
     }
 }
 
+function withSafeReferenceFallback<T>(reader: () => T, fallback: T) {
+    try {
+        return reader();
+    } catch (error) {
+        if (
+            error instanceof Error
+            && (
+                error.message.startsWith("Keine Berechtigung")
+                || error.message.includes("nicht gefunden")
+                || error.message.includes("nicht vorbereitet")
+                || error.message.toLowerCase().includes("api request failed with status 404")
+            )
+        ) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function resolveProcessReferences(item: any = {}) {
-    const angebot = item.angebotId ? angeboteService.getById(item.angebotId) : null;
+    const angebot = item.angebotId ? withSafeReferenceFallback(() => angeboteService.getById(item.angebotId), null) : null;
     const anfrage = item.anfrageId
-        ? customerInquiryService.getById(item.anfrageId)
+        ? withSafeReferenceFallback(() => customerInquiryService.getById(item.anfrageId), null)
         : angebot?.anfrageId
-            ? customerInquiryService.getById(angebot.anfrageId)
+            ? withSafeReferenceFallback(() => customerInquiryService.getById(angebot.anfrageId), null)
             : null;
 
     return {

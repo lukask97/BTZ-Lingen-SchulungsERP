@@ -40,7 +40,7 @@
       "id": 3,
       "kundenNr": "DB10003",
       "firma": "Nordrad Campus Service",
-      "anschrift": "LindenstraÃŸe 22",
+      "anschrift": "Lindenstraße 22",
       "plz": "48529",
       "ort": "Nordhorn",
       "segment": "Dienstleistung",
@@ -52,16 +52,16 @@
         "Abholung"
       ],
       "website": "https://www.nordrad-campus.de/",
-      "notiz": "Servicekunde mit regelmaeÃŸigen Wartungsanfragen."
+      "notiz": "Servicekunde mit regelmäßigen Wartungsanfragen."
     },
     {
       "id": 4,
       "kundenNr": "DB10004",
-      "firma": "Stadtwerke Lingen Mobilitaet",
-      "anschrift": "KaiserstraÃŸe 14",
+      "firma": "Stadtwerke Lingen Mobilität",
+      "anschrift": "Kaiserstraße 14",
       "plz": "49808",
       "ort": "Lingen",
-      "segment": "Oeffentliche Einrichtung",
+      "segment": "Öffentliche Einrichtung",
       "abc": "A",
       "iban": "DE98500105179876543210",
       "optionen": [
@@ -70,20 +70,20 @@
         "Sicherheitsausstattung"
       ],
       "website": "https://www.stadtwerke-lingen.de/",
-      "notiz": "Potenzial fuer groessere Flottenbestellungen."
+      "notiz": "Potenzial für größere Flottenbestellungen."
     },
     {
       "id": 5,
       "kundenNr": "DB10005",
       "firma": "Jugendwerkstatt Ems-Vechte",
-      "anschrift": "WerkstraÃŸe 7",
+      "anschrift": "Werkstraße 7",
       "plz": "48431",
       "ort": "Rheine",
       "segment": "Bildung",
       "abc": "C",
       "iban": "DE12500105171234567890",
       "optionen": [
-        "Schulungsfahrraeder",
+        "Schulungsfahrräder",
         "Helme",
         "Projektmaterial"
       ],
@@ -97,15 +97,15 @@
       "artikelNr": "ART001",
       "name": "Schulungsfahrrad City",
       "kategorieId": 4,
-      "kategorie": "Fahrraeder",
-      "kategoriePfad": "Fahrraeder > Citybike",
+      "kategorie": "Fahrräder",
+      "kategoriePfad": "Fahrräder > Citybike",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 420,
       "verkaufspreis": 799,
       "bestand": 4,
       "mindestmenge": 3,
       "bedarfsmeldungBei": 5,
-      "beschreibung": "Komplettes Fahrrad als Beispiel fuer einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
+      "beschreibung": "Komplettes Fahrrad als Beispiel für einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
     },
     {
       "id": 2,
@@ -127,15 +127,15 @@
       "artikelNr": "ART003",
       "name": "Fahrradhelm",
       "kategorieId": 8,
-      "kategorie": "Zubehoer",
-      "kategoriePfad": "Zubehoer > Helm",
+      "kategorie": "Zubehör",
+      "kategoriePfad": "Zubehör > Helm",
       "artikelTyp": "Einzelartikel",
       "einkaufspreis": 24.5,
       "verkaufspreis": 59.99,
       "bestand": 12,
       "mindestmenge": 10,
       "bedarfsmeldungBei": 15,
-      "beschreibung": "Sicherer Fahrradhelm mit Zertifikat. Zusaetzliche Menge ist bereits bestellt."
+      "beschreibung": "Sicherer Fahrradhelm mit Zertifikat. Zusätzliche Menge ist bereits bestellt."
     },
     {
       "id": 4,
@@ -150,7 +150,7 @@
       "bestand": 8,
       "mindestmenge": 6,
       "bedarfsmeldungBei": 9,
-      "beschreibung": "Rahmen als Einzelkomponente fuer Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
+      "beschreibung": "Rahmen als Einzelkomponente für Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
     },
     {
       "id": 5,
@@ -165,7 +165,7 @@
       "bestand": 9,
       "mindestmenge": 10,
       "bedarfsmeldungBei": 12,
-      "beschreibung": "Lenker fuer Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
+      "beschreibung": "Lenker für Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
     },
     {
       "id": 6,
@@ -195,7 +195,7 @@
       "bestand": 14,
       "mindestmenge": 8,
       "bedarfsmeldungBei": 10,
-      "beschreibung": "Komfortsattel fuer Schulungsfahrraeder mit ausreichend freiem Bestand."
+      "beschreibung": "Komfortsattel für Schulungsfahrräder mit ausreichend freiem Bestand."
     }
   ],
   "artikelStueckliste": [
@@ -288,7 +288,8 @@
       "email": "admin@test.de",
       "password": "admin",
       "rolle": "Admin",
-      "name": "Administrator",
+      "vorname": "Test",
+      "nachname": "Admin",
       "permissions": [
         "*"
       ]
@@ -299,7 +300,8 @@
       "email": "lager@test.de",
       "password": "lager",
       "rolle": "Lager",
-      "name": "Lager Mitarbeiter",
+      "vorname": "Lager",
+      "nachname": "Leo",
       "permissions": [
         "artikel.lesen",
         "lager.buchen",
@@ -314,7 +316,8 @@
       "email": "buchhaltung@test.de",
       "password": "buchhaltung",
       "rolle": "Buchhaltung",
-      "name": "Buchhaltung",
+      "vorname": "Bilanz",
+      "nachname": "Britta",
       "permissions": [
         "kunde.lesen",
         "kunde.anlegen",
@@ -337,7 +340,8 @@
       "email": "marketing@test.de",
       "password": "marketing",
       "rolle": "Marketing",
-      "name": "Marketing Mitarbeiter",
+      "vorname": "Marketing",
+      "nachname": "Mara",
       "permissions": [
         "marketing.lesen",
         "marketing.bearbeiten",
@@ -350,7 +354,8 @@
       "email": "einkauf@test.de",
       "password": "einkauf",
       "rolle": "Einkauf",
-      "name": "Einkauf Mitarbeiter",
+      "vorname": "Einkauf",
+      "nachname": "Eva",
       "permissions": [
         "einkauf.lesen",
         "einkauf.bearbeiten",
@@ -361,30 +366,13 @@
       ]
     },
     {
-      "id": 9,
-      "username": "verkauf",
-      "email": "verkauf@test.de",
-      "password": "verkauf",
-      "rolle": "Verkauf",
-      "name": "Verkauf Mitarbeiter",
-      "permissions": [
-        "kunde.lesen",
-        "kunde.anlegen",
-        "kunde.bearbeiten",
-        "artikel.lesen",
-        "verkauf.lesen",
-        "verkauf.bearbeiten",
-        "service.lesen",
-        "service.bearbeiten"
-      ]
-    },
-    {
       "id": 10,
       "username": "personalwesen",
       "email": "personalwesen@test.de",
       "password": "personalwesen",
       "rolle": "Personalwesen",
-      "name": "Personalwesen Mitarbeiter",
+      "vorname": "HR",
+      "nachname": "Hannah",
       "permissions": [
         "personalwesen.lesen",
         "personalwesen.bearbeiten",
@@ -397,7 +385,8 @@
       "email": "verkauf.azubi@test.de",
       "password": "verkauf",
       "rolle": "Verkauf Azubi",
-      "name": "Verkauf Azubi",
+      "vorname": "Azubi",
+      "nachname": "Alex",
       "permissions": [
         "kunde.lesen",
         "artikel.lesen",
@@ -412,7 +401,8 @@
       "email": "verkauf.senior@test.de",
       "password": "verkauf",
       "rolle": "Verkauf Senior",
-      "name": "Verkauf Senior",
+      "vorname": "Senior",
+      "nachname": "Sascha",
       "permissions": [
         "kunde.lesen",
         "kunde.anlegen",
@@ -431,7 +421,8 @@
       "email": "gf@test.de",
       "password": "gf",
       "rolle": "Geschäftsführung",
-      "name": "Geschäftsführung",
+      "vorname": "Chef",
+      "nachname": "Carsten",
       "permissions": [
         "*"
       ]
@@ -1111,7 +1102,7 @@
       "ort": "Meppen",
       "segment": "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
       "iban": "DE91500105178640732418",
-      "fuerBts": "Alternativlieferant für Zubehör und Lastenbikes",
+      "fürBts": "Alternativlieferant für Zubehör und Lastenbikes",
       "bewertung": 4,
       "abc": "B"
     },
@@ -1124,7 +1115,7 @@
       "ort": "Emstek",
       "segment": "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
       "iban": "DE68500500001234567890",
-      "fuerBts": "",
+      "fürBts": "",
       "bewertung": 5,
       "abc": "A"
     },
@@ -1137,7 +1128,7 @@
       "ort": "",
       "segment": "",
       "iban": "DE30500105170648489890",
-      "fuerBts": "",
+      "fürBts": "",
       "bewertung": 3,
       "abc": "C"
     },
@@ -1150,7 +1141,7 @@
       "ort": "Lingen",
       "segment": "Klassischer Baumarkt mit Fahrradabteilung",
       "iban": "DE02500105170648489901",
-      "fuerBts": "Soll Lieferant sein und Kunde",
+      "fürBts": "Soll Lieferant sein und Kunde",
       "bewertung": 3,
       "abc": "C"
     }
@@ -1166,7 +1157,7 @@
       "lehrkraftAngebotAm": "2026-07-21",
       "lehrkraftAngebotPreis": 73.5,
       "lehrkraftLieferzeitTage": 5,
-      "lehrkraftAngebotText": "Standardangebot fuer drei Helme aus dem Vergleich."
+      "lehrkraftAngebotText": "Standardangebot für drei Helme aus dem Vergleich."
     },
     {
       "id": 2,
@@ -1178,7 +1169,7 @@
       "bedarfsmeldungId": "auto-artikel-1",
       "rechnungStatus": "offen",
       "faelligAm": "2026-08-20",
-      "anfrageNotiz": "Nachbestellung fuer Citybikes im Zulauf."
+      "anfrageNotiz": "Nachbestellung für Citybikes im Zulauf."
     }
   ],
   "bestellpositionen": [
@@ -1202,15 +1193,15 @@
   "kategorien": [
     {
       "id": 1,
-      "name": "Fahrraeder",
+      "name": "Fahrräder",
       "parentId": "",
-      "beschreibung": "Komplette Fahrraeder und fahrbereite Baugruppen."
+      "beschreibung": "Komplette Fahrräder und fahrbereite Baugruppen."
     },
     {
       "id": 4,
       "name": "Citybike",
       "parentId": 1,
-      "beschreibung": "Komplette City- und Schulungsfahrraeder."
+      "beschreibung": "Komplette City- und Schulungsfahrräder."
     },
     {
       "id": 5,
@@ -1222,11 +1213,11 @@
       "id": 6,
       "name": "Sicherheitsbekleidung",
       "parentId": 5,
-      "beschreibung": "Warn- und Schutzkleidung fuer den Einsatz."
+      "beschreibung": "Warn- und Schutzkleidung für den Einsatz."
     },
     {
       "id": 7,
-      "name": "Zubehoer",
+      "name": "Zubehör",
       "parentId": "",
       "beschreibung": "Zusatzprodukte rund ums Fahrrad."
     },
@@ -1234,7 +1225,7 @@
       "id": 8,
       "name": "Helm",
       "parentId": 7,
-      "beschreibung": "Helme und Schutzzubehoer."
+      "beschreibung": "Helme und Schutzzubehör."
     },
     {
       "id": 9,
@@ -1270,7 +1261,7 @@
       "id": 14,
       "name": "Fahrradkette",
       "parentId": 9,
-      "beschreibung": "Antriebskomponenten wie Ketten und Kettenraeeder."
+      "beschreibung": "Antriebskomponenten wie Ketten und Kettenräder."
     }
   ],
   "angebote": [
@@ -1283,9 +1274,51 @@
       "anfrageId": 1,
       "kundeId": 1,
       "datum": "2026-07-22",
-      "gueltigBis": "2026-08-05",
+      "gueltigBis": "2026-08-04",
       "rabattBetrag": 0,
       "gesamtbetrag": 1348.5,
+      "status": "überarbeitet"
+    },
+    {
+      "id": 2,
+      "angebotsNr": "ANG-2026-001.1",
+      "angebotsBasisNr": "ANG-2026-001",
+      "revision": 1,
+      "vorgangId": "anfrage-1",
+      "anfrageId": 1,
+      "kundeId": 1,
+      "datum": "2026-07-24",
+      "gueltigBis": "2026-08-06",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 1348.5,
+      "status": "angenommen"
+    },
+    {
+      "id": 3,
+      "angebotsNr": "ANG-2026-002.0",
+      "angebotsBasisNr": "ANG-2026-002",
+      "revision": 0,
+      "vorgangId": "anfrage-2",
+      "anfrageId": 2,
+      "kundeId": 2,
+      "datum": "2026-07-28",
+      "gueltigBis": "2026-08-11",
+      "rabattBetrag": 50,
+      "gesamtbetrag": 1749.7,
+      "status": "angenommen"
+    },
+    {
+      "id": 4,
+      "angebotsNr": "ANG-2026-003.0",
+      "angebotsBasisNr": "ANG-2026-003",
+      "revision": 0,
+      "vorgangId": "anfrage-3",
+      "anfrageId": 3,
+      "kundeId": 1,
+      "datum": "2026-08-05",
+      "gueltigBis": "2026-08-19",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 799,
       "status": "wartet auf Antwort"
     },
     {
@@ -1315,6 +1348,118 @@
       "rabattBetrag": 25,
       "gesamtbetrag": 953.97,
       "status": "in Vorbereitung"
+    },
+    {
+      "id": 7,
+      "angebotsNr": "ANG-2026-006.0",
+      "angebotsBasisNr": "ANG-2026-006",
+      "revision": 0,
+      "vorgangId": "anfrage-6",
+      "anfrageId": 6,
+      "kundeId": 1,
+      "datum": "2026-03-10",
+      "gueltigBis": "2026-03-24",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 179.98,
+      "status": "angenommen"
+    },
+    {
+      "id": 8,
+      "angebotsNr": "ANG-2026-007.0",
+      "angebotsBasisNr": "ANG-2026-007",
+      "revision": 0,
+      "vorgangId": "anfrage-7",
+      "anfrageId": 7,
+      "kundeId": 1,
+      "datum": "2026-03-28",
+      "gueltigBis": "2026-04-11",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 1598,
+      "status": "angenommen"
+    },
+    {
+      "id": 9,
+      "angebotsNr": "ANG-2026-008.0",
+      "angebotsBasisNr": "ANG-2026-008",
+      "revision": 0,
+      "vorgangId": "anfrage-8",
+      "anfrageId": 8,
+      "kundeId": 1,
+      "datum": "2026-04-17",
+      "gueltigBis": "2026-05-01",
+      "rabattBetrag": 20,
+      "gesamtbetrag": 519.4,
+      "status": "angenommen"
+    },
+    {
+      "id": 10,
+      "angebotsNr": "ANG-2026-009.0",
+      "angebotsBasisNr": "ANG-2026-009",
+      "revision": 0,
+      "vorgangId": "anfrage-9",
+      "anfrageId": 9,
+      "kundeId": 1,
+      "datum": "2026-05-06",
+      "gueltigBis": "2026-05-20",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 390,
+      "status": "angenommen"
+    },
+    {
+      "id": 11,
+      "angebotsNr": "ANG-2026-010.0",
+      "angebotsBasisNr": "ANG-2026-010",
+      "revision": 0,
+      "vorgangId": "anfrage-10",
+      "anfrageId": 10,
+      "kundeId": 1,
+      "datum": "2026-05-21",
+      "gueltigBis": "2026-06-04",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 269.7,
+      "status": "angenommen"
+    },
+    {
+      "id": 12,
+      "angebotsNr": "ANG-2026-011.0",
+      "angebotsBasisNr": "ANG-2026-011",
+      "revision": 0,
+      "vorgangId": "anfrage-11",
+      "anfrageId": 11,
+      "kundeId": 1,
+      "datum": "2026-06-09",
+      "gueltigBis": "2026-06-23",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 89,
+      "status": "angenommen"
+    },
+    {
+      "id": 13,
+      "angebotsNr": "ANG-2026-012.0",
+      "angebotsBasisNr": "ANG-2026-012",
+      "revision": 0,
+      "vorgangId": "anfrage-12",
+      "anfrageId": 12,
+      "kundeId": 1,
+      "datum": "2026-06-26",
+      "gueltigBis": "2026-07-10",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 119.98,
+      "status": "angenommen"
+    },
+    {
+      "id": 14,
+      "angebotsNr": "ANG-2026-013.0",
+      "angebotsBasisNr": "ANG-2026-013",
+      "revision": 0,
+      "vorgangId": "anfrage-13",
+      "anfrageId": 13,
+      "kundeId": 1,
+      "datum": "2026-07-08",
+      "gueltigBis": "2026-07-22",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 799,
+      "status": "angenommen"
     }
   ],
   "angebotspositionen": [
@@ -1325,6 +1470,30 @@
       "leistungTyp": "Artikel",
       "menge": 15,
       "einzelpreis": 89.9
+    },
+    {
+      "id": 2,
+      "angebotId": 2,
+      "artikelId": 2,
+      "leistungTyp": "Artikel",
+      "menge": 15,
+      "einzelpreis": 89.9
+    },
+    {
+      "id": 3,
+      "angebotId": 3,
+      "artikelId": 3,
+      "leistungTyp": "Artikel",
+      "menge": 30,
+      "einzelpreis": 59.99
+    },
+    {
+      "id": 4,
+      "angebotId": 4,
+      "artikelId": 1,
+      "leistungTyp": "Artikel",
+      "menge": 1,
+      "einzelpreis": 799
     },
     {
       "id": 5,
@@ -1349,6 +1518,70 @@
       "leistungTyp": "Artikel",
       "menge": 3,
       "einzelpreis": 59.99
+    },
+    {
+      "id": 8,
+      "angebotId": 7,
+      "artikelId": 3,
+      "leistungTyp": "Artikel",
+      "menge": 3,
+      "einzelpreis": 59.99
+    },
+    {
+      "id": 9,
+      "angebotId": 8,
+      "artikelId": 1,
+      "leistungTyp": "Artikel",
+      "menge": 2,
+      "einzelpreis": 799
+    },
+    {
+      "id": 10,
+      "angebotId": 9,
+      "artikelId": 2,
+      "leistungTyp": "Artikel",
+      "menge": 6,
+      "einzelpreis": 89.9
+    },
+    {
+      "id": 11,
+      "angebotId": 10,
+      "serviceId": 2,
+      "leistungTyp": "Service",
+      "menge": 6,
+      "einzelpreis": 65
+    },
+    {
+      "id": 12,
+      "angebotId": 11,
+      "artikelId": 2,
+      "leistungTyp": "Artikel",
+      "menge": 3,
+      "einzelpreis": 89.9
+    },
+    {
+      "id": 13,
+      "angebotId": 12,
+      "serviceId": 2,
+      "leistungTyp": "Service",
+      "menge": 1,
+      "einzelpreis": 89
+    },
+    {
+      "id": 14,
+      "angebotId": 13,
+      "artikelId": 3,
+      "leistungTyp": "Artikel",
+      "menge": 2,
+      "einzelpreis": 59.99
+    },
+    {
+      "id": 15,
+      "angebotId": 14,
+      "artikelId": 1,
+      "leistungTyp": "Artikel",
+      "menge": 1,
+      "einzelpreis": 799
     }
   ],
   "auftraege": [
@@ -1363,29 +1596,33 @@
       "rabattBetrag": 0,
       "gesamtbetrag": 1348.5,
       "faelligAm": "2026-08-08",
-      "angebotId": 1
+      "angebotId": 2
     },
     {
       "id": 2,
       "auftragNr": "AU-2026-002",
       "kundeId": 2,
-      "datum": "2026-07-20",
+      "anfrageId": 2,
+      "vorgangId": "anfrage-2",
+      "datum": "2026-07-30",
       "status": "bezahlt",
-      "rabattBetrag": 0,
-      "gesamtbetrag": 1799.7,
-      "faelligAm": "2026-08-03",
-      "angebotId": ""
+      "rabattBetrag": 50,
+      "gesamtbetrag": 1749.7,
+      "faelligAm": "2026-08-10",
+      "angebotId": 3
     },
     {
       "id": 3,
       "auftragNr": "AU-2026-003",
       "kundeId": 1,
-      "datum": "2026-07-26",
+      "anfrageId": 3,
+      "vorgangId": "anfrage-3",
+      "datum": "2026-08-08",
       "status": "offen",
       "rabattBetrag": 0,
       "gesamtbetrag": 799,
-      "faelligAm": "",
-      "angebotId": ""
+      "faelligAm": "2026-08-22",
+      "angebotId": 4
     },
     {
       "id": 4,
@@ -1412,6 +1649,110 @@
       "gesamtbetrag": 953.97,
       "faelligAm": "2026-08-26",
       "angebotId": 6
+    },
+    {
+      "id": 6,
+      "auftragNr": "AU-2026-006",
+      "kundeId": 1,
+      "anfrageId": 6,
+      "vorgangId": "anfrage-6",
+      "datum": "2026-03-12",
+      "status": "bezahlt",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 179.98,
+      "faelligAm": "2026-03-26",
+      "angebotId": 7
+    },
+    {
+      "id": 7,
+      "auftragNr": "AU-2026-007",
+      "kundeId": 1,
+      "anfrageId": 7,
+      "vorgangId": "anfrage-7",
+      "datum": "2026-04-02",
+      "status": "bezahlt",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 1598,
+      "faelligAm": "2026-04-16",
+      "angebotId": 8
+    },
+    {
+      "id": 8,
+      "auftragNr": "AU-2026-008",
+      "kundeId": 1,
+      "anfrageId": 8,
+      "vorgangId": "anfrage-8",
+      "datum": "2026-04-22",
+      "status": "abgerechnet",
+      "rabattBetrag": 20,
+      "gesamtbetrag": 519.4,
+      "faelligAm": "2026-05-06",
+      "angebotId": 9
+    },
+    {
+      "id": 9,
+      "auftragNr": "AU-2026-009",
+      "kundeId": 1,
+      "anfrageId": 9,
+      "vorgangId": "anfrage-9",
+      "datum": "2026-05-09",
+      "status": "bezahlt",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 390,
+      "faelligAm": "2026-05-23",
+      "angebotId": 10
+    },
+    {
+      "id": 10,
+      "auftragNr": "AU-2026-010",
+      "kundeId": 1,
+      "anfrageId": 10,
+      "vorgangId": "anfrage-10",
+      "datum": "2026-05-27",
+      "status": "abgerechnet",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 269.7,
+      "faelligAm": "2026-06-10",
+      "angebotId": 11
+    },
+    {
+      "id": 11,
+      "auftragNr": "AU-2026-011",
+      "kundeId": 1,
+      "anfrageId": 11,
+      "vorgangId": "anfrage-11",
+      "datum": "2026-06-12",
+      "status": "bezahlt",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 89,
+      "faelligAm": "2026-06-26",
+      "angebotId": 12
+    },
+    {
+      "id": 12,
+      "auftragNr": "AU-2026-012",
+      "kundeId": 1,
+      "anfrageId": 12,
+      "vorgangId": "anfrage-12",
+      "datum": "2026-07-01",
+      "status": "bezahlt",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 119.98,
+      "faelligAm": "2026-07-15",
+      "angebotId": 13
+    },
+    {
+      "id": 13,
+      "auftragNr": "AU-2026-013",
+      "kundeId": 1,
+      "anfrageId": 13,
+      "vorgangId": "anfrage-13",
+      "datum": "2026-07-12",
+      "status": "abgerechnet",
+      "rabattBetrag": 0,
+      "gesamtbetrag": 799,
+      "faelligAm": "2026-07-26",
+      "angebotId": 14
     }
   ],
   "auftragspositionen": [
@@ -1462,6 +1803,70 @@
       "leistungTyp": "Artikel",
       "menge": 3,
       "einzelpreis": 59.99
+    },
+    {
+      "id": 7,
+      "auftragId": 6,
+      "artikelId": 3,
+      "leistungTyp": "Artikel",
+      "menge": 3,
+      "einzelpreis": 59.99
+    },
+    {
+      "id": 8,
+      "auftragId": 7,
+      "artikelId": 1,
+      "leistungTyp": "Artikel",
+      "menge": 2,
+      "einzelpreis": 799
+    },
+    {
+      "id": 9,
+      "auftragId": 8,
+      "artikelId": 2,
+      "leistungTyp": "Artikel",
+      "menge": 6,
+      "einzelpreis": 89.9
+    },
+    {
+      "id": 10,
+      "auftragId": 9,
+      "serviceId": 2,
+      "leistungTyp": "Service",
+      "menge": 6,
+      "einzelpreis": 65
+    },
+    {
+      "id": 11,
+      "auftragId": 10,
+      "artikelId": 2,
+      "leistungTyp": "Artikel",
+      "menge": 3,
+      "einzelpreis": 89.9
+    },
+    {
+      "id": 12,
+      "auftragId": 11,
+      "serviceId": 2,
+      "leistungTyp": "Service",
+      "menge": 1,
+      "einzelpreis": 89
+    },
+    {
+      "id": 13,
+      "auftragId": 12,
+      "artikelId": 3,
+      "leistungTyp": "Artikel",
+      "menge": 2,
+      "einzelpreis": 59.99
+    },
+    {
+      "id": 14,
+      "auftragId": 13,
+      "artikelId": 1,
+      "leistungTyp": "Artikel",
+      "menge": 1,
+      "einzelpreis": 799
     }
   ],
   "reklamationen": [
@@ -1613,8 +2018,29 @@
       "status": "in Bearbeitung",
       "datum": "2026-07-24",
       "anliegen": "Frage nach Lieferzeiten für Sicherheitsjacken."
-    }
-    ,
+    },
+    {
+      "id": 2,
+      "typ": "Bestandsanfrage",
+      "kundeId": 2,
+      "vorgangId": "anfrage-2",
+      "angebotId": 3,
+      "kanal": "E-Mail",
+      "status": "angenommen",
+      "datum": "2026-07-28",
+      "anliegen": "Bitte Angebot über 30 Fahrradhelme mit kurzfristiger Lieferung senden."
+    },
+    {
+      "id": 3,
+      "typ": "Produktanfrage",
+      "kundeId": 1,
+      "vorgangId": "anfrage-3",
+      "angebotId": 4,
+      "kanal": "Telefon",
+      "status": "offen",
+      "datum": "2026-08-05",
+      "anliegen": "Wir benötigen kurzfristig ein Schulungsfahrrad für eine Vorführung."
+    },
     {
       "id": 4,
       "typ": "Serviceanfrage",
@@ -1624,7 +2050,7 @@
       "kanal": "E-Mail",
       "status": "erledigt",
       "datum": "2026-08-01",
-      "anliegen": "Bitte Angebot fuer eine mobile Wartung von sechs Fahrraedern erstellen."
+      "anliegen": "Bitte Angebot für eine mobile Wartung von sechs Fahrrädern erstellen."
     },
     {
       "id": 5,
@@ -1635,7 +2061,95 @@
       "kanal": "Telefon",
       "status": "offen",
       "datum": "2026-08-10",
-      "anliegen": "Anfrage fuer Helme und Schulungsfahrraeder fuer ein Herbstprojekt."
+      "anliegen": "Anfrage für Helme und Schulungsfahrräder für ein Herbstprojekt."
+    },
+    {
+      "id": 6,
+      "typ": "Nachbestellung",
+      "kundeId": 1,
+      "vorgangId": "anfrage-6",
+      "angebotId": 7,
+      "kanal": "E-Mail",
+      "status": "angenommen",
+      "datum": "2026-03-09",
+      "anliegen": "Bitte drei zusätzliche Helme für den Frühjahrsworkshop anbieten."
+    },
+    {
+      "id": 7,
+      "typ": "Projektanfrage",
+      "kundeId": 1,
+      "vorgangId": "anfrage-7",
+      "angebotId": 8,
+      "kanal": "Telefon",
+      "status": "angenommen",
+      "datum": "2026-03-27",
+      "anliegen": "Zwei Schulungsfahrräder für eine interne Aktion werden benötigt."
+    },
+    {
+      "id": 8,
+      "typ": "Bekleidungsanfrage",
+      "kundeId": 1,
+      "vorgangId": "anfrage-8",
+      "angebotId": 9,
+      "kanal": "E-Mail",
+      "status": "angenommen",
+      "datum": "2026-04-16",
+      "anliegen": "Bitte Sicherheitsjacken für eine kleine Besuchergruppe kalkulieren."
+    },
+    {
+      "id": 9,
+      "typ": "Serviceanfrage",
+      "kundeId": 1,
+      "vorgangId": "anfrage-9",
+      "angebotId": 10,
+      "kanal": "Telefon",
+      "status": "angenommen",
+      "datum": "2026-05-05",
+      "anliegen": "Wartung von sechs Schulungsrädern vor einem Aktionstag."
+    },
+    {
+      "id": 10,
+      "typ": "Produktanfrage",
+      "kundeId": 1,
+      "vorgangId": "anfrage-10",
+      "angebotId": 11,
+      "kanal": "E-Mail",
+      "status": "angenommen",
+      "datum": "2026-05-20",
+      "anliegen": "Drei Sicherheitsjacken für neue Teilnehmende anfragen."
+    },
+    {
+      "id": 11,
+      "typ": "Serviceanfrage",
+      "kundeId": 1,
+      "vorgangId": "anfrage-11",
+      "angebotId": 12,
+      "kanal": "Telefon",
+      "status": "angenommen",
+      "datum": "2026-06-08",
+      "anliegen": "Kurze Wartung eines Vorführrads anfragen."
+    },
+    {
+      "id": 12,
+      "typ": "Nachbestellung",
+      "kundeId": 1,
+      "vorgangId": "anfrage-12",
+      "angebotId": 13,
+      "kanal": "E-Mail",
+      "status": "angenommen",
+      "datum": "2026-06-25",
+      "anliegen": "Zwei weitere Helme für Sommertermine werden benötigt."
+    },
+    {
+      "id": 13,
+      "typ": "Produktanfrage",
+      "kundeId": 1,
+      "vorgangId": "anfrage-13",
+      "angebotId": 14,
+      "kanal": "Telefon",
+      "status": "angenommen",
+      "datum": "2026-07-07",
+      "anliegen": "Ein zusätzliches Schulungsfahrrad für den Juli bestellen."
     }
   ],
   "nachrichten": [
@@ -1666,8 +2180,7 @@
       "betreff": "Angebot ANG-2026-001.0",
       "nachricht": "Ein erstes Angebot wurde erstellt und an den Kunden zur Prüfung weitergegeben.",
       "typ": "Angebot"
-    }
-    ,
+    },
     {
       "id": 3,
       "vorgangId": "anfrage-4",
@@ -1678,8 +2191,8 @@
       "senderRolle": "Kunde",
       "senderName": "Nordrad Campus Service",
       "kanal": "E-Mail",
-      "betreff": "Mobile Wartung fuer sechs Fahrraeder",
-      "nachricht": "Bitte senden Sie uns ein Angebot fuer eine mobile Wartung von sechs Fahrraedern vor Ort.",
+      "betreff": "Mobile Wartung für sechs Fahrräder",
+      "nachricht": "Bitte senden Sie uns ein Angebot für eine mobile Wartung von sechs Fahrrädern vor Ort.",
       "typ": "Anfrage"
     },
     {
@@ -1691,10 +2204,10 @@
       "kundeId": 3,
       "datum": "2026-08-02",
       "senderRolle": "Verkauf",
-      "senderName": "Schuelerfirma Verkauf",
+      "senderName": "Schülerfirma Verkauf",
       "kanal": "E-Mail",
       "betreff": "Angebot ANG-2026-004.0",
-      "nachricht": "Das Serviceangebot wurde erstellt und vom Kunden direkt bestaetigt.",
+      "nachricht": "Das Serviceangebot wurde erstellt und vom Kunden direkt bestätigt.",
       "typ": "Angebot"
     },
     {
@@ -1708,7 +2221,7 @@
       "senderName": "Jugendwerkstatt Ems-Vechte",
       "kanal": "Telefon",
       "betreff": "Projektanfrage Herbst",
-      "nachricht": "Wir planen ein Herbstprojekt und benoetigen Schulungsfahrraeder sowie mehrere Helme.",
+      "nachricht": "Wir planen ein Herbstprojekt und benötigen Schulungsfahrräder sowie mehrere Helme.",
       "typ": "Anfrage"
     },
     {
@@ -1720,11 +2233,49 @@
       "kundeId": 5,
       "datum": "2026-08-11",
       "senderRolle": "Verkauf",
-      "senderName": "Schuelerfirma Verkauf",
+      "senderName": "Schülerfirma Verkauf",
       "kanal": "E-Mail",
       "betreff": "Angebot ANG-2026-005.0",
       "nachricht": "Das Angebot ist intern vorbereitet und wartet noch auf die finale Freigabe vor dem Versand.",
       "typ": "Angebot"
+    }
+  ],
+  "rechnungen": [
+    {
+      "id": 1,
+      "auftragId": 1,
+      "kundeId": 1,
+      "rechnungsnr": "RG-2026-001",
+      "rechnungstyp": "Ausgangsrechnung",
+      "datum": "2026-07-18",
+      "faelligAm": "2026-08-06",
+      "betrag": 1348.5,
+      "status": "offen",
+      "mahnstufe": "1. Mahnung"
+    },
+    {
+      "id": 2,
+      "auftragId": 2,
+      "kundeId": 2,
+      "rechnungsnr": "RG-2026-002",
+      "rechnungstyp": "Ausgangsrechnung",
+      "datum": "2026-07-21",
+      "faelligAm": "2026-07-22",
+      "betrag": 1799.7,
+      "status": "bezahlt",
+      "mahnstufe": "-"
+    },
+    {
+      "id": 3,
+      "bestellungId": 2,
+      "lieferantId": 2,
+      "rechnungsnr": "ER-2026-002",
+      "rechnungstyp": "Eingangsrechnung",
+      "datum": "2026-08-07",
+      "faelligAm": "2026-08-21",
+      "betrag": 2100,
+      "status": "offen",
+      "mahnstufe": "-"
     }
   ],
   "zahlungen": [
@@ -2023,12 +2574,12 @@
       "angebotId": 3,
       "anfrageId": 2,
       "vorgangId": "anfrage-2",
-      "dokumentTyp": "AuftragsbestÃ¤tigung",
-      "titel": "AuftragsbestÃ¤tigung AU-2026-002",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-002",
       "datum": "2026-07-30",
       "status": "versendet",
       "versendetAm": "2026-07-30",
-      "notiz": "Kunde hat die Auftragsbestaetigung am selben Tag erhalten."
+      "notiz": "Kunde hat die Auftragsbestätigung am selben Tag erhalten."
     },
     {
       "id": 4,
@@ -2056,7 +2607,7 @@
       "datum": "2026-07-31",
       "status": "versendet",
       "versendetAm": "2026-07-31",
-      "notiz": "Begleitpapier fuer die Helm-Lieferung."
+      "notiz": "Begleitpapier für die Helm-Lieferung."
     },
     {
       "id": 6,
@@ -2064,12 +2615,12 @@
       "angebotId": 5,
       "anfrageId": 4,
       "vorgangId": "anfrage-4",
-      "dokumentTyp": "AuftragsbestÃ¤tigung",
-      "titel": "AuftragsbestÃ¤tigung AU-2026-004",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-004",
       "datum": "2026-08-03",
       "status": "versendet",
       "versendetAm": "2026-08-03",
-      "notiz": "Serviceauftrag wurde direkt bestaetigt."
+      "notiz": "Serviceauftrag wurde direkt bestätigt."
     },
     {
       "id": 7,
@@ -2082,7 +2633,7 @@
       "datum": "2026-08-04",
       "status": "versendet",
       "versendetAm": "2026-08-04",
-      "notiz": "Einsatzunterlagen fuer das mobile Serviceteam."
+      "notiz": "Einsatzunterlagen für das mobile Serviceteam."
     },
     {
       "id": 8,
@@ -2090,8 +2641,8 @@
       "angebotId": 6,
       "anfrageId": 5,
       "vorgangId": "anfrage-5",
-      "dokumentTyp": "AuftragsbestÃ¤tigung",
-      "titel": "AuftragsbestÃ¤tigung AU-2026-005",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-005",
       "datum": "2026-08-12",
       "status": "erstellt",
       "notiz": "Liegt vorbereitet vor und wartet auf den Versand nach Abschluss der Freigabe."
@@ -2152,10 +2703,62 @@
       "datum": "2026-07-24",
       "konto": "einkauf",
       "betreff": "Materialeinkauf Sicherheitshelme",
-      "info": "Didaktische Beispielausgabe fuer das Einkaufskonto",
+      "info": "Didaktische Beispielausgabe für das Einkaufskonto",
       "soll": 420,
       "haben": 0,
       "saldo": -420
+    }
+  ],
+  "lehrkraftOptionen": [
+    {
+      "id": 1,
+      "autoLieferannahmeNach1Tag": false,
+      "autoDebitorenzahlungNach1Tag": false,
+      "debitorenzahlungRegeln": [
+        {
+          "id": "regel-1",
+          "startTag": 0,
+          "endTag": 0,
+          "gewichtung": 1
+        },
+        {
+          "id": "regel-2",
+          "startTag": 3,
+          "endTag": 14,
+          "gewichtung": 35
+        },
+        {
+          "id": "regel-3",
+          "startTag": 15,
+          "endTag": 28,
+          "gewichtung": 61
+        },
+        {
+          "id": "regel-4",
+          "startTag": 29,
+          "endTag": 42,
+          "gewichtung": 2
+        },
+        {
+          "id": "regel-5",
+          "startTag": 43,
+          "endTag": 56,
+          "gewichtung": 1
+        }
+      ]
+    }
+  ],
+  "fristenOptionen": [
+    {
+      "id": 1,
+      "skontoTage": 7,
+      "skontoProzent": 2,
+      "angebotGfFreigabeAbweichungProzent": 10,
+      "zahlungszielTage": 14,
+      "zahlungserinnerungTage": 3,
+      "mahnung1AbTage": 1,
+      "mahnung2AbTage": 8,
+      "inkassoAbTage": 22
     }
   ],
   "feldMetadaten": [
@@ -2655,57 +3258,6 @@
       "beschreibung": "Didaktisch vereinfachte Mahnstufe",
       "reihenfolge": 9,
       "sichtbar": true
-    }
-  ],
-  "lehrkraftOptionen": [
-    {
-      "id": 1,
-      "autoLieferannahmeNach1Tag": false,
-      "autoDebitorenzahlungNach1Tag": false,
-      "debitorenzahlungRegeln": [
-        {
-          "id": "regel-1",
-          "startTag": 0,
-          "endTag": 0,
-          "gewichtung": 1
-        },
-        {
-          "id": "regel-2",
-          "startTag": 3,
-          "endTag": 14,
-          "gewichtung": 35
-        },
-        {
-          "id": "regel-3",
-          "startTag": 15,
-          "endTag": 28,
-          "gewichtung": 61
-        },
-        {
-          "id": "regel-4",
-          "startTag": 29,
-          "endTag": 42,
-          "gewichtung": 2
-        },
-        {
-          "id": "regel-5",
-          "startTag": 43,
-          "endTag": 56,
-          "gewichtung": 1
-        }
-      ]
-    }
-  ],
-  "fristenOptionen": [
-    {
-      "id": 1,
-      "skontoTage": 7,
-      "skontoProzent": 2,
-      "zahlungszielTage": 14,
-      "zahlungserinnerungTage": 3,
-      "mahnung1AbTage": 1,
-      "mahnung2AbTage": 8,
-      "inkassoAbTage": 22
     }
   ],
   "benutzerSpalten": []

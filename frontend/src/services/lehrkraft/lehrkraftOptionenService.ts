@@ -59,10 +59,17 @@ function getStoredOptions() {
             ...DEFAULT_OPTIONS
         });
     } catch {
-        return baseService.create({
-            id: 1,
-            ...DEFAULT_OPTIONS
-        });
+        try {
+            return baseService.create({
+                id: 1,
+                ...DEFAULT_OPTIONS
+            });
+        } catch {
+            return {
+                id: 1,
+                ...DEFAULT_OPTIONS
+            };
+        }
     }
 }
 

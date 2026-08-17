@@ -29,6 +29,7 @@ const MOCK_DATA_EXPORTS = [
     "abteilungen",
     "kundenanfragen",
     "nachrichten",
+    "rechnungen",
     "zahlungen",
     "mahnungen",
     "belege",
@@ -45,7 +46,9 @@ const MOCK_DATA_EXPORTS = [
     "personalakten",
     "vertriebsdokumente",
     "einkaufsdokumente",
-    "firmenkonto"
+    "firmenkonto",
+    "lehrkraftOptionen",
+    "fristenOptionen"
 ];
 const MOCK_META_DATA_EXPORTS = [
     "feldMetadaten",

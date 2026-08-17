@@ -61,6 +61,31 @@ function sortOffersByRevisionDescending(a, b) {
     return Number(b.revision || 0) - Number(a.revision || 0);
 }
 
+function withFallback(reader, fallback) {
+    try {
+        return reader();
+    } catch (error) {
+        const message = error instanceof Error ? error.message.toLowerCase() : "";
+        if (
+            error instanceof Error
+            && (
+                error.message.startsWith("Keine Berechtigung")
+                || message.includes("failed to fetch")
+                || message.includes("backend nicht erreichbar")
+                || message.includes("networkerror")
+                || message.includes("api request failed with status 5")
+                || message.includes("internal server error")
+                || message.includes("api request failed with status 404")
+                || message.includes("nicht vorbereitet")
+            )
+        ) {
+            return fallback;
+        }
+
+        throw error;
+    }
+}
+
 function hatUnvollständigeKundenadresse(kunde) {
     if (!kunde) return false;
     return !String(kunde.anschrift || "").trim() || !String(kunde.plz || "").trim() || !String(kunde.ort || "").trim();
@@ -135,7 +160,7 @@ export default function Vertriebsdokumente() {
     const anfragen = customerInquiryService.list();
     const angebote = angeboteService.getAll();
     const kunden = kundenService.list();
-    const rechnungen = rechnungenService.list();
+    const rechnungen = withFallback(() => rechnungenService.list(), []);
     const initialAuftragId = routeAuftragId || "";
     const [selectedAuftragId, setSelectedAuftragId] = useState(initialAuftragId);
     const [auftragsFilter, setAuftragsFilter] = useState("alle");
@@ -251,7 +276,7 @@ export default function Vertriebsdokumente() {
                 element: typ,
                 stand: dokument ? (dokument.status || "erstellt") : "fehlt",
                 detail: dokument ? (dokument.versendetAm ? `Versendet am ${dokument.versendetAm}` : dokument.datum || "-") : "Noch nicht angelegt",
-                inhalt: dokument.notiz || "Kein zusätzlicher Hinweis hinterlegt.",
+                inhalt: dokument?.notiz || "Kein zusätzlicher Hinweis hinterlegt.",
                 sourceType: "dokument",
                 source: dokument || null
             };
