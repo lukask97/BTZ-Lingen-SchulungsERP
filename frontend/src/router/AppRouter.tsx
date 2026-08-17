@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import LoginLayout from "../layouts/LoginLayout";
@@ -75,6 +75,7 @@ import Eventbestellung from "../pages/szenarien/Eventbestellung";
 import ServiceSzenario from "../pages/szenarien/ServiceSzenario";
 import Transportverzoegerung from "../pages/szenarien/Transportverzoegerung";
 import Kooperation from "../pages/szenarien/Kooperation";
+import LegacyLinkFallback from "../pages/fallback/LegacyLinkFallback";
 import { ACCESS } from "../constants/permissions";
 
 
@@ -99,6 +100,8 @@ function AppRouter() {
                     <Login/>
                 </LoginLayout>}
             />
+
+            <Route path="/legacy" element={<LegacyLinkFallback />} />
 
             {/* geschützt */}
             <Route
@@ -217,6 +220,8 @@ function AppRouter() {
                 <Route path="szenarien/transportverzoegerung" element={protectedPage(ACCESS.VERKAUF, <Transportverzoegerung/>)}/>
                 <Route path="szenarien/kooperation" element={protectedPage(ACCESS.MARKETING, <Kooperation/>)}/>
             </Route>
+
+            <Route path="*" element={<LegacyLinkFallback />} />
         </Routes>
     </BrowserRouter>);
 }
