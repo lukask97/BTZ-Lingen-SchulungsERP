@@ -51,21 +51,21 @@ export default function Rechnungen() {
                 { field: "rechnungsnr", title: "Rechnungsnummer" },
                 { field: "rechnungstyp", title: "Typ", helpText: "Ausgangsrechnung = Debitorenrechnung, Eingangsrechnung = Kreditorenrechnung." },
                 { field: "bezug", title: "Bezug", render: row => row.rechnungstyp === "Eingangsrechnung"
-                     ? <Link className="detail-link" to={`/bestellungenfocus=${row.bestellungId}`}>{row.bestellNr}</Link>
-                    : <Link className="detail-link" to={`/auftraegefocus=${row.auftragId}`}>{row.auftragNr}</Link> },
+                     ? <Link className="detail-link" to={`/bestellungen?focus=${row.bestellungId}`}>{row.bestellNr}</Link>
+                    : <Link className="detail-link" to={`/auftraege?focus=${row.auftragId}`}>{row.auftragNr}</Link> },
                 { field: "kunde", title: "Partner", helpText: "Bei Ausgangsrechnungen ist der Partner der Debitor, bei Eingangsrechnungen der Kreditor.", render: row => row.rechnungstyp === "Eingangsrechnung"
-                     ? (row.lieferantId ? <Link className="detail-link" to={`/lieferantenfocus=${row.lieferantId}`}>{row.kunde}</Link> : row.kunde)
-                    : (row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde) },
+                     ? (row.lieferantId ? <Link className="detail-link" to={`/lieferanten?focus=${row.lieferantId}`}>{row.kunde}</Link> : row.kunde)
+                    : (row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde) },
                 { field: "datum", title: "Datum" },
                 { field: "faelligAm", title: "Fällig am" },
                 { field: "betrag", title: "Betrag" },
                 { field: "ampel", title: "Status", helpText: "Offen und fällig zählen zu den offenen Posten; bezahlt gilt als ausgeglichen." }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "bezug" && row.rechnungstyp === "Eingangsrechnung") return `/bestellungenfocus=${row.bestellungId}`;
-                if (field === "bezug") return `/auftraegefocus=${row.auftragId}`;
-                if (field === "kunde" && row.rechnungstyp === "Eingangsrechnung" && row.lieferantId) return `/lieferantenfocus=${row.lieferantId}`;
-                if (field === "kunde" && row.kundeId) return `/kundenfocus=${row.kundeId}`;
+                if (field === "bezug" && row.rechnungstyp === "Eingangsrechnung") return `/bestellungen?focus=${row.bestellungId}`;
+                if (field === "bezug") return `/auftraege?focus=${row.auftragId}`;
+                if (field === "kunde" && row.rechnungstyp === "Eingangsrechnung" && row.lieferantId) return `/lieferanten?focus=${row.lieferantId}`;
+                if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 return null;
             }}
             rowActions={[

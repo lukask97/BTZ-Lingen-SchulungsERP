@@ -336,7 +336,7 @@ export default function Kundenanfragen() {
                     render: row => {
                         const kundenname = getCustomerName(row.kundeId, row.kunde);
                         if (row.kundeId && canReadCustomers) {
-                            return <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{kundenname}</Link>;
+                            return <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{kundenname}</Link>;
                         }
 
                         return kundenname;

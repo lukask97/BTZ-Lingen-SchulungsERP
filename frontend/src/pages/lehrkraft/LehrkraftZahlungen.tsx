@@ -132,8 +132,8 @@ export default function LehrkraftZahlungen() {
                 { field: "datum", title: "Datum" },
                 { field: "bezugTyp", title: "Bezug" },
                 { field: "referenz", title: "Referenz", render: row => {
-                    if (row.rechnungId) return <Link className="detail-link" to={`/rechnungenfocus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link>;
-                    if (row.bestellungId) return <Link className="detail-link" to={`/bestellungenfocus=${row.bestellungId}`}>{row.bestellNr}</Link>;
+                    if (row.rechnungId) return <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link>;
+                    if (row.bestellungId) return <Link className="detail-link" to={`/bestellungen?focus=${row.bestellungId}`}>{row.bestellNr}</Link>;
                     return row.referenz;
                 } },
                 { field: "kunde", title: "Partner" },
@@ -143,8 +143,8 @@ export default function LehrkraftZahlungen() {
                 { field: "statusSicht", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "referenz" && row.rechnungId) return `/rechnungenfocus=${row.rechnungsnr}`;
-                if (field === "referenz" && row.bestellungId) return `/bestellungenfocus=${row.bestellungId}`;
+                if (field === "referenz" && row.rechnungId) return `/rechnungen?focus=${row.rechnungsnr}`;
+                if (field === "referenz" && row.bestellungId) return `/bestellungen?focus=${row.bestellungId}`;
                 return null;
             }}
             toolbarActions={[{ name: "new", label: "Zahlung anlegen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neu, variant: "secondary" }]}

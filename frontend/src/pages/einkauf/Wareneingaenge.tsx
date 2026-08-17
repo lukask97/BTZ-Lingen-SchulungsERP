@@ -30,7 +30,7 @@ export default function Wareneingaenge() {
         <DataTable
         title="Offene Wareneingänge"
         columns={[
-            { field: "bestellNr", title: "Bestellnummer", render: row => <Link className="detail-link" to={`/bestellungenfocus=${row.id}`}>{row.bestellNr}</Link> },
+            { field: "bestellNr", title: "Bestellnummer", render: row => <Link className="detail-link" to={`/bestellungen?focus=${row.id}`}>{row.bestellNr}</Link> },
             { field: "lieferant", title: "Lieferant" },
             { field: "datum", title: "Bestelldatum" },
             { field: "prozess", title: "Prozess" },
@@ -40,7 +40,7 @@ export default function Wareneingaenge() {
         selectableColumns={false}
         focusRowId={searchParams.get("focus") || ""}
         focusField="id"
-        detailLinkResolver={({ field, row }) => field === "bestellNr" ? `/bestellungenfocus=${row.id}` : null}
+        detailLinkResolver={({ field, row }) => field === "bestellNr" ? `/bestellungen?focus=${row.id}` : null}
         rowActions={[
             { name: "book", label: "Wareneingang buchen", permission: PERMISSIONS.LAGER_BUCHEN, onClick: buchen, isVisible: row => canBookGoodsReceipt(row) }
         ]}

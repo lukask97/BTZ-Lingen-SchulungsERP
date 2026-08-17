@@ -143,18 +143,18 @@ export default function LehrkraftLieferantenkorrespondenz() {
             })}
             columns={[
                 { field: "datum", title: "Datum" },
-                { field: "bestellNr", title: "Bestellung", render: row => <Link className="detail-link" to={`/bestellungenfocus=${row.id}`}>{row.bestellNr}</Link> },
+                { field: "bestellNr", title: "Bestellung", render: row => <Link className="detail-link" to={`/bestellungen?focus=${row.id}`}>{row.bestellNr}</Link> },
                 { field: "anfrageQuelleLabel", title: "Auslöser" },
                 { field: "artikelnummernText", title: "Artikelnummern" },
                 { field: "positionenText", title: "Bedarf" },
-                { field: "lieferant", title: "Lieferant", render: row => row.lieferantId ? <Link className="detail-link" to={`/lieferantenfocus=${row.lieferantId}`}>{row.lieferant}</Link> : "Noch offen" },
+                { field: "lieferant", title: "Lieferant", render: row => row.lieferantId ? <Link className="detail-link" to={`/lieferanten?focus=${row.lieferantId}`}>{row.lieferant}</Link> : "Noch offen" },
                 { field: "angebotsText", title: "Angebot" },
                 { field: "status", title: "Status" },
                 { field: "versendetAm", title: "Versendet am", render: row => row.versendetAm || "-" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "bestellNr") return `/bestellungenfocus=${row.id}`;
-                if (field === "lieferant" && row.lieferantId) return `/lieferantenfocus=${row.lieferantId}`;
+                if (field === "bestellNr") return `/bestellungen?focus=${row.id}`;
+                if (field === "lieferant" && row.lieferantId) return `/lieferanten?focus=${row.lieferantId}`;
                 return null;
             }}
             rowActions={[
@@ -177,7 +177,7 @@ export default function LehrkraftLieferantenkorrespondenz() {
                 { field: "betrag", title: "Betrag" },
                 { field: "sichtStatus", title: "Status" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "rechnungsnr" ? `/rechnungenfocus=${row.rechnungsnr}` : null}
+            detailLinkResolver={({ field, row }) => field === "rechnungsnr" ? `/rechnungen?focus=${row.rechnungsnr}` : null}
         />}
 
         <Dialog

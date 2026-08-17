@@ -65,11 +65,11 @@ export default function Reklamationen() {
         ]}/>
         <DataTable title="Reklamationen" selectableColumns={false} data={reklamationen.filter(item => !statusFilter || item.status === statusFilter)}
             columns={[
-                { field: "reklamationsNr", title: "Nummer" }, { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "reklamationsNr", title: "Nummer" }, { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "datum", title: "Datum" }, { field: "beschreibung", title: "Beschreibung" },
                 { field: "status", title: "Status" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kundenfocus=${row.kundeId}` : null}
+            detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kunden?focus=${row.kundeId}` : null}
             toolbarActions={[{ name: "new", label: "Reklamation erfassen", permission: PERMISSIONS.SERVICE_BEARBEITEN, onClick: neu }]}
             rowActions={[{ name: "replacement", label: "Ersatzlieferung planen", permission: PERMISSIONS.SERVICE_BEARBEITEN, onClick: ersatzlieferungPlanen }]}
             filters={[{ name: "status", label: "Status", options: [{ value: "neu", label: "Neu" }, { value: "Ersatzlieferung geplant", label: "Ersatzlieferung geplant" }] }]}

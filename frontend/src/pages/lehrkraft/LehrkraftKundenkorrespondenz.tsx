@@ -656,13 +656,13 @@ export default function LehrkraftKundenkorrespondenz() {
             data={gefilterteAnfragen}
             columns={[
                 { field: "datum", title: "Datum" },
-                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "kanal", title: "Kanal" },
                 { field: "betreff", title: "Betreff" },
                 { field: "status", title: "Status" },
                 { field: "anliegen", title: "Nachricht" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kundenfocus=${row.kundeId}` : null}
+            detailLinkResolver={({ field, row }) => field === "kunde" && row.kundeId ? `/kunden?focus=${row.kundeId}` : null}
             toolbarActions={[{ name: "new", label: "Anfrage verfassen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neueAnfrage }]}
             rowActions={[
                 { name: "thread", label: "Nachrichten", permission: PERMISSIONS.GF_BEARBEITEN, onClick: vorgangOeffnen, variant: "secondary", isVisible: row => !!row.vorgangId && row.status !== "archiviert" },
@@ -681,15 +681,15 @@ export default function LehrkraftKundenkorrespondenz() {
             data={gefilterteAngebote}
             columns={[
                 { field: "datum", title: "Datum" },
-                { field: "angebotsNr", title: "Angebot", render: row => <Link className="detail-link" to={`/angebotefocus=${row.id}`}>{row.angebotsNr}</Link> },
-                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "angebotsNr", title: "Angebot", render: row => <Link className="detail-link" to={`/angebote?focus=${row.id}`}>{row.angebotsNr}</Link> },
+                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "gueltigBis", title: "Gültig bis" },
                 { field: "status", title: "Status" },
                 { field: "gesamtbetrag", title: "Betrag" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "angebotsNr") return `/angebotefocus=${row.id}`;
-                if (field === "kunde" && row.kundeId) return `/kundenfocus=${row.kundeId}`;
+                if (field === "angebotsNr") return `/angebote?focus=${row.id}`;
+                if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 return null;
             }}
             rowActions={[
@@ -710,14 +710,14 @@ export default function LehrkraftKundenkorrespondenz() {
             columns={[
                 { field: "datum", title: "Datum" },
                 { field: "bezugTyp", title: "Bezug" },
-                { field: "referenz", title: "Referenz", render: row => row.rechnungId ? <Link className="detail-link" to={`/rechnungenfocus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> : row.referenz },
+                { field: "referenz", title: "Referenz", render: row => row.rechnungId ? <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> : row.referenz },
                 { field: "kunde", title: "Partner" },
                 { field: "zahlungsart", title: "Art" },
                 { field: "ausfuehrenAm", title: "Ausführen am" },
                 { field: "betrag", title: "Betrag" },
                 { field: "statusSicht", title: "Status" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "referenz" && row.rechnungId ? `/rechnungenfocus=${row.rechnungsnr}` : null}
+            detailLinkResolver={({ field, row }) => field === "referenz" && row.rechnungId ? `/rechnungen?focus=${row.rechnungsnr}` : null}
         />}
 
         {activeTab === "warenannahme" && <DataTable
@@ -731,16 +731,16 @@ export default function LehrkraftKundenkorrespondenz() {
             data={gefilterteWarenannahmen}
             columns={[
                 { field: "datum", title: "Datum" },
-                { field: "auftragNr", title: "Auftrag", render: row => row.auftragId ? <Link className="detail-link" to={`/auftraegefocus=${row.auftragId}`}>{row.auftragNr}</Link> : row.auftragNr },
-                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "auftragNr", title: "Auftrag", render: row => row.auftragId ? <Link className="detail-link" to={`/auftraege?focus=${row.auftragId}`}>{row.auftragNr}</Link> : row.auftragNr },
+                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "dokumentTyp", title: "Dokumenttyp" },
                 { field: "status", title: "Status" },
                 { field: "versendetAm", title: "Versendet am", render: row => row.versendetAm || "-" },
                 { field: "annahmeAm", title: "Annahmedatum", render: row => row.annahmeAm || "-" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "auftragNr" && row.auftragId) return `/auftraegefocus=${row.auftragId}`;
-                if (field === "kunde" && row.kundeId) return `/kundenfocus=${row.kundeId}`;
+                if (field === "auftragNr" && row.auftragId) return `/auftraege?focus=${row.auftragId}`;
+                if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 return null;
             }}
             rowActions={[
@@ -763,15 +763,15 @@ export default function LehrkraftKundenkorrespondenz() {
                 data={laufendeAufträge}
                 columns={[
                     { field: "datum", title: "Datum" },
-                    { field: "auftragNr", title: "Auftrag", render: row => <Link className="detail-link" to={`/auftraegefocus=${row.id}`}>{row.auftragNr}</Link> },
-                    { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                    { field: "auftragNr", title: "Auftrag", render: row => <Link className="detail-link" to={`/auftraege?focus=${row.id}`}>{row.auftragNr}</Link> },
+                    { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                     { field: "status", title: "Status" },
                     { field: "gesamtbetrag", title: "Betrag" },
                     { field: "positionenText", title: "Positionen" }
                 ]}
                 detailLinkResolver={({ field, row }) => {
-                    if (field === "auftragNr") return `/auftraegefocus=${row.id}`;
-                    if (field === "kunde" && row.kundeId) return `/kundenfocus=${row.kundeId}`;
+                    if (field === "auftragNr") return `/auftraege?focus=${row.id}`;
+                    if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                     return null;
                 }}
             />
@@ -802,7 +802,7 @@ export default function LehrkraftKundenkorrespondenz() {
             offers={angeboteZuVorgang(threadItem.vorgangId)}
             messages={getThreadMessages(threadItem, today)}
             ownRole="Kunde"
-            offerHrefResolver={item => `/angebotefocus=${item.id}`}
+            offerHrefResolver={item => `/angebote?focus=${item.id}`}
             documentLinks={getVorgangDokumente(threadItem.vorgangId)}
             headerActionLink={{ id: "combined-pdf", label: "Alles in einem Dokument", onClick: () => vorgangAlsSammelPdf(threadItem) }}
             actionLinks={aktuellesAngebotZuVorgang(threadItem.vorgangId) && OFFER_OPEN_STATUSES.includes(normalizeStatus(aktuellesAngebotZuVorgang(threadItem.vorgangId).status)) ? [

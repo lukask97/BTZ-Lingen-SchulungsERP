@@ -297,21 +297,21 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
             columns={[
                 { field: "rechnungsnr", title: "Rechnungsnummer" },
                 { field: "bezug", title: "Bezug", render: row => row.rechnungstyp === "Eingangsrechnung"
-                     ? <Link className="detail-link" to={`/bestellungenfocus=${row.bestellungId}`}>{row.bestellNr}</Link>
-                    : <Link className="detail-link" to={`/auftraegefocus=${row.auftragId}`}>{row.auftragNr}</Link> },
+                     ? <Link className="detail-link" to={`/bestellungen?focus=${row.bestellungId}`}>{row.bestellNr}</Link>
+                    : <Link className="detail-link" to={`/auftraege?focus=${row.auftragId}`}>{row.auftragNr}</Link> },
                 { field: "kunde", title: config.partnerLabel, render: row => row.rechnungstyp === "Eingangsrechnung"
-                     ? (row.lieferantId ? <Link className="detail-link" to={`/lieferantenfocus=${row.lieferantId}`}>{row.kunde}</Link> : row.kunde)
-                    : (row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde) },
+                     ? (row.lieferantId ? <Link className="detail-link" to={`/lieferanten?focus=${row.lieferantId}`}>{row.kunde}</Link> : row.kunde)
+                    : (row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde) },
                 { field: "datum", title: "Datum" },
                 { field: "faelligAm", title: "Fällig am" },
                 { field: "betrag", title: "Betrag" },
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "bezug" && row.rechnungstyp === "Eingangsrechnung") return `/bestellungenfocus=${row.bestellungId}`;
-                if (field === "bezug") return `/auftraegefocus=${row.auftragId}`;
-                if (field === "kunde" && row.rechnungstyp === "Eingangsrechnung" && row.lieferantId) return `/lieferantenfocus=${row.lieferantId}`;
-                if (field === "kunde" && row.kundeId) return `/kundenfocus=${row.kundeId}`;
+                if (field === "bezug" && row.rechnungstyp === "Eingangsrechnung") return `/bestellungen?focus=${row.bestellungId}`;
+                if (field === "bezug") return `/auftraege?focus=${row.auftragId}`;
+                if (field === "kunde" && row.rechnungstyp === "Eingangsrechnung" && row.lieferantId) return `/lieferanten?focus=${row.lieferantId}`;
+                if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
                 return null;
             }}
         />
@@ -340,14 +340,14 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
             data={matchedTransfers}
             columns={[
                 { field: "ausfuehrungsdatum", title: "Ausführung" },
-                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/${mode === "eingang" ? "eingangsrechnungen" : "ausgangsrechnungen"}focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
+                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/${mode === "eingang" ? "eingangsrechnungen" : "ausgangsrechnungen"}?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
                 { field: "name", title: "Name" },
                 { field: "iban", title: "IBAN" },
                 { field: "betrag", title: "Betrag" },
                 { field: "verwendungszweck", title: "Verwendungszweck" },
                 { field: "status", title: "Status" }
             ]}
-            detailLinkResolver={({ field, value }) => field === "rechnungsnr" ? `/${mode === "eingang" ? "eingangsrechnungen" : "ausgangsrechnungen"}focus=${value}` : null}
+            detailLinkResolver={({ field, value }) => field === "rechnungsnr" ? `/${mode === "eingang" ? "eingangsrechnungen" : "ausgangsrechnungen"}?focus=${value}` : null}
             rowActions={[
                 { name: "unmatch", label: "Zuordnung lösen", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: zuordnungLoesen, variant: "secondary" },
                 { name: "cancel", label: "Stornieren", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: stornieren, variant: "danger" }

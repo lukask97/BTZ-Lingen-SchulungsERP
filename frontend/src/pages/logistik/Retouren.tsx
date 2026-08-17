@@ -51,15 +51,15 @@ export default function Retouren() {
             data={retouren}
             columns={[
                 { field: "retourenNr", title: "Retourennummer" },
-                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
-                { field: "artikel", title: "Artikel", render: row => row.artikelId ? <Link className="detail-link" to={`/artikelfocus=${row.artikelId}`}>{row.artikel}</Link> : row.artikel },
+                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "artikel", title: "Artikel", render: row => row.artikelId ? <Link className="detail-link" to={`/artikel?focus=${row.artikelId}`}>{row.artikel}</Link> : row.artikel },
                 { field: "datum", title: "Datum" },
                 { field: "grund", title: "Grund" },
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "kunde" && row.kundeId) return `/kundenfocus=${row.kundeId}`;
-                if (field === "artikel" && row.artikelId) return `/artikelfocus=${row.artikelId}`;
+                if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
+                if (field === "artikel" && row.artikelId) return `/artikel?focus=${row.artikelId}`;
                 return null;
             }}
             rowActions={[{ name: "done", label: "Abschließen", permission: PERMISSIONS.LOGISTIK_BEARBEITEN, onClick: abschliessen, variant: "success", isVisible: row => row.status !== "abgeschlossen" }]}

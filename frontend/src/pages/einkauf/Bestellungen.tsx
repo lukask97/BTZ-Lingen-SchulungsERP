@@ -430,7 +430,7 @@ export default function Bestellungen() {
                 { field: "bestellNr", title: "Bestellnummer" },
                 { field: "anfrageQuelleLabel", title: "Auslöser" },
                 { field: "artikelnummernText", title: "Artikelnummern" },
-                { field: "lieferantAnzeige", title: "Lieferant", render: row => row.lieferantId ? <Link className="detail-link" to={`/lieferantenfocus=${row.lieferantId}`}>{row.lieferant}</Link> : row.lieferantAnzeige },
+                { field: "lieferantAnzeige", title: "Lieferant", render: row => row.lieferantId ? <Link className="detail-link" to={`/lieferanten?focus=${row.lieferantId}`}>{row.lieferant}</Link> : row.lieferantAnzeige },
                 { field: "status", title: "Status" },
                 { field: "angebotsStatus", title: "Lehrkraftangebot" },
                 { field: "prozess", title: "Prozess" },
@@ -439,7 +439,7 @@ export default function Bestellungen() {
             data={data}
             selectableColumns={false}
             focusRowId={searchParams.get("focus") || ""}
-            detailLinkResolver={({ field, row }) => field === "lieferantAnzeige" && row.lieferantId ? `/lieferantenfocus=${row.lieferantId}` : null}
+            detailLinkResolver={({ field, row }) => field === "lieferantAnzeige" && row.lieferantId ? `/lieferanten?focus=${row.lieferantId}` : null}
             searchable
             onSearch={setSuchbegriff}
             filters={[

@@ -63,8 +63,8 @@ export default function Belege() {
     const fehlendeBelege = rechnungen.filter(item => !rechnungenMitBeleg.has(String(item.id)));
     const versendet = daten.filter(item => item.status === "versendet").length;
     const resolveInvoiceLink = (rechnung: any) => rechnung.rechnungstyp === "Eingangsrechnung"
-         ? `/eingangsrechnungenfocus=${rechnung.rechnungsnr}`
-        : `/ausgangsrechnungenfocus=${rechnung.rechnungsnr}`;
+         ? `/eingangsrechnungen?focus=${rechnung.rechnungsnr}`
+        : `/ausgangsrechnungen?focus=${rechnung.rechnungsnr}`;
 
     return <>
         <OverviewCards cards={[

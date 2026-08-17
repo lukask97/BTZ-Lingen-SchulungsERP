@@ -107,7 +107,7 @@ export default function Bestand() {
                 aktiveAuftraege: verplanteMengen[String(item.id)]
                     ? verplanteMengen[String(item.id)].auftraege.map(auftrag => ({
                         label: auftrag.auftragNr,
-                        to: `/auftraegefocus=${auftrag.id}`
+                        to: `/auftraege?focus=${auftrag.id}`
                     }))
                     : []
             };
@@ -196,7 +196,7 @@ export default function Bestand() {
             }}
             columns={[
                 { field: "artikelNr", title: "Artikelnummer" },
-                { field: "name", title: "Artikel", render: row => <Link className="detail-link" to={`/artikelfocus=${row.id}`}>{row.name}</Link> },
+                { field: "name", title: "Artikel", render: row => <Link className="detail-link" to={`/artikel?focus=${row.id}`}>{row.name}</Link> },
                 { field: "artikelTyp", title: "Typ" },
                 { field: "bestand", title: "Bestand", helpText: "Aktueller physischer Lagerbestand des Artikels." },
                 { field: "verplant", title: "Reserviert", helpText: "Menge, die bereits reserviert ist." },
@@ -207,7 +207,7 @@ export default function Bestand() {
                 { field: "inAngeboten", title: "In Angeboten", helpText: "Summierte Menge aus aktuell offenen Angeboten mit Status 'Wartet auf Antwort', in denen der Artikel verwendet wird." }
             ]}
             rowClassName={row => FARBEN.find(farbe => farbe.key === row.farbstatus)?.rowClass || ""}
-            detailLinkResolver={({ field, row }) => field === "name" ? `/artikelfocus=${row.id}` : null}
+            detailLinkResolver={({ field, row }) => field === "name" ? `/artikel?focus=${row.id}` : null}
             rowActions={[
                 { name: "edit", label: "Bestand anpassen", permission: PERMISSIONS.LAGER_BEARBEITEN, onClick: bestandAnpassen, variant: "secondary" }
             ]}

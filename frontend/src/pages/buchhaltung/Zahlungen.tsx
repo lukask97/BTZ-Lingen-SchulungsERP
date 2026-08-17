@@ -66,9 +66,9 @@ export default function Zahlungen() {
             const rechnung = rechnungenService.getById(zahlung.rechnungId);
             if (!rechnung) return null;
             if (rechnung.rechnungstyp === "Eingangsrechnung") {
-                return rechnung.lieferantId ? `/lieferantenfocus=${rechnung.lieferantId}` : null;
+                return rechnung.lieferantId ? `/lieferanten?focus=${rechnung.lieferantId}` : null;
             }
-            return rechnung.kundeId ? `/kundenfocus=${rechnung.kundeId}` : null;
+            return rechnung.kundeId ? `/kunden?focus=${rechnung.kundeId}` : null;
         }
         return null;
     };
@@ -187,7 +187,7 @@ export default function Zahlungen() {
             data={matchedTransfers}
             columns={[
                 { field: "ausfuehrungsdatum", title: "Ausführung" },
-                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/rechnungenfocus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
+                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
                 { field: "zahlungsart", title: "Art" },
                 { field: "name", title: "Name", render: row => {
                     const link = resolvePartnerLink(row);
@@ -199,7 +199,7 @@ export default function Zahlungen() {
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row, value }) => {
-                if (field === "rechnungsnr") return `/rechnungenfocus=${value}`;
+                if (field === "rechnungsnr") return `/rechnungen?focus=${value}`;
                 if (field === "name") return resolvePartnerLink(row);
                 return null;
             }}

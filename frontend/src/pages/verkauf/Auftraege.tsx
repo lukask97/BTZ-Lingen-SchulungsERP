@@ -215,7 +215,7 @@ export default function Auftraege() {
         <DataTable title="Aufträge" selectableColumns={false} data={data.filter(item => !statusFilter || item.status === statusFilter)}
             columns={[
                 { field: "auftragNr", title: "Auftragsnummer" },
-                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "datum", title: "Datum" },
                 { field: "status", title: "Status", helpText: "Zeigt, ob der Auftrag noch offen ist oder bereits weiterverarbeitet wurde." },
                 { field: "anliegenText", title: "Anliegen", helpText: "Kurzbeschreibung der ursprünglichen Kundenanfrage oder des Auslösers." },

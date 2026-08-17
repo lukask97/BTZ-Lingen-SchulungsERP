@@ -94,8 +94,8 @@ export default function Versand() {
             data={versand}
             columns={[
                 { field: "versandNr", title: "Versandnummer" },
-                { field: "auftrag", title: "Auftrag", render: row => row.auftragId ? <Link className="detail-link" to={`/auftraegefocus=${row.auftragId}`}>{row.auftrag}</Link> : row.auftrag },
-                { field: "kunde", title: "Kunde", render: row => row.auftragId ? <Link className="detail-link" to={`/kundenfocus=${getAuftragById(row.auftragId)?.kundeId || ""}`}>{row.kunde}</Link> : row.kunde },
+                { field: "auftrag", title: "Auftrag", render: row => row.auftragId ? <Link className="detail-link" to={`/auftraege?focus=${row.auftragId}`}>{row.auftrag}</Link> : row.auftrag },
+                { field: "kunde", title: "Kunde", render: row => row.auftragId ? <Link className="detail-link" to={`/kunden?focus=${getAuftragById(row.auftragId)?.kundeId || ""}`}>{row.kunde}</Link> : row.kunde },
                 { field: "datum", title: "Datum" },
                 { field: "transport", title: "Transport" },
                 { field: "status", title: "Status" }

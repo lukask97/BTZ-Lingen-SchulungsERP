@@ -491,7 +491,7 @@ export default function Angebote() {
             event.stopPropagation();
             angebotAlsPdf(row);
         }}>{row.angebotsNr}</button> },
-        { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+        { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
         { field: "datum", title: "Datum" },
         { field: "gueltigBis", title: "Gültig bis", render: row => row.gueltigBis || "-" },
         { field: "status", title: "Status", helpText: "Zeigt, ob das Angebot intern vorbereitet wird, beim Kunden liegt oder bereits abgeschlossen ist." },
