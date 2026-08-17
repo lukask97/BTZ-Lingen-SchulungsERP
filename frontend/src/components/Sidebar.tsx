@@ -28,7 +28,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
 
     const {user, logout, hasFullAccess, hasAccess} = useAuth();
     const isAdmin = hasFullAccess();
-    const isVerkaufSenior = String(user?.rolle || "").toLowerCase().includes("verkauf senior");
+    const isVerkaufSenior = String(user.rolle || "").toLowerCase().includes("verkauf senior");
     const location = useLocation();
     const [providerLabel, setProviderLabel] = useState(() => getProviderLabel(getDataProvider()));
     const visibleGroups = useMemo(
@@ -91,7 +91,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
                 {visibleGroups.map(group => <div key={group.title} className="sidebar-group">
                     <div className="sidebar-section-row">
                         {group.canOpenOverview
-                            ? <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>
+                             ? <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>
                             : <span className="sidebar-section-title">{group.title}</span>}
                         <button type="button" className="sidebar-toggle" onClick={() => toggleGroup(group.key)}>
                             {collapsedGroups[group.key] ? "▸" : "▾"}
@@ -129,7 +129,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
             <div className="sidebar-footer">
                 <div className="sidebar-user">
                     Angemeldet als:
-                    <strong>{user?.username}</strong>
+                    <strong>{user.username}</strong>
                 </div>
                 <div className="sidebar-user">
                     Modus:

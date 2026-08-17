@@ -1,6 +1,10 @@
 import kundenService from "../services/verkauf/customerService";
 
 export function getCustomerById(kundeId: number | string) {
+    if (kundeId === null || kundeId === undefined || kundeId === "") {
+        return null;
+    }
+
     try {
         return kundenService.list().find(item => String(item.id) === String(kundeId)) || null;
     } catch {

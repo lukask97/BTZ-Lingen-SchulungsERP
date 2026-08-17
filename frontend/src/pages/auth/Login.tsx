@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
@@ -15,7 +15,7 @@ const QUICK_LOGINS = [
     { label: "Buchhaltung", username: "buchhaltung", password: "buchhaltung" },
     { label: "Marketing", username: "marketing", password: "marketing" },
     { label: "Personalwesen", username: "personalwesen", password: "personalwesen" },
-    { label: "Geschaeftsfuehrung", username: "gf", password: "gf" }
+    { label: "Geschäftsführung", username: "gf", password: "gf" }
 ];
 
 export default function Login() {
@@ -27,6 +27,9 @@ export default function Login() {
 
     const { login, authError } = useAuth();
     const navigate = useNavigate();
+    const authErrorMessage = authError.includes("Backend unter")
+        ? authError
+        : `${authError} Backend unter \`${BACKEND_ORIGIN}\` starten.`;
 
     async function anmelden(e) {
         e.preventDefault();
@@ -42,7 +45,7 @@ export default function Login() {
         } catch (loginError) {
             setError(
                 loginError instanceof Error
-                    ? loginError.message
+                     ? loginError.message
                     : "Anmeldung derzeit nicht möglich"
             );
             setPassword("");
@@ -70,6 +73,7 @@ export default function Login() {
             <h1>Anmeldung</h1>
             <form onSubmit={anmelden}>
                 <input
+                    name="username"
                     disabled={isSubmitting}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -79,6 +83,7 @@ export default function Login() {
                 <br />
                 <br />
                 <input
+                    name="password"
                     disabled={isSubmitting}
                     type="password"
                     value={password}
@@ -93,7 +98,7 @@ export default function Login() {
                 )}
                 {authError && (
                     <div className="login-error">
-                        {authError} Backend unter `{BACKEND_ORIGIN}` starten.
+                        {authErrorMessage}
                     </div>
                 )}
                 {error && <div className="login-error">{error}</div>}

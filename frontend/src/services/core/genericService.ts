@@ -100,7 +100,7 @@ export function createCRUDService<T extends EntityWithId>(tableName: string, ini
             persist([...reload(), created]);
             return created;
         },
-        update: (idOrItem: number | string | (Partial<T> & Record<string, unknown>), payload?: Partial<T>) => {
+        update: (idOrItem: number | string | (Partial<T> & Record<string, unknown>), payload: Partial<T>) => {
             if (useBackend()) {
                 const current = reload();
                 const nextItem = (typeof idOrItem === "object"
@@ -116,7 +116,7 @@ export function createCRUDService<T extends EntityWithId>(tableName: string, ini
             }
             const current = reload();
             const nextItem = (typeof idOrItem === "object"
-                ? idOrItem
+                 ? idOrItem
                 : { ...(current.find(item => item.id === idOrItem) || {}), ...payload, id: idOrItem }) as T;
             persist(current.map(item => item.id === nextItem.id ? nextItem : item));
             return nextItem;

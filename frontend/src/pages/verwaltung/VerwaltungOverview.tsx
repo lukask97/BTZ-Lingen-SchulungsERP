@@ -10,21 +10,20 @@ export default function VerwaltungOverview() {
 
     return <PlaceholderModule
         title="Verwaltung"
-        intro="Kurze Übersicht über die administrativen Bereiche Benutzer, Rollen, Berechtigungen, Dokumentnummern und zentrale Optionen."
+        intro="Kurze Uebersicht ueber Unternehmensdaten, Dokumentnummern und zentrale Optionen. Benutzer, Rollen und Backups liegen jetzt im eigenen Admin-Bereich."
         cards={[
-            { label: "Benutzer", value: benutzerService.list().length },
-            { label: "Rollen", value: rollenService.list().length },
             { label: "Nummernkreise", value: nummernkreiseService.list().length },
-            { label: "Skonto", value: `${fristenOptionenService.get().skontoProzent} % / ${fristenOptionenService.get().skontoTage} Tage` }
+            { label: "Skonto", value: `${fristenOptionenService.get().skontoProzent} % / ${fristenOptionenService.get().skontoTage} Tage` },
+            { label: "Benutzer", value: benutzerService.list().length },
+            { label: "Rollen", value: rollenService.list().length }
         ]}
-        nextSteps={["Benutzer verwalten", "Rollen pflegen", "Berechtigungen prüfen", "Dokumentkuerzel anpassen", "Fristen steuern"]}
+        nextSteps={["Unternehmen pflegen", "Dokumentkuerzel anpassen", "Fristen steuern", "Zum Admin-Bereich fuer Benutzer und Backup wechseln"]}
         links={[
-            { to: "/benutzer", label: "Benutzer" },
-            { to: "/rollen", label: "Rollen" },
-            { to: "/rechte", label: "Rechte" },
+            { to: "/unternehmen", label: "Unternehmen" },
             { to: "/nummernkreise", label: "Nummernkreise" },
             { to: "/exporte", label: "Exporte" },
-            { to: "/optionen", label: "Optionen" }
+            { to: "/optionen", label: "Optionen" },
+            { to: "/admin", label: "Admin" }
         ]}
     />;
 }

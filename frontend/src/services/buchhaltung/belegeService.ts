@@ -21,9 +21,9 @@ function normalizeReceipt(item: any = {}) {
     return {
         ...item,
         bezugTyp,
-        rechnungId: rechnung?.id || item.rechnungId || "",
+        rechnungId: rechnung.id || item.rechnungId || "",
         bezug: bezugTyp === "Rechnung"
-            ? (rechnung?.rechnungsnr || item.bezug || "")
+             ? (rechnung.rechnungsnr || item.bezug || "")
             : (item.bezug || "")
     };
 }
@@ -56,7 +56,7 @@ const belegeService = {
     },
     create: (payload: any) => normalizeReceipt(baseService.create(splitPayload(payload))),
     add: (payload: any) => normalizeReceipt(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return normalizeReceipt(baseService.update(splitPayload(idOrItem)));
         }

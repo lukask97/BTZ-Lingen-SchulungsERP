@@ -154,7 +154,7 @@ export default function Artikel() {
     const uebernehmeBilddateien = async (files) => {
         const neueVorschauen = await createPreviewItems(Array.from(files || []));
         if (neueVorschauen.length === 0) {
-            setBildFehler("Es konnten nur JPG- oder PNG-Bilder uebernommen werden.");
+            setBildFehler("Es konnten nur JPG- oder PNG-Bilder übernommen werden.");
             return;
         }
         setBildFehler("");
@@ -176,8 +176,8 @@ export default function Artikel() {
     };
 
     const ausZwischenablageEinfuegen = async () => {
-        if (!navigator.clipboard?.read) {
-            setBildFehler("Dieser Browser unterstuetzt das Einfuegen aus der Zwischenablage hier nicht.");
+        if (!navigator.clipboard.read) {
+            setBildFehler("Dieser Browser unterstützt das Einfügen aus der Zwischenablage hier nicht.");
             return;
         }
 
@@ -281,7 +281,7 @@ export default function Artikel() {
                 return {
                     ...item,
                     komponenten: vorhandeneKomponenten.map(eintrag => eintrag.artikelId === auswahl.id
-                        ? { ...eintrag, menge: eintrag.menge + Number(komponentenDraft.komponentenMenge) }
+                         ? { ...eintrag, menge: eintrag.menge + Number(komponentenDraft.komponentenMenge) }
                         : eintrag)
                 };
             }
@@ -318,12 +318,12 @@ export default function Artikel() {
             { field: "artikelNr", label: "Artikelnummer" },
             { field: "name", label: "Name" }
         ].filter(({ field }) => {
-            const value = currentItem?.[field];
+            const value = currentItem[field];
             return value === null || value === undefined || String(value).trim() === "";
         });
 
         if (fehlendeFelder.length > 0) {
-            setBildFehler(`Bitte folgende Pflichtfelder ausfuellen: ${fehlendeFelder.map(item => item.label).join(", ")}.`);
+            setBildFehler(`Bitte folgende Pflichtfelder ausfüllen: ${fehlendeFelder.map(item => item.label).join(", ")}.`);
             return;
         }
 
@@ -332,11 +332,11 @@ export default function Artikel() {
 
         try {
             const gespeicherterArtikel = editMode
-                ? artikelService.update(currentItem)
+                 ? artikelService.update(currentItem)
                 : artikelService.create(currentItem);
 
             const backendBilder = editMode && gespeicherterArtikel.id
-                ? await artikelBilderService.list(gespeicherterArtikel.id)
+                 ? await artikelBilderService.list(gespeicherterArtikel.id)
                 : [];
             const backendSlots = new Set(backendBilder.map(item => Number(item.slot)));
             const aktuelleSlots = new Set(bildVorschauen.map(item => Number(item.slot)));
@@ -393,7 +393,7 @@ export default function Artikel() {
             <DataTable
                 title={config.title}
                 tableName={config.tableName}
-                username={user?.username || ""}
+                username={user.username || ""}
                 columns={columns}
                 allColumns={allColumns}
                 data={filteredDisplayData}
@@ -430,10 +430,10 @@ export default function Artikel() {
                     setCurrentItem(item => ({
                         ...item,
                         kategorieId: value,
-                        kategorie: kategorie?.pfad.split(" > ")[0] || "",
-                        kategoriePfad: kategorie?.pfad || ""
+                        kategorie: kategorie.pfad.split(" > ")[0] || "",
+                        kategoriePfad: kategorie.pfad || ""
                     }));
-                }} placeholder="Kategorie waehlen..." />
+                }} placeholder="Kategorie wählen..." />
 
                 <Label>Typ</Label>
                 <select value={currentItem.artikelTyp || "Einzelartikel"} onChange={event => handleFieldChange("artikelTyp", event.target.value)}>
@@ -489,7 +489,7 @@ export default function Artikel() {
                     </div>
                     <div className="form-row">
                         <Label glossaryKey="stueckliste">Stückliste</Label>
-                        {currentItem.komponenten?.length
+                        {currentItem.komponenten.length > 0
                             ? <ul className="positionsliste">
                                 {currentItem.komponenten.map(position => <li key={position.artikelId}>
                                     {position.artikel}: {position.menge}
@@ -524,7 +524,8 @@ export default function Artikel() {
                         }}
                         onDragLeave={event => {
                             event.preventDefault();
-                            if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+                            const nextTarget = event.relatedTarget;
+                            if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return;
                             setIsImageDragActive(false);
                         }}
                         onDrop={event => {
@@ -551,17 +552,17 @@ export default function Artikel() {
                         <div className="artikelbild-overlay-actions">
                             <div className="thread-document-links">
                                 <button type="button" className="button-secondary" onClick={() => fileInputRef.current?.click()}>
-                                    Bilder auswaehlen
+                                    Bilder auswählen
                                 </button>
                                 <button type="button" className="button-secondary" onClick={ausZwischenablageEinfuegen}>
-                                    Aus Zwischenablage einfuegen
+                                    Aus Zwischenablage einfügen
                                 </button>
                             </div>
-                            <small>{bildVorschauen.length}/10 ausgewaehlt</small>
+                            <small>{bildVorschauen.length}/10 ausgewählt</small>
                         </div>
                         {bildFehler && <p className="form-error">{bildFehler}</p>}
                         {bildVorschauen.length === 0
-                            ? <p className="artikelbild-overlay-empty">Ziehe Bilder hier hinein oder waehle sie manuell aus.</p>
+                             ? <p className="artikelbild-overlay-empty">Ziehe Bilder hier hinein oder wähle sie manuell aus.</p>
                             : <div className="artikelbild-vorschau-grid">
                                 {bildVorschauen.map((bild, index) => <article key={bild.id} className="artikelbild-vorschau-card">
                                     <button type="button" className="artikelbild-vorschau-button" onClick={() => setGrossesBild(bild)}>
@@ -571,7 +572,7 @@ export default function Artikel() {
                                         <strong>Slot {bild.slot}</strong>
                                         <span>{bild.name}</span>
                                     </div>
-                                    <button type="button" className="link-button" onClick={() => bildEntfernen(bild.id)}>Loeschen</button>
+                                    <button type="button" className="link-button" onClick={() => bildEntfernen(bild.id)}>Löschen</button>
                                 </article>)}
                             </div>}
                     </div>
@@ -585,7 +586,7 @@ export default function Artikel() {
                 </div>
             </Dialog>
 
-            <Dialog open={Boolean(grossesBild)} title={grossesBild?.name || "Bildvorschau"} onClose={() => setGrossesBild(null)}>
+            <Dialog open={Boolean(grossesBild)} title={grossesBild.name || "Bildvorschau"} onClose={() => setGrossesBild(null)}>
                 {grossesBild && <div className="form-row artikelbild-dialog-content">
                     <img src={grossesBild.url} alt={grossesBild.name} className="artikelbild-dialog-preview"/>
                 </div>}

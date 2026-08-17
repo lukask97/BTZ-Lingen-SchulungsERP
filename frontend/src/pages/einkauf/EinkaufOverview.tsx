@@ -21,11 +21,11 @@ export default function EinkaufOverview() {
 
     return <>
         <h1>Einkauf</h1>
-        <p>Der Einkauf bleibt bewusst einfach: Die Schuelerfirma erfasst Artikelnummern und benoetigte Mengen in einer Anfrage. Dabei kann zwischen Bedarfsmeldung und Lieferantenvergleich unterschieden werden. Die Lehrkraft erstellt darauf aufbauend ein Angebot, bestaetigt die Bestellung und markiert sie anschliessend als versendet.</p>
+        <p>Der Einkauf bleibt bewusst einfach: Die Schülerfirma erfasst Artikelnummern und benötigte Mengen in einer Anfrage. Dabei kann zwischen Bedarfsmeldung und Lieferantenvergleich unterschieden werden. Die Lehrkraft erstellt darauf aufbauend ein Angebot, bestätigt die Bestellung und markiert sie anschließend als versendet.</p>
 
         <div className="kennzahlen">
             <div className="kennzahl"><span>Lieferanten</span><strong>{lieferanten.length}</strong><small>{bewerteteLieferanten} bewertet</small></div>
-            <div className="kennzahl"><span>Anfragen offen</span><strong>{offeneAnfragen}</strong><small>{bestaetigteAnfragen} bestaetigt</small></div>
+            <div className="kennzahl"><span>Anfragen offen</span><strong>{offeneAnfragen}</strong><small>{bestaetigteAnfragen} bestätigt</small></div>
             <div className="kennzahl"><span>Versand / Wareneingang</span><strong>{versendeteBestellungen}</strong><small>{eingegangeneBestellungen} gebucht</small></div>
             <div className="kennzahl"><span>Kritische Bestände</span><strong>{kritischeBestaende}</strong><small>Bedarfsmeldung möglich</small></div>
         </div>
@@ -35,19 +35,19 @@ export default function EinkaufOverview() {
                 <div className="dashboard-panel-header"><h2>Einfache Reihenfolge</h2><span>Ablauf</span></div>
                 <ul className="dashboard-note-list">
                     <li>Artikelbedarf feststellen oder einen Lieferantenvergleich auswerten.</li>
-                    <li>Einkaufsanfrage mit Artikelnummer und benoetigter Menge anlegen.</li>
-                    <li>Lehrkraft erstellt ein Angebot und bestaetigt anschliessend die Bestellung.</li>
-                    <li>Wareneingang buchen und Bestand automatisch erhoehen.</li>
+                    <li>Einkaufsanfrage mit Artikelnummer und benötigter Menge anlegen.</li>
+                    <li>Lehrkraft erstellt ein Angebot und bestätigt anschließend die Bestellung.</li>
+                    <li>Wareneingang buchen und Bestand automatisch erhöhen.</li>
                     <li>Danach erscheint die Eingangsrechnung in der Buchhaltung.</li>
                 </ul>
             </article>
 
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header"><h2>Lehrkraft im Prozess</h2><span>Externe Seite</span></div>
-                <p>Die Lehrkraft ist der Gegenpart zum Einkauf. Sie sieht die Artikelnummern aus der Anfrage, erstellt darauf ein Angebot und bestaetigt die Bestellung erst danach.</p>
+                <p>Die Lehrkraft ist der Gegenpart zum Einkauf. Sie sieht die Artikelnummern aus der Anfrage, erstellt darauf ein Angebot und bestätigt die Bestellung erst danach.</p>
                 <ul className="dashboard-note-list">
-                    <li>{offeneAnfragen} Anfragen warten noch auf ein Angebot oder eine Bestaetigung.</li>
-                    <li>{bestaetigteAnfragen} bestaetigte Bestellungen koennen versendet werden.</li>
+                    <li>{offeneAnfragen} Anfragen warten noch auf ein Angebot oder eine Bestätigung.</li>
+                    <li>{bestaetigteAnfragen} bestätigte Bestellungen können versendet werden.</li>
                     <li>{versendeteBestellungen} versendete Bestellungen warten auf Wareneingang.</li>
                 </ul>
                 <div className="link-list">

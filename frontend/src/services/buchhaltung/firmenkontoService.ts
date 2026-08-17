@@ -41,7 +41,7 @@ function readSettings() {
         const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
         return {
-            einkaufskontoZiel: normalizeNumber(parsed?.einkaufskontoZiel) || STANDARD_EINKAUFSKONTO_ZIEL
+            einkaufskontoZiel: normalizeNumber(parsed.einkaufskontoZiel) || STANDARD_EINKAUFSKONTO_ZIEL
         };
     } catch {
         return { einkaufskontoZiel: STANDARD_EINKAUFSKONTO_ZIEL };
@@ -102,7 +102,7 @@ const firmenkontoService = {
         return item ? normalizeRow(item) : undefined;
     },
     create: (payload: any) => normalizeRow(baseService.create(normalizeRow(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return normalizeRow(baseService.update(normalizeRow(idOrItem)));
         }
@@ -115,11 +115,11 @@ const firmenkontoService = {
         .filter(item => item.konto === konto)
         .reduce((sum, item) => sum + item.haben - item.soll, 0),
     getSettings: () => readSettings(),
-    updateSettings: (payload: { einkaufskontoZiel?: number }) => {
+    updateSettings: (payload: { einkaufskontoZiel: number }) => {
         const current = readSettings();
         return writeSettings({
             ...current,
-            einkaufskontoZiel: normalizeNumber(payload?.einkaufskontoZiel) || STANDARD_EINKAUFSKONTO_ZIEL
+            einkaufskontoZiel: normalizeNumber(payload.einkaufskontoZiel) || STANDARD_EINKAUFSKONTO_ZIEL
         });
     },
     transferSalesToCompany: (datum: string) => {
@@ -139,7 +139,7 @@ const firmenkontoService = {
 
         return { amount: verkaufssaldo, rows };
     },
-    topUpPurchasingAccount: (datum: string, zielbetrag?: number) => {
+    topUpPurchasingAccount: (datum: string, zielbetrag: number) => {
         const target = normalizeNumber(zielbetrag) || readSettings().einkaufskontoZiel;
         const einkaufssaldo = firmenkontoService.getSaldoByAccount(KONTO_TYPEN.EINKAUF);
         const differenz = Math.max(0, target - einkaufssaldo);
@@ -159,7 +159,7 @@ const firmenkontoService = {
 
         return { amount: differenz, rows, target };
     },
-    runWeeklyTransfer: (datum: string, zielbetrag?: number) => {
+    runWeeklyTransfer: (datum: string, zielbetrag: number) => {
         const salesTransfer = firmenkontoService.transferSalesToCompany(datum);
         const purchasingTransfer = firmenkontoService.topUpPurchasingAccount(datum, zielbetrag);
         return {

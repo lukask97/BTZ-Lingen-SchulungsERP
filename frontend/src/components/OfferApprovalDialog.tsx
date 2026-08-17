@@ -6,12 +6,12 @@ import { formatTimestampForDisplay } from "../utils/dateTime";
 
 type ApprovalMessage = {
     id: string | number;
-    datum?: string;
-    zeitpunkt?: string;
-    senderRolle?: string;
-    senderName?: string;
-    betreff?: string;
-    nachricht?: string;
+    datum: string;
+    zeitpunkt: string;
+    senderRolle: string;
+    senderName: string;
+    betreff: string;
+    nachricht: string;
 };
 
 function getApprovalMessageVariant(item: ApprovalMessage) {
@@ -40,10 +40,10 @@ type ApprovalOfferLink = {
 type ApprovalPositionInfo = {
     id: string | number;
     label: string;
-    quantityLabel?: string;
+    quantityLabel: string;
     availabilityText: string;
-    isCritical?: boolean;
-    lineTotal?: string;
+    isCritical: boolean;
+    lineTotal: string;
 };
 
 type OfferApprovalDialogProps = {
@@ -52,26 +52,26 @@ type OfferApprovalDialogProps = {
     onClose: () => void;
     kunde: string;
     vorgangId: string;
-    status?: string;
+    status: string;
     currentOfferLabel: string;
-    currentOfferAmount?: string;
-    currentOfferNote?: string;
-    discountLabel?: string;
-    totalAmountLabel?: string;
+    currentOfferAmount: string;
+    currentOfferNote: string;
+    discountLabel: string;
+    totalAmountLabel: string;
     onOpenCurrentOffer: () => void;
-    positionInfos?: ApprovalPositionInfo[];
+    positionInfos: ApprovalPositionInfo[];
     previousOffers: ApprovalOfferLink[];
     messages: ApprovalMessage[];
     noteValue: string;
     onNoteChange: (value: string) => void;
     onApprove: () => void;
     onReject: () => void;
-    onRevise?: () => void;
-    onForward?: () => void;
-    notePlaceholder?: string;
-    approveLabel?: string;
-    rejectLabel?: string;
-    forwardLabel?: string;
+    onRevise: () => void;
+    onForward: () => void;
+    notePlaceholder: string;
+    approveLabel: string;
+    rejectLabel: string;
+    forwardLabel: string;
 };
 
 export default function OfferApprovalDialog({
@@ -96,10 +96,10 @@ export default function OfferApprovalDialog({
     onReject,
     onRevise,
     onForward,
-    notePlaceholder = "Interne Begruendung oder Rueckfrage notieren...",
+    notePlaceholder = "Interne Begründung oder Rückfrage notieren...",
     approveLabel = "Freigeben",
     rejectLabel = "Ablehnen",
-    forwardLabel = "Zur Geschaeftsfuehrung weiterleiten"
+    forwardLabel = "Zur Geschäftsführung weiterleiten"
 }: OfferApprovalDialogProps) {
     const [chatExpanded, setChatExpanded] = useState(false);
     const chatWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -111,8 +111,9 @@ export default function OfferApprovalDialog({
     );
 
     useEffect(() => {
-        if (!open || !chatWrapperRef.current) return;
-        chatWrapperRef.current.scrollTop = chatWrapperRef.current.scrollHeight;
+        const wrapper = chatWrapperRef.current;
+        if (!open || !wrapper) return;
+        wrapper.scrollTop = wrapper.scrollHeight;
     }, [open, messages.length, chatExpanded]);
 
     return <Dialog open={open} title={title} onClose={onClose}>
@@ -125,7 +126,7 @@ export default function OfferApprovalDialog({
             </div>
             <div className="thread-header-body">
                 <div>
-                    <Label>Interne Angebotspruefung</Label>
+                    <Label>Interne Angebotsprüfung</Label>
                     <p>{currentOfferLabel}</p>
                     {currentOfferAmount && <p><strong>{currentOfferAmount}</strong></p>}
                     <p>{currentOfferNote || "Kein interner Hinweis hinterlegt."}</p>
@@ -139,7 +140,7 @@ export default function OfferApprovalDialog({
 
         <div className="form-row thread-section">
             <div className="thread-section-header">
-                <Label>Pruefdetails</Label>
+                <Label>Prüfdetails</Label>
             </div>
             {positionInfos.length === 0 ? <p>Keine positionsbezogenen Bestandsdaten vorhanden.</p> : <ul className="positionsliste">
                 {positionInfos.map(item => <li key={item.id} className="position-entry">
@@ -153,7 +154,7 @@ export default function OfferApprovalDialog({
                 </li>)}
             </ul>}
             <div className="thread-header-meta">
-                {discountLabel && <div><Label>Verguenstigung</Label><strong>{discountLabel}</strong></div>}
+                {discountLabel && <div><Label>Vergünstigung</Label><strong>{discountLabel}</strong></div>}
                 <div><Label>Gesamtbetrag</Label><strong>{totalAmountLabel || currentOfferAmount || "-"}</strong></div>
             </div>
             {currentOfferNote && <div className="thread-header-meta">
@@ -235,11 +236,11 @@ export default function OfferApprovalDialog({
             </div>
             <div className="thread-document-links">
                 <button type="button" onClick={onApprove}>{approveLabel}</button>
-                {onRevise && <button type="button" className="button-secondary" onClick={onRevise} disabled={noteMissing}>Ueberarbeiten</button>}
+                {onRevise && <button type="button" className="button-secondary" onClick={onRevise} disabled={noteMissing}>Überarbeiten</button>}
                 <button type="button" className="button-danger" onClick={onReject} disabled={noteMissing}>{rejectLabel}</button>
                 {onForward && <button type="button" className="button-secondary" onClick={onForward} disabled={noteMissing}>{forwardLabel}</button>}
             </div>
-            <p>Fuer Ueberarbeiten, Ablehnen oder Weiterleiten bitte eine Notiz eintragen.</p>
+            <p>Für Überarbeiten, Ablehnen oder Weiterleiten bitte eine Notiz eintragen.</p>
         </div>
     </Dialog>;
 }

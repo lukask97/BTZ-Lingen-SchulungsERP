@@ -86,17 +86,17 @@ function hydrateAngebote(items: any[] = []) {
         const positionen = (positionenByAngebotId.get(String(normalized.id || "")) || []).map(position => {
             const istService = String(position.leistungTyp || "").toLowerCase() === "service" || !!position.serviceId;
             const referenz = istService
-                ? servicesById.get(String(position.serviceId || position.artikelId || ""))
+                 ? servicesById.get(String(position.serviceId || position.artikelId || ""))
                 : artikelById.get(String(position.artikelId || ""));
 
             const hydrated = {
                 ...position,
-                artikelId: istService ? (position.artikelId || position.serviceId || referenz?.id || "") : (position.artikelId || referenz?.id || ""),
-                serviceId: istService ? (position.serviceId || position.artikelId || referenz?.id || "") : "",
-                artikel: referenz?.name || position.artikel || "",
-                artikelTyp: istService ? "Dienstleistung" : (referenz?.artikelTyp || position.artikelTyp || "Einzelartikel"),
+                artikelId: istService ? (position.artikelId || position.serviceId || referenz.id || "") : (position.artikelId || referenz.id || ""),
+                serviceId: istService ? (position.serviceId || position.artikelId || referenz.id || "") : "",
+                artikel: referenz.name || position.artikel || "",
+                artikelTyp: istService ? "Dienstleistung" : (referenz.artikelTyp || position.artikelTyp || "Einzelartikel"),
                 leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
-                einzelpreis: Number(position.einzelpreis ?? referenz?.verkaufspreis ?? referenz?.preis ?? 0)
+                einzelpreis: Number(position.einzelpreis || referenz.verkaufspreis || referenz.preis || 0)
             };
             const { angebotId, ...rest } = hydrated;
             return rest;
@@ -114,17 +114,17 @@ function hydrateAngebote(items: any[] = []) {
 function hydratePosition(position: any = {}) {
     const istService = String(position.leistungTyp || "").toLowerCase() === "service" || !!position.serviceId;
     const referenz = istService
-        ? withPermissionFallback(() => servicesService.getById(position.serviceId || position.artikelId), undefined)
+         ? withPermissionFallback(() => servicesService.getById(position.serviceId || position.artikelId), undefined)
         : withPermissionFallback(() => artikelService.getById(position.artikelId), undefined);
 
     return {
         ...position,
-        artikelId: istService ? (position.artikelId || position.serviceId || referenz?.id || "") : (position.artikelId || referenz?.id || ""),
-        serviceId: istService ? (position.serviceId || position.artikelId || referenz?.id || "") : "",
-        artikel: referenz?.name || position.artikel || "",
-        artikelTyp: istService ? "Dienstleistung" : (referenz?.artikelTyp || position.artikelTyp || "Einzelartikel"),
+        artikelId: istService ? (position.artikelId || position.serviceId || referenz.id || "") : (position.artikelId || referenz.id || ""),
+        serviceId: istService ? (position.serviceId || position.artikelId || referenz.id || "") : "",
+        artikel: referenz.name || position.artikel || "",
+        artikelTyp: istService ? "Dienstleistung" : (referenz.artikelTyp || position.artikelTyp || "Einzelartikel"),
         leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
-        einzelpreis: Number(position.einzelpreis ?? referenz?.verkaufspreis ?? referenz?.preis ?? 0)
+        einzelpreis: Number(position.einzelpreis || referenz.verkaufspreis || referenz.preis || 0)
     };
 }
 
@@ -167,7 +167,7 @@ const angeboteService = {
         positionService.replaceForParent(created.id, positionen);
         return hydrateAngebot(created);
     },
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             const normalized = normalizeAngebot(idOrItem);
             const { basePayload, positionen } = splitPayload(normalized);

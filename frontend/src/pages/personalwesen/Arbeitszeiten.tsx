@@ -6,6 +6,7 @@ import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
+import SaveButton from "../../components/SaveButton";
 import arbeitszeitenService from "../../services/personalwesen/arbeitszeitenService";
 import mitarbeiterService from "../../services/personalwesen/mitarbeiterService";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
@@ -42,10 +43,10 @@ export default function Arbeitszeiten() {
     };
 
     const speichern = () => {
-        if (!current.mitarbeiterId) return;
+        if (!current.mitarbeiterId) return false;
         arbeitszeitenService.create(current);
         setEintraege(arbeitszeitenService.list());
-        setOpen(false);
+        return true;
     };
 
     const freigeben = (eintrag) => {
@@ -70,18 +71,22 @@ export default function Arbeitszeiten() {
                 { field: "bis", title: "Bis" },
                 { field: "status", title: "Status" }
             ]}
-            detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalakte?mitarbeiter=${row.mitarbeiterId}` : null}
+            detailLinkResolver={({ field, row }) => field === "mitarbeiter" && row.mitarbeiterId ? `/personalaktemitarbeiter=${row.mitarbeiterId}` : null}
             toolbarActions={[{ name: "new", label: "Zeit buchen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: neu, variant: "secondary" }]}
             rowActions={[
                 { name: "details", label: "Akte öffnen", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: row => navigate(`/personalakte?mitarbeiter=${row.mitarbeiterId}`), variant: "secondary", isVisible: row => !!row.mitarbeiterId },
                 { name: "approve", label: "Freigeben", permission: PERMISSIONS.PERSONALWESEN_BEARBEITEN, onClick: freigeben, variant: "success", isVisible: row => row.status !== "freigegeben" }
             ]}
         />
-        <Dialog open={open} title="Arbeitszeit erfassen" onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title="Arbeitszeit erfassen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Mitarbeiter</Label><LookupField value={current.mitarbeiterId} options={mitarbeiterOptionen} onChange={mitarbeiterAuswaehlen} placeholder="Mitarbeiter suchen..."/></div>
             <div><Label>Von</Label><TextField type="time" value={current.von} onChange={value => setCurrent(item => ({ ...item, von: value }))}/></div>
             <div><Label>Bis</Label><TextField type="time" value={current.bis} onChange={value => setCurrent(item => ({ ...item, bis: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

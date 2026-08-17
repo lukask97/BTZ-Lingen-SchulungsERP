@@ -6,6 +6,7 @@ import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
 import SalesFlowBar from "../../components/SalesFlowBar";
@@ -31,7 +32,7 @@ const toLeistung = (item, typ) => ({
     leistungTyp: typ,
     nummer: typ === "Service" ? item.serviceNr : item.artikelNr,
     name: item.name,
-    preis: Number(item.verkaufspreis ?? item.preis ?? 0),
+    preis: Number(item.verkaufspreis || item.preis || 0),
     artikelTyp: typ === "Service" ? "Dienstleistung" : item.artikelTyp
 });
 
@@ -149,7 +150,7 @@ export default function Auftraege() {
                 return {
                     ...vorherige,
                     positionenDraft: vorherige.positionenDraft.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp
-                        ? { ...item, menge: Number(item.menge) + Number(draft.menge) }
+                         ? { ...item, menge: Number(item.menge) + Number(draft.menge) }
                         : item)
                 };
             }
@@ -164,7 +165,7 @@ export default function Auftraege() {
         const kunde = kunden.find(item => item.id === Number(draft.kundeId));
         if (!kunde || draft.positionenDraft.length === 0) {
             setFehler("Bitte einen Kunden und mindestens eine Position auswählen.");
-            return;
+            return false;
         }
 
         if (draft.sourceInquiryId) {
@@ -192,8 +193,8 @@ export default function Auftraege() {
         }
 
         setRefreshKey(value => value + 1);
-        handleClose();
         resetDraft();
+        return true;
     };
 
     const handleClose = () => {
@@ -214,10 +215,10 @@ export default function Auftraege() {
         <DataTable title="Aufträge" selectableColumns={false} data={data.filter(item => !statusFilter || item.status === statusFilter)}
             columns={[
                 { field: "auftragNr", title: "Auftragsnummer" },
-                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+                { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
                 { field: "datum", title: "Datum" },
                 { field: "status", title: "Status", helpText: "Zeigt, ob der Auftrag noch offen ist oder bereits weiterverarbeitet wurde." },
-                { field: "anliegenText", title: "Anliegen", helpText: "Kurzbeschreibung der urspruenglichen Kundenanfrage oder des Ausloesers." },
+                { field: "anliegenText", title: "Anliegen", helpText: "Kurzbeschreibung der ursprünglichen Kundenanfrage oder des Auslösers." },
                 { field: "prozess", title: "Prozess", helpText: "Zeigt, an welcher Stelle sich der Auftrag im Vertriebs- und Versandablauf befindet." },
                 { field: "positionenText", title: "Positionen" }
             ]}
@@ -236,14 +237,19 @@ export default function Auftraege() {
                 { name: "confirm", label: "Dokumente", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => navigate(`/vertriebsdokumente/auftrag/${row.id}`), variant: "secondary" }
             ]}
         />
-        <Dialog open={open} title={draft.sourceInquiryId ? "Direkten Auftrag aus Kundenanfrage anlegen" : "Neuen Auftrag anlegen"} onClose={handleClose}>
+        <Dialog
+            open={open}
+            title={draft.sourceInquiryId ? "Direkten Auftrag aus Kundenanfrage anlegen" : "Neuen Auftrag anlegen"}
+            onClose={handleClose}
+            footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Auftrag speichern</SaveButton>}
+        >
             {draft.sourceInquiryId && getInquiryForOrder({ anfrageId: draft.sourceInquiryId }, [], anfragen) && <div className="module-panel">
-                <div><Label>Ausgangsanfrage</Label><p>{getInquiryForOrder({ anfrageId: draft.sourceInquiryId }, [], anfragen)?.anliegen}</p></div>
+                <div><Label>Ausgangsanfrage</Label><p>{getInquiryForOrder({ anfrageId: draft.sourceInquiryId }, [], anfragen).anliegen}</p></div>
             </div>}
             <div><Label required>Kunde</Label><LookupField value={draft.kundeId} options={kundenOptionen} onChange={value => setDraft(item => ({ ...item, kundeId: value }))} placeholder="Kunde suchen..."/></div>
             <div className="form-row">
-                <div><Label>Auftragsnummer</Label><input type="text" value={draft.auftragNrDraft} disabled/></div>
-                <div><Label>Fällig am</Label><input type="date" value={draft.faelligAm} onChange={event => setDraft(item => ({ ...item, faelligAm: event.target.value }))}/></div>
+                <div><Label>Auftragsnummer</Label><input name="auftragsnummer" type="text" value={draft.auftragNrDraft} disabled/></div>
+                <div><Label>Fällig am</Label><input name="faellig-am" type="date" value={draft.faelligAm} onChange={event => setDraft(item => ({ ...item, faelligAm: event.target.value }))}/></div>
             </div>
             <div className="form-row bestellposition-hinzufuegen">
                 <div><Label>Artikel / Service</Label><LookupField value={draft.leistungId} options={leistungsOptionen} onChange={value => setDraft(item => ({ ...item, leistungId: value }))} placeholder="Artikel oder Service suchen..."/></div>
@@ -266,7 +272,6 @@ export default function Auftraege() {
             </div>
             <div className="form-row"><strong>Gesamt: {Math.max(0, gesamtbetrag(draft.positionenDraft) - Number(draft.rabattBetrag || 0)).toFixed(2)} EUR</strong></div>
             {fehler && <p className="form-error">{fehler}</p>}
-            <div className="form-row"><button type="button" onClick={speichern}>Auftrag speichern</button></div>
         </Dialog>
     </>;
 }

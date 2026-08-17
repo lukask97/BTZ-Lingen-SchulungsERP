@@ -15,11 +15,14 @@ const plusDays = (days) => {
     return date.toISOString().slice(0, 10);
 };
 function findOrCreateCustomer(name) {
-    const existing = kundenService.list().find(item => item.firma.toLowerCase() === name.toLowerCase());
+    const normalizedName = String(name || "").trim().toLowerCase();
+    const existing = kundenService
+        .list()
+        .find(item => String(item?.firma || "").trim().toLowerCase() === normalizedName);
     if (existing) return existing;
     return kundenService.create({
         kundenNr: `DB${String(Date.now()).slice(-5)}`,
-        firma: name,
+        firma: String(name || "").trim(),
         anschrift: "",
         plz: "",
         ort: "",

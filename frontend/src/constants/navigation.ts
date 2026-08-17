@@ -120,16 +120,28 @@ export const NAVIGATION_GROUPS = [
         ]
     },
     {
+        key: "admin",
+        title: "Admin",
+        overviewPath: "/admin",
+        access: ACCESS.GESCHAEFTSFUEHRUNG,
+        items: [
+            { title: "Admin", path: "/admin", access: ACCESS.GESCHAEFTSFUEHRUNG },
+            { title: "Benutzer", path: "/admin/benutzer", access: ACCESS.BENUTZER },
+            { title: "Rollen", path: "/admin/rollen", access: ACCESS.ROLLEN },
+            { title: "Rechte", path: "/admin/rechte", access: ACCESS.ROLLEN },
+            { title: "Backup", path: "/admin/backup", access: ACCESS.GESCHAEFTSFUEHRUNG }
+        ]
+    },
+    {
         key: "verwaltung",
         title: "Verwaltung",
         overviewPath: "/themen/verwaltung",
         access: ACCESS.BENUTZER,
         items: [
-            { title: "Benutzer", path: "/benutzer", access: ACCESS.BENUTZER },
+            { title: "Unternehmen", path: "/unternehmen", access: ACCESS.BENUTZER },
             { title: "Nummernkreise", path: "/nummernkreise", access: ACCESS.BENUTZER },
             { title: "Exporte", path: "/exporte", access: ACCESS.BENUTZER },
-            { title: "Optionen", path: "/optionen", access: ACCESS.BENUTZER },
-            { title: "Rollen", path: "/rollen", access: ACCESS.ROLLEN }
+            { title: "Optionen", path: "/optionen", access: ACCESS.BENUTZER }
         ]
     }
 ];

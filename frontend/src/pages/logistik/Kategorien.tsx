@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
+import SaveButton from "../../components/SaveButton";
 import kategorienService from "../../services/logistik/kategorienService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 import { PERMISSIONS } from "../../constants/permissions";
@@ -102,7 +103,7 @@ export default function Kategorien() {
 
     const loeschen = (row) => {
         if (kategorien.some(item => String(item.parentId) === String(row.id))) {
-            alert("Diese Kategorie hat Unterkategorien und kann erst danach geloescht werden.");
+            alert("Diese Kategorie hat Unterkategorien und kann erst danach gelöscht werden.");
             return;
         }
         kategorienService.remove(row.id);
@@ -111,8 +112,8 @@ export default function Kategorien() {
 
     const speichern = () => {
         if (!currentItem.name.trim()) {
-            setFehler("Bitte das Pflichtfeld Name ausfuellen.");
-            return;
+            setFehler("Bitte das Pflichtfeld Name ausfllen.");
+            return false;
         }
         const payload = {
             ...currentItem,
@@ -126,12 +127,12 @@ export default function Kategorien() {
 
         setFehler("");
         setRefreshKey(value => value + 1);
-        setOpen(false);
+        return true;
     };
 
     return <>
         <h1>Kategorien</h1>
-        <p>Die Kategorien sind jetzt klarer nach Hauptbereichen gruppiert. So sieht man schneller, welche Unterkategorien zu Fahrraedern, Bekleidung, Zubehoer oder Mechanik gehoeren.</p>
+        <p>Die Kategorien sind jetzt klarer nach Hauptbereichen gruppiert. So sieht man schneller, welche Unterkategorien zu Fahrrädern, Bekleidung, Zubehör oder Mechanik gehören.</p>
 
         <div className="kennzahlen">
             <div className="kennzahl"><span>Hauptkategorien</span><strong>{oberkategorieCount}</strong></div>
@@ -164,13 +165,18 @@ export default function Kategorien() {
             toolbarActions={[{ name: "new", label: "Neue Kategorie", permission: PERMISSIONS.ARTIKEL_BEARBEITEN, onClick: neu }]}
             rowActions={[
                 { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.ARTIKEL_BEARBEITEN, onClick: bearbeiten },
-                { name: "delete", label: "Loeschen", permission: PERMISSIONS.ARTIKEL_BEARBEITEN, onClick: loeschen }
+                { name: "delete", label: "Löschen", permission: PERMISSIONS.ARTIKEL_BEARBEITEN, onClick: loeschen }
             ]}
         />
-        <Dialog open={open} title={editMode ? "Kategorie bearbeiten" : "Neue Kategorie"} onClose={() => {
-            setFehler("");
-            setOpen(false);
-        }}>
+        <Dialog
+            open={open}
+            title={editMode ? "Kategorie bearbeiten" : "Neue Kategorie"}
+            onClose={() => {
+                setFehler("");
+                setOpen(false);
+            }}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label required>Name</Label><TextField value={currentItem.name} onChange={value => {
                 setFehler("");
                 setCurrentItem(item => ({ ...item, name: value }));
@@ -178,15 +184,12 @@ export default function Kategorien() {
             <div><Label>Oberkategorie</Label><LookupField value={currentItem.parentId} options={parentOptions} onChange={value => {
                 setFehler("");
                 setCurrentItem(item => ({ ...item, parentId: value }));
-            }} placeholder="Optional Oberkategorie waehlen..."/></div>
+            }} placeholder="Optional Oberkategorie wählen..."/></div>
             <div className="form-row"><Label>Beschreibung</Label><TextArea rows={3} value={currentItem.beschreibung} onChange={value => {
                 setFehler("");
                 setCurrentItem(item => ({ ...item, beschreibung: value }));
             }}/></div>
-            <div className="form-row">
-                {fehler && <p className="form-error">{fehler}</p>}
-                <button type="button" onClick={speichern}>Speichern</button>
-            </div>
+            <div className="form-row">{fehler && <p className="form-error">{fehler}</p>}</div>
         </Dialog>
     </>;
 }

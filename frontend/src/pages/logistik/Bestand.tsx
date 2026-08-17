@@ -107,19 +107,18 @@ export default function Bestand() {
                 aktiveAuftraege: verplanteMengen[String(item.id)]
                     ? verplanteMengen[String(item.id)].auftraege.map(auftrag => ({
                         label: auftrag.auftragNr,
-                        to: `/auftraege?focus=${auftrag.id}`
+                        to: `/auftraegefocus=${auftrag.id}`
                     }))
                     : []
             };
-        })
-        ;
+        });
 
     const daten = basisDaten.filter(item => {
-            const passtZumTyp = !typFilter || item.artikelTyp === typFilter;
-            const passtZurFarbe = !farbenFilter || item.farbstatus === farbenFilter;
-            const passtZurSuche = !suchbegriff || Object.values(item).join(" ").toLowerCase().includes(suchbegriff.toLowerCase());
-            return passtZumTyp && passtZurFarbe && passtZurSuche;
-        });
+        const passtZumTyp = !typFilter || item.artikelTyp === typFilter;
+        const passtZurFarbe = !farbenFilter || item.farbstatus === farbenFilter;
+        const passtZurSuche = !suchbegriff || Object.values(item).join(" ").toLowerCase().includes(suchbegriff.toLowerCase());
+        return passtZumTyp && passtZurFarbe && passtZurSuche;
+    });
 
     const farbCounts = useMemo(() => FARBEN.reduce((map, farbe) => ({
         ...map,
@@ -145,7 +144,7 @@ export default function Bestand() {
 
     return <>
         <h1>Bestand</h1>
-        <p>Im Mockup gibt es ein zentrales Lager. Hier sieht die Logistik den aktuellen Bestand, bereits verplante Mengen aus aktiven Auftraegen und den daraus verbleibenden verfuegbaren Bestand.</p>
+        <p>Im Mockup gibt es ein zentrales Lager. Hier sieht die Logistik den aktuellen Bestand, bereits verplante Mengen aus aktiven Aufträgen und den daraus verbleibenden verfügbaren Bestand.</p>
         <div className="stock-legend" aria-label="Farblegende Bestand">
             <strong>Farblegende</strong>
             <div className="stock-legend-table" role="table" aria-label="Bedeutung der Bestandsfarben">
@@ -197,18 +196,18 @@ export default function Bestand() {
             }}
             columns={[
                 { field: "artikelNr", title: "Artikelnummer" },
-                { field: "name", title: "Artikel", render: row => <Link className="detail-link" to={`/artikel?focus=${row.id}`}>{row.name}</Link> },
+                { field: "name", title: "Artikel", render: row => <Link className="detail-link" to={`/artikelfocus=${row.id}`}>{row.name}</Link> },
                 { field: "artikelTyp", title: "Typ" },
                 { field: "bestand", title: "Bestand", helpText: "Aktueller physischer Lagerbestand des Artikels." },
                 { field: "verplant", title: "Reserviert", helpText: "Menge, die bereits reserviert ist." },
-                { field: "verfuegbar", title: "Verfuegbar", helpText: "Bestand minus bereits reservierte Menge. Dieser Wert ist fuer neue Zusagen relevant." },
-                { field: "imZulauf", title: "Im Zulauf", helpText: "Offene Bestellmenge aus angefragten, bestaetigten oder versendeten Bestellungen." },
+                { field: "verfuegbar", title: "Verfügbar", helpText: "Bestand minus bereits reservierte Menge. Dieser Wert ist für neue Zusagen relevant." },
+                { field: "imZulauf", title: "Im Zulauf", helpText: "Offene Bestellmenge aus angefragten, bestätigten oder versendeten Bestellungen." },
                 { field: "bedarfsmeldungBei", title: "Bedarfsmeldung bei", helpText: "Unterhalb dieses Werts soll der Einkauf den Bedarf sehen." },
                 { field: "mindestmenge", title: "Sicherheitsbestand", helpText: "Unterhalb dieses Werts wird der Bestand als besonders kritisch behandelt." },
                 { field: "inAngeboten", title: "In Angeboten", helpText: "Summierte Menge aus aktuell offenen Angeboten mit Status 'Wartet auf Antwort', in denen der Artikel verwendet wird." }
             ]}
             rowClassName={row => FARBEN.find(farbe => farbe.key === row.farbstatus)?.rowClass || ""}
-            detailLinkResolver={({ field, row }) => field === "name" ? `/artikel?focus=${row.id}` : null}
+            detailLinkResolver={({ field, row }) => field === "name" ? `/artikelfocus=${row.id}` : null}
             rowActions={[
                 { name: "edit", label: "Bestand anpassen", permission: PERMISSIONS.LAGER_BEARBEITEN, onClick: bestandAnpassen, variant: "secondary" }
             ]}
@@ -219,15 +218,15 @@ export default function Bestand() {
             setAusgewaehlterArtikel(null);
         }}>
             <div className="form-row">
-                <div><Label>Artikel</Label><p>{ausgewaehlterArtikel?.artikelNr} - {ausgewaehlterArtikel?.name}</p></div>
-                <div><Label>Reserviert</Label><p>{ausgewaehlterArtikel?.verplant ?? 0}</p></div>
+                <div><Label>Artikel</Label><p>{ausgewaehlterArtikel?.artikelNr || "-"} - {ausgewaehlterArtikel?.name || "-"}</p></div>
+                <div><Label>Reserviert</Label><p>{ausgewaehlterArtikel?.verplant || 0}</p></div>
             </div>
             <div className="form-row">
-                <div><Label>Aktueller Bestand</Label><p>{ausgewaehlterArtikel?.bestand ?? 0}</p></div>
+                <div><Label>Aktueller Bestand</Label><p>{ausgewaehlterArtikel?.bestand || 0}</p></div>
                 <div><Label>Neuer Bestand</Label><NumberField value={neuerBestand} min="0" step="1" onChange={wert => setNeuerBestand(Number(wert || 0))}/></div>
             </div>
             <div className="form-row">
-                <p>Die Anpassung aendert nur den Lagerbestand. Allgemeine Artikelpflege erfolgt weiterhin auf der Artikelseite.</p>
+                <p>Die Anpassung ändert nur den Lagerbestand. Allgemeine Artikelpflege erfolgt weiterhin auf der Artikelseite.</p>
             </div>
             <div className="form-row"><button type="button" onClick={bestandSpeichern}>Bestand speichern</button></div>
         </Dialog>

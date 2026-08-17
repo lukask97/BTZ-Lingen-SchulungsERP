@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import LoginLayout from "../layouts/LoginLayout";
@@ -58,7 +58,10 @@ import ABCAnalyse from "../pages/buchhaltung/ABCAnalyse";
 import Geschaeftsfuehrung from "../pages/gf/Geschaeftsfuehrung";
 import Berichte from "../pages/gf/Berichte";
 import Freigaben from "../pages/gf/Freigaben";
+import AdminOverview from "../pages/admin/AdminOverview";
+import Backup from "../pages/admin/Backup";
 import VerwaltungOverview from "../pages/verwaltung/VerwaltungOverview";
+import Unternehmen from "../pages/verwaltung/Unternehmen";
 import Benutzer from "../pages/verwaltung/Benutzer";
 import Exporte from "../pages/verwaltung/Exporte";
 import Nummernkreise from "../pages/verwaltung/Nummernkreise";
@@ -123,6 +126,11 @@ function AppRouter() {
                 <Route path="themen/einkauf" element={protectedPage(ACCESS.EINKAUF, <EinkaufOverview/>)}/>
                 <Route path="themen/verkauf" element={protectedPage(ACCESS.VERKAUF, <VerkaufOverview/>)}/>
                 <Route path="themen/verwaltung" element={protectedPage(ACCESS.BENUTZER, <VerwaltungOverview/>)}/>
+                <Route path="admin" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <AdminOverview/>)}/>
+                <Route path="admin/backup" element={protectedPage(ACCESS.GESCHAEFTSFUEHRUNG, <Backup/>)}/>
+                <Route path="admin/benutzer" element={protectedPage(ACCESS.BENUTZER, <Benutzer/>)}/>
+                <Route path="admin/rollen" element={protectedPage(ACCESS.ROLLEN, <Rollen/>)}/>
+                <Route path="admin/rechte" element={protectedPage(ACCESS.ROLLEN, <Rechte/>)}/>
                 <Route path="themen/szenarien" element={<SzenarienOverview/>}/>
                 <Route path="lieferanten" element={protectedPage(ACCESS.EINKAUF, <Lieferanten/>)}/>
                 <Route path="lieferantenvergleich" element={protectedPage(ACCESS.EINKAUF, <Lieferantenvergleich/>)}/>
@@ -182,8 +190,12 @@ function AppRouter() {
                 <Route path="krankmeldungen" element={protectedPage(ACCESS.PERSONALWESEN, <Krankmeldungen/>)}/>
                 <Route path="schulungen" element={protectedPage(ACCESS.PERSONALWESEN, <Schulungen/>)}/>
                 <Route
+                    path="unternehmen"
+                    element={protectedPage(ACCESS.BENUTZER, <Unternehmen/>)}
+                />
+                <Route
                     path="benutzer"
-                    element={protectedPage(ACCESS.BENUTZER, <Benutzer/>)}
+                    element={<Navigate to="/admin/benutzer" replace />}
                 />
                 <Route
                     path="nummernkreise"
@@ -199,11 +211,11 @@ function AppRouter() {
                 />
                 <Route
                     path="rollen"
-                    element={protectedPage(ACCESS.ROLLEN, <Rollen/>)}
+                    element={<Navigate to="/admin/rollen" replace />}
                 />
                 <Route
                     path="rechte"
-                    element={protectedPage(ACCESS.ROLLEN, <Rechte/>)}
+                    element={<Navigate to="/admin/rechte" replace />}
                 />
                 <Route path="szenarien/regionale-bestellung" element={protectedPage(ACCESS.VERKAUF, <RegionaleBestellung/>)}/>
                 <Route path="szenarien/grossbestellung" element={protectedPage(ACCESS.VERKAUF, <Grossbestellung/>)}/>

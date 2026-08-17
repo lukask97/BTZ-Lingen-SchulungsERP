@@ -6,6 +6,7 @@ import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
+import SaveButton from "../../components/SaveButton";
 import SalesFlowBar from "../../components/SalesFlowBar";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import versandService from "../../services/logistik/versandService";
@@ -33,6 +34,7 @@ export default function Versand() {
     const vertriebsdokumente = vertriebsdokumenteService.list();
     const versandfaehigeAuftraege = getReadyForShippingOrders(auftraege, vertriebsdokumente);
     const auftragsOptionen = versandfaehigeAuftraege.map(item => ({ value: String(item.id), label: `${item.auftragNr} - ${item.kunde}` }));
+    const getAuftragById = (auftragId) => auftraege.find(item => String(item.id) === String(auftragId)) || null;
 
     useEffect(() => {
         if (searchParams.get("new") !== "fromOrder") return;
@@ -47,11 +49,11 @@ export default function Versand() {
     }, [searchParams, versandfaehigeAuftraege]);
 
     const speichern = () => {
-        if (!String(current.auftragId || "").trim()) return;
+        if (!String(current.auftragId || "").trim()) return false;
         versandService.create(current);
         setVersand(versandService.list());
-        setOpen(false);
         setCurrent(createVersandauftrag(today));
+        return true;
     };
 
     const neuenVersandStarten = () => {
@@ -92,8 +94,8 @@ export default function Versand() {
             data={versand}
             columns={[
                 { field: "versandNr", title: "Versandnummer" },
-                { field: "auftrag", title: "Auftrag", render: row => row.auftragId ? <Link className="detail-link" to={`/auftraege?focus=${row.auftragId}`}>{row.auftrag}</Link> : row.auftrag },
-                { field: "kunde", title: "Kunde", render: row => row.auftragId ? <Link className="detail-link" to={`/kunden?focus=${auftraege.find(item => item.id === row.auftragId)?.kundeId || ""}`}>{row.kunde}</Link> : row.kunde },
+                { field: "auftrag", title: "Auftrag", render: row => row.auftragId ? <Link className="detail-link" to={`/auftraegefocus=${row.auftragId}`}>{row.auftrag}</Link> : row.auftrag },
+                { field: "kunde", title: "Kunde", render: row => row.auftragId ? <Link className="detail-link" to={`/kundenfocus=${getAuftragById(row.auftragId)?.kundeId || ""}`}>{row.kunde}</Link> : row.kunde },
                 { field: "datum", title: "Datum" },
                 { field: "transport", title: "Transport" },
                 { field: "status", title: "Status" }
@@ -101,7 +103,7 @@ export default function Versand() {
             detailLinkResolver={({ field, row }) => {
                 if (field === "auftrag" && row.auftragId) return `/auftraege?focus=${row.auftragId}`;
                 if (field === "auftragId" && row.auftragId) return `/auftraege?focus=${row.auftragId}`;
-                const auftrag = auftraege.find(item => item.id === row.auftragId);
+                const auftrag = getAuftragById(row.auftragId);
                 if (field === "kunde" && auftrag?.kundeId) return `/kunden?focus=${auftrag.kundeId}`;
                 return null;
             }}
@@ -111,12 +113,16 @@ export default function Versand() {
                 { name: "ship", label: "Als versendet markieren", permission: PERMISSIONS.LOGISTIK_BEARBEITEN, onClick: versenden, variant: "success", isVisible: row => row.status !== "versendet" }
             ]}
         />
-        <Dialog open={open} title="Versand anlegen" onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title="Versand anlegen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Versandnummer</Label><TextField value={current.versandNr} onChange={value => setCurrent(item => ({ ...item, versandNr: value }))}/></div>
             <div><Label>Auftrag</Label><LookupField value={current.auftragId} options={auftragsOptionen} onChange={auftragAuswaehlen} placeholder="Auftrag suchen..."/></div>
             <div><Label>Kunde</Label><TextField value={versandfaehigeAuftraege.find(item => String(item.id) === String(current.auftragId))?.kunde || ""} disabled/></div>
             <div><Label>Transport</Label><TextField value={current.transport} onChange={value => setCurrent(item => ({ ...item, transport: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={speichern}>Speichern</button></div>
         </Dialog>
     </>;
 }

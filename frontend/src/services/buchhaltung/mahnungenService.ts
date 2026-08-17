@@ -36,7 +36,7 @@ export default {
     },
     create: (payload: any) => hydrateMahnung(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateMahnung(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return hydrateMahnung(baseService.update(splitPayload(idOrItem)));
         }

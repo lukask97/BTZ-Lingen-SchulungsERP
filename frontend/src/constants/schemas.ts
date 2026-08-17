@@ -73,6 +73,8 @@ export const INITIAL_DATA = {
     },
     benutzer: {
         id: null,
+        vorname: "",
+        nachname: "",
         username: "",
         email: "",
         password: "",
@@ -204,7 +206,7 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "abc", title: "ABC" },
         { field: "anschrift", title: "Anschrift", visible: false },
         { field: "plz", title: "PLZ", visible: false },
-        { field: "fuerBts", title: "Fuer BTS", visible: false }
+        { field: "fuerBts", title: "Für BTS", visible: false }
     ],
     kunden: [
         { field: "kundenNr", title: "Kundennummer" },
@@ -249,6 +251,8 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "beschreibung", title: "Beschreibung", visible: false }
     ],
     benutzer: [
+        { field: "vorname", title: "Vorname" },
+        { field: "nachname", title: "Nachname" },
         { field: "username", title: "Benutzername" },
         { field: "email", title: "E-Mail" },
         { field: "rolle", title: "Rolle" },
@@ -256,8 +260,8 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
     ],
     nummernkreise: [
         { field: "bezeichnung", title: "Bereich" },
-        { field: "schluessel", title: "Schluessel" },
-        { field: "kuerzel", title: "Kuerzel" }
+        { field: "schluessel", title: "Schlüssel" },
+        { field: "kuerzel", title: "Kürzel" }
     ],
     rollen: [
         { field: "name", title: "Name" },
@@ -271,7 +275,7 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
     lager: [
         { field: "name", title: "Name" },
         { field: "standort", title: "Standort" },
-        { field: "kapazitaet", title: "Kapazitaet" }
+        { field: "kapazitaet", title: "Kapazität" }
     ],
     rechnungen: [
         { field: "rechnungsnr", title: "Rechnungsnummer" },
@@ -279,7 +283,7 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "kunde", title: "Kunde" },
         { field: "bestellNr", title: "Bestellnummer" },
         { field: "datum", title: "Datum" },
-        { field: "faelligAm", title: "Faellig am" },
+        { field: "faelligAm", title: "Fällig am" },
         { field: "betrag", title: "Betrag" },
         { field: "status", title: "Status" },
         { field: "mahnstufe", title: "Mahnstufe" }

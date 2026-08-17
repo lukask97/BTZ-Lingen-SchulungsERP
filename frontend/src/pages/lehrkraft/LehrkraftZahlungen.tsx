@@ -6,6 +6,7 @@ import { PERMISSIONS } from "../../constants/permissions";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import OverviewCards from "../../components/OverviewCards";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
@@ -54,8 +55,8 @@ export default function LehrkraftZahlungen() {
         if (bezugTyp === "Rechnung") {
             const rechnung = rechnungenService.getById(Number(rechnungId));
             if (!rechnung || Number(betrag) <= 0 || !ausfuehrenAm) {
-                setFehler("Bitte Bezug, Betrag und Ausfuehrungsdatum ausfuellen.");
-                return;
+                setFehler("Bitte Bezug, Betrag und Ausführungsdatum ausfüllen.");
+                return false;
             }
             zahlungenService.create({
                 rechnungId: rechnung.id,
@@ -69,8 +70,8 @@ export default function LehrkraftZahlungen() {
         } else {
             const bestellung = bestellungen.find(item => String(item.id) === String(bestellungId));
             if (!bestellung || Number(betrag) <= 0 || !ausfuehrenAm) {
-                setFehler("Bitte Bezug, Betrag und Ausfuehrungsdatum ausfuellen.");
-                return;
+                setFehler("Bitte Bezug, Betrag und Ausführungsdatum ausfüllen.");
+                return false;
             }
             zahlungenService.create({
                 bestellungId: bestellung.id,
@@ -84,7 +85,7 @@ export default function LehrkraftZahlungen() {
         }
         setFehler("");
         setZahlungen(zahlungenService.list());
-        setOpen(false);
+        return true;
     };
 
     const ausfuehren = (zahlung: any) => {
@@ -131,8 +132,8 @@ export default function LehrkraftZahlungen() {
                 { field: "datum", title: "Datum" },
                 { field: "bezugTyp", title: "Bezug" },
                 { field: "referenz", title: "Referenz", render: row => {
-                    if (row.rechnungId) return <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link>;
-                    if (row.bestellungId) return <Link className="detail-link" to={`/bestellungen?focus=${row.bestellungId}`}>{row.bestellNr}</Link>;
+                    if (row.rechnungId) return <Link className="detail-link" to={`/rechnungenfocus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link>;
+                    if (row.bestellungId) return <Link className="detail-link" to={`/bestellungenfocus=${row.bestellungId}`}>{row.bestellNr}</Link>;
                     return row.referenz;
                 } },
                 { field: "kunde", title: "Partner" },
@@ -142,8 +143,8 @@ export default function LehrkraftZahlungen() {
                 { field: "statusSicht", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "referenz" && row.rechnungId) return `/rechnungen?focus=${row.rechnungsnr}`;
-                if (field === "referenz" && row.bestellungId) return `/bestellungen?focus=${row.bestellungId}`;
+                if (field === "referenz" && row.rechnungId) return `/rechnungenfocus=${row.rechnungsnr}`;
+                if (field === "referenz" && row.bestellungId) return `/bestellungenfocus=${row.bestellungId}`;
                 return null;
             }}
             toolbarActions={[{ name: "new", label: "Zahlung anlegen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: neu, variant: "secondary" }]}
@@ -152,10 +153,18 @@ export default function LehrkraftZahlungen() {
                 { name: "cancel", label: "Stornieren", permission: PERMISSIONS.GF_BEARBEITEN, onClick: stornieren, variant: "danger" }
             ]}
         />
-        <Dialog open={open} title="Externe Zahlung anlegen" onClose={() => {
-            setFehler("");
-            setOpen(false);
-        }}>
+        <Dialog
+            open={open}
+            title="Externe Zahlung anlegen"
+            onClose={() => {
+                setFehler("");
+                setOpen(false);
+            }}
+            footer={<SaveButton onSave={speichern} onSuccess={() => {
+                setFehler("");
+                setOpen(false);
+            }}>Speichern</SaveButton>}
+        >
             <div><Label required>Bezug</Label><select value={bezugTyp} onChange={event => {
                 setFehler("");
                 setBezugTyp(event.target.value);
@@ -184,7 +193,6 @@ export default function LehrkraftZahlungen() {
             </div>
             <div className="form-row">
                 {fehler && <p className="form-error">{fehler}</p>}
-                <button type="button" onClick={speichern}>Speichern</button>
             </div>
         </Dialog>
     </>;

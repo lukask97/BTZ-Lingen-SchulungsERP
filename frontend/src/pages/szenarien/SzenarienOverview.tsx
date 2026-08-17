@@ -77,10 +77,10 @@ export default function SzenarienOverview() {
                     <span>Prüfpunkte</span>
                 </div>
                 <ul className="dashboard-note-list">
-                    <li>Wurde der passende Fachbereich gewählt?</li>
-                    <li>Sind Stamm- und Bewegungsdaten sauber verknüpft?</li>
-                    <li>Wurden Notizen, Belege oder Dokumente verständlich ergänzt?</li>
-                    <li>Ist das Ergebnis in Tabellen und Übersichten sichtbar nachvollziehbar?</li>
+                    <li>Wurde der passende Fachbereich gewählt</li>
+                    <li>Sind Stamm- und Bewegungsdaten sauber verknüpft</li>
+                    <li>Wurden Notizen, Belege oder Dokumente verständlich ergänzt</li>
+                    <li>Ist das Ergebnis in Tabellen und Übersichten sichtbar nachvollziehbar</li>
                 </ul>
             </article>
         </section>

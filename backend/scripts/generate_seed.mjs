@@ -15,6 +15,10 @@ const MOCK_DATA_EXPORTS = [
     "rollen",
     "rechte",
     "rollenRechte",
+    "nummernkreise",
+    "fristenOptionen",
+    "unternehmen",
+    "lehrkraftOptionen",
     "lager",
     "lieferanten",
     "bestellungen",
@@ -82,6 +86,33 @@ const payload = {
 
 payload.feldMetadaten = addSequentialIds(payload.feldMetadaten);
 payload.benutzerSpalten = addSequentialIds(payload.benutzerSpalten);
+payload.fristenOptionen = [
+    {
+        id: 1,
+        skontoTage: 14,
+        skontoProzent: 5,
+        angebotGfFreigabeAbweichungProzent: 10,
+        zahlungszielTage: 28,
+        zahlungserinnerungTage: 21,
+        mahnung1AbTage: 1,
+        mahnung2AbTage: 8,
+        inkassoAbTage: 22
+    }
+];
+payload.lehrkraftOptionen = [
+    {
+        id: 1,
+        autoLieferannahmeNach1Tag: false,
+        autoDebitorenzahlungNach1Tag: false,
+        debitorenzahlungRegeln: [
+            { id: "regel-1", startTag: 0, endTag: 0, gewichtung: 1 },
+            { id: "regel-2", startTag: 3, endTag: 14, gewichtung: 35 },
+            { id: "regel-3", startTag: 15, endTag: 28, gewichtung: 61 },
+            { id: "regel-4", startTag: 29, endTag: 42, gewichtung: 2 },
+            { id: "regel-5", startTag: 43, endTag: 56, gewichtung: 1 }
+        ]
+    }
+];
 
 fs.writeFileSync(outputPath, JSON.stringify(payload, null, 2));
 console.log(`Seed-Datei geschrieben: ${outputPath}`);

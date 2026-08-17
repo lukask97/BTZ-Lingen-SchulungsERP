@@ -56,7 +56,7 @@ export default function ABCAnalyse() {
 
     return <>
         <h1>ABC-Analyse</h1>
-        <p>Die Buchhaltung bewertet Kunden nach Umsatz und Anzahl der Auftraege. Die Tabelle kann direkt nach Umsatz oder Auftragsanzahl sortiert werden.</p>
+        <p>Die Buchhaltung bewertet Kunden nach Umsatz und Anzahl der Aufträge. Die Tabelle kann direkt nach Umsatz oder Auftragsanzahl sortiert werden.</p>
 
         <OverviewCards cards={[
             { label: "Kunden gesamt", value: analyseDaten.length },
@@ -73,9 +73,9 @@ export default function ABCAnalyse() {
                     <span>Buchhaltung</span>
                 </div>
                 <ul className="dashboard-note-list">
-                    <li>Grundlage sind die vorhandenen Auftraege aus dem Verkauf.</li>
+                    <li>Grundlage sind die vorhandenen Aufträge aus dem Verkauf.</li>
                     <li>Die ABC-Klasse wird aus dem kumulierten Umsatzanteil abgeleitet.</li>
-                    <li>Zusätzlich ist die Anzahl der Auftraege je Kunde sichtbar.</li>
+                    <li>Zusätzlich ist die Anzahl der Aufträge je Kunde sichtbar.</li>
                 </ul>
             </article>
 
@@ -87,7 +87,7 @@ export default function ABCAnalyse() {
                 <div className="link-list">
                     <Link className="button-link" to="/buchhaltung">Zur Buchhaltung</Link>
                     <Link className="button-link" to="/kunden">Zu den Kunden</Link>
-                    <Link className="button-link" to="/auftraege">Zu den Auftraegen</Link>
+                    <Link className="button-link" to="/auftraege">Zu den Aufträgen</Link>
                 </div>
             </article>
         </section>
@@ -102,7 +102,7 @@ export default function ABCAnalyse() {
                 { field: "kundenNr", title: "Kundennummer" },
                 { field: "kunde", title: "Kunde" },
                 { field: "segment", title: "Kategorie" },
-                { field: "auftragsAnzahl", title: "Anzahl Auftraege" },
+                { field: "auftragsAnzahl", title: "Anzahl Aufträge" },
                 { field: "umsatzLabel", title: "Umsatz" },
                 { field: "umsatzAnteilLabel", title: "Umsatzanteil" },
                 { field: "kumulierterAnteilLabel", title: "Kumuliert" }

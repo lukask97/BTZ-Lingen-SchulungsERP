@@ -4,19 +4,19 @@ import rechnungenService from "../buchhaltung/rechnungenService";
 import lehrkraftOptionenService from "./lehrkraftOptionenService";
 import { addDaysToIsoDate, getBerlinDate } from "../../utils/dateTime";
 
-function isOlderThanOneDay(dateValue?: string) {
+function isOlderThanOneDay(dateValue: string) {
     if (!dateValue) return false;
     const today = getBerlinDate();
     return addDaysToIsoDate(dateValue, 1) <= today;
 }
 
 function istVersanddokument(item: any) {
-    const typ = String(item?.dokumentTyp || "").toLowerCase();
+    const typ = String(item.dokumentTyp || "").toLowerCase();
     return ["lieferschein", "warenbegleitpapier", "transportpapier"].includes(typ);
 }
 
 function getBaseDate(item: any) {
-    return String(item?.ausfuehrenAm || item?.ausfuehrungsdatum || item?.datum || "");
+    return String(item.ausfuehrenAm || item.ausfuehrungsdatum || item.datum || "");
 }
 
 function createStableNumber(seed: string) {
@@ -38,12 +38,12 @@ function resolveFixedDistributionOffset(seed: string, entries: Array<{ tage: num
         return wert < laufend;
     }) || entries[entries.length - 1];
 
-    return treffer?.tage ?? null;
+    return treffer.tage ?? null;
 }
 
 function resolveWeightedPaymentTarget(item: any, regeln: any[]) {
     const gueltigeRegeln = regeln
-        .filter(regel => Number(regel?.gewichtung) > 0)
+        .filter(regel => Number(regel.gewichtung) > 0)
         .map(regel => ({
             ...regel,
             startTag: Number(regel.startTag || 0),

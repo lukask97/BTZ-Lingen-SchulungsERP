@@ -54,7 +54,7 @@ export function saveUserColumns(username, tabelle, fields) {
 
     if (isDatabaseModeEnabled()) {
         try {
-            if (bisher?.id) {
+            if (bisher.id) {
                 syncApiRequest(buildDatabasePath(`/benutzerSpalten/${bisher.id}`), {
                     method: "PATCH",
                     body: payload

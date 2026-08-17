@@ -4,6 +4,7 @@ import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
@@ -107,7 +108,7 @@ export default function Personalakte() {
 
     const speichern = () => {
         const person = mitarbeiter.find(item => String(item.id) === String(current.mitarbeiterId));
-        if (!person || !current.titel.trim()) return;
+        if (!person || !current.titel.trim()) return false;
 
         const payload = {
             ...current,
@@ -124,9 +125,9 @@ export default function Personalakte() {
 
         setAkteneintraege(personalaktenService.list());
         setSelectedMitarbeiterId(String(payload.mitarbeiterId));
-        setOpen(false);
         setEditMode(false);
         setCurrent(createPersonalakteEintrag(String(payload.mitarbeiterId), today));
+        return true;
     };
 
     const bearbeiten = (eintrag) => {
@@ -207,7 +208,12 @@ export default function Personalakte() {
             ]}
         />
 
-        <Dialog open={open} title={editMode ? "Akteintrag bearbeiten" : "Dokument oder Formular hinterlegen"} onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title={editMode ? "Akteintrag bearbeiten" : "Dokument oder Formular hinterlegen"}
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>{editMode ? "Änderungen speichern" : "Speichern"}</SaveButton>}
+        >
             <div><Label>Mitarbeiter</Label><LookupField value={current.mitarbeiterId} options={mitarbeiterOptionen} onChange={value => setCurrent(item => ({ ...item, mitarbeiterId: value }))} placeholder="Mitarbeiter suchen..."/></div>
             <div><Label>Dokumenttyp</Label><select value={current.dokumentTyp} onChange={event => setCurrent(item => ({ ...item, dokumentTyp: event.target.value }))}>
                 {dokumentOptionen.map(item => <option key={item} value={item}>{item}</option>)}
@@ -220,7 +226,6 @@ export default function Personalakte() {
                 <option value="abgeschlossen">Abgeschlossen</option>
             </select></div>
             <div className="form-row"><Label>Hinweis</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
         </Dialog>
     </>;
 }

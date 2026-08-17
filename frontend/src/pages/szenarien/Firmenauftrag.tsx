@@ -24,9 +24,9 @@ export default function Firmenauftrag() {
             "Den Servicevertrag im Auftrag dokumentieren."
         ]}
         teacherChecks={[
-            "Ist die Menge von 8 Fahrzeugen korrekt erfasst?",
-            "Wird der Servicevertrag als Zusatzleistung sichtbar erwähnt?",
-            "Ist der Fall als Firmenauftrag erkennbar und nicht wie eine Standardbestellung behandelt?"
+            "Ist die Menge von 8 Fahrzeugen korrekt erfasst",
+            "Wird der Servicevertrag als Zusatzleistung sichtbar erwähnt",
+            "Ist der Fall als Firmenauftrag erkennbar und nicht wie eine Standardbestellung behandelt"
         ]}
         completionChecks={[
             "Ein Auftrag für die Firmenrad GmbH ist vorhanden.",

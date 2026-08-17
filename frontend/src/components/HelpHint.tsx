@@ -39,7 +39,7 @@ export default function HelpHint({
             role="button"
             aria-label="Hilfe anzeigen"
         >
-            ?
+            
             {open && <span className="help-hint-tooltip">{text}</span>}
         </span>
     );

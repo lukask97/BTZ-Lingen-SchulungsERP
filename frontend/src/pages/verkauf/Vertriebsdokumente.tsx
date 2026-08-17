@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import SalesFlowBar from "../../components/SalesFlowBar";
 import auftraegeService from "../../services/verkauf/auftraegeService";
@@ -20,16 +21,16 @@ import { PERMISSIONS } from "../../constants/permissions";
 import { getLieferscheinnummer } from "../../services/core/documentNumbering";
 import kundenService from "../../services/verkauf/customerService";
 
-const dokumentTypen = ["Auftragsbestaetigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
+const dokumentTypen = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
 const AUFTRAGS_FILTER = [
-    { value: "alle", label: "Alle Auftraege" },
-    { value: "offen", label: "Nur offene Auftraege" },
-    { value: "ohne_bestaetigung", label: "Ohne Auftragsbestaetigung" },
-    { value: "bestaetigt", label: "Bestaetigung versendet" }
+    { value: "alle", label: "Alle Aufträge" },
+    { value: "offen", label: "Nur offene Aufträge" },
+    { value: "ohne_bestaetigung", label: "Ohne Auftragsbestätigung" },
+    { value: "bestaetigt", label: "Bestätigung versendet" }
 ];
 const ARBEITSLISTE_TABS = [
     { key: "offen", label: "Alle offen" },
-    { key: "bestaetigung_fehlend", label: "Auftragsbestaetigung fehlt" },
+    { key: "bestaetigung_fehlend", label: "Auftragsbestätigung fehlt" },
     { key: "bestaetigung_versenden", label: "Nicht versendet" },
     { key: "lieferschein", label: "Lieferschein" }
 ] as const;
@@ -47,7 +48,7 @@ function createDokumentTitel(dokumentTyp, auftrag) {
     return `${dokumentTyp} ${auftrag.auftragNr}`;
 }
 
-function createVertriebsdokument(auftragId, today, dokumentTyp = "Auftragsbestaetigung") {
+function createVertriebsdokument(auftragId, today, dokumentTyp = "Auftragsbestätigung") {
     return {
         auftragId,
         dokumentTyp,
@@ -60,7 +61,7 @@ function sortOffersByRevisionDescending(a, b) {
     return Number(b.revision || 0) - Number(a.revision || 0);
 }
 
-function hatUnvollstaendigeKundenadresse(kunde) {
+function hatUnvollständigeKundenadresse(kunde) {
     if (!kunde) return false;
     return !String(kunde.anschrift || "").trim() || !String(kunde.plz || "").trim() || !String(kunde.ort || "").trim();
 }
@@ -72,24 +73,24 @@ function getDokumentStatusByTyp(dokumente = [], dokumentTyp) {
 }
 
 function getNaechstenDokumentSchritt(auftrag, dokumente = []) {
-    const bestaetigung = getDokumentStatusByTyp(dokumente, "Auftragsbestaetigung");
+    const bestaetigung = getDokumentStatusByTyp(dokumente, "Auftragsbestätigung");
     const lieferschein = getDokumentStatusByTyp(dokumente, "Lieferschein");
     const warenbegleitpapier = getDokumentStatusByTyp(dokumente, "Warenbegleitpapier");
     const transportpapier = getDokumentStatusByTyp(dokumente, "Transportpapier");
 
     if (bestaetigung === "fehlt") {
         return {
-            status: "Aktion noetig",
-            schritt: "Auftragsbestaetigung erstellen",
-            detail: "Bevor weitere Unterlagen vorbereitet werden, muss zuerst die Auftragsbestaetigung angelegt werden.",
+            status: "Aktion nötig",
+            schritt: "Auftragsbestätigung erstellen",
+            detail: "Bevor weitere Unterlagen vorbereitet werden, muss zuerst die Auftragsbestätigung angelegt werden.",
             tone: "warn"
         };
     }
     if (bestaetigung === "erstellt") {
         return {
-            status: "Aktion noetig",
-            schritt: "Auftragsbestaetigung versenden",
-            detail: "Die Auftragsbestaetigung ist vorhanden, wurde aber noch nicht an den Kunden versendet.",
+            status: "Aktion nötig",
+            schritt: "Auftragsbestätigung versenden",
+            detail: "Die Auftragsbestätigung ist vorhanden, wurde aber noch nicht an den Kunden versendet.",
             tone: "warn"
         };
     }
@@ -97,14 +98,14 @@ function getNaechstenDokumentSchritt(auftrag, dokumente = []) {
         return {
             status: "Vorbereiten",
             schritt: "Lieferschein erstellen",
-            detail: "Nach der versendeten Auftragsbestaetigung sollte der Lieferschein vorbereitet werden.",
+            detail: "Nach der versendeten Auftragsbestätigung sollte der Lieferschein vorbereitet werden.",
             tone: "good"
         };
     }
     if (warenbegleitpapier === "fehlt") {
         return {
             status: "Vorbereiten",
-            schritt: "Warenbegleitpapier pruefen",
+            schritt: "Warenbegleitpapier prüfen",
             detail: "Zum Versand fehlt noch das Warenbegleitpapier.",
             tone: "good"
         };
@@ -112,16 +113,16 @@ function getNaechstenDokumentSchritt(auftrag, dokumente = []) {
     if (transportpapier === "fehlt") {
         return {
             status: "Optional offen",
-            schritt: "Transportpapier ergaenzen",
-            detail: "Die Kernunterlagen sind da. Jetzt kann bei Bedarf noch das Transportpapier ergaenzt werden.",
+            schritt: "Transportpapier ergänzen",
+            detail: "Die Kernunterlagen sind da. Jetzt kann bei Bedarf noch das Transportpapier ergänzt werden.",
             tone: "good"
         };
     }
 
     return {
         status: "Komplett",
-        schritt: "Dokumentenkette vollstaendig",
-        detail: "Fuer diesen Auftrag sind alle Vertriebsdokumente bereits angelegt.",
+        schritt: "Dokumentenkette vollständig",
+        detail: "Für diesen Auftrag sind alle Vertriebsdokumente bereits angelegt.",
         tone: "good"
     };
 }
@@ -146,7 +147,7 @@ export default function Vertriebsdokumente() {
     const [current, setCurrent] = useState(createVertriebsdokument(initialAuftragId, today));
     const [aktiveArbeitsliste, setAktiveArbeitsliste] = useState<(typeof ARBEITSLISTE_TABS)[number]["key"]>("offen");
 
-    const gefilterteAuftraegeFuerAuswahl = useMemo(
+    const gefilterteAuftraegeFürAuswahl = useMemo(
         () => auftraege.filter(item => {
             const bestaetigung = getConfirmationDocument(item.id, dokumente);
 
@@ -215,10 +216,10 @@ export default function Vertriebsdokumente() {
     const sichtbareArbeitsliste = useMemo(
         () => offeneArbeitsliste.filter(item => {
             if (aktiveArbeitsliste === "bestaetigung_fehlend") {
-                return item.naechsterSchritt === "Auftragsbestaetigung erstellen";
+                return item.naechsterSchritt === "Auftragsbestätigung erstellen";
             }
             if (aktiveArbeitsliste === "bestaetigung_versenden") {
-                return item.naechsterSchritt === "Auftragsbestaetigung versenden";
+                return item.naechsterSchritt === "Auftragsbestätigung versenden";
             }
             if (aktiveArbeitsliste === "lieferschein") {
                 return item.naechsterSchritt === "Lieferschein erstellen";
@@ -230,18 +231,18 @@ export default function Vertriebsdokumente() {
     const arbeitsTabs = useMemo(
         () => [
             { key: "offen", label: "Alle offen", value: offeneArbeitsliste.length },
-            { key: "bestaetigung_fehlend", label: "Auftragsbestaetigung fehlt", value: offeneArbeitsliste.filter(item => item.naechsterSchritt === "Auftragsbestaetigung erstellen").length },
-            { key: "bestaetigung_versenden", label: "Nicht versendet", value: offeneArbeitsliste.filter(item => item.naechsterSchritt === "Auftragsbestaetigung versenden").length },
+            { key: "bestaetigung_fehlend", label: "Auftragsbestätigung fehlt", value: offeneArbeitsliste.filter(item => item.naechsterSchritt === "Auftragsbestätigung erstellen").length },
+            { key: "bestaetigung_versenden", label: "Nicht versendet", value: offeneArbeitsliste.filter(item => item.naechsterSchritt === "Auftragsbestätigung versenden").length },
             { key: "lieferschein", label: "Lieferschein", value: offeneArbeitsliste.filter(item => item.naechsterSchritt === "Lieferschein erstellen").length }
         ] as const,
         [offeneArbeitsliste]
     );
     const selectedArbeitsstatus = selectedAuftrag
-        ? getNaechstenDokumentSchritt(selectedAuftrag, gefilterteDokumente)
+         ? getNaechstenDokumentSchritt(selectedAuftrag, gefilterteDokumente)
         : null;
     const vorgangsverbindungen = useMemo(() => {
         if (!selectedAuftrag) return [];
-        const dokumentReihenfolge = ["Auftragsbestaetigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
+        const dokumentReihenfolge = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
         const dokumentEintraege = dokumentReihenfolge.map(typ => {
             const dokument = gefilterteDokumente.find(item => item.dokumentTyp === typ);
             return {
@@ -250,7 +251,7 @@ export default function Vertriebsdokumente() {
                 element: typ,
                 stand: dokument ? (dokument.status || "erstellt") : "fehlt",
                 detail: dokument ? (dokument.versendetAm ? `Versendet am ${dokument.versendetAm}` : dokument.datum || "-") : "Noch nicht angelegt",
-                inhalt: dokument?.notiz || "Kein zusaetzlicher Hinweis hinterlegt.",
+                inhalt: dokument.notiz || "Kein zusätzlicher Hinweis hinterlegt.",
                 sourceType: "dokument",
                 source: dokument || null
             };
@@ -261,8 +262,8 @@ export default function Vertriebsdokumente() {
                 id: "anfrage",
                 bereich: "Ausgang",
                 element: "Kundenanfrage",
-                stand: selectedAnfrage?.status || "nicht verknuepft",
-                detail: selectedAnfrage?.anliegen || "Keine direkte Anfrage verknuepft",
+                stand: selectedAnfrage?.status || "nicht verknüpft",
+                detail: selectedAnfrage?.anliegen || "Keine direkte Anfrage verknüpft",
                 inhalt: selectedAnfrage?.nachricht || selectedAnfrage?.anliegen || "Keine weitere Beschreibung hinterlegt.",
                 sourceType: "anfrage"
             },
@@ -271,9 +272,9 @@ export default function Vertriebsdokumente() {
                 bereich: "Kommunikation",
                 element: "Chatverlauf",
                 stand: `${verlaufNachrichten.length} Nachricht(en)`,
-                detail: verlaufNachrichten.length > 0 ? String(verlaufNachrichten[verlaufNachrichten.length - 1]?.betreff || "Letzte Nachricht vorhanden") : "Noch kein Verlauf hinterlegt",
+                detail: verlaufNachrichten.length > 0 ? String(verlaufNachrichten[verlaufNachrichten.length - 1].betreff || "Letzte Nachricht vorhanden") : "Noch kein Verlauf hinterlegt",
                 inhalt: verlaufNachrichten.length > 0
-                    ? verlaufNachrichten.slice(-3).reverse().map(item => `${item.senderRolle || "Nachricht"}: ${item.nachricht || item.betreff || ""}`).join("\n")
+                     ? verlaufNachrichten.slice(-3).reverse().map(item => `${item.senderRolle || "Nachricht"}: ${item.nachricht || item.betreff || ""}`).join("\n")
                     : "Noch kein Verlauf hinterlegt",
                 sourceType: "chat"
             },
@@ -281,10 +282,10 @@ export default function Vertriebsdokumente() {
                 id: "angebot",
                 bereich: "Vertrieb",
                 element: "Angebot",
-                stand: vorgangAngebote.length > 0 ? `${vorgangAngebote.length} Stand/Staende` : "nicht vorhanden",
-                detail: vorgangAngebote.length > 0 ? vorgangAngebote.map(item => item.angebotsNr).join(", ") : "Kein Angebot verknuepft",
+                stand: vorgangAngebote.length > 0 ? `${vorgangAngebote.length} Stand/Stände` : "nicht vorhanden",
+                detail: vorgangAngebote.length > 0 ? vorgangAngebote.map(item => item.angebotsNr).join(", ") : "Kein Angebot verknüpft",
                 inhalt: vorgangAngebote.length > 0
-                    ? vorgangAngebote.map(item => `${item.angebotsNr} | ${item.status || "-"} | ${item.datum || "-"}`).join("\n")
+                     ? vorgangAngebote.map(item => `${item.angebotsNr} | ${item.status || "-"} | ${item.datum || "-"}`).join("\n")
                     : "Noch kein Angebot vorhanden",
                 sourceType: "angebot",
                 source: vorgangAngebote[0] || null
@@ -301,7 +302,7 @@ export default function Vertriebsdokumente() {
             }
         ];
     }, [gefilterteDokumente, selectedAnfrage, selectedAuftrag, selectedRechnung, verlaufNachrichten, vorgangAngebote]);
-    const resetCurrentDocument = (auftragId = selectedAuftragId || String(auftraege[0]?.id || ""), dokumentTyp = "Auftragsbestaetigung") => {
+    const resetCurrentDocument = (auftragId = selectedAuftragId || String(auftraege[0]?.id || ""), dokumentTyp = "Auftragsbestätigung") => {
         setCurrent(createVertriebsdokument(auftragId, today, dokumentTyp));
     };
 
@@ -317,7 +318,7 @@ export default function Vertriebsdokumente() {
     const neu = () => {
         const vorbelegterAuftragId = selectedAuftragId || String(sichtbareArbeitsliste[0]?.auftragId || auftraege[0]?.id || "");
         const bestaetigung = getConfirmationDocument(vorbelegterAuftragId, dokumente);
-        resetCurrentDocument(vorbelegterAuftragId, bestaetigung ? "Lieferschein" : "Auftragsbestaetigung");
+        resetCurrentDocument(vorbelegterAuftragId, bestaetigung ? "Lieferschein" : "Auftragsbestätigung");
         setOpen(true);
     };
 
@@ -325,12 +326,12 @@ export default function Vertriebsdokumente() {
         const auftrag = auftraege.find(item => String(item.id) === String(current.auftragId));
         if (!auftrag) return null;
         const vorhandeneBestaetigung = getConfirmationDocument(auftrag.id, dokumente);
-        if (current.dokumentTyp === "Auftragsbestaetigung" && vorhandeneBestaetigung) {
-            alert("Fuer diesen Auftrag wurde die Auftragsbestaetigung bereits erstellt.");
+        if (current.dokumentTyp === "Auftragsbestätigung" && vorhandeneBestaetigung) {
+            alert("Für diesen Auftrag wurde die Auftragsbestätigung bereits erstellt.");
             return null;
         }
-        if (current.dokumentTyp !== "Auftragsbestaetigung" && !vorhandeneBestaetigung) {
-            alert("Bitte zuerst die Auftragsbestaetigung erstellen.");
+        if (current.dokumentTyp !== "Auftragsbestätigung" && !vorhandeneBestaetigung) {
+            alert("Bitte zuerst die Auftragsbestätigung erstellen.");
             return null;
         }
 
@@ -348,12 +349,12 @@ export default function Vertriebsdokumente() {
 
     const speichern = () => {
         const payload = createDokumentPayload();
-        if (!payload) return;
+        if (!payload) return false;
 
         vertriebsdokumenteService.create(payload);
         refreshDokumente();
-        setOpen(false);
         resetCurrentDocument();
+        return true;
     };
 
     const loeschen = (dokument) => {
@@ -365,7 +366,7 @@ export default function Vertriebsdokumente() {
         const auftrag = auftraege.find(item => String(item.id) === String(dokument.auftragId));
         openDocumentPdf({
             title: dokument.titel || createDokumentTitel(dokument.dokumentTyp, { auftragNr: dokument.auftragNr }),
-            subject: "Automatisch erzeugtes Vertriebsdokument fuer den Schulungseinsatz.",
+            subject: "Automatisch erzeugtes Vertriebsdokument für den Schulungseinsatz.",
             date: dokument.datum,
             note: dokument.notiz,
             referenceLabel: "Auftrag",
@@ -384,26 +385,26 @@ export default function Vertriebsdokumente() {
         const neuestesAngebot = vorgangAngebote[0];
         openDocumentPdf({
             title: `Angebot ${neuestesAngebot.angebotsNr}`,
-            subject: "Alle Angebotsstaende zu diesem Auftrag als PDF-Uebersicht.",
+            subject: "Alle Angebotsstände zu diesem Auftrag als PDF-Übersicht.",
             date: neuestesAngebot.datum || today,
-            note: "Die erste Seite zeigt den neuesten Stand. Danach folgen aeltere Versionen.",
+            note: "Die erste Seite zeigt den neuesten Stand. Danach folgen ältere Versionen.",
             referenceLabel: "Angebot",
             referenceValue: neuestesAngebot.angebotsNr,
             partnerLabel: "Kunde",
-            partnerValue: neuestesAngebot.kunde || selectedAuftrag?.kunde || "-",
+            partnerValue: neuestesAngebot.kunde || selectedAuftrag.kunde || "-",
             positions: neuestesAngebot.positionen || [],
             preispositionen: neuestesAngebot.preispositionen || [],
             deductionAmount: neuestesAngebot.rabattBetrag || 0,
             deductionReason: neuestesAngebot.verguenstigungsGrund || "",
             appendixPages: vorgangAngebote.slice(1).map(angebot => ({
                 title: `Angebot ${angebot.angebotsNr}`,
-                subject: "Frueherer Angebotsstand aus demselben Vorgang.",
+                subject: "Früherer Angebotsstand aus demselben Vorgang.",
                 date: angebot.datum || today,
-                note: angebot.verguenstigungsGrund || angebot.status || "Kein zusaetzlicher Hinweis hinterlegt.",
+                note: angebot.verguenstigungsGrund || angebot.status || "Kein zusätzlicher Hinweis hinterlegt.",
                 referenceLabel: "Angebot",
                 referenceValue: angebot.angebotsNr,
                 partnerLabel: "Kunde",
-                partnerValue: angebot.kunde || selectedAuftrag?.kunde || "-",
+                partnerValue: angebot.kunde || selectedAuftrag.kunde || "-",
                 positions: angebot.positionen || [],
                 preispositionen: angebot.preispositionen || [],
                 deductionAmount: angebot.rabattBetrag || 0,
@@ -430,7 +431,7 @@ export default function Vertriebsdokumente() {
                 title: "Nachrichtenverlauf",
                 subject: "Kompletter Chatverlauf zum Auftrag und den verbundenen Vorgangsdokumenten.",
                 date: today,
-                note: "Chronologisch sortiert fuer die Einsicht auf einer Seite.",
+                note: "Chronologisch sortiert für die Einsicht auf einer Seite.",
                 referenceValue: selectedAuftrag.vorgangId || selectedAnfrage?.vorgangId || selectedAuftrag.auftragNr,
                 partnerLabel: "Kunde",
                 partnerValue: selectedAuftrag.kunde || "-",
@@ -450,7 +451,7 @@ export default function Vertriebsdokumente() {
             versendetAm: today
         });
 
-        if (dokument.dokumentTyp === "Auftragsbestaetigung") {
+        if (dokument.dokumentTyp === "Auftragsbestätigung") {
             const { auftrag, angebot, anfrage, vorgangId } = getProcessContextForDocument(dokument, auftraege, angebote, anfragen);
 
             if (vorgangId) {
@@ -463,11 +464,11 @@ export default function Vertriebsdokumente() {
                     kundeId: auftrag?.kundeId || "",
                     datum: today,
                     senderRolle: "Verkauf",
-                    senderName: "Schuelerfirma Verkauf",
+                    senderName: "Schülerfirma Verkauf",
                     kanal: "E-Mail",
-                    betreff: dokument.titel || `Auftragsbestaetigung ${auftrag?.auftragNr || ""}`.trim(),
-                    nachricht: `Die Auftragsbestaetigung ${dokument.titel || ""} wurde an den Kunden versendet.`,
-                    typ: "Auftragsbestaetigung"
+                    betreff: dokument.titel || `Auftragsbestätigung ${auftrag?.auftragNr || ""}`.trim(),
+                    nachricht: `Die Auftragsbestätigung ${dokument.titel || ""} wurde an den Kunden versendet.`,
+                    typ: "Auftragsbestätigung"
                 });
             }
         }
@@ -477,21 +478,21 @@ export default function Vertriebsdokumente() {
 
     const speichernUndVersenden = () => {
         const payload = createDokumentPayload();
-        if (!payload) return;
+        if (!payload) return false;
 
         const createdDokument = vertriebsdokumenteService.create(payload);
         versenden(createdDokument);
-        setOpen(false);
         resetCurrentDocument();
+        return true;
     };
 
     const arbeitslistenTitel = aktiveArbeitsliste === "offen"
-        ? "Offene Aufgaben je Auftrag"
+         ? "Offene Aufgaben je Auftrag"
         : aktiveArbeitsliste === "bestaetigung_fehlend"
-            ? "Auftraege ohne Auftragsbestaetigung"
+             ? "Aufträge ohne Auftragsbestätigung"
             : aktiveArbeitsliste === "bestaetigung_versenden"
-                ? "Erstellte, aber nicht versendete Auftragsbestaetigungen"
-                : "Auftraege mit naechstem Schritt Lieferschein";
+                 ? "Erstellte, aber nicht versendete Auftragsbestätigungen"
+                : "Aufträge mit nächstem Schritt Lieferschein";
 
     return <>
         {!selectedAuftrag && <SalesFlowBar currentStep="auftragsbestaetigung"/>}
@@ -510,8 +511,8 @@ export default function Vertriebsdokumente() {
                     <div><span>Status</span><strong>{selectedAuftrag.status}</strong></div>
                     <div><span>Auftragswert</span><strong>{euro(auftragswert)}</strong></div>
                 </div>
-                {hatUnvollstaendigeKundenadresse(selectedKunde) && <p className="form-error">
-                    Beim Kunden fehlen Adressdaten. Bitte vor Angebot, Auftragsbestaetigung oder Lieferschein Anschrift, PLZ und Ort pruefen und beim Kunden nachfragen.
+                {hatUnvollständigeKundenadresse(selectedKunde) && <p className="form-error">
+                    Beim Kunden fehlen Adressdaten. Bitte vor Angebot, Auftragsbestätigung oder Lieferschein Anschrift, PLZ und Ort prüfen und beim Kunden nachfragen.
                 </p>}
             </section>
 
@@ -547,11 +548,11 @@ export default function Vertriebsdokumente() {
             rowActions={[
                 { name: "pdf", label: "PDF", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: alsPdf, variant: "secondary" },
                 { name: "send", label: "Versenden", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: versenden, variant: "secondary", isVisible: row => !["versendet", "entgegengenommen"].includes(String(row.status || "").toLowerCase()) },
-                { name: "delete", label: "Loeschen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: loeschen, variant: "danger" }
+                { name: "delete", label: "Löschen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: loeschen, variant: "danger" }
             ]}
             />
         </> : <>
-            <p>Hier sehen Schueler, welches Vertriebsdokument als Naechstes noetig ist.</p>
+            <p>Hier sehen Schüler, welches Vertriebsdokument als Nächstes nötig ist.</p>
 
             <div className="kennzahlen" role="tablist" aria-label="Offene Dokumentaufgaben">
                 {arbeitsTabs.map(tab => <button
@@ -574,7 +575,7 @@ export default function Vertriebsdokumente() {
                 columns={[
                     { field: "auftragNr", title: "Auftrag", render: row => <Link className="detail-link" to={`/vertriebsdokumente/auftrag/${row.auftragId}`}>{row.auftragNr}</Link> },
                     { field: "kunde", title: "Kunde" },
-                    { field: "naechsterSchritt", title: "Naechster Schritt" },
+                    { field: "naechsterSchritt", title: "Nächster Schritt" },
                     { field: "dokumente", title: "Dokumente" }
                 ]}
                 rowActions={[
@@ -582,7 +583,7 @@ export default function Vertriebsdokumente() {
                         auftragAuswaehlen(String(row.auftragId));
                         const bestehendeDokumente = dokumente.filter(item => String(item.auftragId) === String(row.auftragId));
                         const bestaetigung = getConfirmationDocument(row.auftragId, bestehendeDokumente);
-                        resetCurrentDocument(String(row.auftragId), bestaetigung ? "Lieferschein" : "Auftragsbestaetigung");
+                        resetCurrentDocument(String(row.auftragId), bestaetigung ? "Lieferschein" : "Auftragsbestätigung");
                         setOpen(true);
                     }, variant: "success" }
                 ]}
@@ -590,16 +591,24 @@ export default function Vertriebsdokumente() {
             />
         </>}
 
-        <Dialog open={open} title="Vertriebsdokument erstellen" onClose={() => setOpen(false)}>
-            <div><Label>Auftrag</Label><input type="text" value={auftraege.find(item => String(item.id) === String(current.auftragId))?.auftragNr || "-"} disabled/></div>
-            <div><Label>Dokumenttyp</Label><select value={current.dokumentTyp} onChange={event => setCurrent(item => ({ ...item, dokumentTyp: event.target.value }))}>
-                {(getConfirmationDocument(current.auftragId, dokumente) ? dokumentTypen : ["Auftragsbestaetigung"]).map(item => <option key={item} value={item}>{item}</option>)}
+        <Dialog
+            open={open}
+            title="Vertriebsdokument erstellen"
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>Speichern</SaveButton>}
+        >
+            <div><Label>Auftrag</Label><input name="auftrag" type="text" value={auftraege.find(item => String(item.id) === String(current.auftragId))?.auftragNr || "-"} disabled/></div>
+            <div><Label>Dokumenttyp</Label><select name="vertriebsdokumenttyp" value={current.dokumentTyp} onChange={event => setCurrent(item => ({ ...item, dokumentTyp: event.target.value }))}>
+                {(getConfirmationDocument(current.auftragId, dokumente) ? dokumentTypen : ["Auftragsbestätigung"]).map(item => <option key={item} value={item}>{item}</option>)}
             </select></div>
-            <div><Label>Datum</Label><input type="date" value={current.datum} onChange={event => setCurrent(item => ({ ...item, datum: event.target.value }))}/></div>
+            <div><Label>Datum</Label><input name="vertriebsdokument-datum" type="date" value={current.datum} onChange={event => setCurrent(item => ({ ...item, datum: event.target.value }))}/></div>
             <div className="form-row"><Label>Hinweis</Label><TextArea rows={3} value={current.notiz} onChange={value => setCurrent(item => ({ ...item, notiz: value }))}/></div>
             <div className="form-row">
-                <button type="button" onClick={speichern}>Speichern</button>
-                <button type="button" onClick={speichernUndVersenden}>Direkt versenden</button>
+                <button type="button" className="button-secondary" onClick={() => {
+                    if (speichernUndVersenden()) {
+                        setOpen(false);
+                    }
+                }}>Direkt versenden</button>
             </div>
         </Dialog>
     </>;

@@ -85,7 +85,7 @@ export default function Freigaben() {
 
     const offeneAngeboteJeArtikel = useMemo(
         () => angebote
-            .filter(angebot => ["wartet auf antwort"].includes(String(angebot?.status || "").toLowerCase()))
+            .filter(angebot => ["wartet auf antwort"].includes(String(angebot.status || "").toLowerCase()))
             .reduce((map, angebot) => {
                 const artikelIds = new Set(
                     (angebot.positionen || [])
@@ -109,9 +109,9 @@ export default function Freigaben() {
         if (!angebot) return;
         openDocumentPdf({
             title: `Angebot ${angebot.angebotsNr}`,
-            subject: "Automatisch erzeugtes Angebotsdokument fuer den Schulungseinsatz.",
+            subject: "Automatisch erzeugtes Angebotsdokument für den Schulungseinsatz.",
             date: angebot.datum,
-            note: angebot.verguenstigungsGrund || "Kein zusaetzlicher Hinweis hinterlegt.",
+            note: angebot.verguenstigungsGrund || "Kein zusätzlicher Hinweis hinterlegt.",
             referenceLabel: "Angebot",
             referenceValue: angebot.angebotsNr,
             partnerLabel: "Kunde",
@@ -124,10 +124,10 @@ export default function Freigaben() {
     };
 
     const sendeAngebotAnKunden = angebot => {
-        if (!angebot?.anfrageId) return;
+        if (!angebot.anfrageId) return;
         const anfrage = customerInquiryService.getById(angebot.anfrageId);
         if (!anfrage) return;
-        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Pruefung zu.`;
+        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Prüfung zu.`;
 
         nachrichtenService.create({
             vorgangId: getVorgangId(angebot) || getVorgangId(anfrage),
@@ -137,7 +137,7 @@ export default function Freigaben() {
             datum: today,
             zeitpunkt: getBerlinTimestamp(),
             senderRolle: "Verkauf",
-            senderName: "Schuelerfirma Verkauf",
+            senderName: "Schülerfirma Verkauf",
             kanal: anfrage.kanal || "E-Mail",
             betreff: `Angebot ${angebot.angebotsNr}`,
             nachricht: text,
@@ -194,10 +194,10 @@ export default function Freigaben() {
                 kundeId: angebot.kundeId || "",
                 datum: today,
                 zeitpunkt: getBerlinTimestamp(),
-                senderRolle: "Geschaeftsfuehrung",
-                senderName: "Geschaeftsfuehrung",
-                betreff: `Ueberarbeitung ${angebot.angebotsNr}`,
-                nachricht: `Bitte Angebot ${angebot.angebotsNr} ueberarbeiten. Hinweis: ${approvalNote.trim() || item.notiz || ""}`,
+                senderRolle: "Geschäftsführung",
+                senderName: "Geschäftsführung",
+                betreff: `Überarbeitung ${angebot.angebotsNr}`,
+                nachricht: `Bitte Angebot ${angebot.angebotsNr} überarbeiten. Hinweis: ${approvalNote.trim() || item.notiz || ""}`,
                 typ: "Interne Freigabe"
             });
         }
@@ -210,7 +210,7 @@ export default function Freigaben() {
         }
     };
 
-    const freigabePruefen = item => {
+    const freigabePrüfen = item => {
         setSelectedFreigabe(item);
         setApprovalNote(String(item.notiz || ""));
         setApprovalOpen(true);
@@ -219,11 +219,11 @@ export default function Freigaben() {
     const getVerfuegbarkeitFuerPosition = position => {
         if (position.leistungTyp === "Service") {
             const serviceEintrag = services.find(item => String(item.id) === String(position.serviceId || position.artikelId || ""));
-            const berechnungstyp = String(position.berechnungstyp || serviceEintrag?.berechnungstyp || "Pauschal");
-            const zeEinheit = String(position.zeEinheit || serviceEintrag?.zeEinheit || "").trim();
+            const berechnungstyp = String(position.berechnungstyp || serviceEintrag.berechnungstyp || "Pauschal");
+            const zeEinheit = String(position.zeEinheit || serviceEintrag.zeEinheit || "").trim();
             return {
                 text: berechnungstyp === "ZE" && zeEinheit
-                    ? `Berechnungstyp: ${berechnungstyp} | Zeiteinheit: ${zeEinheit}`
+                     ? `Berechnungstyp: ${berechnungstyp} | Zeiteinheit: ${zeEinheit}`
                     : `Berechnungstyp: ${berechnungstyp}`,
                 istKritisch: false
             };
@@ -236,7 +236,7 @@ export default function Freigaben() {
         const inAngeboten = Number(offeneAngeboteJeArtikel[String(position.artikelId)] || 0);
 
         return {
-            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | In Angeboten: ${inAngeboten}`,
+            text: `Verfügbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | In Angeboten: ${inAngeboten}`,
             istKritisch: Number(position.menge || 0) > verfuegbar
         };
     };
@@ -254,9 +254,9 @@ export default function Freigaben() {
                     <span>Lehrkraftsicht</span>
                 </div>
                 <ul className="dashboard-note-list">
-                    <li>Freigaben zeigen vereinfachte Fuehrungsentscheidungen zu Rabatten, Aktionen oder Sonderfaellen.</li>
-                    <li>Die Entscheidung muss begruendet und im Vorgang sichtbar dokumentiert werden.</li>
-                    <li>Fuer Angebote steht derselbe Pruef-Dialog wie im Verkauf zur Verfuegung.</li>
+                    <li>Freigaben zeigen vereinfachte Führungsentscheidungen zu Rabatten, Aktionen oder Sonderfällen.</li>
+                    <li>Die Entscheidung muss begründet und im Vorgang sichtbar dokumentiert werden.</li>
+                    <li>Für Angebote steht derselbe Prüf-Dialog wie im Verkauf zur Verfügung.</li>
                 </ul>
             </article>
 
@@ -266,7 +266,7 @@ export default function Freigaben() {
                     <span>Querverweise</span>
                 </div>
                 <div className="link-list">
-                    <Link className="button-link" to="/geschaeftsfuehrung">Geschaeftsfuehrung</Link>
+                    <Link className="button-link" to="/geschaeftsfuehrung">Geschäftsführung</Link>
                     <Link className="button-link" to="/berichte">Berichte</Link>
                     <Link className="button-link" to="/themen/szenarien">Fallakten</Link>
                 </div>
@@ -287,12 +287,12 @@ export default function Freigaben() {
             ]}
             detailLinkResolver={({ field, row }) => field === "bereich" ? bereichLinks[row.bereich] || null : null}
             rowActions={[
-                { name: "review", label: "Pruefen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: freigabePruefen, variant: "success", isVisible: row => row.status === "offen" && !!resolveOfferForFreigabe(row, angebote) }
+                { name: "review", label: "Prüfen", permission: PERMISSIONS.GF_BEARBEITEN, onClick: freigabePrüfen, variant: "success", isVisible: row => row.status === "offen" && !!resolveOfferForFreigabe(row, angebote) }
             ]}
         />
         {selectedFreigabe && aktuellesAngebot && <OfferApprovalDialog
             open={approvalOpen}
-            title="Freigabe pruefen"
+            title="Freigabe prüfen"
             onClose={() => {
                 setApprovalOpen(false);
                 setSelectedFreigabe(null);
@@ -332,7 +332,7 @@ export default function Freigaben() {
             onApprove={() => freigeben(selectedFreigabe)}
             onRevise={() => zurUeberarbeitungZurueckgeben(selectedFreigabe)}
             onReject={() => ablehnen(selectedFreigabe)}
-            notePlaceholder="Begruendung fuer Freigabe oder Ablehnung notieren..."
+            notePlaceholder="Begründung für Freigabe oder Ablehnung notieren..."
         />}
     </>;
 }

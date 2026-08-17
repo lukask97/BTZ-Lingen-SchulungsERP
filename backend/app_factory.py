@@ -5,9 +5,10 @@ from article_images import ArticleImageStore
 from config import PreviewConfig
 from events import events_bp
 from repositories.memory_store import MemoryStore
-from repositories.postgres_store import PostgresStore
+from repositories.sql_json_store import SqlJsonStore
 from routes.auth import auth_bp
 from routes.article_images import article_images_bp
+from routes.admin import admin_bp
 from routes.meta import meta_bp
 from routes.resources import resources_bp
 
@@ -26,7 +27,7 @@ def parse_cors_origins(value):
 
 def create_store(app):
     if app.config["DATA_MODE"] == "postgres":
-        return PostgresStore(app.config["DATABASE_DSN"])
+        return SqlJsonStore(app.config["DATABASE_DSN"])
     return MemoryStore()
 
 
@@ -57,6 +58,7 @@ def create_app():
     )
 
     app.register_blueprint(meta_bp)
+    app.register_blueprint(admin_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(article_images_bp)
     app.register_blueprint(resources_bp)

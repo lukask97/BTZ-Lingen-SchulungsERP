@@ -5,6 +5,7 @@ import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
@@ -89,7 +90,7 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
     };
 
     const tageNachFaelligkeit = (rechnung: any) => {
-        if (!rechnung?.faelligAm) return null;
+        if (!rechnung.faelligAm) return null;
         const tageBisFaellig = tageBisFaelligkeit(rechnung.faelligAm);
         if (tageBisFaellig === null) return null;
         return Math.max(0, -tageBisFaellig);
@@ -161,14 +162,14 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
     const matchedTransfers = zahlungen.filter(item => {
         if (!item.rechnungId) return false;
         const rechnung = rechnungenService.getById(item.rechnungId);
-        return rechnung?.rechnungstyp === config.invoiceType;
+        return rechnung.rechnungstyp === config.invoiceType;
     });
 
     const candidateInvoices = useMemo(() => {
         const payment = selectedPaymentId ? zahlungenService.getById(selectedPaymentId) : null;
         if (!payment) return openInvoices;
         return openInvoices.filter(rechnung => payment.zahlungsart === "Ausgang"
-            ? rechnung.rechnungstyp === "Eingangsrechnung"
+             ? rechnung.rechnungstyp === "Eingangsrechnung"
             : rechnung.rechnungstyp === "Ausgangsrechnung"
         );
     }, [openInvoices, selectedPaymentId]);
@@ -179,7 +180,7 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
     }));
 
     const transferAnlegen = () => {
-        if (!draft.name.trim() || !draft.iban.trim() || Number(draft.betrag) <= 0) return;
+        if (!draft.name.trim() || !draft.iban.trim() || Number(draft.betrag) <= 0) return false;
         zahlungenService.create({
             zahlungsart: draft.zahlungsart,
             datum: draft.ausfuehrungsdatum,
@@ -193,8 +194,8 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
             status: "offen"
         });
         setZahlungen(zahlungenService.list());
-        setTransferOpen(false);
         setDraft(createTransferDraft(today, mode));
+        return true;
     };
 
     const openMatchDialog = (payment: any) => {
@@ -204,12 +205,12 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
     };
 
     const zuordnen = () => {
-        if (!selectedPaymentId || !selectedInvoiceId) return;
+        if (!selectedPaymentId || !selectedInvoiceId) return false;
         zahlungenService.matchToInvoice(selectedPaymentId, selectedInvoiceId);
         setZahlungen(zahlungenService.list());
-        setMatchOpen(false);
         setSelectedPaymentId("");
         setSelectedInvoiceId("");
+        return true;
     };
 
     const ausfuehren = (zahlung: any) => {
@@ -235,7 +236,7 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
     return <>
         <h1>{config.pageTitle}</h1>
         <p>{mode === "eingang"
-            ? "Hier werden Eingangsrechnungen und die zugehörigen Zahlungsausgänge gegenüber Lieferanten bearbeitet."
+             ? "Hier werden Eingangsrechnungen und die zugehörigen Zahlungsausgänge gegenüber Lieferanten bearbeitet."
             : "Hier werden Ausgangsrechnungen und die zugehörigen Zahlungseingänge von Kunden bearbeitet."}</p>
         {mode === "eingang" && <OverviewCards cards={[
             { label: config.pageTitle, value: allInvoices.length, note: config.summaryHint },
@@ -296,21 +297,21 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
             columns={[
                 { field: "rechnungsnr", title: "Rechnungsnummer" },
                 { field: "bezug", title: "Bezug", render: row => row.rechnungstyp === "Eingangsrechnung"
-                    ? <Link className="detail-link" to={`/bestellungen?focus=${row.bestellungId}`}>{row.bestellNr}</Link>
-                    : <Link className="detail-link" to={`/auftraege?focus=${row.auftragId}`}>{row.auftragNr}</Link> },
+                     ? <Link className="detail-link" to={`/bestellungenfocus=${row.bestellungId}`}>{row.bestellNr}</Link>
+                    : <Link className="detail-link" to={`/auftraegefocus=${row.auftragId}`}>{row.auftragNr}</Link> },
                 { field: "kunde", title: config.partnerLabel, render: row => row.rechnungstyp === "Eingangsrechnung"
-                    ? (row.lieferantId ? <Link className="detail-link" to={`/lieferanten?focus=${row.lieferantId}`}>{row.kunde}</Link> : row.kunde)
-                    : (row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde) },
+                     ? (row.lieferantId ? <Link className="detail-link" to={`/lieferantenfocus=${row.lieferantId}`}>{row.kunde}</Link> : row.kunde)
+                    : (row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde) },
                 { field: "datum", title: "Datum" },
                 { field: "faelligAm", title: "Fällig am" },
                 { field: "betrag", title: "Betrag" },
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row }) => {
-                if (field === "bezug" && row.rechnungstyp === "Eingangsrechnung") return `/bestellungen?focus=${row.bestellungId}`;
-                if (field === "bezug") return `/auftraege?focus=${row.auftragId}`;
-                if (field === "kunde" && row.rechnungstyp === "Eingangsrechnung" && row.lieferantId) return `/lieferanten?focus=${row.lieferantId}`;
-                if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
+                if (field === "bezug" && row.rechnungstyp === "Eingangsrechnung") return `/bestellungenfocus=${row.bestellungId}`;
+                if (field === "bezug") return `/auftraegefocus=${row.auftragId}`;
+                if (field === "kunde" && row.rechnungstyp === "Eingangsrechnung" && row.lieferantId) return `/lieferantenfocus=${row.lieferantId}`;
+                if (field === "kunde" && row.kundeId) return `/kundenfocus=${row.kundeId}`;
                 return null;
             }}
         />
@@ -339,21 +340,26 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
             data={matchedTransfers}
             columns={[
                 { field: "ausfuehrungsdatum", title: "Ausführung" },
-                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/${mode === "eingang" ? "eingangsrechnungen" : "ausgangsrechnungen"}?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
+                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/${mode === "eingang" ? "eingangsrechnungen" : "ausgangsrechnungen"}focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
                 { field: "name", title: "Name" },
                 { field: "iban", title: "IBAN" },
                 { field: "betrag", title: "Betrag" },
                 { field: "verwendungszweck", title: "Verwendungszweck" },
                 { field: "status", title: "Status" }
             ]}
-            detailLinkResolver={({ field, value }) => field === "rechnungsnr" ? `/${mode === "eingang" ? "eingangsrechnungen" : "ausgangsrechnungen"}?focus=${value}` : null}
+            detailLinkResolver={({ field, value }) => field === "rechnungsnr" ? `/${mode === "eingang" ? "eingangsrechnungen" : "ausgangsrechnungen"}focus=${value}` : null}
             rowActions={[
                 { name: "unmatch", label: "Zuordnung lösen", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: zuordnungLoesen, variant: "secondary" },
                 { name: "cancel", label: "Stornieren", permission: PERMISSIONS.BUCHHALTUNG_BEARBEITEN, onClick: stornieren, variant: "danger" }
             ]}
         />
 
-        <Dialog open={transferOpen} title="Überweisung erfassen" onClose={() => setTransferOpen(false)}>
+        <Dialog
+            open={transferOpen}
+            title="Überweisung erfassen"
+            onClose={() => setTransferOpen(false)}
+            footer={<SaveButton onSave={transferAnlegen} onSuccess={() => setTransferOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Art</Label><input type="text" value={draft.zahlungsart === "Ausgang" ? "Ausgang" : "Eingang"} disabled/></div>
             <div><Label>Name</Label><TextField value={draft.name} onChange={value => setDraft(item => ({ ...item, name: value }))}/></div>
             <div><Label>IBAN</Label><TextField value={draft.iban} onChange={value => setDraft(item => ({ ...item, iban: value }))}/></div>
@@ -362,16 +368,19 @@ export default function InvoiceLedgerPage({ mode }: { mode: PageMode }) {
                 <div><Label>Datum der Ausführung</Label><input type="date" value={draft.ausfuehrungsdatum} onChange={event => setDraft(item => ({ ...item, ausfuehrungsdatum: event.target.value }))}/></div>
             </div>
             <div className="form-row"><Label>Verwendungszweck</Label><TextArea rows={3} value={draft.verwendungszweck} onChange={value => setDraft(item => ({ ...item, verwendungszweck: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={transferAnlegen}>Speichern</button></div>
         </Dialog>
 
-        <Dialog open={matchOpen} title="Überweisung einer Rechnung zuordnen" onClose={() => setMatchOpen(false)}>
+        <Dialog
+            open={matchOpen}
+            title="Überweisung einer Rechnung zuordnen"
+            onClose={() => setMatchOpen(false)}
+            footer={<SaveButton onSave={zuordnen} onSuccess={() => setMatchOpen(false)}>Zuordnen</SaveButton>}
+        >
             {selectedPayment && <>
                 <div className="form-row">
                     <p><strong>{selectedPayment.name}</strong> · {Number(selectedPayment.betrag || 0).toFixed(2)} EUR · {selectedPayment.verwendungszweck || "ohne Verwendungszweck"}</p>
                 </div>
                 <div><Label>Passende Rechnung</Label><LookupField value={selectedInvoiceId} options={invoiceOptions} onChange={setSelectedInvoiceId} placeholder="Rechnung auswählen..."/></div>
-                <div className="form-row"><button type="button" onClick={zuordnen}>Zuordnen</button></div>
             </>}
         </Dialog>
     </>;

@@ -9,6 +9,7 @@ import lagerService from "../../services/logistik/lagerService";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useMemo } from "react";
 import OverviewCards from "../../components/OverviewCards";
+import SaveButton from "../../components/SaveButton";
 
 export default function Lager() {
     const { user } = useAuth();
@@ -91,6 +92,7 @@ export default function Lager() {
                 open={open}
                 title={editMode ? "Lager bearbeiten" : "Neues Lager"}
                 onClose={handleClose}
+                footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Speichern</SaveButton>}
             >
                 <Label required>Name</Label>
                 <TextField value={currentItem.name} onChange={v => handleFieldChange("name", v)} />
@@ -101,10 +103,7 @@ export default function Lager() {
                 <Label>Kapazität</Label>
                 <TextField value={currentItem.kapazitaet} onChange={v => handleFieldChange("kapazitaet", v)} />
 
-                <div className="form-row">
-                    {error && <p className="form-error">{error}</p>}
-                    <button type="button" onClick={speichern}>Speichern</button>
-                </div>
+                <div className="form-row">{error && <p className="form-error">{error}</p>}</div>
             </Dialog>
         </>
     );

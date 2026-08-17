@@ -25,7 +25,7 @@ export default {
     },
     create: (payload: any) => hydrateReklamation(reklamationenService.create((( { kunde, ...rest }) => rest)(payload))),
     add: (payload: any) => hydrateReklamation(reklamationenService.create((( { kunde, ...rest }) => rest)(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             const { kunde, ...rest } = idOrItem;
             return hydrateReklamation(reklamationenService.update(rest));

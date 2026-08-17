@@ -84,6 +84,24 @@ class MemoryStore:
             for table_name in self._tables
         }
 
+    def export_backup(self):
+        return {
+            "format": "btz-erp-backup-v1",
+            "createdAt": utc_now_iso(),
+            "tables": deepcopy(self._tables)
+        }
+
+    def restore_backup(self, backup_payload):
+        tables = backup_payload.get("tables") or {}
+        self._tables = deepcopy(tables)
+        self._meta = {
+            table_name: {
+                "updatedAt": utc_now_iso(),
+                "provider": "memory"
+            }
+            for table_name in self._tables
+        }
+
     def _touch(self, table_name):
         self._meta[table_name]["updatedAt"] = utc_now_iso()
 

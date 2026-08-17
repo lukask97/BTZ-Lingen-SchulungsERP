@@ -24,9 +24,9 @@ export default function Grossbestellung() {
             "Den offenen Angebotswert kontrollieren."
         ]}
         teacherChecks={[
-            "Wurde die Stückzahl 12 korrekt dokumentiert?",
-            "Sind Rabatt und Zubehör nicht nur gedacht, sondern sichtbar eingetragen?",
-            "Bleibt das Angebot bewusst offen und wird noch nicht in einen Auftrag übernommen?"
+            "Wurde die Stückzahl 12 korrekt dokumentiert",
+            "Sind Rabatt und Zubehör nicht nur gedacht, sondern sichtbar eingetragen",
+            "Bleibt das Angebot bewusst offen und wird noch nicht in einen Auftrag übernommen"
         ]}
         completionChecks={[
             "Ein offenes Angebot für Nordrad Einkauf ist vorhanden.",

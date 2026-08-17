@@ -5,14 +5,14 @@ import { isDatabaseModeEnabled } from "../core/api";
 const legacyServices = artikel
     .filter(item => item.artikelTyp === "Dienstleistung")
     .map((item, index) => ({
-        id: item.id ?? index + 1,
+        id: item.id || index + 1,
         serviceNr: item.artikelNr || `SER${String(index + 1).padStart(3, "0")}`,
         name: item.name || "",
         kategorie: item.kategorie || "",
         berechnungstyp: item.berechnungstyp || "Pauschal",
         zeEinheit: item.zeEinheit || "",
-        einkaufspreis: Number(item.einkaufspreis ?? item.preis ?? 0),
-        verkaufspreis: Number(item.verkaufspreis ?? item.preis ?? 0),
+        einkaufspreis: Number(item.einkaufspreis || item.preis || 0),
+        verkaufspreis: Number(item.verkaufspreis || item.preis || 0),
         beschreibung: item.beschreibung || ""
     }));
 
@@ -32,14 +32,14 @@ function withPermissionFallback<T>(reader: () => T, fallback: T) {
 }
 
 function normalizeService(item = {}) {
-    const basisPreis = Number(item.preis ?? 0);
+    const basisPreis = Number(item.preis || 0);
     return {
         ...item,
         serviceNr: item.serviceNr || item.artikelNr || "",
         berechnungstyp: item.berechnungstyp || "Pauschal",
         zeEinheit: item.berechnungstyp === "ZE" ? (item.zeEinheit || "1 Tag") : "",
-        einkaufspreis: Number(item.einkaufspreis ?? basisPreis),
-        verkaufspreis: Number(item.verkaufspreis ?? basisPreis),
+        einkaufspreis: Number(item.einkaufspreis || basisPreis),
+        verkaufspreis: Number(item.verkaufspreis || basisPreis),
         beschreibung: item.beschreibung || ""
     };
 }

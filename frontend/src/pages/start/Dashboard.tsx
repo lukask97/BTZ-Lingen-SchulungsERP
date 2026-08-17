@@ -59,7 +59,18 @@ function withFallback<T>(reader: () => T, fallback: T) {
     try {
         return reader();
     } catch (error) {
-        if (error instanceof Error && error.message.startsWith("Keine Berechtigung")) {
+        const message = error instanceof Error ? error.message.toLowerCase() : "";
+        if (
+            error instanceof Error
+            && (
+                error.message.startsWith("Keine Berechtigung")
+                || message.includes("failed to fetch")
+                || message.includes("backend nicht erreichbar")
+                || message.includes("networkerror")
+                || message.includes("api request failed with status 5")
+                || message.includes("internal server error")
+            )
+        ) {
             return fallback;
         }
 
@@ -168,7 +179,7 @@ function Dashboard() {
     ];
 
     const testdatenZuruecksetzen = () => {
-        if (!confirm("Alle lokalen Testdaten werden zurückgesetzt. Fortfahren?")) return;
+        if (!confirm("Alle lokalen Testdaten werden zurückgesetzt. Fortfahren")) return;
         resetTestData();
         window.location.reload();
     };
@@ -176,7 +187,7 @@ function Dashboard() {
     const schuelerAufgaben = [
         buildTask("Kundenanfragen beantworten", offeneAnfragen, `${offeneAnfragen} Anfragen warten auf Bearbeitung oder Rückmeldung.`, "/kundenanfragen", "Anfragen öffnen"),
         buildTask("Aufträge weiterbearbeiten", offeneAuftraege, `${offeneAuftraege} Aufträge sind noch offen und können geprüft oder versendet werden.`, "/auftraege", "Aufträge prüfen"),
-        buildTask("Wareneingänge vorbereiten", offeneWareneingaengeEinkauf, `${offeneWareneingaengeEinkauf} Bestellungen wurden versendet und koennen jetzt als Wareneingang gebucht werden.`, "/wareneingaenge", "Wareneingänge ansehen"),
+        buildTask("Wareneingänge vorbereiten", offeneWareneingaengeEinkauf, `${offeneWareneingaengeEinkauf} Bestellungen wurden versendet und können jetzt als Wareneingang gebucht werden.`, "/wareneingaenge", "Wareneingänge ansehen"),
         buildTask("Offene Posten prüfen", offenePosten, `${offenePosten} Posten sind intern noch nicht geklärt oder ausgeglichen.`, "/buchhaltung", "Offene Posten öffnen"),
         buildTask("Personalvorgänge prüfen", offeneUrlaubsantraege, `${offeneUrlaubsantraege} Urlaubsanträge warten auf eine Entscheidung.`, "/urlaubsantraege", "Anträge öffnen"),
         buildTask("Krankmeldungen bestätigen", offeneKrankmeldungen, `${offeneKrankmeldungen} Krankmeldungen sind neu eingegangen und sollten in Akte und Status übernommen werden.`, "/krankmeldungen", "Krankmeldungen öffnen"),
@@ -256,7 +267,7 @@ function Dashboard() {
         <div className="dashboard-heading">
             <div>
                 <h1>Dashboard</h1>
-                <p>Willkommen, {user?.name || user?.username}. Startseite für Aufgaben, betriebliche Zusammenhänge und digitale Arbeitsabläufe.</p>
+                <p>Willkommen, {user.name || user.username}. Startseite für Aufgaben, betriebliche Zusammenhänge und digitale Arbeitsabläufe.</p>
             </div>
             {hasFullAccess() && <button className="button-secondary dashboard-reset-button" onClick={testdatenZuruecksetzen}>Testdaten zurücksetzen</button>}
         </div>
@@ -438,3 +449,5 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+

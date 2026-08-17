@@ -45,7 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 sessionStorage.removeItem(AUTH_STORAGE_KEY);
                 setAuthError(
                     error instanceof Error
-                        ? error.message
+                         ? error.message
                         : "Backend nicht erreichbar."
                 );
             } finally {

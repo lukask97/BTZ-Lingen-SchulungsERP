@@ -234,8 +234,8 @@ Sie ist bewusst kompakt gehalten und soll helfen, typische kaufmaennische Ablaeu
 
 ## Platz fuer Unterrichtsnotizen
 
-- [ ] Welche Schritte wurden bearbeitet?
-- [ ] Welche Dokumente wurden benoetigt?
-- [ ] Welche Abteilungen waren beteiligt?
-- [ ] Wo gab es Rueckfragen oder Probleme?
-- [ ] Welche Folgeaktion ist als naechstes noetig?
+- [ ] Welche Schritte wurden bearbeitet
+- [ ] Welche Dokumente wurden benoetigt
+- [ ] Welche Abteilungen waren beteiligt
+- [ ] Wo gab es Rueckfragen oder Probleme
+- [ ] Welche Folgeaktion ist als naechstes noetig

@@ -28,7 +28,7 @@ function isConfirmationDocumentType(value) {
 }
 
 export function getVorgangId(item) {
-    return normalize(item?.vorgangId || (item?.anfrageId ? `anfrage-${item.anfrageId}` : item?.id ? `anfrage-${item.id}` : ""));
+    return normalize(item.vorgangId || (item.anfrageId ? `anfrage-${item.anfrageId}` : item.id ? `anfrage-${item.id}` : ""));
 }
 
 export function getOffersForVorgang(vorgangId, angebote = []) {
@@ -85,12 +85,12 @@ export function getInquiryForOrder(auftrag, angebote = [], anfragen = []) {
 }
 
 export function getProcessContextForDocument(dokument, auftraege = [], angebote = [], anfragen = []) {
-    const auftrag = dokument?.auftragId
-        ? auftraege.find(item => normalize(item.id) === normalize(dokument.auftragId)) || null
+    const auftrag = dokument.auftragId
+         ? auftraege.find(item => normalize(item.id) === normalize(dokument.auftragId)) || null
         : null;
     const angebot = getOfferForOrder(auftrag, angebote);
     const anfrage = getInquiryForOrder(auftrag, angebote, anfragen);
-    const vorgangId = normalize(dokument?.vorgangId || auftrag?.vorgangId || angebot?.vorgangId || anfrage?.vorgangId);
+    const vorgangId = normalize(dokument.vorgangId || auftrag.vorgangId || angebot.vorgangId || anfrage.vorgangId);
 
     return { auftrag, angebot, anfrage, vorgangId };
 }
@@ -121,9 +121,9 @@ export function getSalesStepForOrder(auftrag, dokumente = [], versandauftraege =
 
 export function getSalesStep(angebot, auftraege = [], dokumente = [], versandauftraege = []) {
     if (!angebot) return SALES_STEPS.ANGEBOT_ANGENOMMEN;
-    if (angebot?.status === "abgelehnt") return SALES_STEPS.ANGEBOT_ABGELEHNT;
-    if (angebot?.status === "wartet auf Antwort") return SALES_STEPS.ANGEBOT_WARTET_AUF_ANTWORT;
-    if (angebot?.status === "beendet") return SALES_STEPS.ANGEBOT_OFFEN;
+    if (angebot.status === "abgelehnt") return SALES_STEPS.ANGEBOT_ABGELEHNT;
+    if (angebot.status === "wartet auf Antwort") return SALES_STEPS.ANGEBOT_WARTET_AUF_ANTWORT;
+    if (angebot.status === "beendet") return SALES_STEPS.ANGEBOT_OFFEN;
 
     const auftrag = getOrderForOffer(angebot.id, auftraege);
     if (!auftrag) return SALES_STEPS.ANGEBOT_OFFEN;
@@ -176,15 +176,15 @@ export function getPurchaseDocuments(bestellungId, dokumente = []) {
 }
 
 export function isPurchaseRequestOpen(bestellung) {
-    return normalize(bestellung?.status) === "angefragt";
+    return normalize(bestellung.status) === "angefragt";
 }
 
 export function isPurchaseConfirmed(bestellung) {
-    return normalize(bestellung?.status) === "bestaetigt";
+    return normalize(bestellung.status) === "bestaetigt";
 }
 
 export function isPurchaseSent(bestellung) {
-    return normalize(bestellung?.status) === "versendet";
+    return normalize(bestellung.status) === "versendet";
 }
 
 export function getPurchaseOrdersByStatus(bestellungen = [], status) {
@@ -231,5 +231,5 @@ export function canSendPurchaseOrder(bestellung) {
 }
 
 export function canCreateIncomingInvoice(bestellung) {
-    return normalize(bestellung?.status) === "eingegangen";
+    return normalize(bestellung.status) === "eingegangen";
 }

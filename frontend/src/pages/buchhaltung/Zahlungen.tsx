@@ -5,6 +5,7 @@ import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
@@ -50,7 +51,7 @@ export default function Zahlungen() {
         const payment = selectedPaymentId ? zahlungenService.getById(selectedPaymentId) : null;
         if (!payment) return offeneRechnungen;
         return offeneRechnungen.filter(rechnung => payment.zahlungsart === "Ausgang"
-            ? rechnung.rechnungstyp === "Eingangsrechnung"
+             ? rechnung.rechnungstyp === "Eingangsrechnung"
             : rechnung.rechnungstyp !== "Eingangsrechnung"
         );
     }, [offeneRechnungen, selectedPaymentId]);
@@ -65,15 +66,15 @@ export default function Zahlungen() {
             const rechnung = rechnungenService.getById(zahlung.rechnungId);
             if (!rechnung) return null;
             if (rechnung.rechnungstyp === "Eingangsrechnung") {
-                return rechnung.lieferantId ? `/lieferanten?focus=${rechnung.lieferantId}` : null;
+                return rechnung.lieferantId ? `/lieferantenfocus=${rechnung.lieferantId}` : null;
             }
-            return rechnung.kundeId ? `/kunden?focus=${rechnung.kundeId}` : null;
+            return rechnung.kundeId ? `/kundenfocus=${rechnung.kundeId}` : null;
         }
         return null;
     };
 
     const transferAnlegen = () => {
-        if (!draft.name.trim() || !draft.iban.trim() || Number(draft.betrag) <= 0) return;
+        if (!draft.name.trim() || !draft.iban.trim() || Number(draft.betrag) <= 0) return false;
         zahlungenService.create({
             zahlungsart: draft.zahlungsart,
             datum: draft.ausfuehrungsdatum,
@@ -87,8 +88,8 @@ export default function Zahlungen() {
             status: "offen"
         });
         setZahlungen(zahlungenService.list());
-        setTransferOpen(false);
         setDraft(createTransferDraft(today));
+        return true;
     };
 
     const openMatchDialog = (payment: any) => {
@@ -98,12 +99,12 @@ export default function Zahlungen() {
     };
 
     const zuordnen = () => {
-        if (!selectedPaymentId || !selectedInvoiceId) return;
+        if (!selectedPaymentId || !selectedInvoiceId) return false;
         zahlungenService.matchToInvoice(selectedPaymentId, selectedInvoiceId);
         setZahlungen(zahlungenService.list());
-        setMatchOpen(false);
         setSelectedPaymentId("");
         setSelectedInvoiceId("");
+        return true;
     };
 
     const ausfuehren = (zahlung: any) => {
@@ -186,7 +187,7 @@ export default function Zahlungen() {
             data={matchedTransfers}
             columns={[
                 { field: "ausfuehrungsdatum", title: "Ausführung" },
-                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/rechnungen?focus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
+                { field: "rechnungsnr", title: "Rechnung", render: row => <Link className="detail-link" to={`/rechnungenfocus=${row.rechnungsnr}`}>{row.rechnungsnr}</Link> },
                 { field: "zahlungsart", title: "Art" },
                 { field: "name", title: "Name", render: row => {
                     const link = resolvePartnerLink(row);
@@ -198,7 +199,7 @@ export default function Zahlungen() {
                 { field: "status", title: "Status" }
             ]}
             detailLinkResolver={({ field, row, value }) => {
-                if (field === "rechnungsnr") return `/rechnungen?focus=${value}`;
+                if (field === "rechnungsnr") return `/rechnungenfocus=${value}`;
                 if (field === "name") return resolvePartnerLink(row);
                 return null;
             }}
@@ -208,7 +209,12 @@ export default function Zahlungen() {
             ]}
         />
 
-        <Dialog open={transferOpen} title="Überweisung erfassen" onClose={() => setTransferOpen(false)}>
+        <Dialog
+            open={transferOpen}
+            title="Überweisung erfassen"
+            onClose={() => setTransferOpen(false)}
+            footer={<SaveButton onSave={transferAnlegen} onSuccess={() => setTransferOpen(false)}>Speichern</SaveButton>}
+        >
             <div><Label>Art</Label><select value={draft.zahlungsart} onChange={event => setDraft(item => ({ ...item, zahlungsart: event.target.value }))}>
                 <option value="Eingang">Eingang</option>
                 <option value="Ausgang">Ausgang</option>
@@ -220,16 +226,19 @@ export default function Zahlungen() {
                 <div><Label>Datum der Ausführung</Label><input type="date" value={draft.ausfuehrungsdatum} onChange={event => setDraft(item => ({ ...item, ausfuehrungsdatum: event.target.value }))}/></div>
             </div>
             <div className="form-row"><Label>Verwendungszweck</Label><TextArea rows={3} value={draft.verwendungszweck} onChange={value => setDraft(item => ({ ...item, verwendungszweck: value }))}/></div>
-            <div className="form-row"><button type="button" onClick={transferAnlegen}>Speichern</button></div>
         </Dialog>
 
-        <Dialog open={matchOpen} title="Überweisung einer Rechnung zuordnen" onClose={() => setMatchOpen(false)}>
+        <Dialog
+            open={matchOpen}
+            title="Überweisung einer Rechnung zuordnen"
+            onClose={() => setMatchOpen(false)}
+            footer={<SaveButton onSave={zuordnen} onSuccess={() => setMatchOpen(false)}>Zuordnen</SaveButton>}
+        >
             {selectedPayment && <>
                 <div className="form-row">
                     <p><strong>{selectedPayment.name}</strong> · {Number(selectedPayment.betrag || 0).toFixed(2)} EUR · {selectedPayment.verwendungszweck || "ohne Verwendungszweck"}</p>
                 </div>
                 <div><Label>Passende Rechnung</Label><LookupField value={selectedInvoiceId} options={invoiceOptions} onChange={setSelectedInvoiceId} placeholder="Rechnung auswählen..."/></div>
-                <div className="form-row"><button type="button" onClick={zuordnen}>Zuordnen</button></div>
             </>}
         </Dialog>
     </>;

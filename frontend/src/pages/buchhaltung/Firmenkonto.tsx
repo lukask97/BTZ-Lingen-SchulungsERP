@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
 import useAuth from "../../auth/useAuth";
@@ -73,18 +74,18 @@ export default function Firmenkonto() {
         return {
             label: getAccountLabel(konto),
             value: euro(saldo),
-            hint: `Eingaenge ${euro(eingaenge)} / Ausgaenge ${euro(ausgaenge)}`
+            hint: `Eingänge ${euro(eingaenge)} / Ausgänge ${euro(ausgaenge)}`
         };
     });
 
     const activeAccount = canManageAllAccounts ? selectedAccount : (visibleAccounts[0] || KONTO_TYPEN.VERKAUF);
     const activeRows = rowsByAccount[activeAccount] || [];
-    const einkaufssaldo = rowsByAccount[KONTO_TYPEN.EINKAUF]?.at(-1)?.saldo || 0;
-    const verkaufssaldo = rowsByAccount[KONTO_TYPEN.VERKAUF]?.at(-1)?.saldo || 0;
-    const firmensaldo = rowsByAccount[KONTO_TYPEN.FIRMA]?.at(-1)?.saldo || 0;
+    const einkaufssaldo = rowsByAccount[KONTO_TYPEN.EINKAUF].at(-1)?.saldo || 0;
+    const verkaufssaldo = rowsByAccount[KONTO_TYPEN.VERKAUF].at(-1)?.saldo || 0;
+    const firmensaldo = rowsByAccount[KONTO_TYPEN.FIRMA].at(-1)?.saldo || 0;
 
     const speichern = () => {
-        if (!current.betreff.trim()) return;
+        if (!current.betreff.trim()) return false;
 
         const payload = {
             ...current,
@@ -106,7 +107,7 @@ export default function Firmenkonto() {
         setCurrent({ datum: today, konto: activeAccount, betreff: "", info: "", soll: 0, haben: 0 });
         setEditId(null);
         setStatus("Buchung gespeichert.");
-        setOpen(false);
+        return true;
     };
 
     const bearbeiten = (row) => {
@@ -125,7 +126,7 @@ export default function Firmenkonto() {
     const loeschen = (id) => {
         firmenkontoService.remove(id);
         setRows(firmenkontoService.list());
-        setStatus("Buchung geloescht.");
+        setStatus("Buchung gelöscht.");
     };
 
     const abbrechen = () => {
@@ -136,7 +137,7 @@ export default function Firmenkonto() {
 
     const zielbetragSpeichern = () => {
         firmenkontoService.updateSettings({ einkaufskontoZiel: targetAmount });
-        setStatus(`Zielbestand fuer das Einkaufskonto gespeichert: ${euro(targetAmount)}.`);
+        setStatus(`Zielbestand für das Einkaufskonto gespeichert: ${euro(targetAmount)}.`);
     };
 
     const wochenabschlussAusfuehren = () => {
@@ -149,29 +150,29 @@ export default function Firmenkonto() {
             messages.push(`${euro(result.salesTransfer.amount)} vom Verkaufskonto ins Firmenkonto verschoben`);
         }
         if (result.purchasingTransfer.amount > 0) {
-            messages.push(`${euro(result.purchasingTransfer.amount)} ins Einkaufskonto aufgefuellt`);
+            messages.push(`${euro(result.purchasingTransfer.amount)} ins Einkaufskonto aufgefüllt`);
         }
         if (messages.length === 0) {
-            messages.push("Kein Transfer noetig. Verkaufskonto ist leer und das Einkaufskonto liegt bereits auf oder ueber dem Zielbestand.");
+            messages.push("Kein Transfer nötig. Verkaufskonto ist leer und das Einkaufskonto liegt bereits auf oder über dem Zielbestand.");
         }
         setStatus(messages.join(" / "));
     };
 
     return <>
-        <h1>Kontenuebersicht</h1>
-        <p>Verkauf und Einkauf arbeiten mit getrennten Bereichskonten. Der volle Kontostand des Firmenkontos bleibt auf Buchhaltung und Geschaeftsfuehrung beschraenkt.</p>
+        <h1>Kontenübersicht</h1>
+        <p>Verkauf und Einkauf arbeiten mit getrennten Bereichskonten. Der volle Kontostand des Firmenkontos bleibt auf Buchhaltung und Geschäftsführung beschränkt.</p>
         <OverviewCards cards={visibleAccountCards}/>
 
         {canManageAllAccounts && <section className="module-panel">
             <div className="firmenkonto-control-grid">
                 <div className="firmenkonto-control-card">
                     <strong>Wochenabschluss</strong>
-                    <p className="module-hint">Am Montag, 3. August 2026, kannst du den Sammeltransfer manuell ausloesen: zuerst Verkauf ins Firmenkonto, danach Auffuellung des Einkaufskontos bis zum Zielbestand.</p>
-                    <button type="button" className="button-secondary" onClick={wochenabschlussAusfuehren}>Wochenabschluss ausfuehren</button>
+                    <p className="module-hint">Am Montag, 3. August 2026, kannst du den Sammeltransfer manuell auslösen: zuerst Verkauf ins Firmenkonto, danach Auffüllung des Einkaufskontos bis zum Zielbestand.</p>
+                    <button type="button" className="button-secondary" onClick={wochenabschlussAusfuehren}>Wochenabschluss ausführen</button>
                 </div>
                 <div className="firmenkonto-control-card">
                     <strong>Zielbestand Einkauf</strong>
-                    <p className="module-hint">Dieser Wert legt fest, auf welchen Bestand das Einkaufskonto nach dem Wochenabschluss aufgefuellt wird.</p>
+                    <p className="module-hint">Dieser Wert legt fest, auf welchen Bestand das Einkaufskonto nach dem Wochenabschluss aufgefüllt wird.</p>
                     <div className="firmenkonto-target-row">
                         <NumberField value={targetAmount} min="0" onChange={value => setTargetAmount(Number(value || 0))}/>
                         <button type="button" onClick={zielbetragSpeichern}>Ziel speichern</button>
@@ -192,7 +193,7 @@ export default function Firmenkonto() {
             <div className="firmenkonto-header">
                 <div>
                     <strong>{canManageAllAccounts ? "Kontobewegungen" : getAccountLabel(activeAccount)}</strong>
-                    <p className="module-hint">Jede Buchung wird einem Konto zugeordnet. Verkauf und Einkauf sehen nur die fuer sie freigegebenen Bereichskonten.</p>
+                    <p className="module-hint">Jede Buchung wird einem Konto zugeordnet. Verkauf und Einkauf sehen nur die für sie freigegebenen Bereichskonten.</p>
                 </div>
                 <div className="firmenkonto-header-actions">
                     {canManageAllAccounts && <select value={selectedAccount} onChange={event => {
@@ -206,7 +207,7 @@ export default function Firmenkonto() {
                     {canManageAllAccounts && <button type="button" className="button-secondary" onClick={() => {
                         setCurrent(item => ({ ...item, konto: activeAccount }));
                         setOpen(true);
-                    }}>Buchung ergaenzen</button>}
+                    }}>Buchung ergänzen</button>}
                 </div>
             </div>
 
@@ -237,7 +238,7 @@ export default function Firmenkonto() {
                     {canManageAllAccounts && <td>
                         <div className="table-actions">
                             <button type="button" className="button-secondary" onClick={() => bearbeiten(row)}>Bearbeiten</button>
-                            <button type="button" className="button-danger" onClick={() => loeschen(row.id)}>Loeschen</button>
+                            <button type="button" className="button-danger" onClick={() => loeschen(row.id)}>Löschen</button>
                         </div>
                     </td>}
                 </tr>)}
@@ -245,7 +246,12 @@ export default function Firmenkonto() {
             </table>
         </section>
 
-        <Dialog open={open} title={editId ? "Buchung bearbeiten" : "Buchung ergaenzen"} onClose={abbrechen}>
+        <Dialog
+            open={open}
+            title={editId ? "Buchung bearbeiten" : "Buchung ergänzen"}
+            onClose={abbrechen}
+            footer={<SaveButton onSave={speichern} onSuccess={abbrechen}>{editId ? "Änderungen speichern" : "Speichern"}</SaveButton>}
+        >
             <div><Label>Datum</Label><TextField type="date" value={current.datum} onChange={value => setCurrent(item => ({ ...item, datum: value }))}/></div>
             <div><Label>Konto</Label><select value={current.konto} onChange={event => setCurrent(item => ({ ...item, konto: event.target.value }))}>
                 <option value={KONTO_TYPEN.FIRMA}>Firmenkonto</option>
@@ -256,10 +262,6 @@ export default function Firmenkonto() {
             <div className="form-row"><Label>Info</Label><TextField value={current.info} onChange={value => setCurrent(item => ({ ...item, info: value }))}/></div>
             <div><Label>Soll</Label><NumberField value={current.soll} min="0" onChange={value => setCurrent(item => ({ ...item, soll: Number(value || 0) }))}/></div>
             <div><Label>Haben</Label><NumberField value={current.haben} min="0" onChange={value => setCurrent(item => ({ ...item, haben: Number(value || 0) }))}/></div>
-            <div className="form-row firmenkonto-dialog-actions">
-                <button type="button" className="button-secondary" onClick={abbrechen}>Abbrechen</button>
-                <button type="button" onClick={speichern}>{editId ? "Aenderungen speichern" : "Speichern"}</button>
-            </div>
         </Dialog>
     </>;
 }

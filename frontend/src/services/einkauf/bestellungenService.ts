@@ -45,7 +45,7 @@ function normalizePosition(position: any = {}) {
         ...position,
         artikelNr: artikel?.artikelNr || position.artikelNr || "",
         artikel: artikel?.name || position.artikel || "",
-        einzelpreis: Number(position.einzelpreis ?? artikel?.einkaufspreis ?? 0)
+        einzelpreis: Number(position.einzelpreis || artikel?.einkaufspreis || 0)
     };
 }
 
@@ -89,7 +89,7 @@ const service = {
         positionService.replaceForParent(created.id, positionen);
         return hydrateBestellung(created);
     },
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             const { basePayload, positionen } = splitPayload(idOrItem);
             const updated = bestellungenService.update(basePayload);
@@ -162,7 +162,7 @@ export function getAutomatischeBedarfsmeldungen() {
             empfohleneMenge: Math.max(
                 1,
                 Number(item.mindestmenge || 0) > (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
-                    ? Number(item.mindestmenge || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
+                     ? Number(item.mindestmenge || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
                     : Number(item.bedarfsmeldungBei || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0)) + 1
             )
         }));

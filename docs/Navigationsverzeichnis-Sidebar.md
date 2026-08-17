@@ -7,11 +7,11 @@ Bitte prüfen, ob die Gruppierung, Reihenfolge und Benennung aus didaktischer un
 
 ## Prüffragen für die Freigabe
 
-1. Sind die Hauptbereiche in einer sinnvollen Reihenfolge angeordnet?
-2. Sind die Seiten innerhalb jedes Bereichs fachlich logisch sortiert?
-3. Sind die Bezeichnungen für Schülerinnen und Schüler verständlich genug?
-4. Fehlt ein wichtiger Menüpunkt oder ist ein Punkt an der falschen Stelle?
-5. Ist die Buchhaltung in dieser Form sinnvoll gegliedert?
+1. Sind die Hauptbereiche in einer sinnvollen Reihenfolge angeordnet
+2. Sind die Seiten innerhalb jedes Bereichs fachlich logisch sortiert
+3. Sind die Bezeichnungen für Schülerinnen und Schüler verständlich genug
+4. Fehlt ein wichtiger Menüpunkt oder ist ein Punkt an der falschen Stelle
+5. Ist die Buchhaltung in dieser Form sinnvoll gegliedert
 
 ## Aktuelle Sidebar-Struktur
 

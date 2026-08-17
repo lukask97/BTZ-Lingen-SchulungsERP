@@ -1,18 +1,27 @@
+import { useMemo, useRef, useState } from "react";
+import useAuth from "../../auth/useAuth";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
-import TextField from "../../components/form/TextField";
 import Label from "../../components/form/Label";
-
-import useAuth from "../../auth/useAuth";
+import TextField from "../../components/form/TextField";
+import SaveButton from "../../components/SaveButton";
+import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import benutzerService from "../../services/verwaltung/benutzerService";
-import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
-import { useState, useMemo } from "react";
+import rollenService from "../../services/verwaltung/rollenService";
+import {
+    buildUsername,
+    exportUsersToExcel,
+    generateSimplePassword,
+    normalizeImportedUsers,
+    parseUserImportFile
+} from "../../utils/userSpreadsheet";
+import { getUserDisplayNameWithRole } from "../../utils/userDisplay";
 
 export default function Benutzer() {
     const { user } = useAuth();
     const config = PAGE_CONFIG.benutzer;
-    
+
     const {
         allData,
         open,
@@ -27,6 +36,7 @@ export default function Benutzer() {
         bearbeiten,
         loeschen,
         speichern,
+        refreshData,
         handleClose,
         error
     } = useCRUDPage(config.tableName, INITIAL_DATA.benutzer, benutzerService, {
@@ -40,8 +50,14 @@ export default function Benutzer() {
 
     const columns = getVisibleTableColumns(config.tableName);
     const allColumns = getAllTableColumns(config.tableName);
+    const rollen = useMemo(() => rollenService.list(), []);
+    const roleOptions = useMemo(() => rollen.map(item => item.name), [rollen]);
 
     const [roleFilter, setRoleFilter] = useState("");
+    const [importRole, setImportRole] = useState("Verkauf Azubi");
+    const [importError, setImportError] = useState("");
+    const [importSummary, setImportSummary] = useState("");
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
@@ -52,10 +68,8 @@ export default function Benutzer() {
     };
 
     const filteredDisplayData = useMemo(() => {
-        // Filter auf ungefilterte Daten anwenden
         let filtered = allData;
         if (roleFilter) filtered = filtered.filter(item => item.rolle === roleFilter);
-        // Dann Suche anwenden
         if (search) {
             filtered = filtered.filter(item =>
                 Object.values(item)
@@ -71,13 +85,81 @@ export default function Benutzer() {
         {
             name: "rolle",
             label: "Rolle",
-            options: [
-                { value: "Admin", label: "Admin" },
-                { value: "Lager", label: "Lager" },
-                { value: "Buchhaltung", label: "Buchhaltung" }
-            ]
+            options: roleOptions.map(role => ({ value: role, label: role }))
         }
-    ], []);
+    ], [roleOptions]);
+
+    const exportiereBenutzer = () => {
+        exportUsersToExcel(
+            allData.map(item => ({
+                Vorname: item.vorname || String(item.name || "").split(" ").slice(0, -1).join(" "),
+                Nachname: item.nachname || String(item.name || "").split(" ").slice(-1).join(" "),
+                Benutzername: item.username || "",
+                Passwort: item.password || "",
+                Rolle: item.rolle || "",
+                "E-Mail": item.email || ""
+            })),
+            "Benutzer_Export"
+        );
+    };
+
+    const oeffneDateiauswahl = () => {
+        setImportError("");
+        fileInputRef.current?.click();
+    };
+
+    const importiereBenutzerliste = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setImportError("");
+        setImportSummary("");
+
+        try {
+            const parsedRows = await parseUserImportFile(file);
+            const importedUsers = normalizeImportedUsers(parsedRows);
+
+            if (importedUsers.length === 0) {
+                setImportError("Keine gültigen Zeilen gefunden. Erwartet werden mindestens die Spalten Vorname und Name oder Nachname.");
+                return;
+            }
+
+            const existingUsernames = benutzerService.list().map(item => String(item.username || ""));
+            const createdUsers = importedUsers.map(item => {
+                const username = buildUsername(item.vorname, item.nachname, existingUsernames);
+                existingUsernames.push(username);
+
+                return benutzerService.create({
+                    vorname: item.vorname,
+                    nachname: item.nachname,
+                    username,
+                    email: `${username}@schulung.local`,
+                    password: generateSimplePassword(),
+                    rolle: importRole
+                });
+            });
+
+            setImportSummary(`${createdUsers.length} Benutzer wurden angelegt und als Excel exportiert.`);
+            refreshData();
+            exportUsersToExcel(
+                createdUsers.map(item => ({
+                    Vorname: item.vorname || "",
+                    Nachname: item.nachname || "",
+                    Benutzername: item.username || "",
+                    Passwort: item.password || "",
+                    Rolle: item.rolle || "",
+                    "E-Mail": item.email || ""
+                })),
+                "Benutzer_Import_Ergebnis"
+            );
+        } catch {
+            setImportError("Die Datei konnte nicht gelesen werden. Bitte eine Excel-Datei mit Vorname und Name oder Nachname hochladen.");
+        } finally {
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
 
     return (
         <>
@@ -95,6 +177,8 @@ export default function Benutzer() {
                 onSearch={setSearch}
                 onPageSizeChange={setPageSize}
                 toolbarActions={[
+                    { name: "import", label: "Schülerliste importieren", permission: config.permissionCreate, onClick: oeffneDateiauswahl },
+                    { name: "export", label: "Benutzer exportieren", permission: config.permissionCreate, onClick: exportiereBenutzer },
                     { name: "new", label: "Neuer Benutzer", permission: config.permissionCreate, onClick: neu }
                 ]}
                 rowActions={[
@@ -104,11 +188,45 @@ export default function Benutzer() {
                 page={1}
             />
 
+            <section className="module-panel">
+                <h2>Schülerliste importieren</h2>
+                <p>Die Excel-Datei soll mindestens die Spalten <strong>Vorname</strong> und <strong>Name</strong> oder <strong>Nachname</strong> enthalten. Benutzername und Passwort werden automatisch erzeugt.</p>
+                <div className="form-row">
+                    <div>
+                        <Label>Rolle für importierte Nutzer</Label>
+                        <select name="import-role" value={importRole} onChange={event => setImportRole(event.target.value)}>
+                            {roleOptions.map(role => <option key={role} value={role}>{role}</option>)}
+                        </select>
+                    </div>
+                </div>
+                <div className="thread-document-links">
+                    <button type="button" onClick={oeffneDateiauswahl}>Excel auswählen</button>
+                    <button type="button" className="button-secondary" onClick={exportiereBenutzer}>Alle Benutzer als Excel</button>
+                </div>
+                <input
+                    ref={fileInputRef}
+                    name="import-file"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    style={{ display: "none" }}
+                    onChange={importiereBenutzerliste}
+                />
+                {importSummary && <p>{importSummary}</p>}
+                {importError && <p className="form-error">{importError}</p>}
+            </section>
+
             <Dialog
                 open={open}
                 title={editMode ? "Benutzer bearbeiten" : "Neuer Benutzer"}
                 onClose={handleClose}
+                footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Speichern</SaveButton>}
             >
+                <Label>Vorname</Label>
+                <TextField value={currentItem.vorname || ""} onChange={v => handleFieldChange("vorname", v)} />
+
+                <Label>Nachname</Label>
+                <TextField value={currentItem.nachname || ""} onChange={v => handleFieldChange("nachname", v)} />
+
                 <Label required>Benutzername</Label>
                 <TextField value={currentItem.username} onChange={v => handleFieldChange("username", v)} />
 
@@ -121,10 +239,10 @@ export default function Benutzer() {
                 <Label required>Rolle</Label>
                 <TextField value={currentItem.rolle} onChange={v => handleFieldChange("rolle", v)} />
 
-                <div className="form-row">
-                    {error && <p className="form-error">{error}</p>}
-                    <button type="button" onClick={speichern}>Speichern</button>
-                </div>
+                <Label>Anzeigename</Label>
+                <TextField value={getUserDisplayNameWithRole(currentItem, "")} onChange={() => {}} disabled />
+
+                <div className="form-row">{error && <p className="form-error">{error}</p>}</div>
             </Dialog>
         </>
     );

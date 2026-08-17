@@ -56,7 +56,7 @@ export default function Bankauszug() {
 
     const requestedAccount = searchParams.get("konto") || "";
     const activeAccount = visibleAccounts.includes(requestedAccount as any)
-        ? requestedAccount
+         ? requestedAccount
         : (visibleAccounts[0] || KONTO_TYPEN.FIRMA);
 
     const rowsByAccount = useMemo(() => ({

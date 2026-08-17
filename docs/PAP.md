@@ -7,21 +7,21 @@ Die Reihenfolge orientiert sich an der gewuenschten fachlichen Abfolge im Projek
 flowchart TD
     A([Start]) --> B[Kunde erzeugt eine Anfrage]
     B --> C[Anfrage wird gelesen]
-    C --> D{Wird ein Angebot gefordert?}
+    C --> D{Wird ein Angebot gefordert}
     D -- Ja --> E[Angebot erstellen]
     D -- Nein --> X[Anfrage direkt bearbeiten oder beantworten]
     X --> Z([Ende])
 
-    E --> F{Wird fuer das Angebot eine Freigabe benoetigt?}
+    E --> F{Wird fuer das Angebot eine Freigabe benoetigt}
     F -- Ja --> G[Freigabe beantragen]
-    G --> H{Freigabe erteilt?}
+    G --> H{Freigabe erteilt}
     H -- Ja --> I[Angebot senden]
     H -- Nein --> G
     F -- Nein --> I
 
     I --> J[Auf Antwort warten]
     J --> K{Antwort des Kunden}
-    K -- Angenommen --> L{Ist das Angebot noch gueltig?}
+    K -- Angenommen --> L{Ist das Angebot noch gueltig}
     K -- Abgelehnt --> M[Angebot ueberarbeiten oder aendern]
     K -- Verhandlung beendet --> Z
     L -- Ja --> N[Auftrag erstellen]
@@ -38,18 +38,18 @@ flowchart TD
     U --> V[Rechnung versenden oder mit Lieferung uebergeben]
     V --> W[Auf Zahlungseingang warten]
 
-    W --> X1{Zahlung eingegangen?}
-    X1 -- Ja --> X2{Innerhalb von 14 Tagen?}
+    W --> X1{Zahlung eingegangen}
+    X1 -- Ja --> X2{Innerhalb von 14 Tagen}
     X2 -- Ja --> X3[Skonto beruecksichtigen]
     X2 -- Nein --> X4[Regulaere Zahlung verbuchen]
     X3 --> Z
     X4 --> Z
 
-    X1 -- Nein --> Y{Welche Frist ist erreicht?}
+    X1 -- Nein --> Y{Welche Frist ist erreicht}
     Y -- 21 Tage --> Y1[Zahlungserinnerung senden]
-    Y -- 28 Tage --> Y2[1. Mahnung senden]
-    Y -- 42 Tage --> Y3[2. Mahnung senden]
-    Y -- spaeter --> Y4[Inkasso einleiten]
+    Y -- 1 Tag nach Faelligkeit --> Y2[1. Mahnung senden]
+    Y -- 8 Tage nach Faelligkeit --> Y3[2. Mahnung senden]
+    Y -- 22 Tage nach Faelligkeit --> Y4[Inkasso einleiten]
     Y1 --> W
     Y2 --> W
     Y3 --> W
@@ -84,9 +84,9 @@ flowchart TD
 24. Auf den Zahlungseingang warten.
 25. Bis 14 Tage ist Skonto moeglich.
 26. Bei 21 Tagen wird eine Zahlungserinnerung versendet.
-27. Ab 28 Tagen folgt die 1. Mahnung.
-28. Etwa 2 Wochen spaeter folgt die 2. Mahnung.
-29. Danach kann der Vorgang an Inkasso uebergeben werden.
+27. Ab 1 Tag nach Faelligkeit folgt die 1. Mahnung.
+28. Ab 8 Tagen nach Faelligkeit folgt die 2. Mahnung.
+29. Ab 22 Tagen nach Faelligkeit kann der Vorgang an Inkasso uebergeben werden.
 
 ## Entscheidungslogik
 

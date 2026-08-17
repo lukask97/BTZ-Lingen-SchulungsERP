@@ -55,7 +55,7 @@ export default function Exporte() {
 
     const toggleSpalte = (field: string) => {
         setAusgewaehlteSpalten(current => current.includes(field)
-            ? current.filter(item => item !== field)
+             ? current.filter(item => item !== field)
             : [...current, field]
         );
     };
@@ -115,7 +115,7 @@ export default function Exporte() {
 
     return <>
         <h1>Exporte</h1>
-        <p>Hier koennen Exporte vorbereitet werden. Fuer Artikel gibt es einen getrennten Excel-Export und einen eigenen Tab fuer den Artikelkatalog als PDF.</p>
+        <p>Hier können Exporte vorbereitet werden. Für Artikel gibt es einen getrennten Excel-Export und einen eigenen Tab für den Artikelkatalog als PDF.</p>
 
         <div className="kennzahlen" role="tablist" aria-label="Export Tabs">
             <button
@@ -143,7 +143,7 @@ export default function Exporte() {
         {activeTab === "excel" && <>
         <section className="module-panel">
             <h2>Artikel-Export</h2>
-            <p>Waehle zuerst die gewuenschten Spalten. Die Vorschau darunter aktualisiert sich sofort.</p>
+            <p>Wähle zuerst die gewünschten Spalten. Die Vorschau darunter aktualisiert sich sofort.</p>
             <div className="thread-document-links">
                 <button type="button" className="button-secondary" onClick={alleSpaltenWaehlen}>Alle Spalten</button>
                 <button type="button" className="button-secondary" onClick={standardSpaltenWaehlen}>Standardspalten</button>

@@ -2,10 +2,10 @@ import { createCRUDService } from "../core/genericService";
 import { rollenRechte } from "../mockup/mockData";
 
 export type RollenRecht = {
-    id?: number | string | null;
-    rolleId?: number | string | null;
-    rolleName?: string;
-    rechtName?: string;
+    id: number | string | null;
+    rolleId: number | string | null;
+    rolleName: string;
+    rechtName: string;
 };
 
 const baseService = createCRUDService<RollenRecht>("rollenRechte", rollenRechte);
@@ -27,7 +27,7 @@ const rollenRechteService = {
     },
     create: (payload: RollenRecht) => baseService.create(normalizeAssignment(payload)),
     add: (payload: RollenRecht) => baseService.create(normalizeAssignment(payload)),
-    update: (idOrItem: number | string | RollenRecht, payload?: Partial<RollenRecht>) => {
+    update: (idOrItem: number | string | RollenRecht, payload: Partial<RollenRecht>) => {
         if (typeof idOrItem === "object") {
             return baseService.update(normalizeAssignment(idOrItem));
         }

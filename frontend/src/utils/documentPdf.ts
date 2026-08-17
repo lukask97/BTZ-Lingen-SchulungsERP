@@ -23,9 +23,9 @@ export function openDocumentPdf({
 
     const formatCurrency = (value) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(value || 0));
     const getPositionDetail = (position) => {
-        if (String(position?.leistungTyp || "") !== "Service") return "";
-        const berechnungstyp = String(position?.berechnungstyp || "Pauschal");
-        const zeEinheit = String(position?.zeEinheit || "").trim();
+        if (String(position.leistungTyp || "") !== "Service") return "";
+        const berechnungstyp = String(position.berechnungstyp || "Pauschal");
+        const zeEinheit = String(position.zeEinheit || "").trim();
 
         return berechnungstyp === "ZE" && zeEinheit
             ? `${berechnungstyp} | ${zeEinheit}`
@@ -47,7 +47,7 @@ export function openDocumentPdf({
                 ${pagePositions.map((position) => `<tr>
                     <td>${safe(position.artikel)}${getPositionDetail(position) ? `<div class="position-detail">${safe(getPositionDetail(position))}</div>` : ""}</td>
                     <td>${safe(position.menge)}</td>
-                    <td>${safe(formatCurrency(position.einzelpreis ?? 0))}</td>
+                    <td>${safe(formatCurrency(position.einzelpreis || 0))}</td>
                     <td>${safe(formatCurrency(Number(position.menge || 0) * Number(position.einzelpreis || 0)))}</td>
                 </tr>`).join("")}
             </tbody>
@@ -101,7 +101,7 @@ export function openDocumentPdf({
     };
 
     const renderHistoryHtml = (historyEntries = []) => historyEntries.length === 0
-        ? "<p>Keine Verlaufseinträge vorhanden.</p>"
+         ? "<p>Keine Verlaufseinträge vorhanden.</p>"
         : `<ul class="history-list">
             ${historyEntries.map((entry) => `<li>
                 <strong>${safe(entry.date || "")}</strong>

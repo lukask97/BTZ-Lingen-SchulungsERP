@@ -519,7 +519,7 @@ button:disabled {
 
 .dialog-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     gap: 12px;
     padding: 14px 20px;
@@ -532,7 +532,7 @@ button:disabled {
 
 .dialog-footer-extra {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     gap: 12px;
 }
@@ -1462,6 +1462,43 @@ button:disabled {
 
 .link-button:hover { background: #eef5ff; }
 .form-error { color: #c62828; }
+.save-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.save-button.is-success {
+    background: #2e7d32;
+}
+
+.save-button.is-success:hover {
+    background: #256428;
+}
+
+.save-button.is-error {
+    background: #c62828;
+}
+
+.save-button.is-error:hover {
+    background: #b71c1c;
+}
+
+.save-button-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    border-top-color: #fff;
+    border-radius: 999px;
+    animation: save-button-spin 0.8s linear infinite;
+    flex: 0 0 auto;
+}
+
+@keyframes save-button-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 .scenario-document {
     display: grid;
     gap: 14px;

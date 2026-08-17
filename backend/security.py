@@ -45,6 +45,7 @@ TABLE_ACCESS_MAP = {
     "schulungen": "personalwesen",
     "services": "service",
     "urlaubsantraege": "personalwesen",
+    "unternehmen": "benutzer",
     "versandauftraege": "logistik",
     "vertriebsdokumente": "verkauf",
     "zahlungen": "buchhaltung",

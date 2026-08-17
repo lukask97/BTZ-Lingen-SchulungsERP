@@ -7,7 +7,7 @@ export async function getCurrentBackendUser() {
 
     try {
         const result = await apiRequest("/auth/me");
-        if (!result?.authenticated) {
+        if (!result.authenticated) {
             return null;
         }
 

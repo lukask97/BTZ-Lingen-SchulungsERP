@@ -1,12 +1,36 @@
 import { useEffect, useState } from "react";
 import { subscribeToStorageSync } from "../services/mockup/mockStorage";
 
+function isRecoverableFetchError(error: unknown) {
+    return error instanceof Error && (
+        error.message.toLowerCase().includes("failed to fetch")
+        || error.message.toLowerCase().includes("backend nicht erreichbar")
+        || error.message.toLowerCase().includes("networkerror")
+    );
+}
+
 export function useSyncedServiceData<T>(keys: string[], load: () => T) {
-    const [data, setData] = useState(() => load());
+    const [data, setData] = useState(() => {
+        try {
+            return load();
+        } catch (error) {
+            if (isRecoverableFetchError(error)) {
+                return [] as unknown as T;
+            }
+            throw error;
+        }
+    });
     const keysSignature = keys.join("|");
 
     const refresh = () => {
-        setData(load());
+        try {
+            setData(load());
+        } catch (error) {
+            if (isRecoverableFetchError(error)) {
+                return;
+            }
+            throw error;
+        }
     };
 
     useEffect(() => {

@@ -80,7 +80,7 @@ export default {
     },
     create: (payload: any) => service.create(createThreadMessage(payload)),
     add: (payload: any) => service.create(createThreadMessage(payload)),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") return service.update(normalizeMessage(idOrItem));
         return service.update(idOrItem, normalizeMessage(payload));
     }

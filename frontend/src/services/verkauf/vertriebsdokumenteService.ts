@@ -52,7 +52,7 @@ export default {
     },
     create: (payload: any) => hydrateDokument(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateDokument(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload?: any) => {
+    update: (idOrItem: any, payload: any) => {
         if (typeof idOrItem === "object") {
             return hydrateDokument(baseService.update(splitPayload(idOrItem)));
         }

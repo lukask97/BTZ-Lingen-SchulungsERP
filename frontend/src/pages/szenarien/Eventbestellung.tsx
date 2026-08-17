@@ -24,9 +24,9 @@ export default function Eventbestellung() {
             "Optional einen Beleg oder eine Notiz zur Eventabstimmung archivieren."
         ]}
         teacherChecks={[
-            "Ist die Menge von drei Eventpaketen richtig erfasst?",
-            "Wird das Lieferfenster oder die Eventabstimmung schriftlich sichtbar?",
-            "Ist erkennbar, dass es sich nicht um einen normalen Standardauftrag handelt?"
+            "Ist die Menge von drei Eventpaketen richtig erfasst",
+            "Wird das Lieferfenster oder die Eventabstimmung schriftlich sichtbar",
+            "Ist erkennbar, dass es sich nicht um einen normalen Standardauftrag handelt"
         ]}
         completionChecks={[
             "Der Auftrag oder das Angebot ist vorhanden.",

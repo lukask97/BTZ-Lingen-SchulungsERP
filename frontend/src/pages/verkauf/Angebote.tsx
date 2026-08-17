@@ -8,6 +8,7 @@ import OfferApprovalDialog from "../../components/OfferApprovalDialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import Checkbox from "../../components/form/Checkbox";
 import OverviewCards from "../../components/OverviewCards";
@@ -31,6 +32,7 @@ import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 import freigabenService from "../../services/gf/freigabenService";
 import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
+import { getUserDisplayNameWithRole } from "../../utils/userDisplay";
 
 const heute = getBerlinDate();
 const MWST_RATE = 0.19;
@@ -65,7 +67,7 @@ const calculateMwSt = (positionen, preispositionen = [], rabattBetrag = 0) => {
 const gesamtNachAbzug = (positionen, preispositionen = [], rabattBetrag = 0) => {
     return Math.max(0, calculateNetto(positionen, preispositionen, rabattBetrag) + calculateMwSt(positionen, preispositionen, rabattBetrag));
 };
-const istOffenesAngebot = angebot => ["wartet auf antwort"].includes(String(angebot?.status || "").toLowerCase());
+const istOffenesAngebot = angebot => ["wartet auf antwort"].includes(String(angebot.status || "").toLowerCase());
 
 function hatUnvollstaendigeKundenadresse(kunde) {
     if (!kunde) return false;
@@ -79,11 +81,11 @@ const STATUS_FILTER_OPTIONS = [
     { value: "beendet", label: "Beendet", defaultSelected: true }
 ];
 const STATUS_HELP = [
-    { label: "In Vorbereitung", text: "Das Angebot wird intern vorbereitet und zaehlt noch nicht zu den offenen Angeboten beim Kunden." },
-    { label: "Wartet auf Antwort", text: "Das Angebot liegt dem Kunden vor und wartet auf Rueckmeldung." },
+    { label: "In Vorbereitung", text: "Das Angebot wird intern vorbereitet und zählt noch nicht zu den offenen Angeboten beim Kunden." },
+    { label: "Wartet auf Antwort", text: "Das Angebot liegt dem Kunden vor und wartet auf Rückmeldung." },
     { label: "Angenommen", text: "Der Kunde hat das Angebot akzeptiert." },
     { label: "Abgelehnt", text: "Der Kunde hat das Angebot nicht angenommen." },
-    { label: "Beendet", text: "Das Angebot ist abgeschlossen und fuer die weitere Bearbeitung nicht mehr aktiv." }
+    { label: "Beendet", text: "Das Angebot ist abgeschlossen und für die weitere Bearbeitung nicht mehr aktiv." }
 ];
 const plusTage = tage => addDaysToIsoDate(heute, tage);
 const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
@@ -92,7 +94,7 @@ const toLeistung = (item, typ) => ({
     leistungTyp: typ,
     nummer: typ === "Service" ? item.serviceNr : item.artikelNr,
     name: item.name,
-    preis: Number(item.verkaufspreis ?? item.preis ?? 0),
+    preis: Number(item.verkaufspreis || item.preis || 0),
     artikelTyp: typ === "Service" ? "Dienstleistung" : item.artikelTyp,
     berechnungstyp: typ === "Service" ? String(item.berechnungstyp || "Pauschal") : "",
     zeEinheit: typ === "Service" ? String(item.zeEinheit || "") : ""
@@ -103,8 +105,8 @@ function normalizeText(value = "") {
 }
 
 function getDialogMessageVariant(nachricht) {
-    const rolle = String(nachricht?.senderRolle || "").toLowerCase();
-    const betreff = String(nachricht?.betreff || "").toLowerCase();
+    const rolle = String(nachricht.senderRolle || "").toLowerCase();
+    const betreff = String(nachricht.betreff || "").toLowerCase();
 
     if (rolle.includes("kunde")) return "customer";
     if (betreff.includes("angebot") || betreff.includes("an kunden")) return "outbound";
@@ -233,29 +235,29 @@ function createPreispositionDraft() {
 }
 
 function normalizeVorlagenPosition(position, leistungen = []) {
-    const artikelId = position?.artikelId ?? position?.serviceId ?? position?.id ?? "";
+    const artikelId = position.artikelId || position.serviceId || position.id || "";
     const auswahl = leistungen.find(item =>
         String(item.id) === String(artikelId)
-        || String(item.name) === String(position?.artikel || position?.name || "")
+        || String(item.name) === String(position.artikel || position.name || "")
     );
 
     if (auswahl) {
         return {
-            ...createAngebotPositionDraft(auswahl, Number(position?.menge || 1)),
-            einzelpreis: Number(position?.einzelpreis ?? auswahl.preis ?? 0)
+            ...createAngebotPositionDraft(auswahl, Number(position.menge || 1)),
+            einzelpreis: Number(position.einzelpreis || auswahl.preis || 0)
         };
     }
 
     return {
         artikelId: artikelId || "",
-        artikel: position?.artikel || position?.name || "Unbekannte Position",
-        artikelTyp: position?.artikelTyp || "Einzelartikel",
-        leistungTyp: position?.leistungTyp || "Artikel",
-        serviceId: position?.serviceId || "",
-        menge: Number(position?.menge || 1),
-        einzelpreis: Number(position?.einzelpreis || 0),
-        berechnungstyp: position?.berechnungstyp || "",
-        zeEinheit: position?.zeEinheit || ""
+        artikel: position.artikel || position.name || "Unbekannte Position",
+        artikelTyp: position.artikelTyp || "Einzelartikel",
+        leistungTyp: position.leistungTyp || "Artikel",
+        serviceId: position.serviceId || "",
+        menge: Number(position.menge || 1),
+        einzelpreis: Number(position.einzelpreis || 0),
+        berechnungstyp: position.berechnungstyp || "",
+        zeEinheit: position.zeEinheit || ""
     };
 }
 
@@ -265,7 +267,8 @@ function cloneAngebotspositionen(positionen = [], leistungen = []) {
 
 function MultiStatusFilter({ options, selectedValues, onToggle }) {
     const [open, setOpen] = useState(false);
-    const activeCount = selectedValues.length;
+    const safeSelectedValues = selectedValues || [];
+    const activeCount = safeSelectedValues.length;
 
     return (
         <div className="multi-filter">
@@ -277,7 +280,7 @@ function MultiStatusFilter({ options, selectedValues, onToggle }) {
                 {options.map(option => <label key={option.value} className="multi-filter-option">
                     <input
                         type="checkbox"
-                        checked={selectedValues.includes(option.value)}
+                        checked={safeSelectedValues.includes(option.value)}
                         onChange={() => onToggle(option.value)}
                     />
                     <span>{option.label}</span>
@@ -325,7 +328,7 @@ export default function Angebote() {
     ];
     const offeneAngeboteJeArtikel = useMemo(() => getOpenOfferCountByArtikel(angebote), [angebote]);
     const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
-    const bearbeiterOptionen = benutzer.map(item => ({ value: String(item.username || item.id), label: `${item.name || item.username} (${item.rolle || "Team"})` }));
+    const bearbeiterOptionen = benutzer.map(item => ({ value: String(item.username || item.id), label: getUserDisplayNameWithRole(item, String(item.username || "Team")) }));
     const leistungsOptionen = leistungen.map(item => ({
         value: `${item.leistungTyp}:${item.id}`,
         label: `${item.nummer} - ${item.name} (${item.preis.toFixed(2)} EUR)`
@@ -338,7 +341,7 @@ export default function Angebote() {
     const defaultKundeId = String(kunden[0]?.id || "");
     const defaultLeistungId = leistungen[0] ? `${leistungen[0].leistungTyp}:${leistungen[0].id}` : "";
     const istErfahrenerVerkaeufer = useMemo(() => {
-        const rolle = normalizeText(user?.rolle || user?.username || user?.name || "");
+        const rolle = normalizeText(user.rolle || user.username || user.name || "");
         return Boolean(
             hasFullAccess()
             || rolle.includes("admin")
@@ -348,22 +351,22 @@ export default function Angebote() {
         );
     }, [hasFullAccess, user]);
     const brauchtFreigabe = !istErfahrenerVerkaeufer;
-    const defaultBearbeiter = String(user?.username || benutzer[0]?.username || benutzer[0]?.id || "");
+    const defaultBearbeiter = String(user.username || benutzer[0]?.username || benutzer[0]?.id || "");
     const [draft, setDraft] = useState(() => createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigabe));
     const optionen = fristenOptionenService.get();
     const positionsZwischensumme = calculatePositionenTotal(draft.positionenDraft);
     const nettoGesamtImDialog = calculateNetto(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag);
     const abweichungZurZwischensumme =
         positionsZwischensumme > 0
-            ? Math.abs(nettoGesamtImDialog - positionsZwischensumme) / positionsZwischensumme
+             ? Math.abs(nettoGesamtImDialog - positionsZwischensumme) / positionsZwischensumme
             : 0;
     const gfFreigabeSchwelle = Number(optionen.angebotGfFreigabeAbweichungProzent || 10) / 100;
 
     const sendeAngebotAnKunden = (angebot) => {
-        if (!angebot?.anfrageId) return;
+        if (!angebot.anfrageId) return;
         const anfrage = getInquiryForOffer(angebot, anfragen);
         if (!anfrage) return;
-        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Pruefung zu.`;
+        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Prüfung zu.`;
 
         nachrichtenService.create({
             vorgangId: getVorgangId(angebot) || getVorgangId(anfrage),
@@ -373,7 +376,7 @@ export default function Angebote() {
             datum: heute,
             zeitpunkt: getBerlinTimestamp(),
             senderRolle: "Verkauf",
-            senderName: "Schuelerfirma Verkauf",
+            senderName: "Schülerfirma Verkauf",
             kanal: anfrage.kanal || "E-Mail",
             betreff: `Angebot ${angebot.angebotsNr}`,
             nachricht: text,
@@ -390,7 +393,7 @@ export default function Angebote() {
     };
 
     const initialisiereDialog = (anfrageId = "", kunde = "", templateOfferId = "") => {
-        const inquiry = anfragen.find(item => String(item.id) === String(anfrageId));
+        const inquiry = anfragen.find(item => String(item.id) === String(anfrageId)) || null;
         const vorgangId = getVorgangId(inquiry) || (anfrageId ? `anfrage-${anfrageId}` : "");
         const revisionInfo = naechsteAngebotsrevision(vorgangId || `angebot-${Date.now()}`);
         const templateOffer = templateOfferId ? angeboteService.getById(templateOfferId) : null;
@@ -422,7 +425,7 @@ export default function Angebote() {
         const templatePositionen = cloneAngebotspositionen(templateOffer.positionen || [], leistungen);
         const ersteVorlagenPosition = templatePositionen[0];
         const leistungId = ersteVorlagenPosition
-            ? `${ersteVorlagenPosition.leistungTyp}:${ersteVorlagenPosition.serviceId || ersteVorlagenPosition.artikelId}`
+             ? `${ersteVorlagenPosition.leistungTyp}:${ersteVorlagenPosition.serviceId || ersteVorlagenPosition.artikelId}`
             : draft.leistungId;
 
         setDraft(current => ({
@@ -447,7 +450,7 @@ export default function Angebote() {
             sourceInquiryId: String(angebot.anfrageId || ""),
             kundeId: String(angebot.kundeId || defaultKundeId),
             leistungId: erstePosition
-                ? `${erstePosition.leistungTyp}:${erstePosition.serviceId || erstePosition.artikelId}`
+                 ? `${erstePosition.leistungTyp}:${erstePosition.serviceId || erstePosition.artikelId}`
                 : defaultLeistungId,
             menge: 1,
             positionenDraft: positionen,
@@ -488,13 +491,13 @@ export default function Angebote() {
             event.stopPropagation();
             angebotAlsPdf(row);
         }}>{row.angebotsNr}</button> },
-        { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kunden?focus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
+        { field: "kunde", title: "Kunde", render: row => row.kundeId ? <Link className="detail-link" to={`/kundenfocus=${row.kundeId}`}>{row.kunde}</Link> : row.kunde },
         { field: "datum", title: "Datum" },
-        { field: "gueltigBis", title: "Gueltig bis", render: row => row.gueltigBis || "-" },
+        { field: "gueltigBis", title: "Gültig bis", render: row => row.gueltigBis || "-" },
         { field: "status", title: "Status", helpText: "Zeigt, ob das Angebot intern vorbereitet wird, beim Kunden liegt oder bereits abgeschlossen ist." },
-        { field: "freigabeText", title: "Freigabe", helpText: "Zeigt, ob fuer das Angebot noch eine Freigabe durch eine hoehere Rolle noetig ist." },
-        { field: "freigabeNotiz", title: "Notiz", helpText: "Zeigt Rueckmeldungen aus der internen Pruefung oder Hinweise zur Ueberarbeitung." },
-        { field: "anliegenText", title: "Anliegen", helpText: "Kurzbeschreibung der urspruenglichen Kundenanfrage." },
+        { field: "freigabeText", title: "Freigabe", helpText: "Zeigt, ob für das Angebot noch eine Freigabe durch eine höhere Rolle nötig ist." },
+        { field: "freigabeNotiz", title: "Notiz", helpText: "Zeigt Rückmeldungen aus der internen Prüfung oder Hinweise zur Überarbeitung." },
+        { field: "anliegenText", title: "Anliegen", helpText: "Kurzbeschreibung der ursprünglichen Kundenanfrage." },
         { field: "prozess", title: "Prozess", helpText: "Ordnet das Angebot in den gesamten Verkaufsablauf ein." },
         { field: "gesamt", title: "Gesamt" },
         { field: "positionenText", title: "Positionen" }
@@ -517,13 +520,13 @@ export default function Angebote() {
                 statusNormalized: normalizeText(angebot.status),
                 freigabeStatus: angebot.freigabeStatus || "keine",
                 freigabeText: angebot.freigabeStatus === "angefragt"
-                    ? "Freigabe offen"
+                     ? "Freigabe offen"
                     : angebot.freigabeStatus === "weitergeleitet"
-                        ? `Gesperrt: ${angebot.freigabeNotiz || "Grund siehe Notiz"}`
+                         ? `Gesperrt: ${angebot.freigabeNotiz || "Grund siehe Notiz"}`
                         : angebot.freigabeStatus === "intern_abgelehnt"
-                            ? "Zur Ueberarbeitung zurueckgegeben"
+                             ? "Zur Überarbeitung zurückgegeben"
                             : angebot.freigabeStatus === "freigegeben"
-                                ? "Freigegeben"
+                                 ? "Freigegeben"
                                 : "-",
                 freigabeNotiz: angebot.freigabeNotiz || "-",
                 kunde: getCustomerName(angebot.kundeId, angebot.kunde),
@@ -538,9 +541,9 @@ export default function Angebote() {
     const angebotAlsPdf = angebot => {
         openDocumentPdf({
             title: `Angebot ${angebot.angebotsNr}`,
-            subject: "Automatisch erzeugtes Angebotsdokument fuer den Schulungseinsatz.",
+            subject: "Automatisch erzeugtes Angebotsdokument für den Schulungseinsatz.",
             date: angebot.datum,
-            note: angebot.verguenstigungsGrund || "Kein zusaetzlicher Hinweis hinterlegt.",
+            note: angebot.verguenstigungsGrund || "Kein zusätzlicher Hinweis hinterlegt.",
             referenceLabel: "Angebot",
             referenceValue: angebot.angebotsNr,
             partnerLabel: "Kunde",
@@ -552,7 +555,7 @@ export default function Angebote() {
         });
     };
 
-    const anfrageImDialog = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId));
+    const anfrageImDialog = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId)) || null;
     const kundeImDialog = useMemo(
         () => kunden.find(item => String(item.id) === String(draft.kundeId || anfrageImDialog?.kundeId || "")) || null,
         [anfrageImDialog, draft.kundeId, kunden]
@@ -590,7 +593,7 @@ export default function Angebote() {
             const zeEinheit = String(position.zeEinheit || "").trim();
             return {
                 text: berechnungstyp === "ZE" && zeEinheit
-                    ? `Berechnungstyp: ${berechnungstyp} | Zeiteinheit: ${zeEinheit}`
+                     ? `Berechnungstyp: ${berechnungstyp} | Zeiteinheit: ${zeEinheit}`
                     : `Berechnungstyp: ${berechnungstyp}`,
                 istKritisch: false,
                 andereAngeboteText: ""
@@ -598,17 +601,17 @@ export default function Angebote() {
         }
 
         const artikelEintrag = artikel.find(item => String(item.id) === String(position.artikelId));
-        const bestand = Number(artikelEintrag?.bestand || 0);
+        const bestand = Number(artikelEintrag.bestand || 0);
         const verplant = Number(verplanteMengen[String(position.artikelId)] || 0);
         const verfuegbar = bestand - verplant;
         const inAngeboten = Number(offeneAngeboteJeArtikel[String(position.artikelId)] || 0);
         const imZulauf = Number(offeneBestellmengen[String(position.artikelId)] || 0);
         const projected = verfuegbar - Number(position.menge || 0);
-        const sicherheitsbestand = Number(artikelEintrag?.mindestmenge || 0);
+        const sicherheitsbestand = Number(artikelEintrag.mindestmenge || 0);
         const unterschreitetSicherheitsbestand = projected < sicherheitsbestand;
 
         return {
-            text: `Verfuegbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Sicherheitsbestand von ${sicherheitsbestand} wird unterschritten` : ""}`,
+            text: `Verfügbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Sicherheitsbestand von ${sicherheitsbestand} wird unterschritten` : ""}`,
             istKritisch: Number(position.menge || 0) > verfuegbar || unterschreitetSicherheitsbestand
         };
     };
@@ -640,21 +643,22 @@ export default function Angebote() {
         const gfFreigabeNoetig = gfFreigabeAktiv;
 
         if (!kunde || draft.positionenDraft.length === 0) {
-            setDraft(current => ({ ...current, fehler: "Bitte einen Kunden und mindestens eine Position auswaehlen." }));
-            return;
+            setDraft(current => ({ ...current, fehler: "Bitte einen Kunden und mindestens eine Position auswählen." }));
+            return false;
         }
 
         if (editingOfferId) {
             const bestehendesAngebot = angeboteService.getById(editingOfferId);
             if (!bestehendesAngebot) {
                 setDraft(current => ({ ...current, fehler: "Das Angebot konnte nicht mehr gefunden werden." }));
-                return;
+                return false;
             }
 
             const freigabeDirektErteilen = (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (brauchtFreigabe ? false : draft.direktSenden);
             const freigabeNoetig = !freigabeDirektErteilen;
             const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
 
+            const referenzierteAnfrageId = anfrage?.id || "";
             const aktualisiert = {
                 ...bestehendesAngebot,
                 kundeId: kunde.id,
@@ -669,28 +673,29 @@ export default function Angebote() {
                 direktSendenGewuenscht: freigabeDirektErteilen,
                 freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
                 freigabeNotiz: mindestmengenFreigabeNoetig
-                    ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                     ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
                     : gfFreigabeNoetig
-                        ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
+                         ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
                     : "",
-                freigegebenVon: freigabeDirektErteilen ? (user?.username || "") : String(bestehendesAngebot.freigegebenVon || "")
+                freigegebenVon: freigabeDirektErteilen ? (user.username || "") : String(bestehendesAngebot.freigegebenVon || ""),
+                anfrageId: bestehendesAngebot.anfrageId || referenzierteAnfrageId
             };
 
             angeboteService.update(aktualisiert);
 
             nachrichtenService.create({
                 vorgangId: bestehendesAngebot.vorgangId || vorgangId,
-                anfrageId: bestehendesAngebot.anfrageId || draft.sourceInquiryId || "",
+                anfrageId: bestehendesAngebot.anfrageId || referenzierteAnfrageId,
                 angebotId: bestehendesAngebot.id,
                 kundeId: kunde.id,
                 datum: heute,
                 zeitpunkt: getBerlinTimestamp(),
                 senderRolle: "Verkauf",
-                senderName: user?.name || user?.username || "Schuelerfirma Verkauf",
-                betreff: `Angebot ${bestehendesAngebot.angebotsNr} ueberarbeitet`,
+                senderName: getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf")),
+                betreff: `Angebot ${bestehendesAngebot.angebotsNr} überarbeitet`,
                 nachricht: freigabeDirektErteilen
-                    ? "Das Angebot wurde ueberarbeitet und direkt an den Kunden gesendet."
-                    : "Das Angebot wurde nach der internen Rueckmeldung ueberarbeitet und erneut zur Freigabe vorbereitet.",
+                     ? "Das Angebot wurde überarbeitet und direkt an den Kunden gesendet."
+                    : "Das Angebot wurde nach der internen Rückmeldung überarbeitet und erneut zur Freigabe vorbereitet.",
                 typ: "Interne Freigabe"
             });
 
@@ -699,20 +704,20 @@ export default function Angebote() {
             }
 
             setRefreshKey(value => value + 1);
-            handleClose();
-            return;
+            return true;
         }
 
         const revisionInfo = naechsteAngebotsrevision(vorgangId);
         const freigabeDirektErteilen = (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (brauchtFreigabe ? false : draft.direktSenden);
         const freigabeNoetig = !freigabeDirektErteilen;
         const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
+        const referenzierteAnfrageId = anfrage?.id || "";
         const neuesAngebot = angeboteService.add({
             angebotsNr: `${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`,
             angebotsBasisNr: revisionInfo.angebotsBasisNr,
             revision: revisionInfo.revision,
             vorgangId,
-            anfrageId: draft.sourceInquiryId || "",
+            anfrageId: referenzierteAnfrageId,
             kundeId: kunde.id,
             datum: heute,
             gueltigBis: draft.gueltigBis,
@@ -725,12 +730,12 @@ export default function Angebote() {
             bearbeiter: draft.bearbeiter,
             direktSendenGewuenscht: freigabeDirektErteilen,
             freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
-            freigabeAngefragtVon: user?.username || draft.bearbeiter,
-            freigegebenVon: freigabeDirektErteilen ? (user?.username || "") : "",
+            freigabeAngefragtVon: user.username || draft.bearbeiter,
+            freigegebenVon: freigabeDirektErteilen ? (user.username || "") : "",
             freigabeNotiz: mindestmengenFreigabeNoetig
-                ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                 ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
                 : gfFreigabeNoetig
-                    ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
+                     ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
                 : ""
         });
 
@@ -738,14 +743,14 @@ export default function Angebote() {
             freigabenService.create({
                 titel: `${mindestmengenFreigabeNoetig ? "Sicherheitsbestandsfreigabe" : "Preisfreigabe"} ${neuesAngebot.angebotsNr}`,
                 bereich: "verkauf",
-                verantwortung: "Geschaeftsfuehrung",
+                verantwortung: "Geschäftsführung",
                 status: "offen",
                 datum: heute,
                 bezug: neuesAngebot.angebotsNr,
                 angebotId: neuesAngebot.id,
                 vorgangId,
                 notiz: mindestmengenFreigabeNoetig
-                    ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                     ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
                     : `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
             });
         }
@@ -762,7 +767,7 @@ export default function Angebote() {
             sendeAngebotAnKunden(neuesAngebot);
         }
 
-        if (draft.sourceInquiryId && anfrage?.vorgangId && !freigabeDirektErteilen) {
+        if (draft.sourceInquiryId && anfrage.vorgangId && !freigabeDirektErteilen) {
             nachrichtenService.create({
                 vorgangId: anfrage.vorgangId,
                 anfrageId: anfrage.id,
@@ -770,7 +775,7 @@ export default function Angebote() {
                 kundeId: anfrage.kundeId || kunde.id,
                 datum: heute,
                 senderRolle: "Verkauf",
-                senderName: "Schuelerfirma Verkauf",
+                senderName: "Schülerfirma Verkauf",
                 betreff: `Interne Weiterleitung an ${bearbeiterLabel}`,
                 nachricht: `Die Anfrage wurde intern an ${bearbeiterLabel} zur Angebotserstellung weitergeleitet.`,
                 typ: "Interne Weiterleitung"
@@ -778,7 +783,7 @@ export default function Angebote() {
         }
 
         setRefreshKey(value => value + 1);
-        handleClose();
+        return true;
     };
 
     const handleClose = () => {
@@ -793,7 +798,7 @@ export default function Angebote() {
     const toggleStatus = value => {
         setSelectedStatuses(currentValues => (
             currentValues.includes(value)
-                ? currentValues.filter(entry => entry !== value)
+                 ? currentValues.filter(entry => entry !== value)
                 : [...currentValues, value]
         ));
     };
@@ -818,7 +823,7 @@ export default function Angebote() {
             ...angebot,
             freigabeStatus: "freigegeben",
             freigabeNotiz: approvalNote.trim() || angebot.freigabeNotiz || "",
-            freigegebenVon: user?.username || user?.name || "verkauf",
+            freigegebenVon: user.username || user.name || "verkauf",
             direktSendenGewuenscht: true,
             status: "wartet auf Antwort"
         };
@@ -848,9 +853,9 @@ export default function Angebote() {
             datum: heute,
             zeitpunkt: getBerlinTimestamp(),
             senderRolle: "Verkauf Freigabe",
-            senderName: user?.name || user?.username || "Verkauf Senior",
-            betreff: `Ueberarbeitung ${angebot.angebotsNr}`,
-            nachricht: `Bitte Angebot ${angebot.angebotsNr} ueberarbeiten. Hinweis: ${approvalNote.trim()}`,
+            senderName: getUserDisplayNameWithRole(user, String(user.username || "Verkauf Senior")),
+            betreff: `Überarbeitung ${angebot.angebotsNr}`,
+            nachricht: `Bitte Angebot ${angebot.angebotsNr} überarbeiten. Hinweis: ${approvalNote.trim()}`,
             typ: "Interne Freigabe"
         });
         setRefreshKey(value => value + 1);
@@ -879,9 +884,9 @@ export default function Angebote() {
             datum: heute,
             zeitpunkt: getBerlinTimestamp(),
             senderRolle: "Verkauf Freigabe",
-            senderName: user?.name || user?.username || "Verkauf Senior",
-            betreff: `Ueberarbeitung ${angebot.angebotsNr}`,
-            nachricht: `Bitte Angebot ${angebot.angebotsNr} ueberarbeiten. Hinweis: ${approvalNote.trim()}`,
+            senderName: getUserDisplayNameWithRole(user, String(user.username || "Verkauf Senior")),
+            betreff: `Überarbeitung ${angebot.angebotsNr}`,
+            nachricht: `Bitte Angebot ${angebot.angebotsNr} überarbeiten. Hinweis: ${approvalNote.trim()}`,
             typ: "Interne Freigabe"
         });
         setRefreshKey(value => value + 1);
@@ -896,7 +901,7 @@ export default function Angebote() {
         const payload = {
             titel: `Freigabe ${angebot.angebotsNr}`,
             bereich: "verkauf",
-            verantwortung: "Geschaeftsfuehrung",
+            verantwortung: "Geschäftsführung",
             status: "offen",
             datum: heute,
             bezug: angebot.angebotsNr,
@@ -929,22 +934,22 @@ export default function Angebote() {
     const dashboardTabs = [
         { key: "laufend", label: "Laufende Angebote", value: laufendeAngebote.length },
         { key: "freigabe", label: "Freizugebende Angebote", value: freigabeOffenAngebote.length },
-        { key: "ueberarbeitung", label: "Zur Ueberarbeitung zurueckgegeben", value: ueberarbeitungen.length },
+        { key: "ueberarbeitung", label: "Zur Überarbeitung zurückgegeben", value: ueberarbeitungen.length },
         { key: "alle", label: "Alle Angebote", value: neuesteAngebote.length }
     ];
     const sichtbareAngebote = activeTab === "freigabe"
-        ? freigabeOffenAngebote
+         ? freigabeOffenAngebote
         : activeTab === "ueberarbeitung"
-            ? ueberarbeitungen
+             ? ueberarbeitungen
         : activeTab === "alle"
-            ? alleAngebote
+             ? alleAngebote
             : laufendeAngebote;
     const tableTitle = activeTab === "freigabe"
-        ? "Freizugebende Angebote"
+         ? "Freizugebende Angebote"
         : activeTab === "ueberarbeitung"
-            ? "Zur Ueberarbeitung zurueckgegebene Angebote"
+             ? "Zur Überarbeitung zurückgegebene Angebote"
         : activeTab === "alle"
-            ? "Alle Angebote"
+             ? "Alle Angebote"
             : "Laufende Angebote";
     const mindestmengenWarnungenImDialog = getMindestmengenWarnungen(draft.positionenDraft);
     const sicherheitsbestandFreigabeImDialog = mindestmengenWarnungenImDialog.length > 0;
@@ -984,7 +989,7 @@ export default function Angebote() {
             rowActions={[
                 { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotBearbeiten, variant: "secondary", isVisible: row => activeTab === "ueberarbeitung" && String(row.freigabeStatus || "") === "intern_abgelehnt" },
                 { name: "thread", label: "Chat", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: zumChatNavigieren, variant: "secondary", isVisible: row => !!row.anfrageId },
-                { name: "approve", label: "Pruefen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: freigabePruefen, variant: "success", isVisible: row => istErfahrenerVerkaeufer && row.statusNormalized === "in vorbereitung" && !["freigegeben", "intern_abgelehnt"].includes(String(row.freigabeStatus || "")) }
+                { name: "approve", label: "Prüfen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: freigabePruefen, variant: "success", isVisible: row => istErfahrenerVerkaeufer && row.statusNormalized === "in vorbereitung" && !["freigegeben", "intern_abgelehnt"].includes(String(row.freigabeStatus || "")) }
             ]}
             detailLinkResolver={({ field, row, value }) => {
                 if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
@@ -996,7 +1001,7 @@ export default function Angebote() {
             open={open}
             title={editingOfferId ? "Angebot bearbeiten" : (draft.sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot")}
             onClose={handleClose}
-            footer={<button type="button" onClick={speichern}>{editingOfferId ? "Aenderungen speichern" : "Angebot speichern"}</button>}
+            footer={<SaveButton onSave={speichern} onSuccess={handleClose}>{editingOfferId ? "Änderungen speichern" : "Angebot speichern"}</SaveButton>}
         >
             {draft.sourceInquiryId && anfrageImDialog && <div className="offer-forward-panel form-row thread-section">
                 <div className="thread-section-header">
@@ -1013,7 +1018,7 @@ export default function Angebote() {
                     </div>
                     <div className="offer-forward-card thread-subcard">
                         <Label>Bearbeitet von</Label>
-                        <LookupField value={draft.bearbeiter} options={bearbeiterOptionen} onChange={value => setDraft(item => ({ ...item, bearbeiter: value }))} placeholder="Bearbeiter auswaehlen..."/>
+                        <LookupField value={draft.bearbeiter} options={bearbeiterOptionen} onChange={value => setDraft(item => ({ ...item, bearbeiter: value }))} placeholder="Bearbeiter auswählen..."/>
                     </div>
                 </div>
                 <div className="offer-forward-card thread-subcard">
@@ -1043,8 +1048,8 @@ export default function Angebote() {
                 </div>
                 <div className="thread-template-panel">
                     <div className="offer-forward-card thread-subcard">
-                        <Label glossaryKey="lieferantenvergleich">Fruehere Angebote als Vorlage</Label>
-                        <p>Bei Bedarf kann ein bisheriger Angebotsstand uebernommen und anschliessend geaendert werden.</p>
+                        <Label glossaryKey="lieferantenvergleich">Frühere Angebote als Vorlage</Label>
+                        <p>Bei Bedarf kann ein bisheriger Angebotsstand übernommen und anschließend geändert werden.</p>
                     </div>
                     <div className="thread-document-links">
                         {bisherigeAngeboteImDialog.map(item => <button
@@ -1053,7 +1058,7 @@ export default function Angebote() {
                             className={`thread-document-link${String(draft.selectedTemplateOfferId) === String(item.id) ? " is-active" : ""}`}
                             onClick={() => angebotAlsVorlageUebernehmen(String(item.id))}
                         >
-                            {item.angebotsNr} uebernehmen
+                            {item.angebotsNr} übernehmen
                         </button>)}
                     </div>
                 </div>
@@ -1064,17 +1069,17 @@ export default function Angebote() {
                 </div>
                 <div className="thread-form-grid">
                     <div><Label>Angebotsnummer</Label><input type="text" value={draft.angebotsNrDraft} disabled/></div>
-                    <div><Label glossaryKey="gueltigbis">Gueltig bis</Label><input type="date" value={draft.gueltigBis} onChange={event => setDraft(item => ({ ...item, gueltigBis: event.target.value }))}/></div>
+                    <div><Label glossaryKey="gueltigbis">Gültig bis</Label><input type="date" value={draft.gueltigBis} onChange={event => setDraft(item => ({ ...item, gueltigBis: event.target.value }))}/></div>
                 </div>
             </div>
             <div className="form-row thread-section">
                 <div className="thread-section-header">
-                    <Label>Position hinzufuegen</Label>
+                    <Label>Position hinzufügen</Label>
                 </div>
                 <div className="thread-form-grid thread-form-grid-actions">
                     <div><Label>Artikel / Service</Label><LookupField value={draft.leistungId} options={leistungsOptionen} onChange={value => setDraft(item => ({ ...item, leistungId: value }))} placeholder="Artikel oder Service suchen..."/></div>
                     <div><Label glossaryKey="angebotspositionen">Menge</Label><NumberField value={draft.menge} min="1" onChange={wert => setDraft(item => ({ ...item, menge: Number(wert) }))}/></div>
-                    <button type="button" onClick={positionHinzufuegen}>Position hinzufuegen</button>
+                    <button type="button" onClick={positionHinzufuegen}>Position hinzufügen</button>
                 </div>
             </div>
             <div className="form-row thread-section">
@@ -1100,7 +1105,7 @@ export default function Angebote() {
                                     String(item.id) === String(position.serviceId || position.artikelId || "")
                                     && String(item.leistungTyp || "") === String(position.leistungTyp || "")
                                 );
-                                const nummer = String(leistung?.nummer || position.artikelId || position.serviceId || "-");
+                                const nummer = String(leistung.nummer || position.artikelId || position.serviceId || "-");
                                 return <Fragment key={`${position.leistungTyp}-${position.artikelId || position.serviceId || index}`}>
                                     <tr>
                                         <td>{nummer}</td>
@@ -1112,7 +1117,7 @@ export default function Angebote() {
                                                 onChange={wert => setDraft(items => ({
                                                     ...items,
                                                     positionenDraft: items.positionenDraft.map(item => item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp
-                                                        ? { ...item, menge: wert }
+                                                         ? { ...item, menge: wert }
                                                         : item
                                                     )
                                                 }))}
@@ -1137,7 +1142,7 @@ export default function Angebote() {
                     </table>
                 </div>}
                 <div className="thread-summary-card">
-                    <Label>Kalkulationsuebersicht</Label>
+                    <Label>Kalkulationsübersicht</Label>
                     <div className="thread-summary-lines">
                         <div><span>Zwischensumme</span><strong>{calculatePositionenTotal(draft.positionenDraft).toFixed(2)} EUR</strong></div>
                         {draft.preispositionenDraft.length > 0 && (
@@ -1147,7 +1152,7 @@ export default function Angebote() {
                                     return draft.preispositionenDraft.map(position => (
                                         <div key={position.id}>
                                             <span>{position.beschreibung || (position.typ === "percent" ? "Prozent-Anpassung" : "Betrag")}</span>
-                                            <strong>{position.typ === "percent" ? `${Number(position.wert || 0).toFixed(2)} % ≙ ${ (baseTotal * Number(position.wert || 0) / 100).toFixed(2) } EUR` : `${Number(position.wert || 0).toFixed(2)} EUR`}</strong>
+                                            <strong>{position.typ === "percent" ? `${Number(position.wert || 0).toFixed(2)} % \u2249 ${ (baseTotal * Number(position.wert || 0) / 100).toFixed(2) } EUR` : `${Number(position.wert || 0).toFixed(2)} EUR`}</strong>
                                         </div>
                                     ));
                                 })()}
@@ -1248,20 +1253,20 @@ export default function Angebote() {
                     </Checkbox>
                 </div>
                 {brauchtFreigabe && <div className="form-error">
-                    {brauchtFreigabe && <p>Du hast keine Berechtigung zur eigenstaendigen Freigabe.</p>}
+                    {brauchtFreigabe && <p>Du hast keine Berechtigung zur eigenständigen Freigabe.</p>}
                 </div>}
                 {sicherheitsbestandFreigabeImDialog && <p className="form-error">
-                    Die GF-Freigabe wurde automatisch gesetzt, da ein Artikel unter den Sicherheitsbestand geraet.
+                    Die GF-Freigabe wurde automatisch gesetzt, da ein Artikel unter den Sicherheitsbestand gerät.
                 </p>}
                 {preisabweichungFreigabeImDialog && <p className="form-error">
-                    Die GF-Freigabe wurde automatisch gesetzt, weil die Abweichung zur Artikelsumme den Grenzwert von {Number(optionen.angebotGfFreigabeAbweichungProzent || 10).toFixed(1)} % erreicht oder ueberschreitet.
+                    Die GF-Freigabe wurde automatisch gesetzt, weil die Abweichung zur Artikelsumme den Grenzwert von {Number(optionen.angebotGfFreigabeAbweichungProzent || 10).toFixed(1)} % erreicht oder überschreitet.
                 </p>}
             </div>
             {draft.fehler && <p className="form-error">{draft.fehler}</p>}
         </Dialog>
         {approvalOffer && <OfferApprovalDialog
             open={approvalOpen}
-            title="Angebot pruefen"
+            title="Angebot prüfen"
             onClose={() => {
                 setApprovalOpen(false);
                 setApprovalOffer(null);

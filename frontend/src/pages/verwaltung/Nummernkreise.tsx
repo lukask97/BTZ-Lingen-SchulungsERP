@@ -3,6 +3,7 @@ import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import TextField from "../../components/form/TextField";
+import SaveButton from "../../components/SaveButton";
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import nummernkreiseService from "../../services/verwaltung/nummernkreiseService";
@@ -53,14 +54,14 @@ export default function Nummernkreise() {
     } = useCRUDPage("nummernkreise", INITIAL_DATA.nummernkreise, nummernkreiseService as any, {
         requiredFields: [
             { field: "bezeichnung", label: "Bereich" },
-            { field: "kuerzel", label: "Kuerzel" }
+            { field: "kuerzel", label: "Kürzel" }
         ]
     });
 
     const columns = useMemo(() => [
         { field: "bezeichnung", title: "Bereich" },
-        { field: "schluessel", title: "Schluessel" },
-        { field: "kuerzel", title: "Kuerzel" },
+        { field: "schluessel", title: "Schlssel" },
+        { field: "kuerzel", title: "Kürzel" },
         { field: "beispiel", title: "Beispiel", visible: false }
     ], []);
     const rows = useMemo(
@@ -86,14 +87,19 @@ export default function Nummernkreise() {
             page={1}
         />
 
-        <Dialog open={open} title={editMode ? "Nummernkreis bearbeiten" : "Nummernkreis"} onClose={handleClose}>
+        <Dialog
+            open={open}
+            title={editMode ? "Nummernkreis bearbeiten" : "Nummernkreis"}
+            onClose={handleClose}
+            footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Speichern</SaveButton>}
+        >
             <Label required glossaryKey="nummernkreis">Bereich</Label>
             <TextField value={currentItem.bezeichnung} onChange={value => setCurrentItem({ ...currentItem, bezeichnung: value })}/>
 
-            <Label glossaryKey="nummernkreis">Schluessel</Label>
+            <Label glossaryKey="nummernkreis">Schlssel</Label>
             <TextField value={currentItem.schluessel} onChange={value => setCurrentItem({ ...currentItem, schluessel: value })} disabled/>
 
-            <Label required glossaryKey="nummernkreis">Kuerzel</Label>
+            <Label required glossaryKey="nummernkreis">Krzel</Label>
             <TextField value={currentItem.kuerzel} onChange={value => setCurrentItem({ ...currentItem, kuerzel: value.toUpperCase() })}/>
 
             <div className="form-row">
@@ -101,10 +107,7 @@ export default function Nummernkreise() {
                 <strong>{createBeispiel(currentItem)}</strong>
             </div>
 
-            <div className="form-row">
-                {error && <p className="form-error">{error}</p>}
-                <button type="button" onClick={speichern}>Speichern</button>
-            </div>
+            <div className="form-row">{error && <p className="form-error">{error}</p>}</div>
         </Dialog>
     </>;
 }

@@ -134,7 +134,7 @@ export default function Buchhaltung() {
             <p>Die Übersicht zeigt vereinfacht, welche offenen Posten bereits durch Belege, Zahlungsnachweise oder Mahndokumente ergänzt wurden.</p>
             <ul>
                 {belegeProRechnung.map(rechnung => <li key={rechnung.rechnungsnr}>
-                    <Link className="detail-link" to={`/belege?bezug=${rechnung.rechnungsnr}`}><strong>{rechnung.rechnungsnr}</strong></Link> – {rechnung.kunde}: {rechnung.belege.length === 0 ? "kein Beleg hinterlegt" : `${rechnung.belege.length} Beleg(e) vorhanden`}
+                    <Link className="detail-link" to={`/belegebezug=${rechnung.rechnungsnr}`}><strong>{rechnung.rechnungsnr}</strong></Link> – {rechnung.kunde}: {rechnung.belege.length === 0 ? "kein Beleg hinterlegt" : `${rechnung.belege.length} Beleg(e) vorhanden`}
                     {rechnung.belege.length > 0 && <small> ({rechnung.belege.map(item => item.typ).join(", ")})</small>}
                 </li>)}
             </ul>

@@ -39,7 +39,7 @@ export function getRelativeBerlinDate(days: number, baseDate = getBerlinDate()) 
     return addDaysToIsoDate(baseDate, days);
 }
 
-export function formatTimestampForDisplay(value?: string) {
+export function formatTimestampForDisplay(value: string) {
     if (!value) return "";
     return String(value).replace("T", " ").slice(0, 16);
 }

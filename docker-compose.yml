@@ -82,6 +82,8 @@ services:
 
       ERP_SECRET_KEY: erp-docker-secret
 
+      FLASK_DEBUG: "0"
+
       ERP_CORS_ORIGINS: "*"
 
       ERP_SERVER_CONFIG_PATH: /app_data/server-config.json

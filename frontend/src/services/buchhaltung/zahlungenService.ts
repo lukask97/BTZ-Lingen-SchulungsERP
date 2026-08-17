@@ -13,15 +13,15 @@ function normalizePayment(item: any = {}) {
     const rechnung = item.rechnungId ? rechnungenService.getById(item.rechnungId) : null;
     const bestellung = item.bestellungId ? bestellungenService.getById(item.bestellungId) : null;
     const referenceInvoice = rechnung || (item.rechnungsnr ? rechnungenService.list().find(entry => entry.rechnungsnr === item.rechnungsnr) : null);
-    const supplierIban = referenceInvoice?.lieferantId ? lieferantenService.getById(referenceInvoice.lieferantId)?.iban : "";
-    const customerIban = referenceInvoice?.kundeId ? kundenService.getById(referenceInvoice.kundeId)?.iban : "";
+    const supplierIban = referenceInvoice?.lieferantId ? lieferantenService.getById(referenceInvoice.lieferantId)?.iban || "" : "";
+    const customerIban = referenceInvoice?.kundeId ? kundenService.getById(referenceInvoice.kundeId)?.iban || "" : "";
 
     const partnerName = referenceInvoice
         ? (referenceInvoice.rechnungstyp === "Eingangsrechnung"
-            ? getSupplierName(referenceInvoice.lieferantId, referenceInvoice.kunde)
+             ? getSupplierName(referenceInvoice.lieferantId, referenceInvoice.kunde)
             : getCustomerName(referenceInvoice.kundeId, referenceInvoice.kunde))
         : (bestellung
-            ? getSupplierName(bestellung.lieferantId, bestellung.lieferant)
+             ? getSupplierName(bestellung.lieferantId, bestellung.lieferant)
             : (item.name || item.kunde || ""));
     const partnerIban = referenceInvoice?.iban
         || (referenceInvoice?.rechnungstyp === "Eingangsrechnung" ? supplierIban : customerIban)
@@ -55,7 +55,7 @@ function splitPayload(payload: any = {}) {
 }
 
 function updateReferencedInvoiceStatus(payment: any, invoiceStatus = "bezahlt") {
-    if (!payment?.rechnungId) return;
+    if (!payment.rechnungId) return;
     const rechnung = rechnungenService.getById(payment.rechnungId);
     if (!rechnung) return;
     rechnungenService.update({
@@ -96,7 +96,7 @@ const zahlungenService = {
         updateReferencedInvoiceStatus(updated, "bezahlt");
         return updated;
     },
-    markExecuted: (paymentId: number | string, executionDate?: string) => {
+    markExecuted: (paymentId: number | string, executionDate: string) => {
         const payment = baseService.getById(paymentId);
         if (!payment) return null;
         const updated = normalizePayment(baseService.update({

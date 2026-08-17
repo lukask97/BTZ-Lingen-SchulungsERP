@@ -17,7 +17,7 @@ type HistorieTab = "angebote" | "auftraege" | "bestellungen" | "rechnungen";
 
 const KUNDEN_TABS: { key: HistorieTab; label: string }[] = [
     { key: "angebote", label: "Angebote" },
-    { key: "auftraege", label: "Auftraege" },
+    { key: "auftraege", label: "Aufträge" },
     { key: "rechnungen", label: "Rechnungen" }
 ];
 
@@ -69,7 +69,7 @@ export default function PartnerHistorie() {
                 datum: item.datum,
                 status: item.status,
                 freigabe: item.freigabeStatus || "-",
-                gesamt: euro(item.gesamtbetrag ?? 0),
+                gesamt: euro(item.gesamtbetrag || 0),
                 link: `/angebote?focus=${item.id}`
             })),
         [angebote, selectedPartnerId]
@@ -83,7 +83,7 @@ export default function PartnerHistorie() {
                 nummer: item.auftragNr,
                 datum: item.datum,
                 status: item.status,
-                gesamt: euro(item.gesamtbetrag ?? 0),
+                gesamt: euro(item.gesamtbetrag || 0),
                 link: `/auftraege?focus=${item.id}`
             })),
         [auftraege, selectedPartnerId]
@@ -97,7 +97,7 @@ export default function PartnerHistorie() {
                 nummer: item.bestellNr,
                 datum: item.datum,
                 status: item.status,
-                gesamt: euro(item.gesamtbetrag ?? 0),
+                gesamt: euro(item.gesamtbetrag || 0),
                 link: `/bestellungen?focus=${item.id}`
             })),
         [bestellungen, selectedPartnerId]
@@ -106,7 +106,7 @@ export default function PartnerHistorie() {
     const partnerRechnungen = useMemo(
         () => rechnungen
             .filter(item => partnerTyp === "kunde"
-                ? String(item.kundeId || "") === String(selectedPartnerId) && item.rechnungstyp === "Ausgangsrechnung"
+                 ? String(item.kundeId || "") === String(selectedPartnerId) && item.rechnungstyp === "Ausgangsrechnung"
                 : String(item.lieferantId || "") === String(selectedPartnerId) && item.rechnungstyp === "Eingangsrechnung"
             )
             .map(item => ({
@@ -133,7 +133,7 @@ export default function PartnerHistorie() {
         ? [
             { field: "nummer", title: "Rechnung", render: row => <Link className="detail-link" to={row.link}>{row.nummer}</Link> },
             { field: "datum", title: "Datum" },
-            { field: "faelligAm", title: "Faellig am" },
+            { field: "faelligAm", title: "Fällig am" },
             { field: "status", title: "Status" },
             { field: "betrag", title: "Betrag" }
         ]
@@ -149,7 +149,7 @@ export default function PartnerHistorie() {
         ? [
             { key: "nummer", label: "Rechnung" },
             { key: "datum", label: "Datum" },
-            { key: "faelligAm", label: "Faellig am" },
+            { key: "faelligAm", label: "Fällig am" },
             { key: "status", label: "Status" },
             { key: "betrag", label: "Betrag" }
         ]
@@ -187,19 +187,19 @@ export default function PartnerHistorie() {
 
     return <>
         <h1>Partnerhistorie</h1>
-        <p>Hier lassen sich Vorgaenge zu einem Kunden oder Lieferanten gebuendelt nachschlagen. Die Auswahl funktioniert wie bei den Vertriebsdokumenten ueber ein Suchfeld.</p>
+        <p>Hier lassen sich Vorgänge zu einem Kunden oder Lieferanten gebündelt nachschlagen. Die Auswahl funktioniert wie bei den Vertriebsdokumenten über ein Suchfeld.</p>
 
         <section className="module-panel">
             <div className="personalakte-toolbar">
                 <div className="personalakte-select">
                     <Label>Partnerart</Label>
-                    <select value={partnerTyp} onChange={event => updateRoute(event.target.value as PartnerTyp, "")}>
+                    <select name="partner-typ" value={partnerTyp} onChange={event => updateRoute(event.target.value as PartnerTyp, "")}>
                         <option value="kunde">Kunde</option>
                         <option value="lieferant">Lieferant</option>
                     </select>
                 </div>
                 <div className="personalakte-select">
-                    <Label>{partnerTyp === "kunde" ? "Kunde auswaehlen" : "Lieferant auswaehlen"}</Label>
+                    <Label>{partnerTyp === "kunde" ? "Kunde auswählen" : "Lieferant auswählen"}</Label>
                     <LookupField
                         value={selectedPartnerId}
                         options={partnerOptionen}
@@ -220,7 +220,7 @@ export default function PartnerHistorie() {
                         Excel exportieren
                     </button>
                     <Link className="button-link" to={partnerTyp === "kunde" ? "/kunden" : "/lieferanten"}>
-                        {partnerTyp === "kunde" ? "Kunden oeffnen" : "Lieferanten oeffnen"}
+                        {partnerTyp === "kunde" ? "Kunden öffnen" : "Lieferanten öffnen"}
                     </Link>
                 </div>
             </div>

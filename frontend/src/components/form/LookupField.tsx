@@ -20,7 +20,7 @@ export default function LookupField({
     const [open, setOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
-    const selectedOption = options.find(option => String(option.value) === String(value));
+    const selectedOption = options.find(option => String(option.value) === String(value)) || null;
 
     useEffect(() => {
         setQuery(selectedOption?.label || "");

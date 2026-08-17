@@ -4,6 +4,7 @@ import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
+import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import OverviewCards from "../../components/OverviewCards";
@@ -27,17 +28,17 @@ export default function Belege() {
     const rechnungIdFilter = rechnungen.find(item => item.rechnungsnr === bezugFilter)?.id || "";
 
     const speichern = () => {
-        if (current.bezugTyp === "Rechnung" && !current.rechnungId) return;
-        if (current.bezugTyp !== "Rechnung" && !current.bezug.trim()) return;
+        if (current.bezugTyp === "Rechnung" && !current.rechnungId) return false;
+        if (current.bezugTyp !== "Rechnung" && !current.bezug.trim()) return false;
         if (editMode) {
             belegeService.update({ ...current });
         } else {
             belegeService.create({ ...current, datum: today, status: "archiviert" });
         }
         setBelege(belegeService.list());
-        setOpen(false);
         setEditMode(false);
         setCurrent({ typ: "Rechnungskopie", bezugTyp: "Rechnung", rechnungId: "", bezug: "", beschreibung: "" });
+        return true;
     };
 
     const bearbeiten = (beleg) => {
@@ -61,9 +62,9 @@ export default function Belege() {
     const rechnungenMitBeleg = new Set(belege.filter(item => item.bezugTyp === "Rechnung").map(item => String(item.rechnungId || "")));
     const fehlendeBelege = rechnungen.filter(item => !rechnungenMitBeleg.has(String(item.id)));
     const versendet = daten.filter(item => item.status === "versendet").length;
-    const resolveInvoiceLink = (rechnung: any) => rechnung?.rechnungstyp === "Eingangsrechnung"
-        ? `/eingangsrechnungen?focus=${rechnung.rechnungsnr}`
-        : `/ausgangsrechnungen?focus=${rechnung.rechnungsnr}`;
+    const resolveInvoiceLink = (rechnung: any) => rechnung.rechnungstyp === "Eingangsrechnung"
+         ? `/eingangsrechnungenfocus=${rechnung.rechnungsnr}`
+        : `/ausgangsrechnungenfocus=${rechnung.rechnungsnr}`;
 
     return <>
         <OverviewCards cards={[
@@ -113,10 +114,15 @@ export default function Belege() {
         {fehlendeBelege.length > 0 && <section className="module-panel">
             <h2>Rechnungen ohne zugeordneten Beleg</h2>
             <ul className="module-list">
-                {fehlendeBelege.map(item => <li key={item.rechnungsnr}><Link className="detail-link" to={`/belege?bezug=${item.rechnungsnr}`}>{item.rechnungsnr}</Link> – {item.kunde}</li>)}
+                {fehlendeBelege.map(item => <li key={item.rechnungsnr}><Link className="detail-link" to={`/belegebezug=${item.rechnungsnr}`}>{item.rechnungsnr}</Link> \u2013 {item.kunde}</li>)}
             </ul>
         </section>}
-        <Dialog open={open} title={editMode ? "Beleg bearbeiten" : "Beleg archivieren"} onClose={() => setOpen(false)}>
+        <Dialog
+            open={open}
+            title={editMode ? "Beleg bearbeiten" : "Beleg archivieren"}
+            onClose={() => setOpen(false)}
+            footer={<SaveButton onSave={speichern} onSuccess={() => setOpen(false)}>{editMode ? "Änderungen speichern" : "Speichern"}</SaveButton>}
+        >
             <div><Label>Typ</Label><select value={current.typ} onChange={event => setCurrent(item => ({ ...item, typ: event.target.value }))}>
                 <option value="Rechnungskopie">Rechnungskopie</option>
                 <option value="Zahlungsbeleg">Zahlungsbeleg</option>
@@ -138,7 +144,6 @@ export default function Belege() {
                 }} placeholder="Rechnung suchen..."/>
                 : <TextField value={current.bezug} onChange={value => setCurrent(item => ({ ...item, bezug: value }))}/>}</div>
             <div className="form-row"><Label>Beschreibung</Label><TextArea rows={3} value={current.beschreibung} onChange={value => setCurrent(item => ({ ...item, beschreibung: value }))}/></div>
-            <div className="form-row"><button type="button" className={editMode ? "button-secondary" : ""} onClick={speichern}>{editMode ? "Änderungen speichern" : "Speichern"}</button></div>
         </Dialog>
     </>;
 }

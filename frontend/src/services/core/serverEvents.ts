@@ -2,18 +2,18 @@ import { clearTableCache, invalidateTableCache } from "./dataCache";
 import API_URL, { isDatabaseModeEnabled } from "./api";
 
 type TableChangedPayload = {
-    table?: string;
-    action?: string;
-    id?: string | number;
+    table: string;
+    action: string;
+    id: string | number;
 };
 
 type DataResetPayload = {
-    mode?: string;
-    tables?: string[];
+    mode: string;
+    tables: string[];
 };
 
 type SystemPayload = {
-    mode?: string;
+    mode: string;
 };
 
 type TableListener = (payload: TableChangedPayload) => void;
