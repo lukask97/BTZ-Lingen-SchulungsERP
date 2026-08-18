@@ -230,10 +230,10 @@
       "serviceNr": "SER001",
       "name": "Reparatur",
       "kategorie": "Werkstatt",
-      "berechnungstyp": "Pauschal",
-      "zeEinheit": "",
+      "berechnungstyp": "ZE",
+      "zeEinheit": "10 Minuten",
       "einkaufspreis": 0,
-      "verkaufspreis": 65,
+      "verkaufspreis": 20,
       "beschreibung": "Einfache Werkstattleistung für Reparaturen."
     },
     {
