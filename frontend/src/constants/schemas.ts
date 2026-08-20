@@ -18,6 +18,13 @@ export const INITIAL_DATA = {
         bewertung: 3,
         abc: "Unbestimmt"
     },
+    lieferantenArtikelStaffeln: {
+        id: null,
+        artikelId: "",
+        lieferantId: "",
+        mindestbestellmenge: 1,
+        stueckpreis: 0
+    },
     kunden: {
         id: null,
         kundenNr: "",
@@ -46,7 +53,8 @@ export const INITIAL_DATA = {
         mindestmenge: 0,
         bedarfsmeldungBei: 0,
         beschreibung: "",
-        komponenten: []
+        komponenten: [],
+        individualisierungen: []
     },
     kategorien: {
         id: null,

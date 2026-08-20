@@ -33,6 +33,8 @@ import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 import freigabenService from "../../services/gf/freigabenService";
 import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
 import { getUserDisplayNameWithRole } from "../../utils/userDisplay";
+import { getKategoriePfad } from "../../services/logistik/kategorienService";
+import { getOfferDemandByArtikel } from "../../utils/offerDemand";
 
 const heute = getBerlinDate();
 const MWST_RATE = 0.19;
@@ -97,7 +99,8 @@ const toLeistung = (item, typ) => ({
     preis: Number(item.verkaufspreis || item.preis || 0),
     artikelTyp: typ === "Service" ? "Dienstleistung" : item.artikelTyp,
     berechnungstyp: typ === "Service" ? String(item.berechnungstyp || "Pauschal") : "",
-    zeEinheit: typ === "Service" ? String(item.zeEinheit || "") : ""
+    zeEinheit: typ === "Service" ? String(item.zeEinheit || "") : "",
+    individualisierungen: item.individualisierungen || []
 });
 
 function normalizeText(value = "") {
@@ -170,21 +173,7 @@ function getAndereOffeneAngeboteMitArtikel(angebote, artikelId, currentPositione
 }
 
 function getOpenOfferCountByArtikel(angebote = []) {
-    return angebote
-        .filter(angebot => istOffenesAngebot(angebot))
-        .reduce((map, angebot) => {
-            const artikelIds = new Set(
-                (angebot.positionen || [])
-                    .filter(position => String(position.leistungTyp || "").toLowerCase() !== "service" && position.artikelId)
-                    .map(position => String(position.artikelId))
-            );
-
-            artikelIds.forEach(artikelId => {
-                map[artikelId] = Number(map[artikelId] || 0) + 1;
-            });
-
-            return map;
-        }, {});
+    return getOfferDemandByArtikel(angebote, artikelService.getAll(), istOffenesAngebot);
 }
 
 function getDefaultStatusFilter() {
@@ -212,7 +201,19 @@ function createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigab
 }
 
 function createAngebotPositionDraft(auswahl, menge) {
+    let initialOptions = {};
+    if (auswahl.artikelTyp === "Baugruppe" && auswahl.individualisierungen) {
+        const groups = [...new Set(auswahl.individualisierungen.map(i => i.kategorieId))];
+        groups.forEach(g => {
+            const std = auswahl.individualisierungen.find(i => i.kategorieId === g && i.standard);
+            if (std) {
+                initialOptions[g] = std.individualArtikelId;
+            }
+        });
+    }
+
     return {
+        rowId: `pos-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         artikelId: auswahl.id,
         artikel: auswahl.name,
         artikelTyp: auswahl.artikelTyp,
@@ -221,7 +222,8 @@ function createAngebotPositionDraft(auswahl, menge) {
         menge: Number(menge),
         einzelpreis: auswahl.preis,
         berechnungstyp: auswahl.berechnungstyp || "",
-        zeEinheit: auswahl.zeEinheit || ""
+        zeEinheit: auswahl.zeEinheit || "",
+        selectedOptionen: initialOptions
     };
 }
 
@@ -242,13 +244,19 @@ function normalizeVorlagenPosition(position, leistungen = []) {
     );
 
     if (auswahl) {
+        const draft = createAngebotPositionDraft(auswahl, Number(position.menge || 1));
         return {
-            ...createAngebotPositionDraft(auswahl, Number(position.menge || 1)),
+            ...draft,
+            rowId: position.rowId || draft.rowId,
+            selectedOptionen: position.selectedOptionen || draft.selectedOptionen,
+            isOptionForId: position.isOptionForId,
+            optionKategorieId: position.optionKategorieId,
             einzelpreis: Number(position.einzelpreis || auswahl.preis || 0)
         };
     }
 
     return {
+        rowId: position.rowId || `pos-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         artikelId: artikelId || "",
         artikel: position.artikel || position.name || "Unbekannte Position",
         artikelTyp: position.artikelTyp || "Einzelartikel",
@@ -257,12 +265,111 @@ function normalizeVorlagenPosition(position, leistungen = []) {
         menge: Number(position.menge || 1),
         einzelpreis: Number(position.einzelpreis || 0),
         berechnungstyp: position.berechnungstyp || "",
-        zeEinheit: position.zeEinheit || ""
+        zeEinheit: position.zeEinheit || "",
+        selectedOptionen: position.selectedOptionen || {},
+        isOptionForId: position.isOptionForId,
+        optionKategorieId: position.optionKategorieId
     };
 }
 
 function cloneAngebotspositionen(positionen = [], leistungen = []) {
     return positionen.map(position => normalizeVorlagenPosition(position, leistungen));
+}
+
+function getOptionGroups(individualisierungen = []) {
+    return [...new Set((individualisierungen || []).map(item => item.kategorieId))];
+}
+
+function calculateOptionAufpreisProEinheit(position, leistung) {
+    if (!leistung?.individualisierungen?.length) return 0;
+    return getOptionGroups(leistung.individualisierungen).reduce((summe, groupId) => {
+        const gruppenOptionen = leistung.individualisierungen.filter(item => item.kategorieId === groupId);
+        const defaultOpt = gruppenOptionen.find(item => item.standard) || gruppenOptionen[0];
+        const aktuelleOptionId = Number(position.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || 0);
+        const individuelleAuswahl = gruppenOptionen.find(item => Number(item.individualArtikelId) === aktuelleOptionId);
+        return summe + Number(individuelleAuswahl?.preisaenderung || 0) * Number(individuelleAuswahl?.anzahl || 0);
+    }, 0);
+}
+
+function hasIndividualisierungen(leistung) {
+    return Boolean(leistung && Array.isArray(leistung.individualisierungen) && leistung.individualisierungen.length > 0);
+}
+
+function getAktuellenAngebotsbedarf(positionen = [], leistungen = []) {
+    return (positionen || []).reduce((map, position) => {
+        if (position.leistungTyp === "Service" || !position.artikelId || position.isOptionForId) {
+            return map;
+        }
+
+        const key = String(position.artikelId);
+        map[key] = Number(map[key] || 0) + Number(position.menge || 0);
+
+        const leistung = leistungen.find(item =>
+            String(item.id) === String(position.serviceId || position.artikelId || "")
+            && String(item.leistungTyp || "") === String(position.leistungTyp || "")
+        );
+
+        if (!leistung?.individualisierungen?.length) {
+            return map;
+        }
+
+        getOptionGroups(leistung.individualisierungen).forEach(groupId => {
+            const gruppenOptionen = leistung.individualisierungen.filter(item => item.kategorieId === groupId);
+            const defaultOpt = gruppenOptionen.find(item => item.standard) || gruppenOptionen[0];
+            const aktuelleOptionId = Number(position.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || 0);
+            const individuelleAuswahl = gruppenOptionen.find(item => Number(item.individualArtikelId) === aktuelleOptionId);
+            if (!individuelleAuswahl?.individualArtikelId) {
+                return;
+            }
+
+            const optionKey = String(individuelleAuswahl.individualArtikelId);
+            map[optionKey] = Number(map[optionKey] || 0) + (Number(position.menge || 0) * Number(individuelleAuswahl.anzahl || 0));
+        });
+
+        return map;
+    }, {});
+}
+
+function createOptionRow(parentPosition, optionArtikel, individualisierung, kategorieId) {
+    return {
+        ...createAngebotPositionDraft({ ...optionArtikel, leistungTyp: "Artikel" }, Number(parentPosition.menge || 0) * Number(individualisierung.anzahl || 0)),
+        rowId: `pos-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        einzelpreis: Number(individualisierung.preisaenderung || 0),
+        isOptionForId: parentPosition.rowId,
+        optionKategorieId: kategorieId,
+        artikel: `${optionArtikel.name} (Option für ${parentPosition.artikel})`
+    };
+}
+
+function syncOptionRows(positionen, parentPosition, leistung, artikel) {
+    const optionenOhneKinder = positionen.filter(item => item.rowId === parentPosition.rowId || item.isOptionForId !== parentPosition.rowId);
+    const parentIndex = optionenOhneKinder.findIndex(item => item.rowId === parentPosition.rowId);
+    if (parentIndex === -1 || !leistung?.individualisierungen?.length) {
+        return optionenOhneKinder;
+    }
+
+    const neueOptionRows = [];
+    const gruppenIds = [...new Set(leistung.individualisierungen.map(item => item.kategorieId))];
+
+    gruppenIds.forEach(groupId => {
+        const gruppenOptionen = leistung.individualisierungen.filter(item => item.kategorieId === groupId);
+        const defaultOpt = gruppenOptionen.find(item => item.standard) || gruppenOptionen[0];
+        const aktuelleOptionId = Number(parentPosition.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || 0);
+        const individuelleAuswahl = gruppenOptionen.find(item => Number(item.individualArtikelId) === aktuelleOptionId);
+        if (!individuelleAuswahl || individuelleAuswahl.standard) {
+            return;
+        }
+
+        const optionArtikel = artikel.find(item => String(item.id) === String(individuelleAuswahl.individualArtikelId));
+        if (!optionArtikel) {
+            return;
+        }
+
+        neueOptionRows.push(createOptionRow(parentPosition, optionArtikel, individuelleAuswahl, groupId));
+    });
+
+    optionenOhneKinder.splice(parentIndex + 1, 0, ...neueOptionRows);
+    return optionenOhneKinder;
 }
 
 function MultiStatusFilter({ options, selectedValues, onToggle }) {
@@ -329,10 +436,18 @@ export default function Angebote() {
     const offeneAngeboteJeArtikel = useMemo(() => getOpenOfferCountByArtikel(angebote), [angebote]);
     const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
     const bearbeiterOptionen = benutzer.map(item => ({ value: String(item.username || item.id), label: getUserDisplayNameWithRole(item, String(item.username || "Team")) }));
-    const leistungsOptionen = leistungen.map(item => ({
-        value: `${item.leistungTyp}:${item.id}`,
-        label: `${item.nummer} - ${item.name} (${item.preis.toFixed(2)} EUR)`
-    }));
+    const leistungsOptionen = [...leistungen]
+        .sort((a, b) => {
+            const aKonfigurierbar = hasIndividualisierungen(a) ? 0 : 1;
+            const bKonfigurierbar = hasIndividualisierungen(b) ? 0 : 1;
+            if (aKonfigurierbar !== bKonfigurierbar) return aKonfigurierbar - bKonfigurierbar;
+            return String(a.nummer || "").localeCompare(String(b.nummer || ""));
+        })
+        .map(item => ({
+            value: `${item.leistungTyp}:${item.id}`,
+            label: `${hasIndividualisierungen(item) ? "[Konfigurierbar] " : ""}${item.nummer} - ${item.name} (${item.preis.toFixed(2)} EUR)`
+        }));
+    const getIndividualisierungsLabel = (kategorieId) => getKategoriePfad(kategorieId, `Kategorie ${kategorieId}`) || `Kategorie ${kategorieId}`;
     const newMode = searchParams.get("new");
     const inquiryIdFromQuery = searchParams.get("anfrageId") || "";
     const kundeIdFromQuery = searchParams.get("kundeId") || "";
@@ -353,6 +468,7 @@ export default function Angebote() {
     const brauchtFreigabe = !istErfahrenerVerkaeufer;
     const defaultBearbeiter = String(user.username || benutzer[0]?.username || benutzer[0]?.id || "");
     const [draft, setDraft] = useState(() => createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigabe));
+    const aktuellerAngebotsbedarf = useMemo(() => getAktuellenAngebotsbedarf(draft.positionenDraft, leistungen), [draft.positionenDraft, leistungen]);
     const optionen = fristenOptionenService.get();
     const positionsZwischensumme = calculatePositionenTotal(draft.positionenDraft);
     const nettoGesamtImDialog = calculateNetto(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag);
@@ -568,24 +684,24 @@ export default function Angebote() {
             .sort((a, b) => Number(a.revision || 0) - Number(b.revision || 0))
         : [];
 
-    const getMindestmengenWarnungen = (positionen = []) => positionen
-        .filter(position => position.leistungTyp !== "Service")
-        .map(position => {
-            const artikelEintrag = artikel.find(item => String(item.id) === String(position.artikelId));
+    const getMindestmengenWarnungen = (positionen = []) => {
+        const bedarf = getAktuellenAngebotsbedarf(positionen, leistungen);
+        return Object.entries(bedarf).map(([artikelId, menge]) => {
+            const artikelEintrag = artikel.find(item => String(item.id) === String(artikelId));
             if (!artikelEintrag) return null;
             const bestand = Number(artikelEintrag.bestand || 0);
-            const verplant = Number(verplanteMengen[String(position.artikelId)] || 0);
-            const projected = bestand - verplant - Number(position.menge || 0);
+            const verplant = Number(verplanteMengen[String(artikelId)] || 0);
+            const projected = bestand - verplant - Number(menge || 0);
             return projected < Number(artikelEintrag.mindestmenge || 0)
                 ? {
-                    artikelId: position.artikelId,
+                    artikelId,
                     artikel: artikelEintrag.name,
                     projected,
                     sicherheitsbestand: Number(artikelEintrag.mindestmenge || 0)
                 }
                 : null;
-        })
-        .filter(Boolean);
+        }).filter(Boolean);
+    };
 
     const getVerfuegbarkeitFuerPosition = position => {
         if (position.leistungTyp === "Service") {
@@ -606,13 +722,14 @@ export default function Angebote() {
         const verfuegbar = bestand - verplant;
         const inAngeboten = Number(offeneAngeboteJeArtikel[String(position.artikelId)] || 0);
         const imZulauf = Number(offeneBestellmengen[String(position.artikelId)] || 0);
-        const projected = verfuegbar - Number(position.menge || 0);
+        const gesamtbedarfImDialog = Number(aktuellerAngebotsbedarf[String(position.artikelId)] || 0);
+        const projected = verfuegbar - gesamtbedarfImDialog;
         const sicherheitsbestand = Number(artikelEintrag.mindestmenge || 0);
         const unterschreitetSicherheitsbestand = projected < sicherheitsbestand;
 
         return {
             text: `Verfügbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Sicherheitsbestand von ${sicherheitsbestand} wird unterschritten` : ""}`,
-            istKritisch: Number(position.menge || 0) > verfuegbar || unterschreitetSicherheitsbestand
+            istKritisch: gesamtbedarfImDialog > verfuegbar || unterschreitetSicherheitsbestand
         };
     };
 
@@ -620,15 +737,36 @@ export default function Angebote() {
         const auswahl = leistungen.find(item => `${item.leistungTyp}:${item.id}` === String(draft.leistungId));
         if (!auswahl || Number(draft.menge) <= 0) return;
         setDraft(vorherige => {
-            const vorhanden = vorherige.positionenDraft.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp);
+            const istKonfigurierbar = hasIndividualisierungen(auswahl);
+            const vorhanden = istKonfigurierbar
+                ? null
+                : vorherige.positionenDraft.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp && !item.isOptionForId);
+            const aktualisiertePositionen = vorhanden
+                ? vorherige.positionenDraft.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp && !item.isOptionForId
+                    ? { ...item, menge: Number(item.menge) + Number(vorherige.menge) }
+                    : item)
+                : [...vorherige.positionenDraft, createAngebotPositionDraft(auswahl, vorherige.menge)];
+            const parentPosition = vorhanden
+                ? aktualisiertePositionen.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp && !item.isOptionForId)
+                : aktualisiertePositionen[aktualisiertePositionen.length - 1];
             return {
                 ...vorherige,
-                positionenDraft: vorhanden
-                    ? vorherige.positionenDraft.map(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp
-                        ? { ...item, menge: Number(item.menge) + Number(vorherige.menge) }
-                        : item)
-                    : [...vorherige.positionenDraft, createAngebotPositionDraft(auswahl, vorherige.menge)]
+                positionenDraft: parentPosition ? syncOptionRows(aktualisiertePositionen, parentPosition, auswahl, artikel) : aktualisiertePositionen
             };
+        });
+    };
+
+    const handleOptionChange = (positionRowId, kategorieId, newOptionId) => {
+        setDraft(current => {
+            const posList = [...current.positionenDraft];
+            const parentIndex = posList.findIndex(p => p.rowId === positionRowId);
+            if (parentIndex === -1) return current;
+
+            const parentPos = { ...posList[parentIndex] };
+            const leistung = leistungen.find(l => l.id === parentPos.artikelId && l.leistungTyp === parentPos.leistungTyp);
+            parentPos.selectedOptionen = { ...(parentPos.selectedOptionen || {}), [kategorieId]: Number(newOptionId) };
+            posList[parentIndex] = parentPos;
+            return { ...current, positionenDraft: syncOptionRows(posList, parentPos, leistung, artikel) };
         });
     };
 
@@ -1081,12 +1219,15 @@ export default function Angebote() {
                     <div><Label glossaryKey="angebotspositionen">Menge</Label><NumberField value={draft.menge} min="1" onChange={wert => setDraft(item => ({ ...item, menge: Number(wert) }))}/></div>
                     <button type="button" onClick={positionHinzufuegen}>Position hinzufügen</button>
                 </div>
+                <p style={{ marginTop: "0.5rem", color: "var(--text-secondary)" }}>
+                    Konfigurierbare Baugruppen sind im Suchfeld markiert und können mehrfach mit unterschiedlichen Individualisierungen hinzugefügt werden.
+                </p>
             </div>
             <div className="form-row thread-section">
                 <div className="thread-section-header">
                     <Label glossaryKey="angebotspositionen">Angebotspositionen</Label>
                 </div>
-                {draft.positionenDraft.length === 0 ? <p>Noch keine Position vorhanden.</p> : <div className="position-table-wrapper">
+                {draft.positionenDraft.filter(position => !position.isOptionForId).length === 0 ? <p>Noch keine Position vorhanden.</p> : <div className="position-table-wrapper">
                     <table className="position-table">
                         <thead>
                             <tr>
@@ -1099,14 +1240,21 @@ export default function Angebote() {
                             </tr>
                         </thead>
                         <tbody>
-                            {draft.positionenDraft.map((position, index) => {
+                            {draft.positionenDraft.filter(position => !position.isOptionForId).map((position, index) => {
                                 const verfuegbarkeit = getVerfuegbarkeitFuerPosition(position);
                                 const leistung = leistungen.find(item =>
                                     String(item.id) === String(position.serviceId || position.artikelId || "")
                                     && String(item.leistungTyp || "") === String(position.leistungTyp || "")
                                 );
-                                const nummer = String(leistung.nummer || position.artikelId || position.serviceId || "-");
-                                return <Fragment key={`${position.leistungTyp}-${position.artikelId || position.serviceId || index}`}>
+                                const nummer = String(leistung?.nummer || position.artikelId || position.serviceId || "-");
+                                const positionMitIndividualisierung = hasIndividualisierungen(leistung);
+                                const optionGroups = positionMitIndividualisierung
+                                    ? getOptionGroups(leistung.individualisierungen)
+                                    : [];
+                                const endpreisProEinheit = Number(position.einzelpreis || 0) + calculateOptionAufpreisProEinheit(position, leistung);
+                                const endpreisGesamt = endpreisProEinheit * Number(position.menge || 0);
+
+                                return <Fragment key={`${position.leistungTyp}-${position.artikelId || position.serviceId || index}-${position.rowId}`}>
                                     <tr>
                                         <td>{nummer}</td>
                                         <td>{position.artikel}</td>
@@ -1114,26 +1262,85 @@ export default function Angebote() {
                                             <NumberField
                                                 value={position.menge}
                                                 min="1"
-                                                onChange={wert => setDraft(items => ({
-                                                    ...items,
-                                                    positionenDraft: items.positionenDraft.map(item => item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp
-                                                         ? { ...item, menge: wert }
+                                                onChange={wert => setDraft(items => {
+                                                    const aktualisiertePositionen = items.positionenDraft.map(item => item.rowId === position.rowId
+                                                        ? { ...item, menge: wert }
                                                         : item
-                                                    )
-                                                }))}
+                                                    );
+                                                    const parentPosition = aktualisiertePositionen.find(item => item.rowId === position.rowId);
+                                                    return {
+                                                        ...items,
+                                                        positionenDraft: parentPosition ? syncOptionRows(aktualisiertePositionen, parentPosition, leistung, artikel) : aktualisiertePositionen
+                                                    };
+                                                })}
                                             />
                                         </td>
-                                        <td>{Number(position.einzelpreis || 0).toFixed(2)} EUR</td>
-                                        <td>{(Number(position.menge || 0) * Number(position.einzelpreis || 0)).toFixed(2)} EUR</td>
+                                        <td>{endpreisProEinheit.toFixed(2)} EUR</td>
+                                        <td>{endpreisGesamt.toFixed(2)} EUR</td>
                                         <td>
-                                            <button type="button" className="link-button" onClick={() => setDraft(items => ({ ...items, positionenDraft: items.positionenDraft.filter(item => !(item.artikelId === position.artikelId && item.leistungTyp === position.leistungTyp)) }))}>Entfernen</button>
+                                            <button type="button" className="link-button" onClick={() => setDraft(items => ({
+                                                ...items,
+                                                positionenDraft: items.positionenDraft.filter(item => item.rowId !== position.rowId && item.isOptionForId !== position.rowId)
+                                            }))}>Entfernen</button>
                                         </td>
                                     </tr>
                                     <tr className="position-table-detail-row">
                                         <td colSpan={6}>
-                                            <p className={`position-availability${verfuegbarkeit.istKritisch ? " position-availability-critical" : ""}`}>
-                                                {verfuegbarkeit.text}
-                                            </p>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                <p className={`position-availability${verfuegbarkeit.istKritisch ? " position-availability-critical" : ""}`}>
+                                                    {verfuegbarkeit.text}
+                                                </p>
+                                                {optionGroups.length > 0 && (
+                                                    <div style={{ padding: "0.75rem", background: "var(--background-alt)", borderRadius: "var(--radius-sm)", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                                        <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+                                                            <strong>Konfiguration</strong>
+                                                            <span>Änderung: {calculateOptionAufpreisProEinheit(position, leistung) > 0 ? "+" : ""}{calculateOptionAufpreisProEinheit(position, leistung).toFixed(2)} EUR</span>
+                                                        </div>
+                                                        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                                                        {optionGroups.map(groupId => {
+                                                            const gruppenOptionen = leistung.individualisierungen.filter(i => i.kategorieId === groupId);
+                                                            const defaultOpt = gruppenOptionen.find(i => i.standard) || gruppenOptionen[0];
+                                                            const currentVal = position.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || "";
+                                                            const aktuelleOption = gruppenOptionen.find(opt => String(opt.individualArtikelId) === String(currentVal)) || defaultOpt;
+                                                            const optionsArtikel = artikel.find(item => String(item.id) === String(aktuelleOption?.individualArtikelId));
+                                                            const optionsBestand = Number(optionsArtikel?.bestand || 0);
+                                                            const optionsVerplant = Number(verplanteMengen[String(aktuelleOption?.individualArtikelId || "")] || 0);
+                                                            const optionsAngebotsbedarf = Number(aktuellerAngebotsbedarf[String(aktuelleOption?.individualArtikelId || "")] || 0);
+                                                            const optionsVerfuegbar = optionsBestand - optionsVerplant;
+                                                            const optionsMindestbestand = Number(optionsArtikel?.mindestmenge || 0);
+                                                            const optionsProjected = optionsVerfuegbar - optionsAngebotsbedarf;
+                                                            const optionsKritisch = optionsAngebotsbedarf > optionsVerfuegbar || optionsProjected < optionsMindestbestand;
+                                                            return (
+                                                                <div key={groupId} style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: "150px" }}>
+                                                                    <label style={{ fontSize: "0.75rem", fontWeight: "bold", color: "var(--text-secondary)", minHeight: "1.2rem", display: "block" }}>Individualisierung ({getIndividualisierungsLabel(groupId)})</label>
+                                                                    <select
+                                                                        value={currentVal}
+                                                                        onChange={e => handleOptionChange(position.rowId, groupId, e.target.value)}
+                                                                    >
+                                                                        {gruppenOptionen.map(opt => (
+                                                                            <option key={opt.individualArtikelId} value={opt.individualArtikelId}>
+                                                                                {opt.artikel} {Number(opt.preisaenderung || 0) > 0 ? `(+${Number(opt.preisaenderung).toFixed(2)} EUR)` : Number(opt.preisaenderung || 0) < 0 ? `(${Number(opt.preisaenderung).toFixed(2)} EUR)` : ""}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                    <>
+                                                                    <small
+                                                                        className={optionsKritisch ? "form-error" : undefined}
+                                                                        title={`Im Angebot: ${optionsAngebotsbedarf} | Im Zulauf: ${Number(offeneBestellmengen[String(aktuelleOption?.individualArtikelId || "")] || 0)}${optionsProjected < optionsMindestbestand ? ` | Sicherheitsbestand von ${optionsMindestbestand} wird unterschritten` : ""}`}
+                                                                    >
+                                                                        Bestand: {optionsBestand} | Verfuegbar: {optionsVerfuegbar}
+                                                                    </small>
+                                                                    </>
+                                                                    <small style={{ display: "none" }}>
+                                                                        Bestand: {optionsBestand} | Verfügbar: {optionsVerfuegbar} | Im Angebot: {optionsAngebotsbedarf}
+                                                                    </small>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 </Fragment>;

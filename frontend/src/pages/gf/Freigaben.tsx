@@ -15,6 +15,7 @@ import { PERMISSIONS } from "../../constants/permissions";
 import { getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
 import { getOffersForVorgang, getVorgangId } from "../../utils/processFlow";
 import { openDocumentPdf } from "../../utils/documentPdf";
+import { getOfferDemandByArtikel } from "../../utils/offerDemand";
 
 const bereichLinks = {
     verkauf: "/themen/verkauf",
@@ -84,20 +85,12 @@ export default function Freigaben() {
     );
 
     const offeneAngeboteJeArtikel = useMemo(
-        () => angebote
-            .filter(angebot => ["wartet auf antwort"].includes(String(angebot.status || "").toLowerCase()))
-            .reduce((map, angebot) => {
-                const artikelIds = new Set(
-                    (angebot.positionen || [])
-                        .filter(position => String(position.leistungTyp || "").toLowerCase() !== "service" && position.artikelId)
-                        .map(position => String(position.artikelId))
-                );
-                artikelIds.forEach(artikelId => {
-                    map[artikelId] = Number(map[artikelId] || 0) + 1;
-                });
-                return map;
-            }, {}),
-        [angebote]
+        () => getOfferDemandByArtikel(
+            angebote,
+            artikel,
+            angebot => ["wartet auf antwort"].includes(String(angebot.status || "").toLowerCase())
+        ),
+        [angebote, artikel]
     );
 
     const sichtbareFreigaben = useMemo(

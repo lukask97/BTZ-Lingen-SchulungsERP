@@ -10,6 +10,7 @@ import auftraegeService from "../../services/verkauf/auftraegeService";
 import angeboteService from "../../services/verkauf/angeboteService";
 import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
 import { PERMISSIONS } from "../../constants/permissions";
+import { getOfferDemandByArtikel } from "../../utils/offerDemand";
 
 const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
 const OFFENE_ANGEBOTSSTATUS = ["wartet auf antwort"];
@@ -49,18 +50,11 @@ function getVerplanteMengen(auftraege) {
 }
 
 function getOpenOfferCountByArtikel(angebote = []) {
-    return angebote
-        .filter(angebot => OFFENE_ANGEBOTSSTATUS.includes(String(angebot.status || "").toLowerCase()))
-        .reduce((map, angebot) => {
-            (angebot.positionen || [])
-                .filter(position => !position.serviceId && position.artikelId)
-                .forEach(position => {
-                    const artikelId = String(position.artikelId);
-                    map[artikelId] = Number(map[artikelId] || 0) + Number(position.menge || 0);
-                });
-
-            return map;
-        }, {});
+    return getOfferDemandByArtikel(
+        angebote,
+        artikelService.getAll(),
+        angebot => OFFENE_ANGEBOTSSTATUS.includes(String(angebot.status || "").toLowerCase())
+    );
 }
 
 export default function Bestand() {

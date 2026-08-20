@@ -40,6 +40,17 @@ Als `admin` anmelden und auf dem Dashboard **Testdaten zuruecksetzen** waehlen. 
 5. **Angebote** oder **Auftraege** oeffnen und pruefen, dass das urspruengliche Anliegen oben im Dialog sichtbar bleibt.
 6. **Buchhaltung** oeffnen und offene Rechnungen sowie Betraege ansehen.
 
+### Demo fuer Baugruppen-Individualisierung
+
+**Ausgangszustand:** In `Kundenanfragen` liegt die offene Anfrage `anfrage-5a` vom `2026-08-18` fuer individuell konfigurierbare Schulungsfahrraeder.
+
+1. **Kundenanfragen** oeffnen und die Anfrage zur Individualisierung fuer die `Jugendwerkstatt Ems-Vechte` auswaehlen.
+2. Daraus ein neues **Angebot** erzeugen.
+3. Im Angebotsdialog den Artikel **Schulungsfahrrad Premium** oder **Schulungsfahrrad Trekking** hinzufuegen.
+4. Unter der Position die Auswahlfelder fuer `Mechanik > Sattel` und `Mechanik > Lenker` pruefen.
+5. Den Sattel von Standard auf eine Alternative umstellen und beobachten, dass die Aufpreis-Position automatisch angepasst wird.
+6. Optional die Menge erhoehen und pruefen, dass sich die automatisch erzeugte Optionsposition mit aktualisiert.
+
 ## 3. Servicefall
 
 **Ausgangszustand:** Als `admin` oder `buchhaltung` anmelden; die Startreklamation hat den Status `neu`.

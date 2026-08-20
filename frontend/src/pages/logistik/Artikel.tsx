@@ -19,10 +19,13 @@ import artikelBilderService from "../../services/logistik/artikelBilderService";
 const MAX_IMAGE_WIDTH = 1920;
 const MAX_IMAGE_HEIGHT = 1080;
 
-function createKomponentenDraft() {
+function createBaugruppenDraft() {
     return {
-        komponenteId: "",
-        komponentenMenge: 1
+        typ: "fest",
+        artikelId: "",
+        menge: 1,
+        preisaenderung: 0,
+        standard: false
     };
 }
 
@@ -90,10 +93,10 @@ async function createPreviewItems(files = []) {
 }
 
 export default function Artikel() {
-    const syncTick = useStorageSyncRefresh(["artikel", "artikelStueckliste", "kategorien"]);
+    const syncTick = useStorageSyncRefresh(["artikel", "artikelStueckliste", "artikelIndividualisierung", "kategorien"]);
     const { user } = useAuth();
     const config = PAGE_CONFIG.artikel;
-    
+
     const {
         allData,
         open,
@@ -107,7 +110,6 @@ export default function Artikel() {
         neu,
         bearbeiten,
         loeschen,
-        speichern,
         handleClose,
         error
     } = useCRUDPage(config.tableName, INITIAL_DATA.artikel, artikelService, {
@@ -126,7 +128,8 @@ export default function Artikel() {
     const kategorien = useMemo(() => kategorienService.list(), [syncTick]);
 
     const [categoryFilter, setCategoryFilter] = useState("");
-    const [komponentenDraft, setKomponentenDraft] = useState(createKomponentenDraft);
+    const [baugruppenDraft, setBaugruppenDraft] = useState(createBaugruppenDraft);
+    const [ausgewaehlteOptionenJeKategorie, setAusgewaehlteOptionenJeKategorie] = useState({});
     const [bildVorschauen, setBildVorschauen] = useState([]);
     const [isImageDragActive, setIsImageDragActive] = useState(false);
     const [bildFehler, setBildFehler] = useState("");
@@ -199,7 +202,7 @@ export default function Artikel() {
             }
 
             uebernehmeBilddateien(bildDateien);
-        } catch (error) {
+        } catch (clipboardError) {
             setBildFehler("Das Bild konnte nicht aus der Zwischenablage gelesen werden.");
         }
     };
@@ -247,9 +250,9 @@ export default function Artikel() {
                     ...item,
                     anzahlBilder: bilder.length
                 }));
-            } catch (error) {
+            } catch (ladeFehler) {
                 if (!isMounted) return;
-                setBildFehler(error instanceof Error ? error.message : "Bilder konnten nicht geladen werden.");
+                setBildFehler(ladeFehler instanceof Error ? ladeFehler.message : "Bilder konnten nicht geladen werden.");
             }
         };
 
@@ -269,38 +272,140 @@ export default function Artikel() {
         value: String(item.id),
         label: item.pfad
     })), [kategorien]);
+    const kategorienNachId = useMemo(() => kategorien.reduce((map, item) => {
+        map[String(item.id)] = item.pfad;
+        return map;
+    }, {}), [kategorien]);
 
-    const komponenteHinzufuegen = () => {
-        const auswahl = allData.find(item => String(item.id) === String(komponentenDraft.komponenteId));
-        if (!auswahl || Number(komponentenDraft.komponentenMenge) <= 0) return;
+    const festeKomponenten = useMemo(() => (currentItem.komponenten || []).map(position => {
+        const artikelDetails = allData.find(item => String(item.id) === String(position.artikelId));
+        return {
+            ...position,
+            artikelNr: artikelDetails?.artikelNr || "",
+            artikel: artikelDetails?.name || position.artikel || "",
+            verkaufspreis: Number(artikelDetails?.verkaufspreis || 0)
+        };
+    }), [allData, currentItem.komponenten]);
 
-        setCurrentItem(item => {
-            const vorhandeneKomponenten = Array.isArray(item.komponenten) ? item.komponenten : [];
-            const vorhanden = vorhandeneKomponenten.find(eintrag => eintrag.artikelId === auswahl.id);
-            if (vorhanden) {
+    const individualisierungenNachKategorie = useMemo(() => {
+        return (currentItem.individualisierungen || []).reduce((gruppen, eintrag) => {
+            const key = String(eintrag.kategorieId || "ohne-kategorie");
+            if (!gruppen[key]) {
+                gruppen[key] = [];
+            }
+            const artikelDetails = allData.find(item => String(item.id) === String(eintrag.individualArtikelId));
+            gruppen[key].push({
+                ...eintrag,
+                artikelNr: artikelDetails?.artikelNr || "",
+                artikel: artikelDetails?.name || eintrag.artikel || ""
+            });
+            return gruppen;
+        }, {});
+    }, [allData, currentItem.individualisierungen]);
+
+    useEffect(() => {
+        setAusgewaehlteOptionenJeKategorie(current => {
+            const next = {};
+            Object.entries(individualisierungenNachKategorie).forEach(([kategorieId, optionen]) => {
+                const sortierteOptionen = [...optionen].sort((a, b) => {
+                    if (a.standard && !b.standard) return -1;
+                    if (!a.standard && b.standard) return 1;
+                    return String(a.artikel || "").localeCompare(String(b.artikel || ""));
+                });
+                const bisherigeAuswahl = current[kategorieId];
+                const vorhandeneAuswahl = sortierteOptionen.find(option => String(option.individualArtikelId) === String(bisherigeAuswahl));
+                next[kategorieId] = vorhandeneAuswahl?.individualArtikelId || sortierteOptionen[0]?.individualArtikelId || "";
+            });
+            return next;
+        });
+    }, [individualisierungenNachKategorie]);
+
+    const baugruppenteilHinzufuegen = () => {
+        const auswahl = allData.find(item => String(item.id) === String(baugruppenDraft.artikelId));
+        if (!auswahl || Number(baugruppenDraft.menge) <= 0) return;
+
+        if (baugruppenDraft.typ === "fest") {
+            setCurrentItem(item => {
+                const vorhandene = Array.isArray(item.komponenten) ? item.komponenten : [];
+                const vorhanden = vorhandene.find(eintrag => String(eintrag.artikelId) === String(auswahl.id));
+                if (vorhanden) {
+                    return {
+                        ...item,
+                        komponenten: vorhandene.map(eintrag => String(eintrag.artikelId) === String(auswahl.id)
+                            ? { ...eintrag, menge: Number(eintrag.menge || 0) + Number(baugruppenDraft.menge) }
+                            : eintrag)
+                    };
+                }
                 return {
                     ...item,
-                    komponenten: vorhandeneKomponenten.map(eintrag => eintrag.artikelId === auswahl.id
-                         ? { ...eintrag, menge: eintrag.menge + Number(komponentenDraft.komponentenMenge) }
-                        : eintrag)
+                    komponenten: [...vorhandene, {
+                        artikelId: auswahl.id,
+                        artikel: auswahl.name,
+                        menge: Number(baugruppenDraft.menge)
+                    }]
                 };
-            }
-            return {
-                ...item,
-                komponenten: [...vorhandeneKomponenten, {
-                    artikelId: auswahl.id,
-                    artikel: auswahl.name,
-                    menge: Number(komponentenDraft.komponentenMenge)
-                }]
-            };
-        });
-        setKomponentenDraft(createKomponentenDraft());
+            });
+        } else {
+            setCurrentItem(item => {
+                const vorhandene = Array.isArray(item.individualisierungen) ? item.individualisierungen : [];
+                const standardAktiv = Boolean(baugruppenDraft.standard);
+                const bereinigteOptionen = vorhandene.map(eintrag => standardAktiv && String(eintrag.kategorieId) === String(auswahl.kategorieId)
+                    ? { ...eintrag, standard: false }
+                    : eintrag
+                );
+                const vorhanden = bereinigteOptionen.find(eintrag => String(eintrag.individualArtikelId) === String(auswahl.id));
+
+                if (vorhanden) {
+                    return {
+                        ...item,
+                        individualisierungen: bereinigteOptionen.map(eintrag => String(eintrag.individualArtikelId) === String(auswahl.id)
+                            ? {
+                                ...eintrag,
+                                anzahl: Number(eintrag.anzahl || 0) + Number(baugruppenDraft.menge),
+                                preisaenderung: Number(baugruppenDraft.preisaenderung),
+                                standard: standardAktiv
+                            }
+                            : eintrag)
+                    };
+                }
+
+                return {
+                    ...item,
+                    individualisierungen: [...bereinigteOptionen, {
+                        individualArtikelId: auswahl.id,
+                        artikel: auswahl.name,
+                        anzahl: Number(baugruppenDraft.menge),
+                        preisaenderung: Number(baugruppenDraft.preisaenderung),
+                        standard: standardAktiv,
+                        kategorieId: auswahl.kategorieId
+                    }]
+                };
+            });
+        }
+
+        setBaugruppenDraft(createBaugruppenDraft());
     };
 
     const komponenteEntfernen = (artikelId) => {
         setCurrentItem(item => ({
             ...item,
-            komponenten: (item.komponenten || []).filter(eintrag => eintrag.artikelId !== artikelId)
+            komponenten: (item.komponenten || []).filter(eintrag => String(eintrag.artikelId) !== String(artikelId))
+        }));
+    };
+
+    const individualisierungEntfernen = (individualArtikelId) => {
+        setCurrentItem(item => ({
+            ...item,
+            individualisierungen: (item.individualisierungen || []).filter(eintrag => String(eintrag.individualArtikelId) !== String(individualArtikelId))
+        }));
+    };
+
+    const individualisierungAktualisieren = (individualArtikelId, feld, wert) => {
+        setCurrentItem(item => ({
+            ...item,
+            individualisierungen: (item.individualisierungen || []).map(eintrag => String(eintrag.individualArtikelId) === String(individualArtikelId)
+                ? { ...eintrag, [feld]: wert }
+                : eintrag)
         }));
     };
 
@@ -332,11 +437,11 @@ export default function Artikel() {
 
         try {
             const gespeicherterArtikel = editMode
-                 ? artikelService.update(currentItem)
+                ? artikelService.update(currentItem)
                 : artikelService.create(currentItem);
 
             const backendBilder = editMode && gespeicherterArtikel.id
-                 ? await artikelBilderService.list(gespeicherterArtikel.id)
+                ? await artikelBilderService.list(gespeicherterArtikel.id)
                 : [];
             const backendSlots = new Set(backendBilder.map(item => Number(item.slot)));
             const aktuelleSlots = new Set(bildVorschauen.map(item => Number(item.slot)));
@@ -355,20 +460,18 @@ export default function Artikel() {
 
             resetBildVorschauen();
             handleClose();
-        } catch (error) {
-            setBildFehler(error instanceof Error ? error.message : "Bilder konnten nicht gespeichert werden.");
+        } catch (speicherFehler) {
+            setBildFehler(speicherFehler instanceof Error ? speicherFehler.message : "Bilder konnten nicht gespeichert werden.");
         } finally {
             setIsBildSpeichern(false);
         }
     };
 
     const filteredDisplayData = useMemo(() => {
-        // Filter auf ungefilterte Daten anwenden
         let filtered = allData;
         if (categoryFilter) {
             filtered = filtered.filter(item => String(item.kategorieId) === String(categoryFilter));
         }
-        // Dann Suche anwenden
         if (search) {
             filtered = filtered.filter(item =>
                 Object.values(item)
@@ -430,8 +533,8 @@ export default function Artikel() {
                     setCurrentItem(item => ({
                         ...item,
                         kategorieId: value,
-                        kategorie: kategorie.pfad.split(" > ")[0] || "",
-                        kategoriePfad: kategorie.pfad || ""
+                        kategorie: kategorie?.pfad?.split(" > ")[0] || "",
+                        kategoriePfad: kategorie?.pfad || ""
                     }));
                 }} placeholder="Kategorie wählen..." />
 
@@ -471,32 +574,171 @@ export default function Artikel() {
                 </div>
 
                 {currentItem.artikelTyp === "Baugruppe" && <>
-                    <div className="form-row bestellposition-hinzufuegen">
-                        <div>
-                            <Label glossaryKey="stueckliste">Komponente</Label>
-                            <LookupField
-                                value={komponentenDraft.komponenteId}
-                                options={komponentenOptionen}
-                                onChange={value => setKomponentenDraft(item => ({ ...item, komponenteId: value }))}
-                                placeholder="Komponente suchen..."
-                            />
-                        </div>
-                        <div>
-                            <Label>Menge</Label>
-                            <NumberField value={komponentenDraft.komponentenMenge} min="1" step="1" onChange={v => setKomponentenDraft(item => ({ ...item, komponentenMenge: Number(v || 1) }))} />
-                        </div>
-                        <button type="button" onClick={komponenteHinzufuegen}>Komponente hinzufügen</button>
-                    </div>
                     <div className="form-row">
-                        <Label glossaryKey="stueckliste">Stückliste</Label>
-                        {currentItem.komponenten.length > 0
-                            ? <ul className="positionsliste">
-                                {currentItem.komponenten.map(position => <li key={position.artikelId}>
-                                    {position.artikel}: {position.menge}
-                                    <button type="button" className="link-button" onClick={() => komponenteEntfernen(position.artikelId)}>Entfernen</button>
-                                </li>)}
-                            </ul>
-                            : <p>Noch keine Komponenten hinterlegt.</p>}
+                        <Label glossaryKey="stueckliste">Bestandteil hinzufügen</Label>
+                        <p style={{ fontSize: "0.85em", color: "var(--text-secondary)", marginBottom: "1rem" }}>
+                            Füge feste Bestandteile der Stückliste oder wählbare Optionen für die Individualisierung hinzu.
+                        </p>
+                        <div className="form-row bestellposition-hinzufuegen" style={{ alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
+                            <div style={{ flex: "1 1 220px" }}>
+                                <Label>Artikel</Label>
+                                <LookupField
+                                    value={baugruppenDraft.artikelId}
+                                    options={komponentenOptionen}
+                                    onChange={value => setBaugruppenDraft(item => ({ ...item, artikelId: value }))}
+                                    placeholder="Artikel suchen..."
+                                />
+                            </div>
+                            <div style={{ width: "90px" }}>
+                                <Label>Menge</Label>
+                                <NumberField value={baugruppenDraft.menge} min="1" step="1" onChange={v => setBaugruppenDraft(item => ({ ...item, menge: Number(v || 1) }))} />
+                            </div>
+                            <div style={{ flex: "1 1 160px" }}>
+                                <Label>Typ</Label>
+                                <select value={baugruppenDraft.typ} onChange={event => setBaugruppenDraft(item => ({ ...item, typ: event.target.value }))}>
+                                    <option value="fest">Feste Stückliste</option>
+                                    <option value="option">Wählbare Option</option>
+                                </select>
+                            </div>
+
+                            {baugruppenDraft.typ === "option" && (
+                                <>
+                                    <div style={{ width: "130px" }}>
+                                        <Label>Aufpreis</Label>
+                                        <NumberField value={baugruppenDraft.preisaenderung} step="0.01" format="currency" onChange={v => setBaugruppenDraft(item => ({ ...item, preisaenderung: Number(v || 0) }))} />
+                                    </div>
+                                    <div style={{ paddingTop: "1.8rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                        <input
+                                            type="checkbox"
+                                            id="baugruppe-standard"
+                                            checked={baugruppenDraft.standard}
+                                            onChange={event => setBaugruppenDraft(item => ({ ...item, standard: event.target.checked }))}
+                                        />
+                                        <label htmlFor="baugruppe-standard">Standard</label>
+                                    </div>
+                                </>
+                            )}
+
+                            <div style={{ paddingTop: "1.8rem" }}>
+                                <button type="button" onClick={baugruppenteilHinzufuegen}>Hinzufügen</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="form-row">
+                        <Label glossaryKey="stueckliste">Feste Stückliste</Label>
+                        <div className="position-table-wrapper" style={{ marginTop: "0.5rem" }}>
+                            <table className="position-table">
+                                <thead>
+                                    <tr>
+                                        <th>Artikel-Nr.</th>
+                                        <th>Name</th>
+                                        <th>Menge</th>
+                                        <th>Einzelpreis</th>
+                                        <th>Gesamtpreis</th>
+                                        <th>Aktion</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {festeKomponenten.length > 0 ? festeKomponenten.map(position => (
+                                        <tr key={`fest-${position.artikelId}`}>
+                                            <td>{position.artikelNr}</td>
+                                            <td>{position.artikel}</td>
+                                            <td>{position.menge}</td>
+                                            <td>{position.verkaufspreis.toFixed(2)} EUR</td>
+                                            <td>{(position.verkaufspreis * Number(position.menge)).toFixed(2)} EUR</td>
+                                            <td>
+                                                <button type="button" className="link-button" onClick={() => komponenteEntfernen(position.artikelId)}>
+                                                    Entfernen
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    )) : (
+                                        <tr>
+                                            <td colSpan={6} style={{ textAlign: "center", padding: "1rem" }}>
+                                                Noch keine festen Komponenten hinterlegt.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="form-row">
+                        <Label>Wählbare Optionen</Label>
+                        {Object.entries(individualisierungenNachKategorie).length === 0 ? <p>Noch keine Individualisierungen hinterlegt.</p> : (
+                            <div className="position-table-wrapper" style={{ marginTop: "0.75rem" }}>
+                                <table className="position-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Kategorie</th>
+                                            <th>Artikel</th>
+                                            <th>Anzahl</th>
+                                            <th>Aufpreis</th>
+                                            <th>Aktion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.entries(individualisierungenNachKategorie).map(([kategorieId, optionen]) => {
+                                            const sortierteOptionen = [...optionen].sort((a, b) => {
+                                                if (a.standard && !b.standard) return -1;
+                                                if (!a.standard && b.standard) return 1;
+                                                return String(a.artikel || "").localeCompare(String(b.artikel || ""));
+                                            });
+                                            const ausgewaehlt = sortierteOptionen.find(option => String(option.individualArtikelId) === String(ausgewaehlteOptionenJeKategorie[kategorieId])) || sortierteOptionen[0];
+
+                                            return (
+                                                <tr key={kategorieId}>
+                                                    <td style={{ fontWeight: 600 }}>{kategorienNachId[kategorieId] || `Kategorie ${kategorieId}`}</td>
+                                                    <td>
+                                                        <select
+                                                            value={ausgewaehlt?.individualArtikelId || ""}
+                                                            onChange={event => setAusgewaehlteOptionenJeKategorie(current => ({
+                                                                ...current,
+                                                                [kategorieId]: event.target.value
+                                                            }))}
+                                                            style={{ fontWeight: ausgewaehlt?.standard ? 700 : 400 }}
+                                                        >
+                                                            {sortierteOptionen.map(option => (
+                                                                <option key={`option-${option.individualArtikelId}`} value={option.individualArtikelId} style={{ fontWeight: option.standard ? 700 : 400 }}>
+                                                                    {option.artikelNr} - {option.artikel}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </td>
+                                                    <td style={{ width: "110px" }}>
+                                                        <NumberField
+                                                            value={ausgewaehlt?.anzahl || 0}
+                                                            min="0"
+                                                            step="1"
+                                                            onChange={value => ausgewaehlt && individualisierungAktualisieren(ausgewaehlt.individualArtikelId, "anzahl", Number(value || 0))}
+                                                        />
+                                                    </td>
+                                                    <td style={{ width: "140px" }}>
+                                                        <NumberField
+                                                            value={ausgewaehlt?.preisaenderung || 0}
+                                                            step="0.01"
+                                                            format="currency"
+                                                            onChange={value => ausgewaehlt && individualisierungAktualisieren(ausgewaehlt.individualArtikelId, "preisaenderung", Number(value || 0))}
+                                                        />
+                                                    </td>
+                                                    <td style={{ width: "100px" }}>
+                                                        <button
+                                                            type="button"
+                                                            className="link-button"
+                                                            onClick={() => ausgewaehlt && individualisierungEntfernen(ausgewaehlt.individualArtikelId)}
+                                                        >
+                                                            Entfernen
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 </>}
 
@@ -562,11 +804,11 @@ export default function Artikel() {
                         </div>
                         {bildFehler && <p className="form-error">{bildFehler}</p>}
                         {bildVorschauen.length === 0
-                             ? <p className="artikelbild-overlay-empty">Ziehe Bilder hier hinein oder wähle sie manuell aus.</p>
+                            ? <p className="artikelbild-overlay-empty">Ziehe Bilder hier hinein oder wähle sie manuell aus.</p>
                             : <div className="artikelbild-vorschau-grid">
-                                {bildVorschauen.map((bild, index) => <article key={bild.id} className="artikelbild-vorschau-card">
+                                {bildVorschauen.map((bild) => <article key={bild.id} className="artikelbild-vorschau-card">
                                     <button type="button" className="artikelbild-vorschau-button" onClick={() => setGrossesBild(bild)}>
-                                        <img src={bild.url} alt={bild.name} className="artikelbild-vorschau"/>
+                                        <img src={bild.url} alt={bild.name} className="artikelbild-vorschau" />
                                     </button>
                                     <div className="artikelbild-vorschau-meta">
                                         <strong>Slot {bild.slot}</strong>
@@ -586,9 +828,9 @@ export default function Artikel() {
                 </div>
             </Dialog>
 
-            <Dialog open={Boolean(grossesBild)} title={grossesBild.name || "Bildvorschau"} onClose={() => setGrossesBild(null)}>
+            <Dialog open={Boolean(grossesBild)} title={grossesBild?.name || "Bildvorschau"} onClose={() => setGrossesBild(null)}>
                 {grossesBild && <div className="form-row artikelbild-dialog-content">
-                    <img src={grossesBild.url} alt={grossesBild.name} className="artikelbild-dialog-preview"/>
+                    <img src={grossesBild.url} alt={grossesBild.name} className="artikelbild-dialog-preview" />
                 </div>}
             </Dialog>
         </>

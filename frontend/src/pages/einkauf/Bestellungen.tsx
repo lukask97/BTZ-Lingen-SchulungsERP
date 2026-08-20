@@ -18,6 +18,7 @@ import OverviewCards from "../../components/OverviewCards";
 import { getBerlinDate } from "../../utils/dateTime";
 import { canBookGoodsReceipt, getPurchaseStep, getPurchaseStepLabel } from "../../utils/processFlow";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
+import { getOfferDemandByArtikel } from "../../utils/offerDemand";
 
 function createBestellungDialogState(lieferanten: any[], artikel: any[]) {
     const ersterLieferant = lieferanten[0];
@@ -81,21 +82,7 @@ function getVerplanteMengen(auftraege: any[] = []) {
 }
 
 function getOpenOfferCountByArtikel(angebote: any[] = []) {
-    return angebote
-        .filter(angebot => istOffenesAngebot(angebot))
-        .reduce((map, angebot) => {
-            const artikelIds = new Set(
-                (angebot.positionen || [])
-                    .filter(position => String(position.leistungTyp || "").toLowerCase() !== "service" && position.artikelId)
-                    .map(position => String(position.artikelId))
-            );
-
-            artikelIds.forEach(artikelId => {
-                map[artikelId] = Number(map[artikelId] || 0) + 1;
-            });
-
-            return map;
-        }, {});
+    return getOfferDemandByArtikel(angebote, artikelService.getAll(), istOffenesAngebot);
 }
 
 function getArtikelInfoText({

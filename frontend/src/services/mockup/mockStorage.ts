@@ -80,7 +80,7 @@ export const SYNC_DATA_KEYS = [
     "kunden", "artikel", "artikelStueckliste", "benutzer", "rollen", "rechte", "lager",
     "rollenRechte",
     "services",
-    "lieferanten", "bestellungen", "angebote", "auftraege", "reklamationen",
+    "lieferanten", "lieferantenArtikelStaffeln", "bestellungen", "angebote", "auftraege", "reklamationen",
     "bestellpositionen", "angebotspositionen", "auftragspositionen",
     "marketingaktionen", "abteilungen", "kundenanfragen", "nachrichten", "zahlungen", "mahnungen",
     "belege", "freigaben", "berichte", "versandauftraege", "retouren", "bewerber",

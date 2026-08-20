@@ -30,6 +30,7 @@ TABLE_ACCESS_MAP = {
     "lager": "lager",
     "lehrkraftOptionen": "gf",
     "lieferanten": "einkauf",
+    "lieferantenArtikelStaffeln": "einkauf",
     "mahnungen": "buchhaltung",
     "marketingaktionen": "marketing",
     "mitarbeiter": "personalwesen",

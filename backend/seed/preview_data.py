@@ -139,6 +139,7 @@ PREVIEW_DATA = {
         {"id": 8, "schluessel": "zahlung", "bezeichnung": "Zahlung", "kuerzel": "ZA"}
     ],
     "auftraege": [],
+    "lieferantenArtikelStaffeln": [],
     "vertriebsdokumente": [],
     "rechnungen": [],
     "zahlungen": [],
