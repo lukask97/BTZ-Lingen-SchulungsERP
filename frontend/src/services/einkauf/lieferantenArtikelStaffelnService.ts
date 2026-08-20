@@ -9,12 +9,19 @@ function normalizeStaffel(item = {}) {
         artikelId: item.artikelId || "",
         lieferantId: item.lieferantId || "",
         mindestbestellmenge: Number(item.mindestbestellmenge || 1),
-        stueckpreis: Number(item.stueckpreis || 0)
+        stueckpreis: Number(item.stueckpreis || 0),
+        lieferzeitTage: Number(item.lieferzeitTage || 1)
     };
 }
 
 export default {
     ...service,
+    listByArtikel(artikelId) {
+        return service.list()
+            .filter(item => String(item.artikelId) === String(artikelId))
+            .map(normalizeStaffel)
+            .sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0));
+    },
     listByPair(artikelId, lieferantId) {
         return service.list()
             .filter(item => String(item.artikelId) === String(artikelId) && String(item.lieferantId) === String(lieferantId))
@@ -66,9 +73,44 @@ export default {
                 staffeln: gruppe.staffeln.sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0)),
                 staffeltext: gruppe.staffeln
                     .sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0))
-                    .map(item => `ab ${Number(item.mindestbestellmenge || 0)} Stk: ${Number(item.stueckpreis || 0).toFixed(2)} EUR`)
+                    .map(item => `ab ${Number(item.mindestbestellmenge || 0)} Stk: ${Number(item.stueckpreis || 0).toFixed(2)} EUR, ${Number(item.lieferzeitTage || 0)} Tage`)
                     .join(" | ")
             }))
             .sort((a, b) => `${a.artikelNr}${a.lieferant}`.localeCompare(`${b.artikelNr}${b.lieferant}`));
+    },
+    getSupplierIdsForArtikel(artikelId) {
+        return [...new Set(this.listByArtikel(artikelId).map(item => String(item.lieferantId || "")).filter(Boolean))];
+    },
+    getBestStaffelForQuantity(artikelId, lieferantId, menge) {
+        const staffeln = this.listByPair(artikelId, lieferantId);
+        if (staffeln.length === 0) return null;
+        const sortierteStaffeln = [...staffeln].sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0));
+        return sortierteStaffeln.filter(item => Number(item.mindestbestellmenge || 0) <= Number(menge || 0)).slice(-1)[0] || sortierteStaffeln[0];
+    },
+    getPreferredSupplierForArtikel(artikelId, menge, mode = "balanced") {
+        const lieferantIds = this.getSupplierIdsForArtikel(artikelId);
+        const optionen = lieferantIds.map(lieferantId => {
+            const supplierStaffeln = this.listByPair(artikelId, lieferantId);
+            return {
+                lieferantId,
+                besteStaffel: this.getBestStaffelForQuantity(artikelId, lieferantId, menge),
+                maxMengenStaffel: [...supplierStaffeln].sort((a, b) => Number(b.mindestbestellmenge || 0) - Number(a.mindestbestellmenge || 0))[0] || null
+            };
+        }).filter(item => item.besteStaffel);
+
+        if (optionen.length === 0) return null;
+        if (mode === "maxQuantity") {
+            return optionen.sort((a, b) => {
+                const maxDelta = Number(b.maxMengenStaffel?.mindestbestellmenge || 0) - Number(a.maxMengenStaffel?.mindestbestellmenge || 0);
+                if (maxDelta !== 0) return maxDelta;
+                return Number(a.besteStaffel?.lieferzeitTage || 0) - Number(b.besteStaffel?.lieferzeitTage || 0);
+            })[0];
+        }
+
+        return optionen.sort((a, b) => {
+            const lieferzeitDelta = Number(a.besteStaffel?.lieferzeitTage || 0) - Number(b.besteStaffel?.lieferzeitTage || 0);
+            if (lieferzeitDelta !== 0) return lieferzeitDelta;
+            return Number(a.besteStaffel?.stueckpreis || 0) - Number(b.besteStaffel?.stueckpreis || 0);
+        })[0];
     }
 };

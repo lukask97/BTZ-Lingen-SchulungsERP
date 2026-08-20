@@ -4,6 +4,7 @@ import { createPositionTableService } from "../core/positionTableService";
 import artikelService from "../logistik/artikelService";
 import { getSupplierName } from "../../utils/supplierReferences";
 import { getBerlinDate } from "../../utils/dateTime";
+import lieferantenArtikelStaffelnService from "./lieferantenArtikelStaffelnService";
 
 const bestellungenService = createCRUDService("bestellungen", bestellungen);
 const positionService = createPositionTableService(bestellpositionen, {
@@ -45,7 +46,8 @@ function normalizePosition(position: any = {}) {
         ...position,
         artikelNr: artikel?.artikelNr || position.artikelNr || "",
         artikel: artikel?.name || position.artikel || "",
-        einzelpreis: Number(position.einzelpreis || artikel?.einkaufspreis || 0)
+        einzelpreis: Number(position.einzelpreis || artikel?.einkaufspreis || 0),
+        lieferzeitTage: Number(position.lieferzeitTage || 0)
     };
 }
 
@@ -151,6 +153,25 @@ export function getAutomatischeBedarfsmeldungen() {
             return bestand + imZulauf <= bedarfsmeldungBei;
         })
         .map(item => ({
+            ...(() => {
+                const empfohleneMenge = Math.max(
+                    1,
+                    Number(item.mindestmenge || 0) > (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
+                         ? Number(item.mindestmenge || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
+                        : Number(item.bedarfsmeldungBei || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0)) + 1
+                );
+                const schnellsteOption = lieferantenArtikelStaffelnService.getPreferredSupplierForArtikel(item.id, empfohleneMenge, "balanced");
+                const groessteOption = lieferantenArtikelStaffelnService.getPreferredSupplierForArtikel(item.id, empfohleneMenge, "maxQuantity");
+                return {
+                    empfohleneMenge,
+                    vorgeschlagenerLieferantId: schnellsteOption?.lieferantId || "",
+                    vorgeschlageneLieferzeitTage: Number(schnellsteOption?.besteStaffel?.lieferzeitTage || 0),
+                    vorgeschlagenerStueckpreis: Number(schnellsteOption?.besteStaffel?.stueckpreis || item.einkaufspreis || 0),
+                    maximalMengenLieferantId: groessteOption?.lieferantId || "",
+                    maximalMengenLieferzeitTage: Number(groessteOption?.besteStaffel?.lieferzeitTage || 0),
+                    maximalMengenSchwelle: Number(groessteOption?.maxMengenStaffel?.mindestbestellmenge || 0)
+                };
+            })(),
             id: `auto-artikel-${item.id}`,
             artikelId: item.id,
             artikelNr: item.artikelNr,
@@ -158,13 +179,7 @@ export function getAutomatischeBedarfsmeldungen() {
             bestand: Number(item.bestand || 0),
             imZulauf: Number(offeneBestellmengen[String(item.id)] || 0),
             bedarfsmeldungBei: Number(item.bedarfsmeldungBei || 0),
-            mindestmenge: Number(item.mindestmenge || 0),
-            empfohleneMenge: Math.max(
-                1,
-                Number(item.mindestmenge || 0) > (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
-                     ? Number(item.mindestmenge || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
-                    : Number(item.bedarfsmeldungBei || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0)) + 1
-            )
+            mindestmenge: Number(item.mindestmenge || 0)
         }));
 }
 

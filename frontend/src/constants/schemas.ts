@@ -23,7 +23,8 @@ export const INITIAL_DATA = {
         artikelId: "",
         lieferantId: "",
         mindestbestellmenge: 1,
-        stueckpreis: 0
+        stueckpreis: 0,
+        lieferzeitTage: 1
     },
     kunden: {
         id: null,

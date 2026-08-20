@@ -11,6 +11,7 @@ import TextField from "../../components/form/TextField";
 import { PERMISSIONS } from "../../constants/permissions";
 import bestellungenService, { getAutomatischeBedarfsmeldungen, naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
+import lieferantenArtikelStaffelnService from "../../services/einkauf/lieferantenArtikelStaffelnService";
 import artikelService from "../../services/logistik/artikelService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import angeboteService from "../../services/verkauf/angeboteService";
@@ -35,7 +36,8 @@ function createBestellungDialogState(lieferanten: any[], artikel: any[]) {
         positionen: [],
         notiz: "",
         fehler: "",
-        vorgemerktePositionen: []
+        vorgemerktePositionen: [],
+        lieferantenStrategie: "schnell"
     };
 }
 
@@ -149,7 +151,6 @@ export default function Bestellungen() {
             }, {});
     }, [bestellungen]);
     const [dialogState, setDialogState] = useState(() => createBestellungDialogState(lieferanten, artikel));
-    const lieferantenOptionen = lieferanten.map(item => ({ value: String(item.id), label: `${item.lieferantenNr} - ${item.firma}` }));
     const artikelOptionen = artikel.map(item => ({
         value: String(item.id),
         label: `${item.artikelNr} - ${item.name} [${item.artikelTyp}] (EK: ${Number(item.einkaufspreis || item.preis || 0).toFixed(2)} EUR, Bestand: ${item.bestand})`
@@ -158,6 +159,49 @@ export default function Bestellungen() {
         value: String(item.id),
         label: `${item.bestellNr} - ${getPositionenText(item.positionen || [])}`
     }));
+    const verfuegbareLieferantIdsImDialog = useMemo(() => {
+        const ids = new Set<string>();
+        dialogState.positionen.forEach(position => {
+            lieferantenArtikelStaffelnService.getSupplierIdsForArtikel(position.artikelId).forEach(id => ids.add(String(id)));
+        });
+        if (dialogState.artikelId) {
+            lieferantenArtikelStaffelnService.getSupplierIdsForArtikel(dialogState.artikelId).forEach(id => ids.add(String(id)));
+        }
+        return ids;
+    }, [dialogState.positionen, dialogState.artikelId]);
+    const lieferantenOptionen = lieferanten
+        .filter(item => verfuegbareLieferantIdsImDialog.size === 0 || verfuegbareLieferantIdsImDialog.has(String(item.id)))
+        .map(item => ({ value: String(item.id), label: `${item.lieferantenNr} - ${item.firma}` }));
+
+    const wendeLieferantenVorschlagAn = (positionen: any[] = [], strategie = "schnell") => {
+        const erstePosition = positionen[0];
+        if (!erstePosition?.artikelId) {
+            return { lieferantId: "", positionen, notizZusatz: "" };
+        }
+        const option = lieferantenArtikelStaffelnService.getPreferredSupplierForArtikel(
+            erstePosition.artikelId,
+            erstePosition.menge,
+            strategie === "groessteMenge" ? "maxQuantity" : "balanced"
+        );
+        if (!option?.lieferantId) {
+            return { lieferantId: "", positionen, notizZusatz: "Für die Positionen ist noch kein passender Lieferant mit Staffel hinterlegt." };
+        }
+        const lieferant = lieferanten.find(item => String(item.id) === String(option.lieferantId));
+        return {
+            lieferantId: String(option.lieferantId),
+            positionen: positionen.map(position => {
+                const staffel = lieferantenArtikelStaffelnService.getBestStaffelForQuantity(position.artikelId, option.lieferantId, position.menge);
+                return {
+                    ...position,
+                    einzelpreis: Number(staffel?.stueckpreis || position.einzelpreis || 0),
+                    lieferzeitTage: Number(staffel?.lieferzeitTage || position.lieferzeitTage || 0)
+                };
+            }),
+            notizZusatz: strategie === "groessteMenge"
+                ? `Vorschlag: ${lieferant?.firma || "Lieferant"} für größere Mengen.`
+                : `Vorschlag: ${lieferant?.firma || "Lieferant"} mit kurzer Lieferzeit.`
+        };
+    };
 
     const aktualisiereDialogNachArtikel = (value: string) => {
         const auswahl = artikel.find(item => String(item.id) === String(value));

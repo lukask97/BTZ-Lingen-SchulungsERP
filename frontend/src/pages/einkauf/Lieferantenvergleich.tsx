@@ -195,11 +195,11 @@ export default function Lieferantenvergleich() {
         >
             <div>
                 <Label required>Artikel</Label>
-                <LookupField value={draft.artikelId} options={artikelOptionen} onChange={value => setDraft(current => ({ ...current, artikelId: value, fehler: "" }))} placeholder="Artikel suchen..."/>
+                <LookupField value={draft.artikelId} options={artikelOptionen} onChange={value => setDraft(current => ({ ...current, artikelId: value, fehler: "" }))} placeholder="Artikel suchen..." disabled={editMode}/>
             </div>
             <div>
                 <Label required>Lieferant</Label>
-                <LookupField value={draft.lieferantId} options={lieferantenOptionen} onChange={value => setDraft(current => ({ ...current, lieferantId: value, fehler: "" }))} placeholder="Lieferant suchen..."/>
+                <LookupField value={draft.lieferantId} options={lieferantenOptionen} onChange={value => setDraft(current => ({ ...current, lieferantId: value, fehler: "" }))} placeholder="Lieferant suchen..." disabled={editMode}/>
             </div>
             <div className="form-row">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", marginBottom: "0.75rem" }}>

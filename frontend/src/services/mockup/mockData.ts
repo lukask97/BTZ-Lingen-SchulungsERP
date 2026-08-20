@@ -870,26 +870,26 @@ export let lieferanten = [
 ];
 
 export let lieferantenArtikelStaffeln = [
-    { id: 1, artikelId: 1, lieferantId: 2, mindestbestellmenge: 1, stueckpreis: 438 },
-    { id: 2, artikelId: 1, lieferantId: 2, mindestbestellmenge: 5, stueckpreis: 424 },
-    { id: 3, artikelId: 1, lieferantId: 2, mindestbestellmenge: 10, stueckpreis: 409 },
-    { id: 4, artikelId: 3, lieferantId: 1, mindestbestellmenge: 10, stueckpreis: 23.9 },
-    { id: 5, artikelId: 3, lieferantId: 1, mindestbestellmenge: 25, stueckpreis: 22.4 },
-    { id: 6, artikelId: 3, lieferantId: 3, mindestbestellmenge: 5, stueckpreis: 24.7 },
-    { id: 7, artikelId: 3, lieferantId: 3, mindestbestellmenge: 20, stueckpreis: 22.9 },
-    { id: 8, artikelId: 5, lieferantId: 2, mindestbestellmenge: 10, stueckpreis: 17.6 },
-    { id: 9, artikelId: 5, lieferantId: 2, mindestbestellmenge: 50, stueckpreis: 16.4 },
-    { id: 10, artikelId: 6, lieferantId: 2, mindestbestellmenge: 20, stueckpreis: 14.2 },
-    { id: 11, artikelId: 6, lieferantId: 2, mindestbestellmenge: 50, stueckpreis: 13.4 },
-    { id: 12, artikelId: 6, lieferantId: 4, mindestbestellmenge: 10, stueckpreis: 14.8 },
-    { id: 13, artikelId: 6, lieferantId: 4, mindestbestellmenge: 40, stueckpreis: 13.6 },
-    { id: 14, artikelId: 10, lieferantId: 2, mindestbestellmenge: 1, stueckpreis: 515 },
-    { id: 15, artikelId: 10, lieferantId: 2, mindestbestellmenge: 3, stueckpreis: 498 },
-    { id: 16, artikelId: 10, lieferantId: 2, mindestbestellmenge: 8, stueckpreis: 486 },
-    { id: 17, artikelId: 14, lieferantId: 4, mindestbestellmenge: 5, stueckpreis: 23.5 },
-    { id: 18, artikelId: 14, lieferantId: 4, mindestbestellmenge: 20, stueckpreis: 21.9 },
-    { id: 19, artikelId: 16, lieferantId: 1, mindestbestellmenge: 6, stueckpreis: 22.6 },
-    { id: 20, artikelId: 16, lieferantId: 1, mindestbestellmenge: 18, stueckpreis: 21.1 }
+    { id: 1, artikelId: 1, lieferantId: 2, mindestbestellmenge: 1, stueckpreis: 438, lieferzeitTage: 4 },
+    { id: 2, artikelId: 1, lieferantId: 2, mindestbestellmenge: 5, stueckpreis: 424, lieferzeitTage: 7 },
+    { id: 3, artikelId: 1, lieferantId: 2, mindestbestellmenge: 10, stueckpreis: 409, lieferzeitTage: 12 },
+    { id: 4, artikelId: 3, lieferantId: 1, mindestbestellmenge: 10, stueckpreis: 23.9, lieferzeitTage: 2 },
+    { id: 5, artikelId: 3, lieferantId: 1, mindestbestellmenge: 25, stueckpreis: 22.4, lieferzeitTage: 5 },
+    { id: 6, artikelId: 3, lieferantId: 3, mindestbestellmenge: 5, stueckpreis: 24.7, lieferzeitTage: 1 },
+    { id: 7, artikelId: 3, lieferantId: 3, mindestbestellmenge: 20, stueckpreis: 22.9, lieferzeitTage: 4 },
+    { id: 8, artikelId: 5, lieferantId: 2, mindestbestellmenge: 10, stueckpreis: 17.6, lieferzeitTage: 3 },
+    { id: 9, artikelId: 5, lieferantId: 2, mindestbestellmenge: 50, stueckpreis: 16.4, lieferzeitTage: 10 },
+    { id: 10, artikelId: 6, lieferantId: 2, mindestbestellmenge: 20, stueckpreis: 14.2, lieferzeitTage: 3 },
+    { id: 11, artikelId: 6, lieferantId: 2, mindestbestellmenge: 50, stueckpreis: 13.4, lieferzeitTage: 8 },
+    { id: 12, artikelId: 6, lieferantId: 4, mindestbestellmenge: 10, stueckpreis: 14.8, lieferzeitTage: 2 },
+    { id: 13, artikelId: 6, lieferantId: 4, mindestbestellmenge: 40, stueckpreis: 13.6, lieferzeitTage: 7 },
+    { id: 14, artikelId: 10, lieferantId: 2, mindestbestellmenge: 1, stueckpreis: 515, lieferzeitTage: 6 },
+    { id: 15, artikelId: 10, lieferantId: 2, mindestbestellmenge: 3, stueckpreis: 498, lieferzeitTage: 10 },
+    { id: 16, artikelId: 10, lieferantId: 2, mindestbestellmenge: 8, stueckpreis: 486, lieferzeitTage: 18 },
+    { id: 17, artikelId: 14, lieferantId: 4, mindestbestellmenge: 5, stueckpreis: 23.5, lieferzeitTage: 2 },
+    { id: 18, artikelId: 14, lieferantId: 4, mindestbestellmenge: 20, stueckpreis: 21.9, lieferzeitTage: 6 },
+    { id: 19, artikelId: 16, lieferantId: 1, mindestbestellmenge: 6, stueckpreis: 22.6, lieferzeitTage: 3 },
+    { id: 20, artikelId: 16, lieferantId: 1, mindestbestellmenge: 18, stueckpreis: 21.1, lieferzeitTage: 7 }
 ];
 
 export let bestellungen = [
