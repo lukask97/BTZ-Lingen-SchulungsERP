@@ -9,6 +9,8 @@ import { getUserFullName } from "../utils/userDisplay";
 type SidebarProps = {
     isCollapsed: boolean;
     onToggleCollapse: () => void;
+    isDarkMode: boolean;
+    onToggleDarkMode: () => void;
 };
 
 function getProviderLabel(provider: string) {
@@ -25,7 +27,7 @@ function getBackendModeLabel(mode: string) {
 }
 
 
-export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
+export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onToggleDarkMode }: SidebarProps) {
 
     const {user, logout, hasFullAccess, hasAccess} = useAuth();
     const isAdmin = hasFullAccess();
@@ -128,6 +130,9 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
             </div>
 
             <div className="sidebar-footer">
+                <button className="sidebar-theme-button" onClick={onToggleDarkMode}>
+                    {isDarkMode ? "Light Mode" : "Dark Mode"}
+                </button>
                 <div className="sidebar-user">
                     angemeldet als:
                     <strong>{getUserFullName(user)}</strong>

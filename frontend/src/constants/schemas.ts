@@ -38,7 +38,8 @@ export const INITIAL_DATA = {
         iban: "",
         website: "",
         optionen: [],
-        notiz: ""
+        notiz: "",
+        ansprechpartner: []
     },
     artikel: {
         id: null,

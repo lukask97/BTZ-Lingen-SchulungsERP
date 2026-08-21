@@ -9,7 +9,18 @@
     <meta name="google" content="notranslate" />
     <meta name="description" content="BTZ Lingen Schulungs-ERP für Einkauf, Verkauf, Buchhaltung, Logistik und Personalwesen." />
     <meta name="theme-color" content="#0f4c81" />
+    <meta name="color-scheme" content="light dark" />
     <title>BTZ Lingen Schulungs-ERP</title>
+    <script>
+      (() => {
+        try {
+          const isDarkMode = window.localStorage.getItem("erp-dark-mode") === "true";
+          document.documentElement.setAttribute("data-theme", isDarkMode ? "dark" : "light");
+        } catch (_error) {
+          // Ignore localStorage access issues during initial paint.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

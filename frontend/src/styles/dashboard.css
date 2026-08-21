@@ -30,9 +30,23 @@
     padding: 18px;
 }
 
+[data-theme=dark] .kennzahl,
+.theme-dark .kennzahl {
+    background: #2a313a;
+    border-color: #404a56;
+    color: #e5e7eb;
+}
+
 .kennzahl span {
     display: block;
     color: #555;
+}
+
+[data-theme=dark] .kennzahl span,
+[data-theme=dark] .kennzahl small,
+.theme-dark .kennzahl span,
+.theme-dark .kennzahl small {
+    color: #b6c0cb;
 }
 
 .kennzahl strong {
@@ -57,6 +71,13 @@
     border-radius: 6px;
 }
 
+[data-theme=dark] .buchhaltung-liste,
+.theme-dark .buchhaltung-liste {
+    background: #2a313a;
+    border-color: #404a56;
+    color: #e5e7eb;
+}
+
 .buchhaltung-liste h2 { margin-top: 0; }
 .buchhaltung-liste li { margin: 8px 0; }
 
@@ -75,11 +96,26 @@
     transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
+[data-theme=dark] .button-link,
+.theme-dark .button-link {
+    background: #2d3742;
+    border-color: #4b5b70;
+    color: #9fd0ff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+}
+
 .button-link:hover {
     background: #eff6ff;
     color: #0f4fa8;
     border-color: #93c5fd;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme=dark] .button-link:hover,
+.theme-dark .button-link:hover {
+    background: #374453;
+    color: #c7e2ff;
+    border-color: #6f8fb0;
 }
 
 .prozess-einstiege { margin-top: 32px; }
@@ -107,9 +143,40 @@
     background: #fff;
 }
 
+[data-theme=dark] .prozess-karte,
+.theme-dark .prozess-karte {
+    background: #2a313a;
+    border-color: #404a56;
+    color: #e5e7eb;
+}
+
 .prozess-karte h3 { margin: 0; }
 .prozess-karte p { flex: 1; color: #555; }
 .prozess-karte a { color: #1565c0; font-weight: 600; }
+
+[data-theme=dark] .prozess-karte p,
+[data-theme=dark] .lernpfad-karte p,
+[data-theme=dark] .task-card p,
+[data-theme=dark] .teacher-class-card p,
+[data-theme=dark] .status-card span,
+[data-theme=dark] .activity-date,
+.theme-dark .prozess-karte p,
+.theme-dark .lernpfad-karte p,
+.theme-dark .task-card p,
+.theme-dark .teacher-class-card p,
+.theme-dark .status-card span,
+.theme-dark .activity-date {
+    color: #b6c0cb;
+}
+
+[data-theme=dark] .prozess-karte a,
+[data-theme=dark] .task-card a,
+[data-theme=dark] .teacher-class-card span,
+.theme-dark .prozess-karte a,
+.theme-dark .task-card a,
+.theme-dark .teacher-class-card span {
+    color: #9fd0ff;
+}
 
 .lernpfad-karte {
     display: flex;
@@ -119,6 +186,13 @@
     border: 1px solid #dbe2ea;
     border-radius: 10px;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+[data-theme=dark] .lernpfad-karte,
+.theme-dark .lernpfad-karte {
+    background: linear-gradient(180deg, #2f3741 0%, #28313a 100%);
+    border-color: #404a56;
+    color: #e5e7eb;
 }
 
 .lernpfad-kopf {
@@ -139,6 +213,12 @@
     border-radius: 999px;
     padding: 4px 10px;
     white-space: nowrap;
+}
+
+[data-theme=dark] .lernpfad-kopf span,
+.theme-dark .lernpfad-kopf span {
+    color: #d6dee8;
+    background: #3d4956;
 }
 
 .lernpfad-karte p {
@@ -171,6 +251,14 @@
     box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
 }
 
+[data-theme=dark] .dashboard-panel,
+.theme-dark .dashboard-panel {
+    background: linear-gradient(180deg, #2f3741 0%, #28313a 100%);
+    border-color: #404a56;
+    color: #e5e7eb;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
 .dashboard-panel-header {
     display: flex;
     justify-content: space-between;
@@ -190,6 +278,11 @@
     font-weight: 600;
 }
 
+[data-theme=dark] .dashboard-panel-header span,
+.theme-dark .dashboard-panel-header span {
+    color: #b6c0cb;
+}
+
 .task-list,
 .activity-list,
 .teacher-class-list {
@@ -203,6 +296,15 @@
     border-radius: 12px;
     padding: 14px;
     background: rgba(255, 255, 255, 0.78);
+}
+
+[data-theme=dark] .task-card,
+[data-theme=dark] .teacher-class-card,
+.theme-dark .task-card,
+.theme-dark .teacher-class-card {
+    border-color: #46515d;
+    background: rgba(49, 58, 69, 0.92);
+    color: #e5e7eb;
 }
 
 .task-card strong,
@@ -231,6 +333,11 @@
     line-height: 1.55;
 }
 
+[data-theme=dark] .dashboard-note-list,
+.theme-dark .dashboard-note-list {
+    color: #d3d9e1;
+}
+
 .dashboard-note-list li {
     margin: 0 0 10px;
 }
@@ -256,6 +363,11 @@
     border-top: 1px solid #e2e8f0;
 }
 
+[data-theme=dark] .activity-row,
+.theme-dark .activity-row {
+    border-top-color: #46515d;
+}
+
 .activity-row:first-child {
     border-top: none;
     padding-top: 0;
@@ -273,6 +385,15 @@
     color: #0f172a;
 }
 
+[data-theme=dark] .activity-row strong,
+[data-theme=dark] .status-card strong,
+[data-theme=dark] .lernpfad-schritte,
+.theme-dark .activity-row strong,
+.theme-dark .status-card strong,
+.theme-dark .lernpfad-schritte {
+    color: #eef2f7;
+}
+
 .activity-row p {
     margin: 0;
     color: #556070;
@@ -288,6 +409,12 @@
     border-radius: 8px;
     padding: 14px;
     border: 1px solid #e2e8f0;
+}
+
+[data-theme=dark] .status-card,
+.theme-dark .status-card {
+    border-color: #46515d;
+    background: #313a45;
 }
 
 .status-card span {

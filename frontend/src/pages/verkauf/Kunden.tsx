@@ -8,7 +8,7 @@ import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
 import kundenService from "../../services/verkauf/customerService";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import OverviewCards from "../../components/OverviewCards";
 import SaveButton from "../../components/SaveButton";
 import { Link, useSearchParams } from "react-router-dom";
@@ -58,8 +58,40 @@ export default function Kunden() {
     const allColumns = getAllTableColumns(config.tableName);
 
     const [abcFilter, setAbcFilter] = useState("");
+    const [neuerKontaktName, setNeuerKontaktName] = useState("");
+    const [neueKontaktAbteilung, setNeueKontaktAbteilung] = useState("");
     const handleFieldChange = (field, value) => {
         setCurrentItem({ ...currentItem, [field]: value });
+    };
+
+    const kontakte = Array.isArray(currentItem.ansprechpartner) ? currentItem.ansprechpartner : [];
+
+    useEffect(() => {
+        if (!open) {
+            setNeuerKontaktName("");
+            setNeueKontaktAbteilung("");
+        }
+    }, [open]);
+
+    const kontaktHinzufuegen = () => {
+        const name = neuerKontaktName.trim();
+        const abteilung = neueKontaktAbteilung.trim();
+        if (!name) return;
+
+        handleFieldChange("ansprechpartner", [
+            ...kontakte,
+            {
+                id: `kp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                name,
+                abteilung
+            }
+        ]);
+        setNeuerKontaktName("");
+        setNeueKontaktAbteilung("");
+    };
+
+    const kontaktEntfernen = (kontaktId) => {
+        handleFieldChange("ansprechpartner", kontakte.filter(item => item.id !== kontaktId));
     };
 
     const handleFilterChange = (filters) => {
@@ -176,9 +208,45 @@ export default function Kunden() {
 
                 <Label>Optionen</Label>
                 <TextField
-                    value={currentItem.optionen.join(", ") || ""}
+                    value={Array.isArray(currentItem.optionen) ? currentItem.optionen.join(", ") : ""}
                     onChange={v => handleFieldChange("optionen", v.split(",").map(x => x.trim()).filter(Boolean))}
                 />
+
+                <div className="form-row">
+                    <Label>Ansprechpartner</Label>
+                    <div style={{ display: "grid", gap: "0.75rem" }}>
+                        {kontakte.length > 0 && <div style={{ display: "grid", gap: "0.5rem" }}>
+                            {kontakte.map(kontakt => <div
+                                key={kontakt.id}
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 1fr) auto",
+                                    gap: "0.5rem",
+                                    alignItems: "center"
+                                }}
+                            >
+                                <div style={{ fontWeight: 600 }}>{kontakt.name}</div>
+                                <div style={{ color: "var(--color-text-muted)" }}>{kontakt.abteilung || "---"}</div>
+                                <button type="button" className="button-secondary" onClick={() => kontaktEntfernen(kontakt.id)}>
+                                    Entfernen
+                                </button>
+                            </div>)}
+                        </div>}
+                        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) auto", gap: "0.5rem", alignItems: "end" }}>
+                            <div>
+                                <Label>Name</Label>
+                                <TextField value={neuerKontaktName} onChange={setNeuerKontaktName} />
+                            </div>
+                            <div>
+                                <Label>Abteilung</Label>
+                                <TextField value={neueKontaktAbteilung} onChange={setNeueKontaktAbteilung} />
+                            </div>
+                            <button type="button" className="button-secondary" onClick={kontaktHinzufuegen}>
+                                Hinzufügen
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <div className="form-row">
                     <Label>Notiz</Label>

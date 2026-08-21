@@ -18,7 +18,11 @@ export let kunden = [
         iban: "DE44500105175407324931",
 
         optionen: ["Fahrradbekleidung", "Sicherheitsbekleidung", "Sonderfahrräder", "Lastenbikes"],
-        notiz:""
+        notiz:"",
+        ansprechpartner: [
+            { id: "kp-1-1", name: "Mara Heinen", abteilung: "Einkauf" },
+            { id: "kp-1-2", name: "Thomas Wilken", abteilung: "Filialleitung" }
+        ]
     },
 
 
@@ -36,7 +40,11 @@ export let kunden = [
         optionen: ["Bikes aller Art", "Leasing", "Reparatur Service"],
 
         website: "https://www.emsland.com/",
-        notiz:""
+        notiz:"",
+        ansprechpartner: [
+            { id: "kp-2-1", name: "Lena Kramer", abteilung: "Touristik" },
+            { id: "kp-2-2", name: "Jan Feldkamp", abteilung: "Eventplanung" }
+        ]
     },
 
     {
@@ -51,6 +59,10 @@ export let kunden = [
         iban: "DE31500105170648489890",
         optionen: ["Service", "Wartung", "Abholung"],
         website: "https://www.nordrad-campus.de/",
+        ansprechpartner: [
+            { id: "kp-3-1", name: "Sven Hartmann", abteilung: "Werkstattleitung" },
+            { id: "kp-3-2", name: "Kira Beckmann", abteilung: "Disposition" }
+        ],
         notiz:"Servicekunde mit regelmäßigen Wartungsanfragen."
     },
 
@@ -66,6 +78,10 @@ export let kunden = [
         iban: "DE98500105179876543210",
         optionen: ["Flottenkunden", "Lastenbikes", "Sicherheitsausstattung"],
         website: "https://www.stadtwerke-lingen.de/",
+        ansprechpartner: [
+            { id: "kp-4-1", name: "Nadine Albers", abteilung: "Mobilitätsmanagement" },
+            { id: "kp-4-2", name: "Timo Gerdes", abteilung: "Beschaffung" }
+        ],
         notiz:"Potenzial für größere Flottenbestellungen."
     },
 
@@ -81,6 +97,10 @@ export let kunden = [
         iban: "DE12500105171234567890",
         optionen: ["Schulungsfahrräder", "Helme", "Projektmaterial"],
         website: "",
+        ansprechpartner: [
+            { id: "kp-5-1", name: "Leonie Schulte", abteilung: "Projektkoordination" },
+            { id: "kp-5-2", name: "Bastian Kruse", abteilung: "Ausbildung" }
+        ],
         notiz:"Neuer Projektkunde mit wiederkehrendem Trainingsbedarf."
     }
 
@@ -2351,3 +2371,5 @@ export let unternehmen = [
         einkaufBlz: "360 440 81"
     }
 ];
+
+

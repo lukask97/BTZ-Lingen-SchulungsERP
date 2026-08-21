@@ -122,7 +122,10 @@ function createAnfrageDraft(defaultKundeId = "") {
         kanal: "E-Mail",
         betreff: "",
         anliegen: "",
-        neuerKundeName: ""
+        neuerKundeName: "",
+        ansprechpartnerId: "__none__",
+        neuerAnsprechpartnerName: "",
+        neuerAnsprechpartnerAbteilung: ""
     };
 }
 
@@ -203,6 +206,32 @@ export default function LehrkraftKundenkorrespondenz() {
         [kunden]
     );
     const nutztNeuenKunden = String(current.kundeId || "") === "__neu__";
+    const ausgewaehlterKunde = useMemo(
+        () => kunden.find(item => String(item.id) === String(current.kundeId || "")) || null,
+        [current.kundeId, kunden]
+    );
+    const ansprechpartnerOptionen = useMemo(() => {
+        const basis = [
+            { value: "__none__", label: "---" },
+            ...((ausgewaehlterKunde?.ansprechpartner || []).map(item => ({
+                value: String(item.id),
+                label: `${item.name}${item.abteilung ? ` - ${item.abteilung}` : ""}`
+            }))),
+            { value: "__new__", label: "Neuer Ansprechpartner" }
+        ];
+        return basis;
+    }, [ausgewaehlterKunde]);
+    const nutztNeuenAnsprechpartner = String(current.ansprechpartnerId || "") === "__new__";
+
+    const zufaelligenAnsprechpartnerWaehlen = () => {
+        const kontakte = ausgewaehlterKunde?.ansprechpartner || [];
+        if (kontakte.length === 0) {
+            setCurrent(item => ({ ...item, ansprechpartnerId: "__none__" }));
+            return;
+        }
+        const zufall = kontakte[Math.floor(Math.random() * kontakte.length)];
+        setCurrent(item => ({ ...item, ansprechpartnerId: String(zufall.id) }));
+    };
 
     const refreshPageData = () => {
         setRefreshKey(current => current + 1);
@@ -348,11 +377,28 @@ export default function LehrkraftKundenkorrespondenz() {
                 iban: "",
                 website: "",
                 optionen: [],
-                notiz: "Von der Lehrkraft direkt bei der ersten Anfrage angelegt."
+                notiz: "Von der Lehrkraft direkt bei der ersten Anfrage angelegt.",
+                ansprechpartner: []
             })
             : bestehenderKunde;
 
         if (!kunde || (nutztNeuenKunden && !current.neuerKundeName.trim())) return false;
+        const vorhandeneKontakte = Array.isArray(kunde.ansprechpartner) ? kunde.ansprechpartner : [];
+        const ausgewaehlterKontakt = vorhandeneKontakte.find(item => String(item.id) === String(current.ansprechpartnerId || ""));
+        const neuerKontakt = nutztNeuenAnsprechpartner && current.neuerAnsprechpartnerName.trim()
+            ? {
+                id: `kp-${Date.now()}`,
+                name: current.neuerAnsprechpartnerName.trim(),
+                abteilung: current.neuerAnsprechpartnerAbteilung.trim()
+            }
+            : null;
+        if (neuerKontakt) {
+            kundenService.update({
+                ...kunde,
+                ansprechpartner: [...vorhandeneKontakte, neuerKontakt]
+            });
+        }
+        const kontakt = neuerKontakt || ausgewaehlterKontakt || null;
         const vorgangId = createInquiryVorgangId();
         const neueAnfrage = customerInquiryService.create({
             typ: current.typ,
@@ -361,7 +407,9 @@ export default function LehrkraftKundenkorrespondenz() {
             status: "offen",
             datum: today,
             anliegen,
-            vorgangId
+            vorgangId,
+            ansprechpartnerName: kontakt?.name || "",
+            ansprechpartnerAbteilung: kontakt?.abteilung || ""
         });
         nachrichtenService.create({
             vorgangId,
@@ -375,7 +423,9 @@ export default function LehrkraftKundenkorrespondenz() {
             kanal: current.kanal,
             betreff,
             nachricht: anliegen,
-            typ: "Anfrage"
+            typ: "Anfrage",
+            ansprechpartnerName: kontakt?.name || "",
+            ansprechpartnerAbteilung: kontakt?.abteilung || ""
         });
         refreshPageData();
         return true;
@@ -786,6 +836,32 @@ export default function LehrkraftKundenkorrespondenz() {
             <div><Label>Typ</Label><select value={current.typ} onChange={event => setCurrent(value => ({ ...value, typ: event.target.value }))}><option>Produktanfrage</option><option>Angebotswunsch</option><option>Support</option><option>Sonstiges</option></select></div>
             <div><Label>Als Kunde</Label><LookupField value={current.kundeId} options={[{ value: "__neu__", label: "Neuer Kunde..." }, ...kundenOptionen]} onChange={value => setCurrent(item => ({ ...item, kundeId: value }))} placeholder="Kunde suchen..."/></div>
             {nutztNeuenKunden && <div><Label>Name des neuen Kunden</Label><TextField value={current.neuerKundeName} onChange={value => setCurrent(item => ({ ...item, neuerKundeName: value }))}/></div>}
+            {!nutztNeuenKunden && <div>
+                <Label>Ansprechpartner</Label>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                    <div style={{ flex: 1 }}>
+                        <LookupField
+                            value={current.ansprechpartnerId}
+                            options={ansprechpartnerOptionen}
+                            onChange={value => setCurrent(item => ({ ...item, ansprechpartnerId: value }))}
+                            placeholder="Ansprechpartner auswählen..."
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        className="button-secondary"
+                        style={{ width: "2.5rem", minWidth: "2.5rem", padding: "0.5rem" }}
+                        onClick={zufaelligenAnsprechpartnerWaehlen}
+                        title="Zufällige Person wählen"
+                    >
+                        🎲
+                    </button>
+                </div>
+            </div>}
+            {!nutztNeuenKunden && nutztNeuenAnsprechpartner && <>
+                <div><Label>Name</Label><TextField value={current.neuerAnsprechpartnerName} onChange={value => setCurrent(item => ({ ...item, neuerAnsprechpartnerName: value }))}/></div>
+                <div><Label>Abteilung</Label><TextField value={current.neuerAnsprechpartnerAbteilung} onChange={value => setCurrent(item => ({ ...item, neuerAnsprechpartnerAbteilung: value }))}/></div>
+            </>}
             <div><Label>Kanal</Label><TextField value={current.kanal} onChange={value => setCurrent(item => ({ ...item, kanal: value }))}/></div>
             <div><Label required>Betreff</Label><TextField value={current.betreff} onChange={value => setCurrent(item => ({ ...item, betreff: value }))}/></div>
             <div className="form-row"><Label required>Anliegen</Label><TextArea rows={4} value={current.anliegen} onChange={value => setCurrent(item => ({ ...item, anliegen: value }))}/></div>

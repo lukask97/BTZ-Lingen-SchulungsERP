@@ -101,6 +101,7 @@ export default function SaveButton({
                 await wait(minSavingDurationMs - elapsed);
             }
             if (result === false) {
+                console.log("Nicht erfolgreich");
                 setState("error");
                 resetLater("error");
                 return;
@@ -109,6 +110,7 @@ export default function SaveButton({
             setState("success");
             resetLater("success", onSuccess);
         } catch {
+            console.log("Nicht erfolgreich");
             const elapsed = Date.now() - startedAt;
             if (elapsed < minSavingDurationMs) {
                 await wait(minSavingDurationMs - elapsed);
