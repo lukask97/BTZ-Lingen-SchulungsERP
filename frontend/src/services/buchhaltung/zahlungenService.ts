@@ -1,5 +1,4 @@
-import { zahlungen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import rechnungenService from "./rechnungenService";
 import bestellungenService from "../einkauf/bestellungenService";
 import { getCustomerName } from "../../utils/customerReferences";
@@ -7,7 +6,7 @@ import { getSupplierName } from "../../utils/supplierReferences";
 import kundenService from "../verkauf/customerService";
 import lieferantenService from "../einkauf/lieferantenService";
 
-const baseService = createCRUDService("zahlungen", zahlungen);
+const baseService = createCRUDService("zahlungen", []);
 
 function safeGetInvoiceById(rechnungId: number | string) {
     try {
@@ -141,3 +140,5 @@ const zahlungenService = {
 };
 
 export default zahlungenService;
+
+

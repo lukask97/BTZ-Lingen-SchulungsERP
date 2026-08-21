@@ -16,18 +16,18 @@ Die Standardentwicklung läuft mit:
 
 ## Wichtige Dokumentation
 
-- [README.md](README.md) – Startbefehle, Docker-Setup und Laufzeitumgebungen
-- [backend/README_PREVIEW.md](backend/README_PREVIEW.md) – Backend-Logik, Auth und DB-Modus
+- [README.md](README.md) – Startbefehle, Docker-Setup und Projektstruktur
+- [docs/README.md](docs/README.md) – Uebersicht ueber die vorhandene Projektdokumentation
 - [docs/DEMO.md](docs/DEMO.md) – Demo-Fluss und Testkonten
 - [docs/DB-Schema-Entwurf.md](docs/DB-Schema-Entwurf.md) – Datenmodell und SQL-Ansatz
 
 ## Laufzeit- und Architektur-Prinzipien
 
-- Das Flask-Backend erzeugt die App über [backend/app_factory.py](backend/app_factory.py) und liest Konfiguration aus [backend/config.py](backend/config.py).
-- Der Standardmodus ist PostgreSQL (`ERP_DATA_MODE=postgres`), nicht der In-Memory-Modus.
+- Das Flask-Backend erzeugt die App ueber [backend/app_factory.py](backend/app_factory.py) und liest Konfiguration aus [backend/config.py](backend/config.py).
+- Es gibt nur noch einen Persistenzweg: PostgreSQL mit JSONB ueber [backend/repositories/postgres_store.py](backend/repositories/postgres_store.py).
 - Das Frontend verwendet in [frontend/src/services/core/api.ts](frontend/src/services/core/api.ts) automatisch den Backend-Host auf Port 5000, sofern `VITE_API_URL` nicht gesetzt ist.
-- Auth und Session-Handling laufen serverseitig im Backend; das Frontend prüft Berechtigungen über den Auth-Kontext.
-- Die API folgt generischen CRUD-Pfaden unter `/api/datenbanken/<table>`; Spezialfälle sollten nach dem bestehenden Muster in den Route-Blueprints ergänzt werden.
+- Auth und Session-Handling laufen serverseitig im Backend; das Frontend prueft Berechtigungen ueber den Auth-Kontext.
+- Die API folgt generischen CRUD-Pfaden unter `/api/datenbanken/<table>`; Spezialfaelle sollten nach dem bestehenden Muster in den Route-Blueprints ergaenzt werden.
 
 ## Typische Startbefehle
 
@@ -59,7 +59,7 @@ npm run build
 - Backend-Blueprints liegen unter [backend/routes/](backend/routes/); neue API-Module sollten dort eingefügt werden.
 - Persistenzlogik gehört in [backend/repositories/](backend/repositories/), nicht in die Routen selbst.
 - DB-Initialisierung und Schema-Änderungen stehen in [database/init/](database/init/) bzw. [backend/migrations/](backend/migrations/).
-- Seed-Daten werden aus dem Frontend- bzw. Mock-Kontext erzeugt; relevante Dateien liegen in [backend/seed/](backend/seed/) und [backend/scripts/](backend/scripts/).
+- Seed-, Demo- und Reset-Daten liegen zentral in [backend/seed/](backend/seed/); gepflegte Quellmodule dafuer liegen unter [frontend/src/services/seed/](frontend/src/services/seed/).
 
 ## Änderungen und Arbeitsweise
 
@@ -83,8 +83,8 @@ npm run build
 - `verkauf_azubi / verkauf`
 - `verkauf_senior / verkauf`
 
-## Hinweise für AI-Coding-Agents
+## Hinweise fuer AI-Coding-Agents
 
-- Priorisiere Änderungen, die die bestehende Architektur respektieren: React-Frontend, Flask-Backend, PostgreSQL-Store.
-- Dokumentation und Design sind in diesem Repo wichtiger als „neue Framework-Patterns“; bleibe nah an den vorhandenen Mustern.
-- Wenn du unsicher bist, lies zuerst [README.md](README.md), [backend/README_PREVIEW.md](backend/README_PREVIEW.md) und die betroffene Route/Service-Datei, bevor du neue Strukturen einführst.
+- Priorisiere Aenderungen, die die bestehende Architektur respektieren: React-Frontend, Flask-Backend, PostgreSQL-Store.
+- Dokumentation und Design sind in diesem Repo wichtiger als neue Framework-Patterns; bleibe nah an den vorhandenen Mustern.
+- Wenn du unsicher bist, lies zuerst [README.md](README.md), [docs/README.md](docs/README.md) und die betroffene Route/Service-Datei, bevor du neue Strukturen einfuehrst.

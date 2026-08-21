@@ -26,6 +26,6 @@ export function userHasAccess(user: AuthUser | null, access: AccessKey) {
     return user.permissions.some(permission => permission === access || permission.startsWith(`${access}.`));
 }
 
-export function userCanAccess(user: AuthUser | null, options: { access: string; permission: PermissionKey }) {
+export function userCanAccess(user: AuthUser | null, options: { access: AccessKey; permission: PermissionKey }) {
     return userHasAccess(user, options.access) && userHasPermission(user, options.permission);
 }

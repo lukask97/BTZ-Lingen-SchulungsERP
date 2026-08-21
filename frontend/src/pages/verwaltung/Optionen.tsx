@@ -2,10 +2,10 @@
 import Label from "../../components/form/Label";
 import NumberField from "../../components/form/NumberField";
 import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 export default function Optionen() {
-    const refreshTick = useStorageSyncRefresh(["fristenOptionen"]);
+    const refreshTick = useDataSyncRefresh(["fristenOptionen"]);
     const [optionen, setOptionen] = useState(() => fristenOptionenService.get());
 
     useEffect(() => {

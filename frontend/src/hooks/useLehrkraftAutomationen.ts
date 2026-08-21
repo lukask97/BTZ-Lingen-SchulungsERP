@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { useStorageSyncRefresh } from "./useStorageSyncRefresh";
+import { useDataSyncRefresh } from "./useDataSyncRefresh";
 import { applyLehrkraftAutomationen } from "../services/lehrkraft/lehrkraftAutomationService";
 
 export function useLehrkraftAutomationen() {
-    const syncTick = useStorageSyncRefresh([
+    const syncTick = useDataSyncRefresh([
         "lehrkraftOptionen",
         "vertriebsdokumente",
         "zahlungen",

@@ -1,5 +1,14 @@
 import { useId } from "react";
 
+type CheckboxProps = {
+    id?: string;
+    name?: string;
+    children: any;
+    checked?: boolean;
+    onChange: (value: boolean) => void;
+    disabled?: boolean;
+};
+
 export default function Checkbox({
     id,
     name,
@@ -7,7 +16,7 @@ export default function Checkbox({
     checked = false,
     onChange,
     disabled = false
-}) {
+}: CheckboxProps) {
     const generatedId = useId();
     const fieldId = id || `checkbox-${generatedId}`;
     const fieldName = name || fieldId;

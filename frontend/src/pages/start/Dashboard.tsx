@@ -20,7 +20,7 @@ import { ACCESS } from "../../constants/permissions";
 import useAuth from "../../auth/useAuth";
 import { getBerlinDate } from "../../utils/dateTime";
 import { getUnifiedOpenItems, isOpenItem, isOverdueOpenItem, isPendingPayment, isOverduePayment } from "../../utils/openItems";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 const DASHBOARD_AREAS = [
     { access: ACCESS.EINKAUF, title: "Einkauf", text: "Lieferanten vergleichen, Bestellungen anlegen und Wareneingänge bearbeiten.", to: "/themen/einkauf", link: "Zum Einkauf" },
@@ -113,7 +113,7 @@ function buildTeacherAlert(label, count) {
 
 function Dashboard() {
     const today = getBerlinDate();
-    useStorageSyncRefresh([
+    useDataSyncRefresh([
         "auftraege", "angebote", "bestellungen", "kundenanfragen", "vertriebsdokumente",
         "zahlungen", "mahnungen", "freigaben", "artikel", "urlaubsantraege",
         "krankmeldungen", "arbeitszeiten", "schulungen", "bewerber", "mitarbeiter"

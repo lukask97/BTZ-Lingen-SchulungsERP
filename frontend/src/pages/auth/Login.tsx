@@ -7,7 +7,6 @@ import { BACKEND_ORIGIN } from "../../services/core/api";
 
 const QUICK_LOGINS = [
     { label: "Admin", username: "admin", password: "admin" },
-    { label: "Verkauf", username: "verkauf", password: "verkauf" },
     { label: "Verkauf Azubi", username: "verkauf_azubi", password: "verkauf" },
     { label: "Verkauf Senior", username: "verkauf_senior", password: "verkauf" },
     { label: "Lager", username: "lager", password: "lager" },

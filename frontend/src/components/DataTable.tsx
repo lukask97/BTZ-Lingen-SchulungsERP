@@ -706,7 +706,7 @@ export default function DataTable({
                   {visibleColumns.map((column) => (
                     <td key={column.field}>
                       {column.render
-                        ? column.render(row)
+                        ? column.render(row, row[column.field])
                         : displayValue(row[column.field])}
                     </td>
                   ))}

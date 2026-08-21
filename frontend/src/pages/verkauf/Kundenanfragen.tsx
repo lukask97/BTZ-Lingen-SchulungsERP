@@ -8,7 +8,7 @@ import SalesFlowBar from "../../components/SalesFlowBar";
 import customerInquiryService from "../../services/verkauf/customerInquiryService";
 import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
 import angeboteService from "../../services/verkauf/angeboteService";
-import { subscribeToStorageSync } from "../../services/mockup/mockStorage";
+import { subscribeToDataSync } from "../../services/seed/dataSync";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import { naechsteAuftragsnummer } from "../../services/verkauf/verkaufService";
 import { getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
@@ -35,8 +35,8 @@ function getThreadMessages(threadItem: any, fallbackDate: string) {
             datum: threadItem.beantwortetAm || threadItem.datum || fallbackDate,
             zeitpunkt: `${threadItem.beantwortetAm || threadItem.datum || fallbackDate}T12:00:00`,
             senderRolle: "Verkauf",
-            senderName: "Schülerfirma Verkauf",
-            betreff: "Antwort der Schülerfirma",
+            senderName: "Schuelerfirma Verkauf",
+            betreff: "Antwort der Schuelerfirma",
             nachricht: threadItem.antwort
         }].sort((a, b) => String(a.zeitpunkt || a.datum).localeCompare(String(b.zeitpunkt || b.datum)));
     }
@@ -59,7 +59,7 @@ export default function Kundenanfragen() {
     const [selectedOfferId, setSelectedOfferId] = useState<string>("");
     const angebote = angeboteService.getAll();
     const auftraege = auftraegeService.getAll();
-    const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
+    const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schuelerfirma Verkauf"));
 
     const refreshInquiryState = () => {
         setAnfragen(customerInquiryService.list());
@@ -85,13 +85,13 @@ export default function Kundenanfragen() {
         );
     };
 
-    const angebotAlsPdf = angebot => {
+    const angebotAlsPdf = (angebot) => {
         if (!angebot) return;
         openDocumentPdf({
             title: `Angebot ${angebot.angebotsNr}`,
-            subject: "Automatisch erzeugtes Angebotsdokument für den Schulungseinsatz.",
+            subject: "Automatisch erzeugtes Angebotsdokument fuer den Schulungseinsatz.",
             date: angebot.datum,
-            note: angebot.verguenstigungsGrund || "Kein zusätzlicher Hinweis hinterlegt.",
+            note: angebot.verguenstigungsGrund || "Kein zusaetzlicher Hinweis hinterlegt.",
             referenceLabel: "Angebot",
             referenceValue: angebot.angebotsNr,
             partnerLabel: "Kunde",
@@ -108,7 +108,7 @@ export default function Kundenanfragen() {
         const angebot = getSelectedOffer(angeboteZuVorgang(threadItem.vorgangId));
         if (!threadItem || !angebot || angebotWurdeBereitsGesendet(angebot)) return;
 
-        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Prüfung zu.`;
+        const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Pruefung zu.`;
         const aktualisierteAnfrage = {
             ...threadItem,
             status: "beantwortet",
@@ -208,7 +208,7 @@ export default function Kundenanfragen() {
             senderRolle: "Verkauf",
             senderName: verkaufAbsenderName,
             kanal: threadItem.kanal || "E-Mail",
-            betreff: "Antwort der Schülerfirma",
+            betreff: "Antwort der Schuelerfirma",
             nachricht: replyText.trim(),
             typ: "Antwort"
         });
@@ -227,19 +227,17 @@ export default function Kundenanfragen() {
         if (!auftrag) return false;
         return !["abgerechnet", "bezahlt", "storniert", "beendet", "abgeschlossen"].includes(String(auftrag.status || "").toLowerCase());
     };
-    const laufendeAuftraege = anfragen.filter(item => {
-        return istLaufenderAuftrag(item.auftragId);
-    }).length;
+    const laufendeAuftraege = anfragen.filter(item => istLaufenderAuftrag(item.auftragId)).length;
     const vorgangAngebote = useMemo(
         () => threadVorgangId ? angeboteZuVorgang(threadVorgangId) : [],
         [threadVorgangId, angebote]
     );
     const dashboardTabs = useMemo(() => ([
         { key: "offen", label: "Offene Anfragen", value: offene },
-        { key: "rueckmeldung", label: "Warte auf Rückmeldung", value: wartetAufRueckmeldung },
+        { key: "rueckmeldung", label: "Warte auf Rueckmeldung", value: wartetAufRueckmeldung },
         {
             key: "auftraege",
-            label: "Laufende Aufträge",
+            label: "Laufende Auftraege",
             value: laufendeAuftraege
         },
         { key: "alle", label: "Alle", value: anfragen.length }
@@ -272,14 +270,14 @@ export default function Kundenanfragen() {
         }] : []),
         ...(kannAngebotSenden ? [{
             id: "send-offer",
-            label: angebotIstInternVorbereitet ? "Angebot prüfen" : "Angebot senden",
+            label: angebotIstInternVorbereitet ? "Angebot pruefen" : "Angebot senden",
             onClick: angebotIstInternVorbereitet
                 ? () => navigate(`/angebote?approveOfferId=${aktuellesAngebot?.id || ""}`)
                 : angebotSenden
         }] : [])
     ];
 
-    useEffect(() => subscribeToStorageSync(["kundenanfragen", "nachrichten", "angebote", "auftraege", "kunden"], () => {
+    useEffect(() => subscribeToDataSync(["kundenanfragen", "nachrichten", "angebote", "auftraege", "kunden"], () => {
         refreshInquiryState();
         if (threadItem?.id) {
             const aktuelleAnfrage = customerInquiryService.list().find(item => String(item.id) === String(threadItem.id));
@@ -313,7 +311,7 @@ export default function Kundenanfragen() {
     }, [threadVorgangId, angebote, selectedOfferId]);
 
     return <>
-        <SalesFlowBar currentStep="kundenanfragen"/>
+        <SalesFlowBar currentStep="kundenanfragen" />
         <div className="kennzahlen">
             {dashboardTabs.map(card => <button key={card.key} type="button" className={`kennzahl kennzahl-button${activeTab === card.key ? " is-active" : ""}`} onClick={() => setActiveTab(card.key)}>
                 <span>{card.label}</span>
@@ -322,11 +320,11 @@ export default function Kundenanfragen() {
         </div>
         <DataTable
             title={activeTab === "offen"
-                 ? "Offene Anfragen"
+                ? "Offene Anfragen"
                 : activeTab === "rueckmeldung"
-                     ? "Warte auf Rückmeldung"
+                    ? "Warte auf Rueckmeldung"
                     : activeTab === "auftraege"
-                         ? "Laufende Aufträge"
+                        ? "Laufende Auftraege"
                         : "Alle Kundenanfragen"}
             selectableColumns={false}
             data={sichtbareAnfragen}
@@ -426,9 +424,9 @@ export default function Kundenanfragen() {
                         </div>
                     </div>
                 </> : null}
-                replyLabel="Antwort der Schülerfirma"
+                replyLabel="Antwort der Schuelerfirma"
                 replyValue={replyText}
-                replyPlaceholder="Antwort, Rückfrage oder Information an den Kunden direkt im Chat erfassen..."
+                replyPlaceholder="Antwort, Rueckfrage oder Information an den Kunden direkt im Chat erfassen..."
                 onReplyChange={setReplyText}
                 onReplySend={antwortSpeichern}
                 showReplyBox

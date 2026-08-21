@@ -1,4 +1,3 @@
-import { auftraege, auftragspositionen } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
 import { createPositionTableService } from "../core/positionTableService";
 import artikelService from "../logistik/artikelService";
@@ -7,8 +6,8 @@ import angeboteService from "./angeboteService";
 import customerInquiryService from "./customerInquiryService";
 import kundenService from "./customerService";
 
-const baseService = createCRUDService("auftraege", auftraege);
-const positionService = createPositionTableService(auftragspositionen, {
+const baseService = createCRUDService("auftraege", []);
+const positionService = createPositionTableService([], {
     tableName: "auftragspositionen",
     parentField: "auftragId"
 });
@@ -60,12 +59,12 @@ function resolveProcessReferences(item: any = {}) {
     };
 }
 
-function hydrateAuftrag(item = {}) {
-    const processRefs = resolveProcessReferences(item as any);
+function hydrateAuftrag(item: any = {}) {
+    const processRefs = resolveProcessReferences(item);
     return {
         ...item,
         ...processRefs,
-        kunde: (item as any).kunde,
+        kunde: item.kunde,
         positionen: positionService.listByParent(item.id || "")
             .map(position => {
                 const hydrated = hydratePosition(position);
@@ -196,7 +195,7 @@ const auftraegeService = {
         positionService.replaceForParent(created.id, positionen);
         return hydrateAuftrag(created);
     },
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             const { basePayload, positionen } = splitPayload(idOrItem);
             const updated = baseService.update(basePayload);

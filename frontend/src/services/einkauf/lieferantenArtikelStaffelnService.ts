@@ -1,9 +1,8 @@
-import { createCRUDService } from "../core/genericService";
-import { lieferantenArtikelStaffeln } from "../mockup/mockData";
+﻿import { createCRUDService } from "../core/genericService";
 
-const service = createCRUDService("lieferantenArtikelStaffeln", lieferantenArtikelStaffeln);
+const service = createCRUDService("lieferantenArtikelStaffeln", []);
 
-function normalizeStaffel(item = {}) {
+function normalizeStaffel(item: any = {}) {
     return {
         ...item,
         artikelId: item.artikelId || "",
@@ -16,19 +15,19 @@ function normalizeStaffel(item = {}) {
 
 export default {
     ...service,
-    listByArtikel(artikelId) {
+    listByArtikel(artikelId: any) {
         return service.list()
             .filter(item => String(item.artikelId) === String(artikelId))
             .map(normalizeStaffel)
             .sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0));
     },
-    listByPair(artikelId, lieferantId) {
+    listByPair(artikelId: any, lieferantId: any) {
         return service.list()
             .filter(item => String(item.artikelId) === String(artikelId) && String(item.lieferantId) === String(lieferantId))
             .map(normalizeStaffel)
             .sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0));
     },
-    replaceForPair(artikelId, lieferantId, staffeln = []) {
+    replaceForPair(artikelId: any, lieferantId: any, staffeln: any[] = []) {
         const vorhandene = service.list().filter(item =>
             String(item.artikelId) === String(artikelId) && String(item.lieferantId) === String(lieferantId)
         );
@@ -45,7 +44,7 @@ export default {
             lieferantId
         })));
     },
-    listGrouped(artikelListe = [], lieferantenListe = []) {
+    listGrouped(artikelListe: any[] = [], lieferantenListe: any[] = []) {
         const gruppen = new Map();
 
         service.list().forEach(eintrag => {
@@ -78,16 +77,16 @@ export default {
             }))
             .sort((a, b) => `${a.artikelNr}${a.lieferant}`.localeCompare(`${b.artikelNr}${b.lieferant}`));
     },
-    getSupplierIdsForArtikel(artikelId) {
+    getSupplierIdsForArtikel(artikelId: any) {
         return [...new Set(this.listByArtikel(artikelId).map(item => String(item.lieferantId || "")).filter(Boolean))];
     },
-    getBestStaffelForQuantity(artikelId, lieferantId, menge) {
+    getBestStaffelForQuantity(artikelId: any, lieferantId: any, menge: any) {
         const staffeln = this.listByPair(artikelId, lieferantId);
         if (staffeln.length === 0) return null;
         const sortierteStaffeln = [...staffeln].sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0));
         return sortierteStaffeln.filter(item => Number(item.mindestbestellmenge || 0) <= Number(menge || 0)).slice(-1)[0] || sortierteStaffeln[0];
     },
-    getPreferredSupplierForArtikel(artikelId, menge, mode = "balanced") {
+    getPreferredSupplierForArtikel(artikelId: any, menge: any, mode = "balanced") {
         const lieferantIds = this.getSupplierIdsForArtikel(artikelId);
         const optionen = lieferantIds.map(lieferantId => {
             const supplierStaffeln = this.listByPair(artikelId, lieferantId);
@@ -114,3 +113,5 @@ export default {
         })[0];
     }
 };
+
+

@@ -1,14 +1,12 @@
-import { angebote } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import { formatOfferNumber, naechsteAngebotsrevision as buildNextAngebotsrevision } from "../core/documentNumbering";
-import { angebotspositionen } from "../mockup/mockData";
 import { createPositionTableService } from "../core/positionTableService";
 import artikelService from "../logistik/artikelService";
 import servicesService from "./servicesService";
 import kundenService from "./customerService";
 
-const baseService = createCRUDService("angebote", angebote);
-const positionService = createPositionTableService(angebotspositionen, {
+const baseService = createCRUDService("angebote", []);
+const positionService = createPositionTableService([], {
     tableName: "angebotspositionen",
     parentField: "angebotId"
 });
@@ -167,7 +165,7 @@ const angeboteService = {
         positionService.replaceForParent(created.id, positionen);
         return hydrateAngebot(created);
     },
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             const normalized = normalizeAngebot(idOrItem);
             const { basePayload, positionen } = splitPayload(normalized);
@@ -192,11 +190,12 @@ const angeboteService = {
 };
 
 export function naechsteAngebotsnummer() {
-    return buildNextAngebotsrevision(angeboteService.getAll(), `angebot-${Date.now()}`).angebotsNr;
+    return buildNextAngebotsrevision(angeboteService.getAll(), `angebot-${Date.now()}`, undefined as any).angebotsNr;
 }
 
 export function naechsteAngebotsrevision(vorgangId: any) {
-    return buildNextAngebotsrevision(angeboteService.getAll(), String(vorgangId));
+    return buildNextAngebotsrevision(angeboteService.getAll(), String(vorgangId), undefined as any);
 }
 
 export default angeboteService;
+

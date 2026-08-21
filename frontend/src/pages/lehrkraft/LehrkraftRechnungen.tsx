@@ -3,7 +3,7 @@ import DataTable from "../../components/DataTable";
 import OverviewCards from "../../components/OverviewCards";
 import { PERMISSIONS } from "../../constants/permissions";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { getBerlinDate } from "../../utils/dateTime";
 import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 
@@ -16,7 +16,7 @@ function getInvoiceViewStatus(rechnung: any) {
 
 export default function LehrkraftRechnungen() {
     useLehrkraftAutomationen();
-    useStorageSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen"]);
+    useDataSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen"]);
 
     const navigate = useNavigate();
     const rechnungen = rechnungenService.list().map(item => ({

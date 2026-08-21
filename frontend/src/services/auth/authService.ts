@@ -1,10 +1,6 @@
-import { benutzer, rollen, rollenRechte } from "../mockup/mockData.js";
-import { apiRequest, isDatabaseModeEnabled } from "../core/api";
-import { resolveUserPermissions } from "../../auth/permissionResolver";
+import { apiRequest } from "../core/api";
 
 export async function getCurrentBackendUser() {
-    if (!isDatabaseModeEnabled()) return null;
-
     try {
         const result = await apiRequest("/auth/me");
         if (!result.authenticated) {
@@ -31,31 +27,10 @@ export async function login(username,password){
         if (error instanceof Error && error.message === "Benutzername oder Passwort falsch.") {
             return null;
         }
-
-        if (isDatabaseModeEnabled()) {
-            throw error;
-        }
+        throw error;
     }
-
-    const user = benutzer.find(
-        u =>
-            u.username === username &&
-            u.password === password
-    );
-
-
-    if(!user)
-        return null;
-
-
-    return {
-        ...user,
-        permissions: resolveUserPermissions(user, rollen, rollenRechte)
-    };
-
 }
 
-export async function logoutPreviewSession() {
-    if (!isDatabaseModeEnabled()) return;
+export async function logoutSession() {
     await apiRequest("/auth/logout", { method: "POST" });
 }

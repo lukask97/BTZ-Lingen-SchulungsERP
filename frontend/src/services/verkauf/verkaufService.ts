@@ -8,7 +8,7 @@ export function naechsteAuftragsnummer() {
     return createNextOrderNumber(auftraegeService.getAll());
 }
 
-export function angebotInAuftragUebernehmen(angebotId) {
+export function angebotInAuftragUebernehmen(angebotId: any) {
     const angebot = angeboteService.getAll().find(item => item.id === angebotId);
     if (!angebot || angebot.status !== "wartet auf Antwort") return false;
 
@@ -33,7 +33,7 @@ export function angebotInAuftragUebernehmen(angebotId) {
     return neuerAuftrag;
 }
 
-export function kundenanfrageInAuftragUebernehmen(anfrageId, payload = {}) {
+export function kundenanfrageInAuftragUebernehmen(anfrageId: any, payload: any = {}) {
     const anfrage = customerInquiryService.list().find(item => String(item.id) === String(anfrageId));
     if (!anfrage || !anfrage.kundeId) return false;
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import NumberField from "../../components/form/NumberField";
 import Label from "../../components/form/Label";
 import lehrkraftOptionenService from "../../services/lehrkraft/lehrkraftOptionenService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 type LehrkraftTab = "lieferannahme" | "zahlungen";
 
@@ -50,7 +50,7 @@ function toDrafts(regeln: Zahlungsregel[]): ZahlungsregelDraft[] {
 }
 
 export default function LehrkraftOptionen() {
-    const refreshTick = useStorageSyncRefresh(["lehrkraftOptionen"]);
+    const refreshTick = useDataSyncRefresh(["lehrkraftOptionen"]);
 
     const [optionen, setOptionen] = useState(() => lehrkraftOptionenService.get());
     const [activeTab, setActiveTab] = useState<LehrkraftTab>("lieferannahme");

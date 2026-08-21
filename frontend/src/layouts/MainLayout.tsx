@@ -5,17 +5,15 @@ import {
     from "react-router-dom";
 import { useEffect, useState } from "react";
 
-
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import TeacherNotesPanel from "../components/TeacherNotesPanel";
-import { useStorageSyncRefresh } from "../hooks/useStorageSyncRefresh";
-import { SYNC_DATA_KEYS } from "../services/mockup/mockStorage";
-
+import { useDataSyncRefresh } from "../hooks/useDataSyncRefresh";
+import { SYNC_DATA_KEYS } from "../services/seed/dataSync";
 
 function MainLayout() {
-    useStorageSyncRefresh(SYNC_DATA_KEYS);
+    useDataSyncRefresh(SYNC_DATA_KEYS);
     const location = useLocation();
     const isTeacherView = location.pathname.startsWith("/lehrkraft");
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -30,7 +28,6 @@ function MainLayout() {
     }, [isDarkMode]);
 
     return (
-
         <div className="layout">
             <Sidebar
                 isCollapsed={isSidebarCollapsed}
@@ -45,16 +42,14 @@ function MainLayout() {
                 />
                 <div className={isTeacherView ? "content-shell content-shell-teacher" : "content-shell"}>
                     <main>
-                        <Outlet/>
+                        <Outlet />
                     </main>
-                    {isTeacherView && <TeacherNotesPanel/>}
+                    {isTeacherView && <TeacherNotesPanel />}
                 </div>
-                <Footer/>
+                <Footer />
             </div>
         </div>
     );
-
 }
-
 
 export default MainLayout;

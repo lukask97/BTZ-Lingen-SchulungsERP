@@ -43,8 +43,8 @@ export interface PermissionButtonProps {
     permission: PermissionKey;
     access: AccessKey;
     onClick: (...args: any[]) => void;
-    disabled: boolean;
-    variant: string;
-    className: string;
-    deniedTitle: string;
+    disabled?: boolean;
+    variant?: string;
+    className?: string;
+    deniedTitle?: string;
 }

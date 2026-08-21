@@ -1,9 +1,8 @@
-import { mahnungen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import rechnungenService from "./rechnungenService";
 import { getCustomerName } from "../../utils/customerReferences";
 
-const baseService = createCRUDService("mahnungen", mahnungen);
+const baseService = createCRUDService("mahnungen", []);
 
 function safeGetInvoiceById(rechnungId: number | string) {
     try {
@@ -59,3 +58,5 @@ export default {
         return hydrateMahnung(baseService.update(idOrItem, splitPayload(payload)));
     }
 };
+
+

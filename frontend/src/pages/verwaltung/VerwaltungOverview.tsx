@@ -4,10 +4,10 @@ import fristenOptionenService from "../../services/verwaltung/fristenOptionenSer
 import nummernkreiseService from "../../services/verwaltung/nummernkreiseService";
 import rollenService from "../../services/verwaltung/rollenService";
 import unternehmenService from "../../services/verwaltung/unternehmenService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 export default function VerwaltungOverview() {
-    useStorageSyncRefresh(["benutzer", "rollen", "nummernkreise", "fristenOptionen", "unternehmen"]);
+    useDataSyncRefresh(["benutzer", "rollen", "nummernkreise", "fristenOptionen", "unternehmen"]);
 
     return <PlaceholderModule
         title="Verwaltung"

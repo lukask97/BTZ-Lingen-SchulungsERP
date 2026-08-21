@@ -1,14 +1,13 @@
-import optionenDefault from "../../constants/optionenDefault";
+﻿import optionenDefault from "../../constants/optionenDefault";
 import { createCRUDService } from "../core/genericService";
-import { unternehmen as initialUnternehmen } from "../mockup/mockData";
 
 function clone<T>(value: T): T {
     return JSON.parse(JSON.stringify(value));
 }
 
 const DEFAULT_UNTERNEHMEN = clone(optionenDefault.unternehmen);
-const INITIAL_UNTERNEHMEN = clone(initialUnternehmen?.[0] || {});
-const baseService = createCRUDService("unternehmen", initialUnternehmen || []);
+const INITIAL_UNTERNEHMEN = clone(DEFAULT_UNTERNEHMEN);
+const baseService = createCRUDService("unternehmen", []);
 
 function normalizeKontonamen(payload: Record<string, unknown>) {
     const firmenname = String(payload.firmenname || DEFAULT_UNTERNEHMEN.firmenname || "").trim();
@@ -108,3 +107,5 @@ const unternehmenService = {
 };
 
 export default unternehmenService;
+
+

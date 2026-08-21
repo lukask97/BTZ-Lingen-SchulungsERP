@@ -1,4 +1,5 @@
-import { marketingaktionen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 
-export default createCRUDService("marketingaktionen", marketingaktionen);
+export default createCRUDService("marketingaktionen", []);
+
+

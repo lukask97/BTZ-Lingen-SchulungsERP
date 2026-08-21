@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { subscribeToStorageSync } from "../services/mockup/mockStorage";
+import { subscribeToDataSync } from "../services/seed/dataSync";
 
 function isRecoverableFetchError(error: unknown) {
     return error instanceof Error && (
@@ -36,7 +36,7 @@ export function useSyncedServiceData<T>(keys: string[], load: () => T) {
     useEffect(() => {
         refresh();
 
-        return subscribeToStorageSync(keys, () => {
+        return subscribeToDataSync(keys, () => {
             refresh();
         });
     }, [keysSignature]);

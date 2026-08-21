@@ -13,6 +13,7 @@ import TextArea from "../../components/form/TextArea";
 import Checkbox from "../../components/form/Checkbox";
 import OverviewCards from "../../components/OverviewCards";
 import SalesFlowBar from "../../components/SalesFlowBar";
+import MultiStatusFilter from "./MultiStatusFilter";
 import angeboteService, { naechsteAngebotsrevision } from "../../services/verkauf/angeboteService";
 import customerInquiryService from "../../services/verkauf/customerInquiryService";
 import kundenService from "../../services/verkauf/customerService";
@@ -25,56 +26,29 @@ import versandService from "../../services/logistik/versandService";
 import bestellungenService, { getOffeneBestellmengenProArtikel } from "../../services/einkauf/bestellungenService";
 import { getCustomerName } from "../../utils/customerReferences";
 import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
-import { addDaysToIsoDate, formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
+import { formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
 import { getInquiryForOffer, getOffersForVorgang, getSalesStep, getSalesStepLabel, getVorgangId } from "../../utils/processFlow";
 import { openDocumentPdf } from "../../utils/documentPdf";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 import freigabenService from "../../services/gf/freigabenService";
 import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
 import { getUserDisplayNameWithRole } from "../../utils/userDisplay";
 import { getKategoriePfad } from "../../services/logistik/kategorienService";
-import { getOfferDemandByArtikel } from "../../utils/offerDemand";
+import {
+    calculateMwSt,
+    calculateNetto,
+    calculatePositionenTotal,
+    gesamtNachAbzug,
+    getOpenOfferCountByArtikel as getOpenOfferCountByArtikelForArtikel,
+    hatUnvollstaendigeKundenadresse,
+    istOffenesAngebot,
+    plusTage,
+    MWST_RATE
+} from "./angeboteHelpers";
 
 const heute = getBerlinDate();
-const MWST_RATE = 0.19;
-const calculatePositionenTotal = (positionen = []) => {
-    return (positionen || []).reduce((summe, position) => {
-        const menge = Number(position.menge);
-        const einzelpreis = Number(position.einzelpreis);
-        return summe + (Number.isFinite(menge) ? menge : 0) * (Number.isFinite(einzelpreis) ? einzelpreis : 0);
-    }, 0);
-};
-const calculatePreispositionenTotal = (positionen = [], preispositionen = []) => {
-    const positionsTotal = calculatePositionenTotal(positionen);
-    return (preispositionen || []).reduce((summe, preisposition) => {
-        const rawWert = preisposition.wert;
-        const wert = Number(rawWert);
-        const numericWert = Number.isFinite(wert) ? wert : 0;
-        if (preisposition.typ === "percent") {
-            return summe + (positionsTotal * numericWert) / 100;
-        }
-        return summe + numericWert;
-    }, 0);
-};
-const calculateNetto = (positionen, preispositionen = [], rabattBetrag = 0) => {
-    const positionsTotal = calculatePositionenTotal(positionen);
-    const adjustmentTotal = calculatePreispositionenTotal(positionen, preispositionen);
-    const rabatt = Number(rabattBetrag);
-    return Math.max(0, positionsTotal + adjustmentTotal - (Number.isFinite(rabatt) ? rabatt : 0));
-};
-const calculateMwSt = (positionen, preispositionen = [], rabattBetrag = 0) => {
-    return Math.max(0, calculateNetto(positionen, preispositionen, rabattBetrag) * MWST_RATE);
-};
-const gesamtNachAbzug = (positionen, preispositionen = [], rabattBetrag = 0) => {
-    return Math.max(0, calculateNetto(positionen, preispositionen, rabattBetrag) + calculateMwSt(positionen, preispositionen, rabattBetrag));
-};
-const istOffenesAngebot = angebot => ["wartet auf antwort"].includes(String(angebot.status || "").toLowerCase());
 
-function hatUnvollstaendigeKundenadresse(kunde) {
-    if (!kunde) return false;
-    return !String(kunde.anschrift || "").trim() || !String(kunde.plz || "").trim() || !String(kunde.ort || "").trim();
-}
 const STATUS_FILTER_OPTIONS = [
     { value: "in vorbereitung", label: "In Vorbereitung", defaultSelected: true },
     { value: "wartet auf antwort", label: "Wartet auf Antwort", defaultSelected: true },
@@ -89,7 +63,6 @@ const STATUS_HELP = [
     { label: "Abgelehnt", text: "Der Kunde hat das Angebot nicht angenommen." },
     { label: "Beendet", text: "Das Angebot ist abgeschlossen und für die weitere Bearbeitung nicht mehr aktiv." }
 ];
-const plusTage = tage => addDaysToIsoDate(heute, tage);
 const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
 const toLeistung = (item, typ) => ({
     id: item.id,
@@ -181,10 +154,6 @@ function getAndereOffeneAngeboteMitArtikel(angebote, artikelId, currentPositione
         .filter(Boolean);
 }
 
-function getOpenOfferCountByArtikel(angebote = []) {
-    return getOfferDemandByArtikel(angebote, artikelService.getAll(), istOffenesAngebot);
-}
-
 function getDefaultStatusFilter() {
     return STATUS_FILTER_OPTIONS.filter(option => option.defaultSelected).map(option => option.value);
 }
@@ -210,11 +179,11 @@ function createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigab
 }
 
 function createAngebotPositionDraft(auswahl, menge) {
-    let initialOptions = {};
+    const initialOptions: Record<string, any> = {};
     if (auswahl.artikelTyp === "Baugruppe" && auswahl.individualisierungen) {
-        const groups = [...new Set(auswahl.individualisierungen.map(i => i.kategorieId))];
+        const groups = Array.from(new Set(auswahl.individualisierungen.map(i => String(i.kategorieId)))) as string[];
         groups.forEach(g => {
-            const std = auswahl.individualisierungen.find(i => i.kategorieId === g && i.standard);
+            const std = auswahl.individualisierungen.find(i => String(i.kategorieId) === g && i.standard);
             if (std) {
                 initialOptions[g] = std.individualArtikelId;
             }
@@ -358,12 +327,12 @@ function syncOptionRows(positionen, parentPosition, leistung, artikel) {
     }
 
     const neueOptionRows = [];
-    const gruppenIds = [...new Set(leistung.individualisierungen.map(item => item.kategorieId))];
+    const gruppenIds = Array.from(new Set(leistung.individualisierungen.map(item => String(item.kategorieId)))) as string[];
 
     gruppenIds.forEach(groupId => {
-        const gruppenOptionen = leistung.individualisierungen.filter(item => item.kategorieId === groupId);
+        const gruppenOptionen = leistung.individualisierungen.filter(item => String(item.kategorieId) === groupId);
         const defaultOpt = gruppenOptionen.find(item => item.standard) || gruppenOptionen[0];
-        const aktuelleOptionId = Number(parentPosition.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || 0);
+        const aktuelleOptionId = Number(parentPosition.selectedOptionen?.[String(groupId)] || defaultOpt?.individualArtikelId || 0);
         const individuelleAuswahl = gruppenOptionen.find(item => Number(item.individualArtikelId) === aktuelleOptionId);
         if (!individuelleAuswahl || individuelleAuswahl.standard) {
             return;
@@ -381,33 +350,8 @@ function syncOptionRows(positionen, parentPosition, leistung, artikel) {
     return optionenOhneKinder;
 }
 
-function MultiStatusFilter({ options, selectedValues, onToggle }) {
-    const [open, setOpen] = useState(false);
-    const safeSelectedValues = selectedValues || [];
-    const activeCount = safeSelectedValues.length;
-
-    return (
-        <div className="multi-filter">
-            <button type="button" className="multi-filter-trigger" onClick={() => setOpen(current => !current)}>
-                Statusfilter ({activeCount})
-            </button>
-            {open && <div className="multi-filter-menu">
-                <strong>Status anzeigen</strong>
-                {options.map(option => <label key={option.value} className="multi-filter-option">
-                    <input
-                        type="checkbox"
-                        checked={safeSelectedValues.includes(option.value)}
-                        onChange={() => onToggle(option.value)}
-                    />
-                    <span>{option.label}</span>
-                </label>)}
-            </div>}
-        </div>
-    );
-}
-
 export default function Angebote() {
-    const syncTick = useStorageSyncRefresh([
+    const syncTick = useDataSyncRefresh([
         "angebote", "auftraege", "vertriebsdokumente", "versandauftraege",
         "kundenanfragen", "kunden", "benutzer", "artikel", "services", "nachrichten", "bestellungen", "bestellpositionen"
     ]);
@@ -442,7 +386,10 @@ export default function Angebote() {
         ...artikel.map(item => toLeistung(item, "Artikel")),
         ...services.map(item => toLeistung(item, "Service"))
     ];
-    const offeneAngeboteJeArtikel = useMemo(() => getOpenOfferCountByArtikel(angebote), [angebote]);
+    const offeneAngeboteJeArtikel = useMemo(
+        () => getOpenOfferCountByArtikelForArtikel(angebote, artikelService.getAll()),
+        [angebote]
+    );
     const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
     const bearbeiterOptionen = benutzer.map(item => ({ value: String(item.username || item.id), label: getUserDisplayNameWithRole(item, String(item.username || "Team")) }));
     const leistungsOptionen = [...leistungen]
@@ -707,7 +654,7 @@ export default function Angebote() {
     const getMindestmengenWarnungen = (positionen = []) => {
         const bedarf = getAktuellenAngebotsbedarf(positionen, leistungen);
         return Object.entries(bedarf).map(([artikelId, menge]) => {
-            const artikelEintrag = artikel.find(item => String(item.id) === String(artikelId));
+            const artikelEintrag: any = artikel.find((item: any) => String(item.id) === String(artikelId));
             if (!artikelEintrag) return null;
             const bestand = Number(artikelEintrag.bestand || 0);
             const verplant = Number(verplanteMengen[String(artikelId)] || 0);
@@ -736,7 +683,7 @@ export default function Angebote() {
             };
         }
 
-        const artikelEintrag = artikel.find(item => String(item.id) === String(position.artikelId));
+        const artikelEintrag: any = artikel.find((item: any) => String(item.id) === String(position.artikelId));
         const bestand = Number(artikelEintrag.bestand || 0);
         const verplant = Number(verplanteMengen[String(position.artikelId)] || 0);
         const verfuegbar = bestand - verplant;
@@ -1321,11 +1268,11 @@ export default function Angebote() {
                                                         </div>
                                                         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                                                         {optionGroups.map(groupId => {
-                                                            const gruppenOptionen = leistung.individualisierungen.filter(i => i.kategorieId === groupId);
+                                                            const gruppenOptionen = leistung.individualisierungen.filter(i => String(i.kategorieId) === String(groupId));
                                                             const defaultOpt = gruppenOptionen.find(i => i.standard) || gruppenOptionen[0];
                                                             const currentVal = position.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || "";
                                                             const aktuelleOption = gruppenOptionen.find(opt => String(opt.individualArtikelId) === String(currentVal)) || defaultOpt;
-                                                            const optionsArtikel = artikel.find(item => String(item.id) === String(aktuelleOption?.individualArtikelId));
+                                                            const optionsArtikel: any = artikel.find((item: any) => String(item.id) === String(aktuelleOption?.individualArtikelId));
                                                             const optionsBestand = Number(optionsArtikel?.bestand || 0);
                                                             const optionsVerplant = Number(verplanteMengen[String(aktuelleOption?.individualArtikelId || "")] || 0);
                                                             const optionsAngebotsbedarf = Number(aktuellerAngebotsbedarf[String(aktuelleOption?.individualArtikelId || "")] || 0);

@@ -12,7 +12,7 @@ import artikelService from "../../services/logistik/artikelService";
 import kategorienService from "../../services/logistik/kategorienService";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useState, useMemo, useRef, useEffect } from "react";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { naechsteStammdatennummer } from "../../services/core/documentNumbering";
 import artikelBilderService from "../../services/logistik/artikelBilderService";
 
@@ -93,7 +93,7 @@ async function createPreviewItems(files = []) {
 }
 
 export default function Artikel() {
-    const syncTick = useStorageSyncRefresh(["artikel", "artikelStueckliste", "artikelIndividualisierung", "kategorien"]);
+    const syncTick = useDataSyncRefresh(["artikel", "artikelStueckliste", "artikelIndividualisierung", "kategorien"]);
     const { user } = useAuth();
     const config = PAGE_CONFIG.artikel;
 

@@ -22,7 +22,7 @@ import { kundenanfrageInAuftragUebernehmen, naechsteAuftragsnummer } from "../..
 import { getCustomerName } from "../../utils/customerReferences";
 import { getBerlinDate, getRelativeBerlinDate } from "../../utils/dateTime";
 import { canStartShipping, getInquiryForOrder, getSalesStepForOrder, getSalesStepLabel } from "../../utils/processFlow";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 
 const gesamtbetrag = positionen => positionen.reduce((summe, position) => summe + Number(position.menge) * Number(position.einzelpreis), 0);
@@ -65,7 +65,7 @@ function createAuftragDraft(defaultKundeId, defaultLeistungId) {
 
 export default function Auftraege() {
     const today = getBerlinDate();
-    const syncTick = useStorageSyncRefresh([
+    const syncTick = useDataSyncRefresh([
         "auftraege", "versandauftraege", "vertriebsdokumente",
         "kundenanfragen", "kunden", "artikel", "services"
     ]);

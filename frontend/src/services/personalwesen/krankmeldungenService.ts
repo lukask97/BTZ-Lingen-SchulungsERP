@@ -1,8 +1,7 @@
-import { krankmeldungen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import mitarbeiterService from "./mitarbeiterService";
 
-const baseService = createCRUDService("krankmeldungen", krankmeldungen);
+const baseService = createCRUDService("krankmeldungen", []);
 
 function hydrateEntry(item: any = {}) {
     const mitarbeiter = item.mitarbeiterId ? mitarbeiterService.getById(item.mitarbeiterId) : null;
@@ -34,3 +33,5 @@ export default {
         return hydrateEntry(baseService.update(idOrItem, splitPayload(payload)));
     }
 };
+
+

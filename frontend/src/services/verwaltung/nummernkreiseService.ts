@@ -1,8 +1,5 @@
-import optionenDefault from "../../constants/optionenDefault";
-import { isPermissionError } from "../core/api";
+﻿import optionenDefault from "../../constants/optionenDefault";
 import { createCRUDService } from "../core/genericService";
-import { nummernkreise } from "../mockup/mockData";
-import { loadData, saveData } from "../mockup/mockStorage";
 
 export type NummernkreisSchluessel =
     | "artikel"
@@ -23,8 +20,8 @@ export type Nummernkreis = {
     kuerzel: string;
 };
 
-const STORAGE_KEY = "nummernkreise";
-const REMOTE_SERVICE = createCRUDService<Nummernkreis>(STORAGE_KEY, nummernkreise);
+const TABLE_NAME = "nummernkreise";
+const nummernkreiseCrud = createCRUDService<Nummernkreis>(TABLE_NAME, []);
 
 const DEFAULT_NUMMERNKREISE: Record<NummernkreisSchluessel, { bezeichnung: string; kuerzel: string }> = {
     artikel: { bezeichnung: "Artikel", kuerzel: "ART" },
@@ -38,23 +35,6 @@ const DEFAULT_NUMMERNKREISE: Record<NummernkreisSchluessel, { bezeichnung: strin
     mahnung: { bezeichnung: "Mahnung", kuerzel: "MH" },
     zahlung: { bezeichnung: "Zahlung", kuerzel: "ZA" }
 };
-
-let nummernkreiseTableAvailable: boolean | null = null;
-
-function isMissingTableError(error: unknown) {
-    if (!(error instanceof Error)) return false;
-
-    const message = error.message.toLowerCase();
-    return error.message.includes("Die Tabelle 'nummernkreise' ist im aktuellen Backend-Modus nicht vorbereitet.")
-        || error.message.includes("status 404")
-        || error.message.includes("404")
-        || message.includes("not found")
-        || message.includes("backend unter")
-        || message.includes("nicht erreichbar")
-        || message.includes("cors")
-        || message.includes("networkerror")
-        || message.includes("xmlhttprequest");
-}
 
 function normalizeKuerzel(value: string) {
     return String(value || "")
@@ -99,131 +79,49 @@ function getResetDefaults() {
         : withDefaults([]);
 }
 
-function readLocal() {
-    return withDefaults(loadData(STORAGE_KEY, nummernkreise) as Nummernkreis[]);
+function listNummernkreise() {
+    return withDefaults(nummernkreiseCrud.list());
 }
 
-function writeLocal(entries: Nummernkreis[]) {
-    const normalized = withDefaults(entries);
-    saveData(STORAGE_KEY, normalized);
-    return normalized;
+function createNummernkreis(payload: Nummernkreis) {
+    return nummernkreiseCrud.create(normalizeNummernkreis(payload));
 }
 
-function createLocal(payload: Nummernkreis) {
-    const current = readLocal();
-    const created = {
-        ...normalizeNummernkreis(payload),
-        id: payload.id ?? Date.now()
-    };
-    writeLocal([...current.filter(item => String(item.schluessel) !== String(created.schluessel)), created]);
-    return created;
+function updateNummernkreis(idOrItem: number | string | Nummernkreis, payload?: Partial<Nummernkreis>) {
+    if (typeof idOrItem === "object") {
+        return nummernkreiseCrud.update(normalizeNummernkreis(idOrItem));
+    }
+    return nummernkreiseCrud.update(idOrItem, normalizeNummernkreis({ ...(payload as Nummernkreis), id: idOrItem } as Nummernkreis));
 }
 
-function updateLocal(idOrItem: number | string | Nummernkreis, payload?: Partial<Nummernkreis>) {
-    const current = readLocal();
-    const nextItem = typeof idOrItem === "object"
-        ? normalizeNummernkreis(idOrItem)
-        : normalizeNummernkreis({ ...(current.find(item => String(item.id) === String(idOrItem)) || {}), ...(payload || {}), id: idOrItem } as Nummernkreis);
-    writeLocal(current.map(item => String(item.id) === String(nextItem.id) ? nextItem : item));
-    return nextItem;
+function removeNummernkreis(id: number | string) {
+    return nummernkreiseCrud.remove(id);
 }
 
-function removeLocal(id: number | string) {
-    const current = readLocal();
-    writeLocal(current.filter(item => String(item.id) !== String(id)));
-}
+function resetNummernkreise() {
+    const current = nummernkreiseCrud.list();
+    current.forEach(item => {
+        nummernkreiseCrud.remove(item.id);
+    });
 
-function listWithFallback() {
-    if (nummernkreiseTableAvailable === false) {
-        return readLocal();
-    }
+    const defaults = getResetDefaults();
+    defaults.forEach(item => {
+        nummernkreiseCrud.create(item);
+    });
 
-    try {
-        const result = withDefaults(REMOTE_SERVICE.list());
-        nummernkreiseTableAvailable = true;
-        return result;
-    } catch (error) {
-        if (isMissingTableError(error) || isPermissionError(error)) {
-            nummernkreiseTableAvailable = false;
-            return readLocal();
-        }
-        throw error;
-    }
-}
-
-function createWithFallback(payload: Nummernkreis) {
-    const normalizedPayload = normalizeNummernkreis(payload);
-
-    if (nummernkreiseTableAvailable === false) {
-        return createLocal(normalizedPayload);
-    }
-
-    try {
-        const result = REMOTE_SERVICE.create(normalizedPayload);
-        nummernkreiseTableAvailable = true;
-        return result;
-    } catch (error) {
-        if (isMissingTableError(error) || isPermissionError(error)) {
-            nummernkreiseTableAvailable = false;
-            return createLocal(normalizedPayload);
-        }
-        throw error;
-    }
-}
-
-function updateWithFallback(idOrItem: number | string | Nummernkreis, payload?: Partial<Nummernkreis>) {
-    if (nummernkreiseTableAvailable === false) {
-        return updateLocal(idOrItem, payload);
-    }
-
-    try {
-        const result = typeof idOrItem === "object"
-            ? REMOTE_SERVICE.update(normalizeNummernkreis(idOrItem))
-            : REMOTE_SERVICE.update(idOrItem, normalizeNummernkreis({ ...(payload as Nummernkreis), id: idOrItem } as Nummernkreis));
-        nummernkreiseTableAvailable = true;
-        return result;
-    } catch (error) {
-        if (isMissingTableError(error) || isPermissionError(error)) {
-            nummernkreiseTableAvailable = false;
-            return updateLocal(idOrItem, payload);
-        }
-        throw error;
-    }
-}
-
-function removeWithFallback(id: number | string) {
-    if (nummernkreiseTableAvailable === false) {
-        return removeLocal(id);
-    }
-
-    try {
-        const result = REMOTE_SERVICE.remove(id);
-        nummernkreiseTableAvailable = true;
-        return result;
-    } catch (error) {
-        if (isMissingTableError(error) || isPermissionError(error)) {
-            nummernkreiseTableAvailable = false;
-            return removeLocal(id);
-        }
-        throw error;
-    }
+    return listNummernkreise();
 }
 
 const nummernkreiseService = {
-    list: () => listWithFallback(),
-    getAll: () => listWithFallback(),
-    getById: (id: number | string) => listWithFallback().find(item => String(item.id) === String(id)),
-    getBySchluessel: (schluessel: NummernkreisSchluessel) => listWithFallback().find(item => item.schluessel === schluessel),
-    create: (payload: Nummernkreis) => createWithFallback(payload),
-    add: (payload: Nummernkreis) => createWithFallback(payload),
-    update: (idOrItem: number | string | Nummernkreis, payload: Partial<Nummernkreis>) => updateWithFallback(idOrItem, payload),
-    remove: (id: number | string) => removeWithFallback(id),
-    reset: () => {
-        const defaults = getResetDefaults();
-        writeLocal(defaults);
-        nummernkreiseTableAvailable = false;
-        return readLocal();
-    }
+    list: () => listNummernkreise(),
+    getAll: () => listNummernkreise(),
+    getById: (id: number | string) => listNummernkreise().find(item => String(item.id) === String(id)),
+    getBySchluessel: (schluessel: NummernkreisSchluessel) => listNummernkreise().find(item => item.schluessel === schluessel),
+    create: (payload: Nummernkreis) => createNummernkreis(payload),
+    add: (payload: Nummernkreis) => createNummernkreis(payload),
+    update: (idOrItem: number | string | Nummernkreis, payload: Partial<Nummernkreis>) => updateNummernkreis(idOrItem, payload),
+    remove: (id: number | string) => removeNummernkreis(id),
+    reset: () => resetNummernkreise()
 };
 
 export function getDefaultNummernkreise() {
@@ -231,3 +129,5 @@ export function getDefaultNummernkreise() {
 }
 
 export default nummernkreiseService;
+
+

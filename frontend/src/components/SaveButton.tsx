@@ -3,15 +3,15 @@ import { useEffect, useRef, useState } from "react";
 type SaveButtonProps = {
     onSave: () => unknown | Promise<unknown>;
     onSuccess: () => void;
-    children: string;
-    className: string;
-    type: "button" | "submit" | "reset";
-    disabled: boolean;
-    savingLabel: string;
-    successLabel: string;
-    errorLabel: string;
-    successCloseDelayMs: number;
-    minSavingDurationMs: number;
+    children?: string;
+    className?: string;
+    type?: "button" | "submit" | "reset";
+    disabled?: boolean;
+    savingLabel?: string;
+    successLabel?: string;
+    errorLabel?: string;
+    successCloseDelayMs?: number;
+    minSavingDurationMs?: number;
 };
 
 type SaveState = "idle" | "saving" | "success" | "error";
@@ -63,7 +63,7 @@ export default function SaveButton({
         }
     }, []);
 
-    const resetLater = (nextState: SaveState, callback: () => void) => {
+    const resetLater = (nextState: SaveState, callback?: () => void) => {
         if (timeoutRef.current) {
             window.clearTimeout(timeoutRef.current);
         }

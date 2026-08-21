@@ -1,6 +1,5 @@
-import optionenDefault from "../../constants/optionenDefault";
+﻿import optionenDefault from "../../constants/optionenDefault";
 import { createCRUDService } from "../core/genericService";
-import { lehrkraftOptionen as initialLehrkraftOptionen } from "../mockup/mockData";
 
 const STORAGE_KEY = "lehrkraftOptionen";
 
@@ -37,23 +36,24 @@ function sanitizeOptions(value: any = {}) {
     };
 }
 
-const baseService = createCRUDService(STORAGE_KEY, [
-    ...(initialLehrkraftOptionen || [])
-]);
+const baseService = createCRUDService(STORAGE_KEY, []);
 
 function getStoredOptions() {
     try {
         return baseService.getById(1) || baseService.list()[0] || baseService.create({
-            ...(initialLehrkraftOptionen?.[0] || { id: 1 })
+            id: 1,
+            ...DEFAULT_OPTIONS
         });
     } catch {
         try {
             return baseService.create({
-                ...(initialLehrkraftOptionen?.[0] || { id: 1 })
+                id: 1,
+            ...DEFAULT_OPTIONS
             });
         } catch {
             return {
-                ...(initialLehrkraftOptionen?.[0] || { id: 1 })
+                id: 1,
+            ...DEFAULT_OPTIONS
             };
         }
     }
@@ -82,3 +82,5 @@ const lehrkraftOptionenService = {
 };
 
 export default lehrkraftOptionenService;
+
+

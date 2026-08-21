@@ -3,7 +3,7 @@ import Label from "../../components/form/Label";
 import TextField from "../../components/form/TextField";
 import SaveButton from "../../components/SaveButton";
 import unternehmenService from "../../services/verwaltung/unternehmenService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 const FIELD_GROUPS = [
     {
@@ -111,7 +111,7 @@ function safe(value: unknown) {
 }
 
 export default function Unternehmen() {
-    const refreshTick = useStorageSyncRefresh(["unternehmen"]);
+    const refreshTick = useDataSyncRefresh(["unternehmen"]);
     const [current, setCurrent] = useState(() => unternehmenService.get());
     const [activeSection, setActiveSection] = useState<(typeof SECTION_TABS)[number]["key"]>("stammdaten");
 

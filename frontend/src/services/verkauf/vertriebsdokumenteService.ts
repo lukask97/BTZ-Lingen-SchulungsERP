@@ -1,9 +1,8 @@
-import { vertriebsdokumente } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
 import auftraegeService from "./auftraegeService";
 import { getCustomerName } from "../../utils/customerReferences";
 
-const baseService = createCRUDService("vertriebsdokumente", vertriebsdokumente);
+const baseService = createCRUDService("vertriebsdokumente", []);
 
 function withSafeReferenceFallback<T>(reader: () => T, fallback: T) {
     try {
@@ -42,7 +41,6 @@ function hydrateDokument(item: any = {}) {
         angebotId,
         anfrageId,
         vorgangId,
-        // Document titles and numbers may remain as historical snapshots; partner data is derived from the order.
         auftragNr: item.auftragNr || auftrag?.auftragNr || "",
         kundeId: item.kundeId || auftrag?.kundeId || "",
         kunde: getCustomerName(item.kundeId || auftrag?.kundeId, item.kunde || auftrag?.kunde || ""),

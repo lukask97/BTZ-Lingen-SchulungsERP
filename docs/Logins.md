@@ -20,7 +20,7 @@ URL: `http://localhost:5173`
 | `gf` | `gf` | Geschaeftsfuehrung / Vollzugriff |
 
 Hinweis:
-Die Benutzer stammen aus den Demo-/Seed-Daten. Je nach Datenmodus koennen lokal andere Daten hinzugekommen sein, die hier nicht gelistet sind.
+Die Benutzer stammen aus den zentralen Seed-Daten in PostgreSQL. Nach einem Reset wird wieder genau dieser Stand hergestellt.
 
 ## pgAdmin
 

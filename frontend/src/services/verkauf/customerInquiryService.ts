@@ -1,8 +1,7 @@
-import { kundenanfragen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import { getCustomerName } from "../../utils/customerReferences";
 
-const baseService = createCRUDService("kundenanfragen", kundenanfragen);
+const baseService = createCRUDService("kundenanfragen", []);
 
 function withPermissionFallback<T>(reader: () => T, fallback: T) {
     try {
@@ -58,10 +57,12 @@ export default {
     },
     create: (payload: any) => hydrateInquiry(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateInquiry(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             return hydrateInquiry(baseService.update(splitPayload(idOrItem)));
         }
         return hydrateInquiry(baseService.update(idOrItem, splitPayload(payload)));
     }
 };
+
+

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import Dialog from "./Dialog";
 import Label from "./form/Label";
@@ -147,7 +148,7 @@ type ThreadChatDialogProps = {
     documentLinks: ThreadDocumentLink[];
     headerActionLink: ThreadActionLink;
     actionLinks: ThreadActionLink[];
-    customActionSection: JSX.Element | null;
+    customActionSection: ReactNode;
     replyLabel: string;
     replyValue: string;
     replyPlaceholder: string;

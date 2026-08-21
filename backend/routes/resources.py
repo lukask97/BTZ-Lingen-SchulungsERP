@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, request
+from flask import Blueprint, request
 
 from api_utils import get_store, json_response
 from events import publish_event
@@ -14,6 +14,7 @@ TABLE_NAME_ALIASES = {
 def resolve_table_name(table_name):
     return TABLE_NAME_ALIASES.get(table_name, table_name)
 
+
 def build_not_found_response(table_name, entity_id):
     return json_response({
         "ok": False,
@@ -24,7 +25,7 @@ def build_not_found_response(table_name, entity_id):
 def build_missing_table_response(table_name):
     return json_response({
         "ok": False,
-        "message": f"Die Tabelle '{table_name}' ist im aktuellen Backend-Modus nicht vorbereitet."
+        "message": f"Die Tabelle '{table_name}' ist im Backend nicht vorbereitet."
     }, 404)
 
 
@@ -32,11 +33,11 @@ def get_validated_store(table_name, permission_action):
     resolved_table_name = resolve_table_name(table_name)
     store = get_store()
     if not store.table_exists(resolved_table_name):
-        return None, build_missing_table_response(table_name)
+        return None, None, build_missing_table_response(table_name)
 
     permission_error = require_table_permission(resolved_table_name, permission_action)
     if permission_error:
-        return None, permission_error
+        return None, None, permission_error
 
     return store, resolved_table_name, None
 
@@ -49,7 +50,6 @@ def list_entities(table_name):
 
     return json_response({
         "ok": True,
-        "provider": current_app.config["DATA_MODE"],
         "meta": store.get_meta(resolved_table_name),
         "items": store.list(resolved_table_name)
     })

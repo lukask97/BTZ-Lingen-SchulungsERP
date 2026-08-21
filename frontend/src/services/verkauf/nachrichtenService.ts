@@ -1,12 +1,11 @@
-import { nachrichten } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import customerInquiryService from "./customerInquiryService";
 import angeboteService from "./angeboteService";
 import auftraegeService from "./auftraegeService";
 import { getBerlinTimestamp } from "../../utils/dateTime";
 import { getCustomerName } from "../../utils/customerReferences";
 
-const service = createCRUDService("nachrichten", nachrichten);
+const service = createCRUDService("nachrichten", []);
 
 function tryRead<T>(reader: () => T, fallback: T) {
     try {
@@ -85,3 +84,5 @@ export default {
         return service.update(idOrItem, normalizeMessage(payload));
     }
 };
+
+

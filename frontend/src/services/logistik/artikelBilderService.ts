@@ -1,4 +1,4 @@
-import { BACKEND_ORIGIN, isDatabaseModeEnabled } from "../core/api";
+import { BACKEND_ORIGIN } from "../core/api";
 
 function resolveImageUrl(path: string) {
     return new URL(path, `${BACKEND_ORIGIN}/`).toString();
@@ -18,10 +18,6 @@ async function parseJsonResponse(response: Response) {
 
 const artikelBilderService = {
     async list(artikelId: string | number) {
-        if (!isDatabaseModeEnabled()) {
-            return [];
-        }
-
         const response = await fetch(`${BACKEND_ORIGIN}/api/artikel/${artikelId}/bilder`, {
             credentials: "include"
         });
@@ -33,14 +29,6 @@ const artikelBilderService = {
     },
 
     async upload(artikelId: string | number, slot: number, file: File) {
-        if (!isDatabaseModeEnabled()) {
-            return {
-                slot,
-                filename: file.name,
-                url: URL.createObjectURL(file)
-            };
-        }
-
         const body = new FormData();
         body.append("file", file);
 
@@ -57,10 +45,6 @@ const artikelBilderService = {
     },
 
     async remove(artikelId: string | number, slot: number) {
-        if (!isDatabaseModeEnabled()) {
-            return { ok: true };
-        }
-
         const response = await fetch(`${BACKEND_ORIGIN}/api/artikel/${artikelId}/bilder/${slot}`, {
             method: "DELETE",
             credentials: "include"

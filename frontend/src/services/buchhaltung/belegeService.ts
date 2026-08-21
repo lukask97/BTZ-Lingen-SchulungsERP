@@ -1,8 +1,7 @@
-import { belege } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import rechnungenService from "./rechnungenService";
 
-const baseService = createCRUDService("belege", belege);
+const baseService = createCRUDService("belege", []);
 
 function resolveInvoice(item: any = {}) {
     if (item.rechnungId) {
@@ -65,3 +64,5 @@ const belegeService = {
 };
 
 export default belegeService;
+
+

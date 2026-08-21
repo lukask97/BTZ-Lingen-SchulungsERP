@@ -1,7 +1,6 @@
-import { firmenkonto } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 
-const baseService = createCRUDService("firmenkonto", firmenkonto);
+const baseService = createCRUDService("firmenkonto", []);
 
 export const KONTO_TYPEN = {
     FIRMA: "firma",
@@ -170,3 +169,5 @@ const firmenkontoService = {
 };
 
 export default firmenkontoService;
+
+

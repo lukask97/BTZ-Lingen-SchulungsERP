@@ -1,25 +1,16 @@
-import { benutzerSpalten } from "../mockup/mockMetaData";
-
-import {
-    loadData, saveData
-} from "../mockup/mockStorage";
-import { buildDatabasePath, isDatabaseModeEnabled, isPermissionError, syncApiRequest } from "./api";
+import { buildDatabasePath, isPermissionError, syncApiRequest } from "./api";
 
 function getUserColumnSettings() {
-    if (isDatabaseModeEnabled()) {
-        try {
-            const result = syncApiRequest(buildDatabasePath("/benutzerSpalten"));
-            return result.items || [];
-        } catch (error) {
-            if (isPermissionError(error)) {
-                return [];
-            }
-
-            throw error;
+    try {
+        const result = syncApiRequest(buildDatabasePath("/benutzerSpalten"));
+        return result.items || [];
+    } catch (error) {
+        if (isPermissionError(error)) {
+            return [];
         }
-    }
 
-    return loadData("benutzerSpalten", benutzerSpalten);
+        throw error;
+    }
 }
 
 export function getUserColumns(username, tabelle) {
@@ -52,33 +43,25 @@ export function saveUserColumns(username, tabelle, fields) {
 
     };
 
-    if (isDatabaseModeEnabled()) {
-        try {
-            if (bisher.id) {
-                syncApiRequest(buildDatabasePath(`/benutzerSpalten/${bisher.id}`), {
-                    method: "PATCH",
-                    body: payload
-                });
-                return;
-            }
-
-            syncApiRequest(buildDatabasePath("/benutzerSpalten"), {
-                method: "POST",
+    try {
+        if (bisher.id) {
+            syncApiRequest(buildDatabasePath(`/benutzerSpalten/${bisher.id}`), {
+                method: "PATCH",
                 body: payload
             });
-        } catch (error) {
-            if (isPermissionError(error)) {
-                return;
-            }
-
-            throw error;
+            return;
         }
-        return;
+
+        syncApiRequest(buildDatabasePath("/benutzerSpalten"), {
+            method: "POST",
+            body: payload
+        });
+    } catch (error) {
+        if (isPermissionError(error)) {
+            return;
+        }
+
+        throw error;
     }
-
-    daten.push(payload);
-
-
-    saveData("benutzerSpalten", daten);
 
 }

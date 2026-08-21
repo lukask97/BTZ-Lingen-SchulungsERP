@@ -1,9 +1,9 @@
 import DataTable from "../../components/DataTable";
 import abteilungenService from "../../services/organisation/abteilungenService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 export default function Organisation() {
-    useStorageSyncRefresh(["abteilungen"]);
+    useDataSyncRefresh(["abteilungen"]);
 
     const abteilungen = abteilungenService.getAll().map(abteilung => ({
         ...abteilung,

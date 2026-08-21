@@ -4,12 +4,12 @@ import bestellungenService from "../../services/einkauf/bestellungenService";
 import retourenService from "../../services/logistik/retourenService";
 import versandService from "../../services/logistik/versandService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import { getOpenGoodsReceiptOrders, getOrdersWithoutShipment } from "../../utils/processFlow";
 
 export default function Logistik() {
-    useStorageSyncRefresh(["artikel", "bestellungen", "versandauftraege", "retouren", "auftraege"]);
+    useDataSyncRefresh(["artikel", "bestellungen", "versandauftraege", "retouren", "auftraege"]);
 
     const artikel = artikelService.list();
     const bestellungen = bestellungenService.list();

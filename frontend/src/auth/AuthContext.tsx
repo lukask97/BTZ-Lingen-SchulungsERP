@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./authStore";
 import type { AuthProviderProps, AuthUser } from "../types/auth";
-import { getCurrentBackendUser, logoutPreviewSession } from "../services/auth/authService";
+import { getCurrentBackendUser, logoutSession } from "../services/auth/authService";
 import { userHasAccess, userHasFullAccess, userHasPermission } from "./permissions";
 
 const AUTH_STORAGE_KEY = "session-user";
@@ -81,7 +81,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setAuthError("");
 
         sessionStorage.removeItem(AUTH_STORAGE_KEY);
-        await logoutPreviewSession();
+        await logoutSession();
 
     }
 

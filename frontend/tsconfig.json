@@ -17,6 +17,6 @@
     "jsx": "react-jsx",
     "types": ["vite/client"]
   },
-  "include": ["src", "../backend/seed/optionenDefault.json"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

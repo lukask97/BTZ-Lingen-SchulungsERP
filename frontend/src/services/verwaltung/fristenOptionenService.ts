@@ -1,6 +1,5 @@
-import optionenDefault from "../../constants/optionenDefault";
+﻿import optionenDefault from "../../constants/optionenDefault";
 import { createCRUDService } from "../core/genericService";
-import { fristenOptionen as initialFristenOptionen } from "../mockup/mockData";
 
 const STORAGE_KEY = "fristenOptionen";
 
@@ -52,23 +51,24 @@ function sanitizeOptions(value: any = {}) {
     };
 }
 
-const baseService = createCRUDService(STORAGE_KEY, [
-    ...(initialFristenOptionen || [])
-]);
+const baseService = createCRUDService(STORAGE_KEY, []);
 
 function getStoredOptions() {
     try {
         return baseService.getById(1) || baseService.list()[0] || baseService.create({
-            ...(initialFristenOptionen?.[0] || { id: 1 })
+            id: 1,
+            ...DEFAULT_OPTIONS
         });
     } catch {
         try {
             return baseService.create({
-                ...(initialFristenOptionen?.[0] || { id: 1 })
+                id: 1,
+            ...DEFAULT_OPTIONS
             });
         } catch {
             return {
-                ...(initialFristenOptionen?.[0] || { id: 1 })
+                id: 1,
+            ...DEFAULT_OPTIONS
             };
         }
     }
@@ -97,3 +97,5 @@ const fristenOptionenService = {
 };
 
 export default fristenOptionenService;
+
+

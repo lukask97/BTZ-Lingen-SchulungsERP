@@ -7,7 +7,7 @@ import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import SaveButton from "../../components/SaveButton";
 import kategorienService from "../../services/logistik/kategorienService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { PERMISSIONS } from "../../constants/permissions";
 import useAuth from "../../auth/useAuth";
 import { getAllTableColumns, getVisibleTableColumns } from "../../constants/schemas";
@@ -59,7 +59,7 @@ function KategorienTreeList({ nodes }) {
 
 export default function Kategorien() {
     const { user } = useAuth();
-    const syncTick = useStorageSyncRefresh(["kategorien"]);
+    const syncTick = useDataSyncRefresh(["kategorien"]);
     const [refreshKey, setRefreshKey] = useState(0);
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);

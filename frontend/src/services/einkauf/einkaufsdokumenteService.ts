@@ -1,9 +1,8 @@
-import { einkaufsdokumente } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import bestellungenService from "./bestellungenService";
 import { getSupplierName } from "../../utils/supplierReferences";
 
-const baseService = createCRUDService("einkaufsdokumente", einkaufsdokumente);
+const baseService = createCRUDService("einkaufsdokumente", []);
 
 function hydrateDokument(item: any = {}) {
     const bestellung = item.bestellungId ? bestellungenService.getById(item.bestellungId) : null;
@@ -42,3 +41,5 @@ export default {
         return hydrateDokument(baseService.update(idOrItem, splitPayload(payload)));
     }
 };
+
+

@@ -7,7 +7,7 @@ import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumente
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
 import { isPendingPayment } from "../../utils/openItems";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { getOpenGoodsReceiptOrders, getPurchaseOrdersByStatus } from "../../utils/processFlow";
 import { useLehrkraftAutomationen } from "../../hooks/useLehrkraftAutomationen";
 
@@ -15,7 +15,7 @@ const OFFER_OPEN_STATUSES = ["wartet auf antwort"];
 
 export default function LehrkraftOverview() {
     useLehrkraftAutomationen();
-    useStorageSyncRefresh(["kundenanfragen", "angebote", "vertriebsdokumente", "bestellungen", "zahlungen", "auftraege"]);
+    useDataSyncRefresh(["kundenanfragen", "angebote", "vertriebsdokumente", "bestellungen", "zahlungen", "auftraege"]);
 
     const kundenkorrespondenz = customerInquiryService.list();
     const angebote = angeboteService.getAll();

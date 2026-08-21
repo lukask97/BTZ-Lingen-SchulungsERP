@@ -1,4 +1,5 @@
-import { schulungen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 
-export default createCRUDService("schulungen", schulungen);
+export default createCRUDService("schulungen", []);
+
+

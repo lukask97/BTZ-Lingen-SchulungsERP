@@ -1,9 +1,8 @@
-import { rollen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import { resolveRolePermissions } from "../../auth/permissionResolver";
 import rollenRechteService from "./rollenRechteService";
 
-const rollenService = createCRUDService("rollen", rollen);
+const rollenService = createCRUDService("rollen", []);
 
 function enrichRole(role) {
     return {
@@ -56,3 +55,5 @@ export default {
     remove: deleteRolle,
     delete: deleteRolle
 };
+
+

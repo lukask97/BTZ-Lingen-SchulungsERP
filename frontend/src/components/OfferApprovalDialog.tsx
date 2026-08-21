@@ -133,10 +133,10 @@ type OfferApprovalDialogProps = {
     onReject: () => void;
     onRevise: () => void;
     onForward: () => void;
-    notePlaceholder: string;
-    approveLabel: string;
-    rejectLabel: string;
-    forwardLabel: string;
+    notePlaceholder?: string;
+    approveLabel?: string;
+    rejectLabel?: string;
+    forwardLabel?: string;
 };
 
 export default function OfferApprovalDialog({

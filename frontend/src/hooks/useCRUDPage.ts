@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CrudService, EntityWithId, UseCrudPageOptions, UseCrudPageResult } from "../types/crud";
-import { subscribeToStorageSync } from "../services/mockup/mockStorage";
+import { subscribeToDataSync } from "../services/seed/dataSync";
 
 function isRecoverableFetchError(error: unknown) {
     return error instanceof Error && (
@@ -48,7 +48,7 @@ export function useCRUDPage<T extends EntityWithId>(
     useEffect(() => {
         refreshData();
 
-        return subscribeToStorageSync([tableName], () => {
+        return subscribeToDataSync([tableName], () => {
             refreshData();
         });
     }, [services, tableName]);
@@ -75,7 +75,7 @@ export function useCRUDPage<T extends EntityWithId>(
     };
 
     const loeschen = (item: T) => {
-        if (confirm("Möchten Sie diesen Eintrag wirklich löschen")) {
+        if (confirm("Moechten Sie diesen Eintrag wirklich loeschen")) {
             services.remove(item.id ?? "");
             refreshData();
         }

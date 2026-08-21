@@ -1,8 +1,7 @@
-import { rechte } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import rollenRechteService from "./rollenRechteService";
 
-const rechteService = createCRUDService("rechte", rechte);
+const rechteService = createCRUDService("rechte", []);
 
 export const getRechte = () => rechteService.getAll();
 export const addRecht = (recht) => rechteService.add(recht);
@@ -26,3 +25,5 @@ export default {
     delete: deleteRecht,
     remove: deleteRecht
 };
+
+

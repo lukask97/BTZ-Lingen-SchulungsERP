@@ -8,7 +8,7 @@ import artikelService from "../../services/logistik/artikelService";
 import bestellungenService, { getOffeneBestellmengenProArtikel } from "../../services/einkauf/bestellungenService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import angeboteService from "../../services/verkauf/angeboteService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { PERMISSIONS } from "../../constants/permissions";
 import { getOfferDemandByArtikel } from "../../utils/offerDemand";
 
@@ -58,7 +58,7 @@ function getOpenOfferCountByArtikel(angebote = []) {
 }
 
 export default function Bestand() {
-    const syncTick = useStorageSyncRefresh(["artikel", "auftraege", "bestellungen"]);
+    const syncTick = useDataSyncRefresh(["artikel", "auftraege", "bestellungen"]);
     const [searchParams] = useSearchParams();
     const [refreshKey, setRefreshKey] = useState(0);
     const [suchbegriff, setSuchbegriff] = useState("");

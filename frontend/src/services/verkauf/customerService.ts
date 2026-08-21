@@ -1,7 +1,6 @@
-import { kunden } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 
-const kundenService = createCRUDService("kunden", kunden);
+const kundenService = createCRUDService("kunden", []);
 
 function withPermissionFallback<T>(reader: () => T, fallback: T) {
     try {
@@ -16,7 +15,7 @@ function withPermissionFallback<T>(reader: () => T, fallback: T) {
 }
 
 function getFallbackCustomers() {
-    return kunden;
+    return [];
 }
 
 export const getKunden = () => withPermissionFallback(() => kundenService.getAll(), getFallbackCustomers());
@@ -25,11 +24,11 @@ export const updateKunde = (kunde) => kundenService.update(kunde);
 export const deleteKunde = (id) => kundenService.delete(id);
 export const getKundeById = (id) => withPermissionFallback(
     () => (id == null || id === "" ? undefined : kundenService.getById(id)),
-    getFallbackCustomers().find(item => String(item.id) === String(id))
+    undefined
 );
 export const searchKunden = (query) => withPermissionFallback(
     () => kundenService.search(query),
-    getFallbackCustomers().filter(item => JSON.stringify(item).toLowerCase().includes(String(query || "").toLowerCase()))
+    []
 );
 
 export default {
@@ -38,10 +37,12 @@ export default {
     getAll: () => withPermissionFallback(() => kundenService.getAll(), getFallbackCustomers()),
     getById: (id) => withPermissionFallback(
         () => (id == null || id === "" ? undefined : kundenService.getById(id)),
-        getFallbackCustomers().find(item => String(item.id) === String(id))
+        undefined
     ),
     search: (query) => withPermissionFallback(
         () => kundenService.search(query),
-        getFallbackCustomers().filter(item => JSON.stringify(item).toLowerCase().includes(String(query || "").toLowerCase()))
+        []
     )
 };
+
+

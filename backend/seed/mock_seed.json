@@ -4,7 +4,7 @@
       "id": 1,
       "kundenNr": "DB10001",
       "firma": "Campus Baumarkt GmbH",
-      "anschrift": "Industriestraße 3",
+      "anschrift": "IndustriestraÃŸe 3",
       "plz": "49809",
       "ort": "Lingen",
       "segment": "Baumarkt",
@@ -13,10 +13,22 @@
       "optionen": [
         "Fahrradbekleidung",
         "Sicherheitsbekleidung",
-        "Sonderfahrräder",
+        "SonderfahrrÃ¤der",
         "Lastenbikes"
       ],
-      "notiz": ""
+      "notiz": "",
+      "ansprechpartner": [
+        {
+          "id": "kp-1-1",
+          "name": "Mara Heinen",
+          "abteilung": "Einkauf"
+        },
+        {
+          "id": "kp-1-2",
+          "name": "Thomas Wilken",
+          "abteilung": "Filialleitung"
+        }
+      ]
     },
     {
       "id": 2,
@@ -34,13 +46,25 @@
         "Reparatur Service"
       ],
       "website": "https://www.emsland.com/",
-      "notiz": ""
+      "notiz": "",
+      "ansprechpartner": [
+        {
+          "id": "kp-2-1",
+          "name": "Lena Kramer",
+          "abteilung": "Touristik"
+        },
+        {
+          "id": "kp-2-2",
+          "name": "Jan Feldkamp",
+          "abteilung": "Eventplanung"
+        }
+      ]
     },
     {
       "id": 3,
       "kundenNr": "DB10003",
       "firma": "Nordrad Campus Service",
-      "anschrift": "Lindenstraße 22",
+      "anschrift": "LindenstraÃŸe 22",
       "plz": "48529",
       "ort": "Nordhorn",
       "segment": "Dienstleistung",
@@ -52,16 +76,28 @@
         "Abholung"
       ],
       "website": "https://www.nordrad-campus.de/",
-      "notiz": "Servicekunde mit regelmäßigen Wartungsanfragen."
+      "ansprechpartner": [
+        {
+          "id": "kp-3-1",
+          "name": "Sven Hartmann",
+          "abteilung": "Werkstattleitung"
+        },
+        {
+          "id": "kp-3-2",
+          "name": "Kira Beckmann",
+          "abteilung": "Disposition"
+        }
+      ],
+      "notiz": "Servicekunde mit regelmÃ¤ÃŸigen Wartungsanfragen."
     },
     {
       "id": 4,
       "kundenNr": "DB10004",
-      "firma": "Stadtwerke Lingen Mobilität",
-      "anschrift": "Kaiserstraße 14",
+      "firma": "Stadtwerke Lingen MobilitÃ¤t",
+      "anschrift": "KaiserstraÃŸe 14",
       "plz": "49808",
       "ort": "Lingen",
-      "segment": "Öffentliche Einrichtung",
+      "segment": "Ã–ffentliche Einrichtung",
       "abc": "A",
       "iban": "DE98500105179876543210",
       "optionen": [
@@ -70,24 +106,48 @@
         "Sicherheitsausstattung"
       ],
       "website": "https://www.stadtwerke-lingen.de/",
-      "notiz": "Potenzial für größere Flottenbestellungen."
+      "ansprechpartner": [
+        {
+          "id": "kp-4-1",
+          "name": "Nadine Albers",
+          "abteilung": "MobilitÃ¤tsmanagement"
+        },
+        {
+          "id": "kp-4-2",
+          "name": "Timo Gerdes",
+          "abteilung": "Beschaffung"
+        }
+      ],
+      "notiz": "Potenzial fÃ¼r grÃ¶ÃŸere Flottenbestellungen."
     },
     {
       "id": 5,
       "kundenNr": "DB10005",
       "firma": "Jugendwerkstatt Ems-Vechte",
-      "anschrift": "Werkstraße 7",
+      "anschrift": "WerkstraÃŸe 7",
       "plz": "48431",
       "ort": "Rheine",
       "segment": "Bildung",
       "abc": "C",
       "iban": "DE12500105171234567890",
       "optionen": [
-        "Schulungsfahrräder",
+        "SchulungsfahrrÃ¤der",
         "Helme",
         "Projektmaterial"
       ],
       "website": "",
+      "ansprechpartner": [
+        {
+          "id": "kp-5-1",
+          "name": "Leonie Schulte",
+          "abteilung": "Projektkoordination"
+        },
+        {
+          "id": "kp-5-2",
+          "name": "Bastian Kruse",
+          "abteilung": "Ausbildung"
+        }
+      ],
       "notiz": "Neuer Projektkunde mit wiederkehrendem Trainingsbedarf."
     }
   ],
@@ -97,15 +157,15 @@
       "artikelNr": "ART001",
       "name": "Schulungsfahrrad City",
       "kategorieId": 4,
-      "kategorie": "Fahrräder",
-      "kategoriePfad": "Fahrräder > Citybike",
+      "kategorie": "FahrrÃ¤der",
+      "kategoriePfad": "FahrrÃ¤der > Citybike",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 420,
       "verkaufspreis": 799,
       "bestand": 4,
       "mindestmenge": 3,
       "bedarfsmeldungBei": 5,
-      "beschreibung": "Komplettes Fahrrad als Beispiel für einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
+      "beschreibung": "Komplettes Fahrrad als Beispiel fÃ¼r einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
     },
     {
       "id": 2,
@@ -127,15 +187,15 @@
       "artikelNr": "ART003",
       "name": "Fahrradhelm",
       "kategorieId": 8,
-      "kategorie": "Zubehör",
-      "kategoriePfad": "Zubehör > Helm",
+      "kategorie": "ZubehÃ¶r",
+      "kategoriePfad": "ZubehÃ¶r > Helm",
       "artikelTyp": "Einzelartikel",
       "einkaufspreis": 24.5,
       "verkaufspreis": 59.99,
       "bestand": 12,
       "mindestmenge": 10,
       "bedarfsmeldungBei": 15,
-      "beschreibung": "Sicherer Fahrradhelm mit Zertifikat. Zusätzliche Menge ist bereits bestellt."
+      "beschreibung": "Sicherer Fahrradhelm mit Zertifikat. ZusÃ¤tzliche Menge ist bereits bestellt."
     },
     {
       "id": 4,
@@ -150,7 +210,7 @@
       "bestand": 8,
       "mindestmenge": 6,
       "bedarfsmeldungBei": 9,
-      "beschreibung": "Rahmen als Einzelkomponente für Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
+      "beschreibung": "Rahmen als Einzelkomponente fÃ¼r Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
     },
     {
       "id": 5,
@@ -165,7 +225,7 @@
       "bestand": 9,
       "mindestmenge": 10,
       "bedarfsmeldungBei": 12,
-      "beschreibung": "Lenker für Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
+      "beschreibung": "Lenker fÃ¼r Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
     },
     {
       "id": 6,
@@ -195,7 +255,7 @@
       "bestand": 14,
       "mindestmenge": 8,
       "bedarfsmeldungBei": 10,
-      "beschreibung": "Komfortsattel für Schulungsfahrräder mit ausreichend freiem Bestand."
+      "beschreibung": "Komfortsattel fÃ¼r SchulungsfahrrÃ¤der mit ausreichend freiem Bestand."
     },
     {
       "id": 8,
@@ -210,7 +270,7 @@
       "bestand": 10,
       "mindestmenge": 5,
       "bedarfsmeldungBei": 8,
-      "beschreibung": "Sportsattel für die Individualisierung."
+      "beschreibung": "Sportsattel fÃ¼r die Individualisierung."
     },
     {
       "id": 9,
@@ -232,23 +292,23 @@
       "artikelNr": "ART010",
       "name": "Schulungsfahrrad Premium",
       "kategorieId": 4,
-      "kategorie": "Fahrräder",
-      "kategoriePfad": "Fahrräder > Citybike",
+      "kategorie": "FahrrÃ¤der",
+      "kategoriePfad": "FahrrÃ¤der > Citybike",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 500,
       "verkaufspreis": 999,
       "bestand": 2,
       "mindestmenge": 1,
       "bedarfsmeldungBei": 3,
-      "beschreibung": "Premium Fahrrad, bei dem Komponenten individualisiert werden können."
+      "beschreibung": "Premium Fahrrad, bei dem Komponenten individualisiert werden kÃ¶nnen."
     },
     {
       "id": 11,
       "artikelNr": "ART011",
       "name": "Schulungsfahrrad Trekking",
       "kategorieId": 4,
-      "kategorie": "Fahrräder",
-      "kategoriePfad": "Fahrräder > Trekking",
+      "kategorie": "FahrrÃ¤der",
+      "kategoriePfad": "FahrrÃ¤der > Trekking",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 550,
       "verkaufspreis": 1099,
@@ -262,30 +322,30 @@
       "artikelNr": "ART012",
       "name": "Schulungsfahrrad Urban Flex",
       "kategorieId": 4,
-      "kategorie": "Fahrräder",
-      "kategoriePfad": "Fahrräder > Citybike",
+      "kategorie": "FahrrÃ¤der",
+      "kategoriePfad": "FahrrÃ¤der > Citybike",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 470,
       "verkaufspreis": 939,
       "bestand": 4,
       "mindestmenge": 2,
       "bedarfsmeldungBei": 3,
-      "beschreibung": "Urbanes Schulungsrad mit mehreren Individualisierungsoptionen für Demo-Angebote."
+      "beschreibung": "Urbanes Schulungsrad mit mehreren Individualisierungsoptionen fÃ¼r Demo-Angebote."
     },
     {
       "id": 13,
       "artikelNr": "ART013",
       "name": "Schulungsfahrrad Cargo Start",
       "kategorieId": 4,
-      "kategorie": "Fahrräder",
-      "kategoriePfad": "Fahrräder > Lastenrad",
+      "kategorie": "FahrrÃ¤der",
+      "kategoriePfad": "FahrrÃ¤der > Lastenrad",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 690,
       "verkaufspreis": 1399,
       "bestand": 2,
       "mindestmenge": 1,
       "bedarfsmeldungBei": 2,
-      "beschreibung": "Einfaches Lastenrad für Schulungs- und Vorführzwecke mit konfigurierbaren Komponenten."
+      "beschreibung": "Einfaches Lastenrad fÃ¼r Schulungs- und VorfÃ¼hrzwecke mit konfigurierbaren Komponenten."
     },
     {
       "id": 14,
@@ -300,7 +360,7 @@
       "bestand": 7,
       "mindestmenge": 4,
       "bedarfsmeldungBei": 5,
-      "beschreibung": "Breiter Komfortlenker als Upgrade für individualisierbare Baugruppen."
+      "beschreibung": "Breiter Komfortlenker als Upgrade fÃ¼r individualisierbare Baugruppen."
     },
     {
       "id": 15,
@@ -315,7 +375,7 @@
       "bestand": 11,
       "mindestmenge": 6,
       "bedarfsmeldungBei": 8,
-      "beschreibung": "Pannensicherer Reifen als Upgrade für intensive Schulungseinsätze."
+      "beschreibung": "Pannensicherer Reifen als Upgrade fÃ¼r intensive SchulungseinsÃ¤tze."
     },
     {
       "id": 16,
@@ -330,7 +390,7 @@
       "bestand": 9,
       "mindestmenge": 4,
       "bedarfsmeldungBei": 6,
-      "beschreibung": "Gel-Sattel für längere Fahrten und Komfort-Demos."
+      "beschreibung": "Gel-Sattel fÃ¼r lÃ¤ngere Fahrten und Komfort-Demos."
     }
   ],
   "artikelStueckliste": [
@@ -638,7 +698,7 @@
       "zeEinheit": "",
       "einkaufspreis": 0,
       "verkaufspreis": 65,
-      "beschreibung": "Einfache Werkstattleistung für Reparaturen."
+      "beschreibung": "Einfache Werkstattleistung fÃ¼r Reparaturen."
     },
     {
       "id": 2,
@@ -649,7 +709,7 @@
       "zeEinheit": "",
       "einkaufspreis": 0,
       "verkaufspreis": 89,
-      "beschreibung": "Wartungspaket für Fahrräder oder Fuhrpark."
+      "beschreibung": "Wartungspaket fÃ¼r FahrrÃ¤der oder Fuhrpark."
     },
     {
       "id": 3,
@@ -824,7 +884,7 @@
       "username": "gf",
       "email": "gf@test.de",
       "password": "gf",
-      "rolle": "Geschäftsführung",
+      "rolle": "GeschÃ¤ftsfÃ¼hrung",
       "vorname": "Chef",
       "nachname": "Carsten",
       "permissions": [
@@ -836,12 +896,12 @@
     {
       "id": 1,
       "name": "Admin",
-      "beschreibung": "Vollständiger Zugriff auf alle Funktionen"
+      "beschreibung": "VollstÃ¤ndiger Zugriff auf alle Funktionen"
     },
     {
       "id": 2,
       "name": "Lager",
-      "beschreibung": "Verwaltung des Lagers und Bestände"
+      "beschreibung": "Verwaltung des Lagers und BestÃ¤nde"
     },
     {
       "id": 3,
@@ -871,7 +931,7 @@
     {
       "id": 8,
       "name": "Verkauf Azubi",
-      "beschreibung": "Verkauf für Auszubildende"
+      "beschreibung": "Verkauf fÃ¼r Auszubildende"
     },
     {
       "id": 9,
@@ -880,8 +940,8 @@
     },
     {
       "id": 10,
-      "name": "Geschäftsführung",
-      "beschreibung": "Vollzugriff für die Geschäftsführung"
+      "name": "GeschÃ¤ftsfÃ¼hrung",
+      "beschreibung": "Vollzugriff fÃ¼r die GeschÃ¤ftsfÃ¼hrung"
     }
   ],
   "rechte": [
@@ -968,12 +1028,12 @@
     {
       "id": 17,
       "name": "gf.lesen",
-      "beschreibung": "Geschäftsführungsdaten lesen"
+      "beschreibung": "GeschÃ¤ftsfÃ¼hrungsdaten lesen"
     },
     {
       "id": 18,
       "name": "gf.bearbeiten",
-      "beschreibung": "Geschäftsführungsdaten bearbeiten"
+      "beschreibung": "GeschÃ¤ftsfÃ¼hrungsdaten bearbeiten"
     },
     {
       "id": 19,
@@ -998,7 +1058,7 @@
     {
       "id": 23,
       "name": "kunde.loeschen",
-      "beschreibung": "Kundendaten löschen"
+      "beschreibung": "Kundendaten lÃ¶schen"
     },
     {
       "id": 24,
@@ -1023,7 +1083,7 @@
     {
       "id": 28,
       "name": "artikel.loeschen",
-      "beschreibung": "Artikeldaten löschen"
+      "beschreibung": "Artikeldaten lÃ¶schen"
     },
     {
       "id": 29,
@@ -1048,7 +1108,7 @@
     {
       "id": 33,
       "name": "rechnung.loeschen",
-      "beschreibung": "Rechnungen löschen"
+      "beschreibung": "Rechnungen lÃ¶schen"
     },
     {
       "id": 34,
@@ -1073,7 +1133,7 @@
     {
       "id": 38,
       "name": "lager.loeschen",
-      "beschreibung": "Lagerdaten löschen"
+      "beschreibung": "Lagerdaten lÃ¶schen"
     },
     {
       "id": 39,
@@ -1103,7 +1163,7 @@
     {
       "id": 44,
       "name": "benutzer.loeschen",
-      "beschreibung": "Benutzerdaten löschen"
+      "beschreibung": "Benutzerdaten lÃ¶schen"
     },
     {
       "id": 45,
@@ -1128,7 +1188,7 @@
     {
       "id": 49,
       "name": "rollen.loeschen",
-      "beschreibung": "Rollen löschen"
+      "beschreibung": "Rollen lÃ¶schen"
     },
     {
       "id": 50,
@@ -1153,7 +1213,7 @@
     {
       "id": 54,
       "name": "rechte.loeschen",
-      "beschreibung": "Rechte löschen"
+      "beschreibung": "Rechte lÃ¶schen"
     }
   ],
   "rollenRechte": [
@@ -1478,20 +1538,82 @@
     {
       "id": 54,
       "rolleId": 10,
-      "rolleName": "Geschäftsführung",
+      "rolleName": "GeschÃ¤ftsfÃ¼hrung",
       "rechtName": "*"
+    }
+  ],
+  "nummernkreise": [
+    {
+      "id": 1,
+      "schluessel": "artikel",
+      "bezeichnung": "Artikel",
+      "kuerzel": "ART"
+    },
+    {
+      "id": 2,
+      "schluessel": "service",
+      "bezeichnung": "Service",
+      "kuerzel": "SER"
+    },
+    {
+      "id": 3,
+      "schluessel": "angebot",
+      "bezeichnung": "Angebot",
+      "kuerzel": "ANG"
+    },
+    {
+      "id": 4,
+      "schluessel": "auftrag",
+      "bezeichnung": "Auftrag",
+      "kuerzel": "AU"
+    },
+    {
+      "id": 5,
+      "schluessel": "rechnung",
+      "bezeichnung": "Rechnung",
+      "kuerzel": "RG"
+    },
+    {
+      "id": 6,
+      "schluessel": "lieferschein",
+      "bezeichnung": "Lieferschein",
+      "kuerzel": "LS"
+    },
+    {
+      "id": 7,
+      "schluessel": "bestellung",
+      "bezeichnung": "Bestellung",
+      "kuerzel": "EK"
+    },
+    {
+      "id": 8,
+      "schluessel": "gutschrift",
+      "bezeichnung": "Gutschrift",
+      "kuerzel": "GS"
+    },
+    {
+      "id": 9,
+      "schluessel": "mahnung",
+      "bezeichnung": "Mahnung",
+      "kuerzel": "MH"
+    },
+    {
+      "id": 10,
+      "schluessel": "zahlung",
+      "bezeichnung": "Zahlung",
+      "kuerzel": "ZA"
     }
   ],
   "lager": [
     {
       "id": 1,
       "name": "Hauptlager",
-      "standort": "Lingen, Industriestraße 3",
+      "standort": "Lingen, IndustriestraÃŸe 3",
       "kapazitaet": 5000
     },
     {
       "id": 2,
-      "name": "Außenlager",
+      "name": "AuÃŸenlager",
       "standort": "Meppen, Gewerbepark Nord",
       "kapazitaet": 2000
     }
@@ -1504,9 +1626,9 @@
       "anschrift": "Max-Weber Str. 2",
       "plz": "49716",
       "ort": "Meppen",
-      "segment": "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
+      "segment": "Fahrradbekleidung, Sicherheitsbekleidung, SonderfahrrÃ¤der, Lastenbikes",
       "iban": "DE91500105178640732418",
-      "fürBts": "Alternativlieferant für Zubehör und Lastenbikes",
+      "fuerBts": "Alternativlieferant fÃ¼r ZubehÃ¶r und Lastenbikes",
       "bewertung": 4,
       "abc": "B"
     },
@@ -1517,9 +1639,9 @@
       "anschrift": "Europa-Allee 26",
       "plz": "49685",
       "ort": "Emstek",
-      "segment": "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
+      "segment": "Fahrradwerk, FahrradzubehÃ¶r, Einzelteile, Service",
       "iban": "DE68500500001234567890",
-      "fürBts": "",
+      "fuerBts": "",
       "bewertung": 5,
       "abc": "A"
     },
@@ -1527,12 +1649,12 @@
       "id": 3,
       "lieferantenNr": "KR10003",
       "firma": "Meister Handels GmbH",
-      "anschrift": "Industriestraße 9",
+      "anschrift": "IndustriestraÃŸe 9",
       "plz": "",
       "ort": "",
       "segment": "",
       "iban": "DE30500105170648489890",
-      "fürBts": "",
+      "fuerBts": "",
       "bewertung": 3,
       "abc": "C"
     },
@@ -1540,12 +1662,12 @@
       "id": 4,
       "lieferantenNr": "KR10004",
       "firma": "Campus Sonderbaumarkt GmbH",
-      "anschrift": "Industriestraße 9",
+      "anschrift": "IndustriestraÃŸe 9",
       "plz": "49809",
       "ort": "Lingen",
       "segment": "Klassischer Baumarkt mit Fahrradabteilung",
       "iban": "DE02500105170648489901",
-      "fürBts": "Soll Lieferant sein und Kunde",
+      "fuerBts": "Soll Lieferant sein und Kunde",
       "bewertung": 3,
       "abc": "C"
     }
@@ -1556,140 +1678,160 @@
       "artikelId": 1,
       "lieferantId": 2,
       "mindestbestellmenge": 1,
-      "stueckpreis": 438
+      "stueckpreis": 438,
+      "lieferzeitTage": 4
     },
     {
       "id": 2,
       "artikelId": 1,
       "lieferantId": 2,
       "mindestbestellmenge": 5,
-      "stueckpreis": 424
+      "stueckpreis": 424,
+      "lieferzeitTage": 7
     },
     {
       "id": 3,
       "artikelId": 1,
       "lieferantId": 2,
       "mindestbestellmenge": 10,
-      "stueckpreis": 409
+      "stueckpreis": 409,
+      "lieferzeitTage": 12
     },
     {
       "id": 4,
       "artikelId": 3,
       "lieferantId": 1,
       "mindestbestellmenge": 10,
-      "stueckpreis": 23.9
+      "stueckpreis": 23.9,
+      "lieferzeitTage": 2
     },
     {
       "id": 5,
       "artikelId": 3,
       "lieferantId": 1,
       "mindestbestellmenge": 25,
-      "stueckpreis": 22.4
+      "stueckpreis": 22.4,
+      "lieferzeitTage": 5
     },
     {
       "id": 6,
       "artikelId": 3,
       "lieferantId": 3,
       "mindestbestellmenge": 5,
-      "stueckpreis": 24.7
+      "stueckpreis": 24.7,
+      "lieferzeitTage": 1
     },
     {
       "id": 7,
       "artikelId": 3,
       "lieferantId": 3,
       "mindestbestellmenge": 20,
-      "stueckpreis": 22.9
+      "stueckpreis": 22.9,
+      "lieferzeitTage": 4
     },
     {
       "id": 8,
       "artikelId": 5,
       "lieferantId": 2,
       "mindestbestellmenge": 10,
-      "stueckpreis": 17.6
+      "stueckpreis": 17.6,
+      "lieferzeitTage": 3
     },
     {
       "id": 9,
       "artikelId": 5,
       "lieferantId": 2,
       "mindestbestellmenge": 50,
-      "stueckpreis": 16.4
+      "stueckpreis": 16.4,
+      "lieferzeitTage": 10
     },
     {
       "id": 10,
       "artikelId": 6,
       "lieferantId": 2,
       "mindestbestellmenge": 20,
-      "stueckpreis": 14.2
+      "stueckpreis": 14.2,
+      "lieferzeitTage": 3
     },
     {
       "id": 11,
       "artikelId": 6,
       "lieferantId": 2,
       "mindestbestellmenge": 50,
-      "stueckpreis": 13.4
+      "stueckpreis": 13.4,
+      "lieferzeitTage": 8
     },
     {
       "id": 12,
       "artikelId": 6,
       "lieferantId": 4,
       "mindestbestellmenge": 10,
-      "stueckpreis": 14.8
+      "stueckpreis": 14.8,
+      "lieferzeitTage": 2
     },
     {
       "id": 13,
       "artikelId": 6,
       "lieferantId": 4,
       "mindestbestellmenge": 40,
-      "stueckpreis": 13.6
+      "stueckpreis": 13.6,
+      "lieferzeitTage": 7
     },
     {
       "id": 14,
       "artikelId": 10,
       "lieferantId": 2,
       "mindestbestellmenge": 1,
-      "stueckpreis": 515
+      "stueckpreis": 515,
+      "lieferzeitTage": 6
     },
     {
       "id": 15,
       "artikelId": 10,
       "lieferantId": 2,
       "mindestbestellmenge": 3,
-      "stueckpreis": 498
+      "stueckpreis": 498,
+      "lieferzeitTage": 10
     },
     {
       "id": 16,
       "artikelId": 10,
       "lieferantId": 2,
       "mindestbestellmenge": 8,
-      "stueckpreis": 486
+      "stueckpreis": 486,
+      "lieferzeitTage": 18
     },
     {
       "id": 17,
       "artikelId": 14,
       "lieferantId": 4,
       "mindestbestellmenge": 5,
-      "stueckpreis": 23.5
+      "stueckpreis": 23.5,
+      "lieferzeitTage": 2
     },
     {
       "id": 18,
       "artikelId": 14,
       "lieferantId": 4,
       "mindestbestellmenge": 20,
-      "stueckpreis": 21.9
+      "stueckpreis": 21.9,
+      "lieferzeitTage": 6
     },
     {
       "id": 19,
       "artikelId": 16,
       "lieferantId": 1,
       "mindestbestellmenge": 6,
-      "stueckpreis": 22.6
+      "stueckpreis": 22.6,
+      "lieferzeitTage": 3
     },
     {
       "id": 20,
       "artikelId": 16,
       "lieferantId": 1,
       "mindestbestellmenge": 18,
-      "stueckpreis": 21.1
+      "stueckpreis": 21.1,
+      "lieferzeitTage": 7
     }
   ],
   "bestellungen": [
@@ -1703,7 +1845,7 @@
       "lehrkraftAngebotAm": "2026-07-21",
       "lehrkraftAngebotPreis": 73.5,
       "lehrkraftLieferzeitTage": 5,
-      "lehrkraftAngebotText": "Standardangebot für drei Helme aus dem Vergleich."
+      "lehrkraftAngebotText": "Standardangebot fÃ¼r drei Helme aus dem Vergleich."
     },
     {
       "id": 2,
@@ -1715,7 +1857,7 @@
       "bedarfsmeldungId": "auto-artikel-1",
       "rechnungStatus": "offen",
       "faelligAm": "2026-08-20",
-      "anfrageNotiz": "Nachbestellung für Citybikes im Zulauf."
+      "anfrageNotiz": "Nachbestellung fÃ¼r Citybikes im Zulauf."
     }
   ],
   "bestellpositionen": [
@@ -1739,15 +1881,15 @@
   "kategorien": [
     {
       "id": 1,
-      "name": "Fahrräder",
+      "name": "FahrrÃ¤der",
       "parentId": "",
-      "beschreibung": "Komplette Fahrräder und fahrbereite Baugruppen."
+      "beschreibung": "Komplette FahrrÃ¤der und fahrbereite Baugruppen."
     },
     {
       "id": 4,
       "name": "Citybike",
       "parentId": 1,
-      "beschreibung": "Komplette City- und Schulungsfahrräder."
+      "beschreibung": "Komplette City- und SchulungsfahrrÃ¤der."
     },
     {
       "id": 5,
@@ -1759,11 +1901,11 @@
       "id": 6,
       "name": "Sicherheitsbekleidung",
       "parentId": 5,
-      "beschreibung": "Warn- und Schutzkleidung für den Einsatz."
+      "beschreibung": "Warn- und Schutzkleidung fÃ¼r den Einsatz."
     },
     {
       "id": 7,
-      "name": "Zubehör",
+      "name": "ZubehÃ¶r",
       "parentId": "",
       "beschreibung": "Zusatzprodukte rund ums Fahrrad."
     },
@@ -1771,7 +1913,7 @@
       "id": 8,
       "name": "Helm",
       "parentId": 7,
-      "beschreibung": "Helme und Schutzzubehör."
+      "beschreibung": "Helme und SchutzzubehÃ¶r."
     },
     {
       "id": 9,
@@ -1807,7 +1949,7 @@
       "id": 14,
       "name": "Fahrradkette",
       "parentId": 9,
-      "beschreibung": "Antriebskomponenten wie Ketten und Kettenräder."
+      "beschreibung": "Antriebskomponenten wie Ketten und KettenrÃ¤der."
     }
   ],
   "angebote": [
@@ -1823,7 +1965,7 @@
       "gueltigBis": "2026-08-04",
       "rabattBetrag": 0,
       "gesamtbetrag": 1348.5,
-      "status": "überarbeitet"
+      "status": "Ã¼berarbeitet"
     },
     {
       "id": 2,
@@ -2421,7 +2563,7 @@
       "reklamationsNr": "REK-2026-001",
       "kundeId": 2,
       "datum": "2026-07-24",
-      "beschreibung": "Ein Fahrradhelm wurde beschädigt geliefert.",
+      "beschreibung": "Ein Fahrradhelm wurde beschÃ¤digt geliefert.",
       "status": "neu"
     }
   ],
@@ -2432,7 +2574,7 @@
       "titel": "Sommeraktion Lastenbikes",
       "datum": "2026-08-01",
       "status": "geplant",
-      "beschreibung": "Regionale Kampagne für Lastenbikes und Zubehör."
+      "beschreibung": "Regionale Kampagne fÃ¼r Lastenbikes und ZubehÃ¶r."
     },
     {
       "id": 2,
@@ -2440,7 +2582,7 @@
       "titel": "Newsletter August",
       "datum": "2026-08-05",
       "status": "Entwurf",
-      "beschreibung": "Neue Fahrräder, Serviceangebote und Termine."
+      "beschreibung": "Neue FahrrÃ¤der, Serviceangebote und Termine."
     },
     {
       "id": 3,
@@ -2456,20 +2598,20 @@
       "id": 1,
       "kuerzel": "BU",
       "name": "Buchhaltung",
-      "zuordnung": "A – Bürowesen",
+      "zuordnung": "A â€“ BÃ¼rowesen",
       "aufgaben": [
-        "Überweisungen",
+        "Ãœberweisungen",
         "Lohn und Gehalt",
-        "Bankübersicht"
+        "BankÃ¼bersicht"
       ]
     },
     {
       "id": 2,
       "kuerzel": "MW-EK",
       "name": "Einkauf",
-      "zuordnung": "B – Materialwirtschaft",
+      "zuordnung": "B â€“ Materialwirtschaft",
       "aufgaben": [
-        "EK-Rechnungsprüfung",
+        "EK-RechnungsprÃ¼fung",
         "Wareneingang"
       ]
     },
@@ -2477,7 +2619,7 @@
       "id": 3,
       "kuerzel": "MW-VK",
       "name": "Verkauf",
-      "zuordnung": "C – Materialwirtschaft",
+      "zuordnung": "C â€“ Materialwirtschaft",
       "aufgaben": [
         "Lieferscheine",
         "Auftragsbearbeitung",
@@ -2489,9 +2631,9 @@
       "id": 4,
       "kuerzel": "MK",
       "name": "Marketing",
-      "zuordnung": "C – Materialwirtschaft",
+      "zuordnung": "C â€“ Materialwirtschaft",
       "aufgaben": [
-        "Werbemaßnahmen",
+        "WerbemaÃŸnahmen",
         "Webseite",
         "Onlineshop",
         "Interner und externer Auftritt"
@@ -2501,7 +2643,7 @@
       "id": 5,
       "kuerzel": "PW",
       "name": "Personalwesen",
-      "zuordnung": "A – Bürowesen",
+      "zuordnung": "A â€“ BÃ¼rowesen",
       "aufgaben": [
         "Schulungen und Fortbildungen",
         "Personalbeschaffung und -einsatz",
@@ -2513,10 +2655,10 @@
       "id": 6,
       "kuerzel": "MW-TAM",
       "name": "Technische Anlagen und Maschinen",
-      "zuordnung": "B – Materialwirtschaft",
+      "zuordnung": "B â€“ Materialwirtschaft",
       "aufgaben": [
-        "Übersichten und Einsatzplanung",
-        "TÜV und Papiere",
+        "Ãœbersichten und Einsatzplanung",
+        "TÃœV und Papiere",
         "Miete, Leasing und Kauf"
       ]
     },
@@ -2524,10 +2666,10 @@
       "id": 7,
       "kuerzel": "MW-FP",
       "name": "Fuhrpark",
-      "zuordnung": "B – Materialwirtschaft",
+      "zuordnung": "B â€“ Materialwirtschaft",
       "aufgaben": [
-        "Übersichten und Einsatzplanung",
-        "TÜV und Papiere",
+        "Ãœbersichten und Einsatzplanung",
+        "TÃœV und Papiere",
         "Miete, Leasing und Kauf"
       ]
     },
@@ -2535,21 +2677,21 @@
       "id": 8,
       "kuerzel": "IT",
       "name": "IT und Kommunikation",
-      "zuordnung": "D – Stabsstelle unter Bürowesen",
+      "zuordnung": "D â€“ Stabsstelle unter BÃ¼rowesen",
       "aufgaben": [
         "IT-Ausstattung",
-        "Webshop, Flyer und Präsentationen",
+        "Webshop, Flyer und PrÃ¤sentationen",
         "Bilder und Gestaltung",
-        "Schnittstelle für WW, BW und AGF"
+        "Schnittstelle fÃ¼r WW, BW und AGF"
       ]
     },
     {
       "id": 9,
       "kuerzel": "AGF",
-      "name": "Stellvertretende Geschäftsführung",
-      "zuordnung": "Übergeordnet",
+      "name": "Stellvertretende GeschÃ¤ftsfÃ¼hrung",
+      "zuordnung": "Ãœbergeordnet",
       "aufgaben": [
-        "Stellvertretende Leitung für die Geschäftsführung"
+        "Stellvertretende Leitung fÃ¼r die GeschÃ¤ftsfÃ¼hrung"
       ]
     }
   ],
@@ -2563,7 +2705,7 @@
       "kanal": "Telefon",
       "status": "in Bearbeitung",
       "datum": "2026-07-24",
-      "anliegen": "Frage nach Lieferzeiten für Sicherheitsjacken."
+      "anliegen": "Frage nach Lieferzeiten fÃ¼r Sicherheitsjacken."
     },
     {
       "id": 2,
@@ -2574,7 +2716,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-07-28",
-      "anliegen": "Bitte Angebot über 30 Fahrradhelme mit kurzfristiger Lieferung senden."
+      "anliegen": "Bitte Angebot Ã¼ber 30 Fahrradhelme mit kurzfristiger Lieferung senden."
     },
     {
       "id": 3,
@@ -2585,7 +2727,7 @@
       "kanal": "Telefon",
       "status": "offen",
       "datum": "2026-08-05",
-      "anliegen": "Wir benötigen kurzfristig ein Schulungsfahrrad für eine Vorführung."
+      "anliegen": "Wir benÃ¶tigen kurzfristig ein Schulungsfahrrad fÃ¼r eine VorfÃ¼hrung."
     },
     {
       "id": 4,
@@ -2596,7 +2738,7 @@
       "kanal": "E-Mail",
       "status": "erledigt",
       "datum": "2026-08-01",
-      "anliegen": "Bitte Angebot für eine mobile Wartung von sechs Fahrrädern erstellen."
+      "anliegen": "Bitte Angebot fÃ¼r eine mobile Wartung von sechs FahrrÃ¤dern erstellen."
     },
     {
       "id": 5,
@@ -2607,7 +2749,7 @@
       "kanal": "Telefon",
       "status": "offen",
       "datum": "2026-08-10",
-      "anliegen": "Anfrage für Helme und Schulungsfahrräder für ein Herbstprojekt."
+      "anliegen": "Anfrage fÃ¼r Helme und SchulungsfahrrÃ¤der fÃ¼r ein Herbstprojekt."
     },
     {
       "id": 14,
@@ -2618,7 +2760,7 @@
       "kanal": "E-Mail",
       "status": "offen",
       "datum": "2026-08-18",
-      "anliegen": "Bitte ein Angebot für zwei Schulungsfahrräder Premium mit Komfort- oder Sportsattel als Auswahlmöglichkeit erstellen."
+      "anliegen": "Bitte ein Angebot fÃ¼r zwei SchulungsfahrrÃ¤der Premium mit Komfort- oder Sportsattel als AuswahlmÃ¶glichkeit erstellen."
     },
     {
       "id": 6,
@@ -2629,7 +2771,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-03-09",
-      "anliegen": "Bitte drei zusätzliche Helme für den Frühjahrsworkshop anbieten."
+      "anliegen": "Bitte drei zusÃ¤tzliche Helme fÃ¼r den FrÃ¼hjahrsworkshop anbieten."
     },
     {
       "id": 7,
@@ -2640,7 +2782,7 @@
       "kanal": "Telefon",
       "status": "angenommen",
       "datum": "2026-03-27",
-      "anliegen": "Zwei Schulungsfahrräder für eine interne Aktion werden benötigt."
+      "anliegen": "Zwei SchulungsfahrrÃ¤der fÃ¼r eine interne Aktion werden benÃ¶tigt."
     },
     {
       "id": 8,
@@ -2651,7 +2793,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-04-16",
-      "anliegen": "Bitte Sicherheitsjacken für eine kleine Besuchergruppe kalkulieren."
+      "anliegen": "Bitte Sicherheitsjacken fÃ¼r eine kleine Besuchergruppe kalkulieren."
     },
     {
       "id": 9,
@@ -2662,7 +2804,7 @@
       "kanal": "Telefon",
       "status": "angenommen",
       "datum": "2026-05-05",
-      "anliegen": "Wartung von sechs Schulungsrädern vor einem Aktionstag."
+      "anliegen": "Wartung von sechs SchulungsrÃ¤dern vor einem Aktionstag."
     },
     {
       "id": 10,
@@ -2673,7 +2815,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-05-20",
-      "anliegen": "Drei Sicherheitsjacken für neue Teilnehmende anfragen."
+      "anliegen": "Drei Sicherheitsjacken fÃ¼r neue Teilnehmende anfragen."
     },
     {
       "id": 11,
@@ -2684,7 +2826,7 @@
       "kanal": "Telefon",
       "status": "angenommen",
       "datum": "2026-06-08",
-      "anliegen": "Kurze Wartung eines Vorführrads anfragen."
+      "anliegen": "Kurze Wartung eines VorfÃ¼hrrads anfragen."
     },
     {
       "id": 12,
@@ -2695,7 +2837,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-06-25",
-      "anliegen": "Zwei weitere Helme für Sommertermine werden benötigt."
+      "anliegen": "Zwei weitere Helme fÃ¼r Sommertermine werden benÃ¶tigt."
     },
     {
       "id": 13,
@@ -2706,7 +2848,7 @@
       "kanal": "Telefon",
       "status": "angenommen",
       "datum": "2026-07-07",
-      "anliegen": "Ein zusätzliches Schulungsfahrrad für den Juli bestellen."
+      "anliegen": "Ein zusÃ¤tzliches Schulungsfahrrad fÃ¼r den Juli bestellen."
     }
   ],
   "nachrichten": [
@@ -2720,8 +2862,8 @@
       "senderRolle": "Kunde",
       "senderName": "Campus Baumarkt GmbH",
       "kanal": "Telefon",
-      "betreff": "Lieferzeiten für Sicherheitsjacken",
-      "nachricht": "Wir benötigen eine Rückmeldung zu Lieferzeiten und möglichen Mengenstaffeln.",
+      "betreff": "Lieferzeiten fÃ¼r Sicherheitsjacken",
+      "nachricht": "Wir benÃ¶tigen eine RÃ¼ckmeldung zu Lieferzeiten und mÃ¶glichen Mengenstaffeln.",
       "typ": "Anfrage"
     },
     {
@@ -2732,10 +2874,10 @@
       "kundeId": 1,
       "datum": "2026-07-25",
       "senderRolle": "Verkauf",
-      "senderName": "Schülerfirma Verkauf",
+      "senderName": "SchÃ¼lerfirma Verkauf",
       "kanal": "E-Mail",
       "betreff": "Angebot ANG-2026-001.0",
-      "nachricht": "Ein erstes Angebot wurde erstellt und an den Kunden zur Prüfung weitergegeben.",
+      "nachricht": "Ein erstes Angebot wurde erstellt und an den Kunden zur PrÃ¼fung weitergegeben.",
       "typ": "Angebot"
     },
     {
@@ -2748,8 +2890,8 @@
       "senderRolle": "Kunde",
       "senderName": "Nordrad Campus Service",
       "kanal": "E-Mail",
-      "betreff": "Mobile Wartung für sechs Fahrräder",
-      "nachricht": "Bitte senden Sie uns ein Angebot für eine mobile Wartung von sechs Fahrrädern vor Ort.",
+      "betreff": "Mobile Wartung fÃ¼r sechs FahrrÃ¤der",
+      "nachricht": "Bitte senden Sie uns ein Angebot fÃ¼r eine mobile Wartung von sechs FahrrÃ¤dern vor Ort.",
       "typ": "Anfrage"
     },
     {
@@ -2761,10 +2903,10 @@
       "kundeId": 3,
       "datum": "2026-08-02",
       "senderRolle": "Verkauf",
-      "senderName": "Schülerfirma Verkauf",
+      "senderName": "SchÃ¼lerfirma Verkauf",
       "kanal": "E-Mail",
       "betreff": "Angebot ANG-2026-004.0",
-      "nachricht": "Das Serviceangebot wurde erstellt und vom Kunden direkt bestätigt.",
+      "nachricht": "Das Serviceangebot wurde erstellt und vom Kunden direkt bestÃ¤tigt.",
       "typ": "Angebot"
     },
     {
@@ -2778,7 +2920,7 @@
       "senderName": "Jugendwerkstatt Ems-Vechte",
       "kanal": "Telefon",
       "betreff": "Projektanfrage Herbst",
-      "nachricht": "Wir planen ein Herbstprojekt und benötigen Schulungsfahrräder sowie mehrere Helme.",
+      "nachricht": "Wir planen ein Herbstprojekt und benÃ¶tigen SchulungsfahrrÃ¤der sowie mehrere Helme.",
       "typ": "Anfrage"
     },
     {
@@ -2790,7 +2932,7 @@
       "kundeId": 5,
       "datum": "2026-08-11",
       "senderRolle": "Verkauf",
-      "senderName": "Schülerfirma Verkauf",
+      "senderName": "SchÃ¼lerfirma Verkauf",
       "kanal": "E-Mail",
       "betreff": "Angebot ANG-2026-005.0",
       "nachricht": "Das Angebot ist intern vorbereitet und wartet noch auf die finale Freigabe vor dem Versand.",
@@ -2848,7 +2990,7 @@
       "name": "Emsland Tourismus GmbH",
       "iban": "DE75512108001245126199",
       "verwendungszweck": "Rechnung RG-2026-002",
-      "methode": "Überweisung",
+      "methode": "Ãœberweisung",
       "status": "ausgefuehrt"
     },
     {
@@ -2861,7 +3003,7 @@
       "name": "Campus Baumarkt GmbH",
       "iban": "DE44500105175407324931",
       "verwendungszweck": "Zahlung zu RG-2026-001",
-      "methode": "Überweisung",
+      "methode": "Ãœberweisung",
       "status": "offen"
     },
     {
@@ -2874,7 +3016,7 @@
       "name": "Kalkhoff Werke GmbH",
       "iban": "DE68500500001234567890",
       "verwendungszweck": "Eingangsrechnung ER-2026-002",
-      "methode": "Überweisung",
+      "methode": "Ãœberweisung",
       "status": "offen"
     }
   ],
@@ -2895,7 +3037,7 @@
       "rechnungId": 2,
       "datum": "2026-07-21",
       "status": "archiviert",
-      "beschreibung": "Digitale Ablage für die erste Beispielrechnung."
+      "beschreibung": "Digitale Ablage fÃ¼r die erste Beispielrechnung."
     },
     {
       "id": 2,
@@ -2904,7 +3046,7 @@
       "rechnungId": 2,
       "datum": "2026-07-22",
       "status": "archiviert",
-      "beschreibung": "Zahlungseingang per Überweisung wurde abgelegt."
+      "beschreibung": "Zahlungseingang per Ãœberweisung wurde abgelegt."
     },
     {
       "id": 3,
@@ -2913,19 +3055,19 @@
       "rechnungId": 1,
       "datum": "2026-07-23",
       "status": "versendet",
-      "beschreibung": "1. Mahnung für eine fällige Ausgangsrechnung."
+      "beschreibung": "1. Mahnung fÃ¼r eine fÃ¤llige Ausgangsrechnung."
     }
   ],
   "freigaben": [
     {
       "id": 1,
-      "titel": "Rabattfreigabe Großkunde",
+      "titel": "Rabattfreigabe GroÃŸkunde",
       "bereich": "verkauf",
       "status": "offen",
-      "verantwortung": "Geschäftsführung",
+      "verantwortung": "GeschÃ¤ftsfÃ¼hrung",
       "datum": "2026-07-25",
-      "bezug": "Großbestellung Nordrad Einkauf",
-      "notiz": "10 % Mengenrabatt für den Großkunden prüfen."
+      "bezug": "GroÃŸbestellung Nordrad Einkauf",
+      "notiz": "10 % Mengenrabatt fÃ¼r den GroÃŸkunden prÃ¼fen."
     }
   ],
   "berichte": [
@@ -2944,11 +3086,11 @@
     },
     {
       "id": 2,
-      "titel": "Lagerüberblick",
+      "titel": "LagerÃ¼berblick",
       "bereich": "logistik",
       "datum": "2026-07-25",
       "status": "Entwurf",
-      "zusammenfassung": "Niedrige Bestände bei Lastenrädern und Helmen.",
+      "zusammenfassung": "Niedrige BestÃ¤nde bei LastenrÃ¤dern und Helmen.",
       "zielgruppe": "Klasse",
       "empfohlenAktion": "Bedarfsmeldung und Bestellung aus dem Lagerstand ableiten.",
       "startdatum": "2026-07-01",
@@ -2997,7 +3139,7 @@
     {
       "id": 1,
       "name": "Lena Fischer",
-      "stelle": "Kaufmännische Assistenz",
+      "stelle": "KaufmÃ¤nnische Assistenz",
       "datum": "2026-07-20",
       "status": "eingegangen",
       "notiz": "Gute Vorkenntnisse in Excel und Kundenkontakt."
@@ -3047,7 +3189,7 @@
       "mitarbeiterId": 1,
       "von": "2026-07-24",
       "bis": "2026-07-26",
-      "grund": "Erkältung",
+      "grund": "ErkÃ¤ltung",
       "status": "eingegangen"
     }
   ],
@@ -3069,7 +3211,7 @@
       "titel": "Arbeitsvertrag Fachkraft Lager",
       "datum": "2024-08-01",
       "status": "archiviert",
-      "notiz": "Grundlage für die simulierte Personalakte."
+      "notiz": "Grundlage fÃ¼r die simulierte Personalakte."
     },
     {
       "id": 2,
@@ -3096,7 +3238,7 @@
       "titel": "Marketing-Schulung Kampagnenplanung",
       "datum": "2026-07-15",
       "status": "archiviert",
-      "notiz": "Teilnahmebescheinigung für interne Weiterbildung."
+      "notiz": "Teilnahmebescheinigung fÃ¼r interne Weiterbildung."
     }
   ],
   "vertriebsdokumente": [
@@ -3106,11 +3248,11 @@
       "angebotId": 1,
       "anfrageId": 1,
       "vorgangId": "anfrage-1",
-      "dokumentTyp": "Auftragsbestätigung",
-      "titel": "Auftragsbestätigung AU-2026-001",
+      "dokumentTyp": "AuftragsbestÃ¤tigung",
+      "titel": "AuftragsbestÃ¤tigung AU-2026-001",
       "datum": "2026-07-25",
       "status": "fertig",
-      "notiz": "Bestellung bestätigt und Liefertermin angekündigt."
+      "notiz": "Bestellung bestÃ¤tigt und Liefertermin angekÃ¼ndigt."
     },
     {
       "id": 2,
@@ -3131,12 +3273,12 @@
       "angebotId": 3,
       "anfrageId": 2,
       "vorgangId": "anfrage-2",
-      "dokumentTyp": "Auftragsbestätigung",
-      "titel": "Auftragsbestätigung AU-2026-002",
+      "dokumentTyp": "AuftragsbestÃ¤tigung",
+      "titel": "AuftragsbestÃ¤tigung AU-2026-002",
       "datum": "2026-07-30",
       "status": "versendet",
       "versendetAm": "2026-07-30",
-      "notiz": "Kunde hat die Auftragsbestätigung am selben Tag erhalten."
+      "notiz": "Kunde hat die AuftragsbestÃ¤tigung am selben Tag erhalten."
     },
     {
       "id": 4,
@@ -3164,7 +3306,7 @@
       "datum": "2026-07-31",
       "status": "versendet",
       "versendetAm": "2026-07-31",
-      "notiz": "Begleitpapier für die Helm-Lieferung."
+      "notiz": "Begleitpapier fÃ¼r die Helm-Lieferung."
     },
     {
       "id": 6,
@@ -3172,12 +3314,12 @@
       "angebotId": 5,
       "anfrageId": 4,
       "vorgangId": "anfrage-4",
-      "dokumentTyp": "Auftragsbestätigung",
-      "titel": "Auftragsbestätigung AU-2026-004",
+      "dokumentTyp": "AuftragsbestÃ¤tigung",
+      "titel": "AuftragsbestÃ¤tigung AU-2026-004",
       "datum": "2026-08-03",
       "status": "versendet",
       "versendetAm": "2026-08-03",
-      "notiz": "Serviceauftrag wurde direkt bestätigt."
+      "notiz": "Serviceauftrag wurde direkt bestÃ¤tigt."
     },
     {
       "id": 7,
@@ -3190,7 +3332,7 @@
       "datum": "2026-08-04",
       "status": "versendet",
       "versendetAm": "2026-08-04",
-      "notiz": "Einsatzunterlagen für das mobile Serviceteam."
+      "notiz": "Einsatzunterlagen fÃ¼r das mobile Serviceteam."
     },
     {
       "id": 8,
@@ -3198,8 +3340,8 @@
       "angebotId": 6,
       "anfrageId": 5,
       "vorgangId": "anfrage-5",
-      "dokumentTyp": "Auftragsbestätigung",
-      "titel": "Auftragsbestätigung AU-2026-005",
+      "dokumentTyp": "AuftragsbestÃ¤tigung",
+      "titel": "AuftragsbestÃ¤tigung AU-2026-005",
       "datum": "2026-08-12",
       "status": "erstellt",
       "notiz": "Liegt vorbereitet vor und wartet auf den Versand nach Abschluss der Freigabe."
@@ -3222,7 +3364,7 @@
       "titel": "Anfrage Lieferzeit und Staffelpreise",
       "datum": "2026-07-19",
       "status": "versendet",
-      "notiz": "Lieferant soll Lieferzeit und Preisstaffel bestätigen."
+      "notiz": "Lieferant soll Lieferzeit und Preisstaffel bestÃ¤tigen."
     },
     {
       "id": 3,
@@ -3231,7 +3373,7 @@
       "titel": "Bestellung EK-2026-001",
       "datum": "2026-07-20",
       "status": "fertig",
-      "notiz": "Verbindliche Bestellung ausgelöst."
+      "notiz": "Verbindliche Bestellung ausgelÃ¶st."
     }
   ],
   "firmenkonto": [
@@ -3260,10 +3402,48 @@
       "datum": "2026-07-24",
       "konto": "einkauf",
       "betreff": "Materialeinkauf Sicherheitshelme",
-      "info": "Didaktische Beispielausgabe für das Einkaufskonto",
+      "info": "Didaktische Beispielausgabe fÃ¼r das Einkaufskonto",
       "soll": 420,
       "haben": 0,
       "saldo": -420
+    }
+  ],
+  "unternehmen": [
+    {
+      "id": 1,
+      "firmenname": "UEF Lin",
+      "branche": "Gross- & Einzelhandel Sport, Freizeit, Rad",
+      "steuernummer": "88 888 89480",
+      "ustIdNr": "DE194227226",
+      "handelsregisterNr": "HRB 5985",
+      "betriebsNr": "11129381",
+      "unternehmerNr": "",
+      "strasse": "Schwarzer Weg 16",
+      "plzOrt": "49809 Lingen (Ems)",
+      "bundesland": "Niedersachsen",
+      "telefon": "0591-97304-58",
+      "mail": "de01BTS@zuef-edu.de",
+      "unternehmensNr": "123456789123 001",
+      "amtsgericht": "Lingen (EMS)",
+      "finanzamtNr": "",
+      "firmaKontoname": "UEF Lin",
+      "firmaBankName": "Ruhrtal-Bank",
+      "firmaIban": "DE36360440810021070851",
+      "firmaKontoNr": "210 708 51",
+      "firmaBic": "RUHRDEE0",
+      "firmaBlz": "360 440 81",
+      "verkaufKontoname": "UEF Lin-VK",
+      "verkaufBankName": "Ruhrtal-Bank",
+      "verkaufIban": "DE36360440810021070852",
+      "verkaufKontoNr": "210 708 52",
+      "verkaufBic": "RUHRDEE0",
+      "verkaufBlz": "360 440 81",
+      "einkaufKontoname": "UEF Lin-EK",
+      "einkaufBankName": "Ruhrtal-Bank",
+      "einkaufIban": "DE36360440810021070853",
+      "einkaufKontoNr": "210 708 53",
+      "einkaufBic": "RUHRDEE0",
+      "einkaufBlz": "360 440 81"
     }
   ],
   "lehrkraftOptionen": [
@@ -3316,44 +3496,6 @@
       "mahnung1AbTage": 1,
       "mahnung2AbTage": 8,
       "inkassoAbTage": 22
-    }
-  ],
-  "unternehmen": [
-    {
-      "id": 1,
-      "firmenname": "UEF Lin",
-      "branche": "Gross- & Einzelhandel Sport, Freizeit, Rad",
-      "steuernummer": "88 888 89480",
-      "ustIdNr": "DE194227226",
-      "handelsregisterNr": "HRB 5985",
-      "betriebsNr": "11129381",
-      "unternehmerNr": "",
-      "strasse": "Schwarzer Weg 16",
-      "plzOrt": "49809 Lingen (Ems)",
-      "bundesland": "Niedersachsen",
-      "telefon": "0591-97304-58",
-      "mail": "de01BTS@zuef-edu.de",
-      "unternehmensNr": "123456789123 001",
-      "amtsgericht": "Lingen (EMS)",
-      "finanzamtNr": "",
-      "firmaKontoname": "UEF Lin",
-      "firmaBankName": "Ruhrtal-Bank",
-      "firmaIban": "DE36360440810021070851",
-      "firmaKontoNr": "210 708 51",
-      "firmaBic": "RUHRDEE0",
-      "firmaBlz": "360 440 81",
-      "verkaufKontoname": "UEF Lin-VK",
-      "verkaufBankName": "Ruhrtal-Bank",
-      "verkaufIban": "DE36360440810021070852",
-      "verkaufKontoNr": "210 708 52",
-      "verkaufBic": "RUHRDEE0",
-      "verkaufBlz": "360 440 81",
-      "einkaufKontoname": "UEF Lin-EK",
-      "einkaufBankName": "Ruhrtal-Bank",
-      "einkaufIban": "DE36360440810021070853",
-      "einkaufKontoNr": "210 708 53",
-      "einkaufBic": "RUHRDEE0",
-      "einkaufBlz": "360 440 81"
     }
   ],
   "feldMetadaten": [

@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, request, session
+from flask import Blueprint, request, session
 
 from api_utils import get_store, json_response
 from security import get_user_permissions
@@ -16,6 +16,7 @@ def sanitize_user(user):
     }
     sanitized["permissions"] = get_user_permissions(user)
     return sanitized
+
 
 def build_auth_state_response(user=None):
     return json_response({
@@ -62,8 +63,7 @@ def login():
     session["user_id"] = user["id"]
     return json_response({
         "ok": True,
-        "user": sanitize_user(user),
-        "mode": current_app.config["DATA_MODE"]
+        "user": sanitize_user(user)
     })
 
 

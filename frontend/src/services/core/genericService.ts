@@ -1,149 +1,94 @@
-import { loadData, saveData } from "../mockup/mockStorage";
 import type { CrudService, EntityWithId } from "../../types/crud";
-import { buildDatabasePath, isDatabaseModeEnabled, isPermissionError, syncApiRequest } from "./api";
+import { buildDatabasePath, syncApiRequest } from "./api";
 import { getCachedTableData, invalidateTableCache, setCachedTableData } from "./dataCache";
 
 /**
  * Generischer CRUD-Service für alle Tabellen
  * 
  * @param {string} tableName - Name der Tabelle
- * @param {array} initialData - Initiale Mock-Daten
+ * @param {array} initialData - wird nur noch fuer Rueckwaertskompatibilitaet entgegengenommen
  * @returns {object} CRUD-Funktionen
  */
 export function createCRUDService<T extends EntityWithId>(tableName: string, initialData: T[] = []): CrudService<T> {
-    const useBackend = () => isDatabaseModeEnabled();
-    let tableData = useBackend() ? [] as T[] : loadData(tableName, initialData);
-
-    const getFallbackData = () => loadData(tableName, initialData);
+    void initialData;
+    let tableData = [] as T[];
 
     const reload = (force = false) => {
-        if (useBackend()) {
-            try {
-                if (!force) {
-                    const cached = getCachedTableData<T>(tableName);
-                    if (cached) {
-                        tableData = cached;
-                        return tableData;
-                    }
-                }
-
-                const result = syncApiRequest(buildDatabasePath(`/${tableName}`));
-                tableData = setCachedTableData(tableName, result.items || []);
+        if (!force) {
+            const cached = getCachedTableData<T>(tableName);
+            if (cached) {
+                tableData = cached;
                 return tableData;
-            } catch (error) {
-                if (isPermissionError(error)) {
-                    tableData = getFallbackData();
-                    return tableData;
-                }
-
-                throw error;
             }
         }
-        tableData = loadData(tableName, initialData);
+
+        const result = syncApiRequest(buildDatabasePath(`/${tableName}`));
+        tableData = setCachedTableData(tableName, result.items || []);
         return tableData;
     };
 
     const persist = (nextData: T[]) => {
-        if (useBackend()) {
-            tableData = nextData;
-            return tableData;
-        }
         tableData = nextData;
-        saveData(tableName, tableData);
         return tableData;
     };
-
-    const createId = () => Date.now() + Math.floor(Math.random() * 1000);
 
     const api = {
         list: () => reload(),
         getById: (id: number | string) => {
-            if (useBackend()) {
-                const cached = getCachedTableData<T>(tableName);
-                if (cached) {
-                    const cachedItem = cached.find(item => String(item.id) === String(id));
-                    if (cachedItem) {
-                        return cachedItem;
-                    }
-                }
-
-                const loadedItems = reload();
-                const loadedItem = loadedItems.find(item => String(item.id) === String(id));
-                if (loadedItem) {
-                    return loadedItem;
-                }
-
-                try {
-                    const result = syncApiRequest(buildDatabasePath(`/${tableName}/${id}`));
-                    return result.item;
-                } catch (error) {
-                    if (isPermissionError(error)) {
-                        return getFallbackData().find(item => String(item.id) === String(id));
-                    }
-
-                    throw error;
+            const cached = getCachedTableData<T>(tableName);
+            if (cached) {
+                const cachedItem = cached.find(item => String(item.id) === String(id));
+                if (cachedItem) {
+                    return cachedItem;
                 }
             }
-            return reload().find(item => String(item.id) === String(id));
+
+            const loadedItems = reload();
+            const loadedItem = loadedItems.find(item => String(item.id) === String(id));
+            if (loadedItem) {
+                return loadedItem;
+            }
+
+            const result = syncApiRequest(buildDatabasePath(`/${tableName}/${id}`));
+            return result.item;
         },
         create: (item: Partial<T> & Record<string, unknown>) => {
-            if (useBackend()) {
-                const result = syncApiRequest(buildDatabasePath(`/${tableName}`), {
-                    method: "POST",
-                    body: item
-                });
-                invalidateTableCache(tableName);
-                tableData = reload(true);
-                return result.item;
-            }
-            const created = { ...item, id: item.id ?? createId() } as T;
-            persist([...reload(), created]);
-            return created;
+            const result = syncApiRequest(buildDatabasePath(`/${tableName}`), {
+                method: "POST",
+                body: item
+            });
+            invalidateTableCache(tableName);
+            tableData = reload(true);
+            return result.item;
         },
         update: (idOrItem: number | string | (Partial<T> & Record<string, unknown>), payload: Partial<T>) => {
-            if (useBackend()) {
-                const current = reload();
-                const nextItem = (typeof idOrItem === "object"
-                    ? idOrItem
-                    : { ...(current.find(item => item.id === idOrItem) || {}), ...payload, id: idOrItem }) as T;
-                const result = syncApiRequest(buildDatabasePath(`/${tableName}/${nextItem.id}`), {
-                    method: "PATCH",
-                    body: nextItem
-                });
-                invalidateTableCache(tableName);
-                tableData = reload(true);
-                return result.item;
-            }
             const current = reload();
             const nextItem = (typeof idOrItem === "object"
-                 ? idOrItem
+                ? idOrItem
                 : { ...(current.find(item => item.id === idOrItem) || {}), ...payload, id: idOrItem }) as T;
-            persist(current.map(item => item.id === nextItem.id ? nextItem : item));
-            return nextItem;
+            const result = syncApiRequest(buildDatabasePath(`/${tableName}/${nextItem.id}`), {
+                method: "PATCH",
+                body: nextItem
+            });
+            invalidateTableCache(tableName);
+            tableData = reload(true);
+            return result.item;
         },
         remove: (id: number | string) => {
-            if (useBackend()) {
+            syncApiRequest(buildDatabasePath(`/${tableName}/${id}`), {
+                method: "DELETE"
+            });
+            invalidateTableCache(tableName);
+            tableData = reload(true);
+        },
+        removeMany: (ids: Array<number | string>) => {
+            ids.forEach(id => {
                 syncApiRequest(buildDatabasePath(`/${tableName}/${id}`), {
                     method: "DELETE"
                 });
-                invalidateTableCache(tableName);
-                tableData = reload(true);
-                return;
-            }
-            persist(reload().filter(item => item.id !== id));
-        },
-        removeMany: (ids: Array<number | string>) => {
-            if (useBackend()) {
-                ids.forEach(id => {
-                    syncApiRequest(buildDatabasePath(`/${tableName}/${id}`), {
-                        method: "DELETE"
-                    });
-                });
-                invalidateTableCache(tableName);
-                tableData = reload(true);
-                return;
-            }
-            persist(reload().filter(item => !ids.includes(item.id)));
+            });
+            invalidateTableCache(tableName);
+            tableData = reload(true);
         },
         search: (query: string) => {
             return reload().filter(item =>

@@ -1,4 +1,5 @@
-import { abteilungen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 
-export default createCRUDService("abteilungen", abteilungen);
+export default createCRUDService("abteilungen", []);
+
+

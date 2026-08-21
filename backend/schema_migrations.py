@@ -3,7 +3,7 @@ from pathlib import Path
 
 import psycopg2
 
-from config import PreviewConfig
+from config import AppConfig
 
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
@@ -14,7 +14,7 @@ def run_pending_migrations(dsn: str | None = None) -> None:
     if not migrations:
         return
 
-    connection = _connect_with_retry(dsn or PreviewConfig.DATABASE_DSN)
+    connection = _connect_with_retry(dsn or AppConfig.DATABASE_DSN)
     try:
         with connection.cursor() as cursor:
             cursor.execute(

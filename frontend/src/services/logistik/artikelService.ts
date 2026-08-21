@@ -1,14 +1,13 @@
-import { artikel, artikelStueckliste, artikelIndividualisierung } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
 import { getKategoriePfad } from "./kategorienService";
 import { createPositionTableService } from "../core/positionTableService";
 
-const baseService = createCRUDService("artikel", artikel);
-const stuecklisteService = createPositionTableService(artikelStueckliste, {
+const baseService = createCRUDService("artikel", []);
+const stuecklisteService = createPositionTableService([], {
     tableName: "artikelStueckliste",
     parentField: "hauptartikelId"
 });
-const individualisierungService = createPositionTableService(artikelIndividualisierung, {
+const individualisierungService = createPositionTableService([], {
     tableName: "artikelIndividualisierung",
     parentField: "artikelId"
 });
@@ -25,26 +24,26 @@ function withPermissionFallback<T>(reader: () => T, fallback: T) {
     }
 }
 
-function hydrateKomponenten(item = {}) {
+function hydrateKomponenten(item: any = {}) {
     return stuecklisteService.listByParent(item.id || "")
         .map(position => ({
             artikelId: position.komponentenartikelId || position.artikelId,
             artikel: withPermissionFallback(
                 () => baseService.list().find(entry => String(entry.id) === String(position.komponentenartikelId || position.artikelId))?.name || "",
-                artikel.find(entry => String(entry.id) === String(position.komponentenartikelId || position.artikelId))?.name || ""
+                ""
             ),
             menge: Number(position.menge || 0)
         }));
 }
 
-function hydrateIndividualisierungen(item = {}) {
+function hydrateIndividualisierungen(item: any = {}) {
     return individualisierungService.listByParent(item.id || "")
         .map(position => ({
             individualArtikelId: position.individualArtikelId,
             artikelId: position.artikelId,
             artikel: withPermissionFallback(
                 () => baseService.list().find(entry => String(entry.id) === String(position.individualArtikelId))?.name || "",
-                artikel.find(entry => String(entry.id) === String(position.individualArtikelId))?.name || ""
+                ""
             ),
             kategorieId: position.kategorieId,
             anzahl: Number(position.anzahl || 0),
@@ -53,7 +52,10 @@ function hydrateIndividualisierungen(item = {}) {
         }));
 }
 
-export function normalizeArtikel(item = {}) {
+export function normalizeArtikel(item: any = {}) {
+    const id = (item as any).id ?? (item as any).artikelId ?? (item as any).artikelNr ?? "";
+    const artikelNr = (item as any).artikelNr || String(id || "");
+    const name = (item as any).name || (item as any).artikel || (item as any).bezeichnung || "";
     const komponenten = Array.isArray(item.komponenten) ? item.komponenten : hydrateKomponenten(item);
     const individualisierungen = Array.isArray(item.individualisierungen) ? item.individualisierungen : hydrateIndividualisierungen(item);
     const basisPreis = Number(item.preis || 0);
@@ -63,6 +65,11 @@ export function normalizeArtikel(item = {}) {
     const kategorie = kategoriePfad.split(" > ")[0] || item.kategorie || "";
     return {
         ...item,
+        id,
+        artikelNr,
+        name,
+        artikel: name,
+        preis: verkaufspreis,
         kategorieId: item.kategorieId || "",
         kategorie,
         kategoriePfad,
@@ -82,29 +89,25 @@ export function normalizeArtikel(item = {}) {
     };
 }
 
-function splitPayload(payload = {}) {
+function splitPayload(payload: any = {}) {
     const { komponenten = [], individualisierungen = [], ...basePayload } = payload;
     return { basePayload, komponenten, individualisierungen };
-}
-
-function getFallbackArtikel() {
-    return artikel.map(normalizeArtikel).filter(item => item.artikelTyp !== "Dienstleistung");
 }
 
 const artikelService = {
     list: () => withPermissionFallback(
         () => baseService.list().map(normalizeArtikel).filter(item => item.artikelTyp !== "Dienstleistung"),
-        getFallbackArtikel()
+        []
     ),
     getAll: () => withPermissionFallback(
         () => baseService.list().map(normalizeArtikel).filter(item => item.artikelTyp !== "Dienstleistung"),
-        getFallbackArtikel()
+        []
     ),
-    getById: (id) => {
+    getById: (id: any) => {
         const item = artikelService.list().find(entry => String(entry.id) === String(id));
         return item ? normalizeArtikel(item) : undefined;
     },
-    create: (payload) => {
+    create: (payload: any) => {
         const normalized = normalizeArtikel(payload);
         const { basePayload, komponenten, individualisierungen } = splitPayload(normalized);
         const created = baseService.create(basePayload);
@@ -121,10 +124,10 @@ const artikelService = {
         })));
         return normalizeArtikel(created);
     },
-    add: (payload) => {
+    add: (payload: any) => {
         return artikelService.create(payload);
     },
-    update: (idOrItem, payload) => {
+    update: (idOrItem: any, payload?: any) => {
         let updated;
         if (typeof idOrItem === "object") {
             const normalized = normalizeArtikel(idOrItem);
@@ -159,21 +162,21 @@ const artikelService = {
         }
         return normalizeArtikel(updated);
     },
-    remove: (id) => {
+    remove: (id: any) => {
         stuecklisteService.removeByParent(id);
         individualisierungService.removeByParent(id);
         return baseService.remove(id);
     },
-    delete: (id) => {
+    delete: (id: any) => {
         return artikelService.remove(id);
     },
-    removeMany: (ids) => baseService.removeMany(ids),
-    deleteMultiple: (ids) => baseService.removeMany(ids),
-    search: (query) => withPermissionFallback(
+    removeMany: (ids: any[]) => baseService.removeMany(ids),
+    deleteMultiple: (ids: any[]) => baseService.removeMany(ids),
+    search: (query: string) => withPermissionFallback(
         () => baseService.search(query).map(normalizeArtikel),
-        artikelService.list().filter(item => JSON.stringify(item).toLowerCase().includes(String(query || "").toLowerCase()))
+        []
     ),
-    sortBy: (field, order = "asc") => withPermissionFallback(
+    sortBy: (field: any, order = "asc") => withPermissionFallback(
         () => baseService.sortBy(field, order).map(normalizeArtikel),
         [...artikelService.list()].sort((a, b) => {
             const aValue = String(a[field] ?? "");

@@ -1,8 +1,7 @@
-import { reklamationen } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import { getCustomerName } from "../../utils/customerReferences";
 
-const reklamationenService = createCRUDService("reklamationen", reklamationen);
+const reklamationenService = createCRUDService("reklamationen", []);
 
 function hydrateReklamation(item: any = {}) {
     return {
@@ -34,3 +33,5 @@ export default {
         return hydrateReklamation(reklamationenService.update(idOrItem, rest));
     }
 };
+
+

@@ -1,4 +1,3 @@
-import { bestellungen, bestellpositionen } from "../mockup/mockData";
 import { createCRUDService } from "../core/genericService";
 import { createPositionTableService } from "../core/positionTableService";
 import artikelService from "../logistik/artikelService";
@@ -6,8 +5,8 @@ import { getSupplierName } from "../../utils/supplierReferences";
 import { getBerlinDate } from "../../utils/dateTime";
 import lieferantenArtikelStaffelnService from "./lieferantenArtikelStaffelnService";
 
-const bestellungenService = createCRUDService("bestellungen", bestellungen);
-const positionService = createPositionTableService(bestellpositionen, {
+const bestellungenService = createCRUDService("bestellungen", []);
+const positionService = createPositionTableService([], {
     tableName: "bestellpositionen",
     parentField: "bestellungId"
 });
@@ -157,7 +156,7 @@ export function getAutomatischeBedarfsmeldungen() {
                 const empfohleneMenge = Math.max(
                     1,
                     Number(item.mindestmenge || 0) > (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
-                         ? Number(item.mindestmenge || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
+                        ? Number(item.mindestmenge || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0))
                         : Number(item.bedarfsmeldungBei || 0) - (Number(item.bestand || 0) + Number(offeneBestellmengen[String(item.id)] || 0)) + 1
                 );
                 const schnellsteOption = lieferantenArtikelStaffelnService.getPreferredSupplierForArtikel(item.id, empfohleneMenge, "balanced");

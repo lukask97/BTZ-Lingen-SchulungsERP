@@ -12,7 +12,7 @@ import { INITIAL_DATA } from "../../constants/schemas";
 import artikelService from "../../services/logistik/artikelService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
 import lieferantenArtikelStaffelnService from "../../services/einkauf/lieferantenArtikelStaffelnService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 function createDraft() {
     return {
@@ -25,7 +25,7 @@ function createDraft() {
 
 export default function Lieferantenvergleich() {
     const navigate = useNavigate();
-    const syncTick = useStorageSyncRefresh(["lieferanten", "artikel", "lieferantenArtikelStaffeln"]);
+    const syncTick = useDataSyncRefresh(["lieferanten", "artikel", "lieferantenArtikelStaffeln"]);
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [draft, setDraft] = useState(createDraft());

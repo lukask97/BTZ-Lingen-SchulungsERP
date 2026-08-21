@@ -5,12 +5,12 @@ import mahnungenService from "../../services/buchhaltung/mahnungenService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { getOpenItemStatus, getUnifiedOpenItems, isOverdueOpenItem, sumPaidItems, sumUnifiedOpenItems } from "../../utils/openItems";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 const euro = betrag => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(betrag);
 
 export default function Buchhaltung() {
-    useStorageSyncRefresh(["auftraege", "bestellungen", "belege", "zahlungen", "mahnungen"]);
+    useDataSyncRefresh(["auftraege", "bestellungen", "belege", "zahlungen", "mahnungen"]);
 
     const rechnungen = rechnungenService.getAll();
     const belege = belegeService.list();

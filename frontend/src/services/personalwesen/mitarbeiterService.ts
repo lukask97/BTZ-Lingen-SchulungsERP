@@ -1,4 +1,5 @@
-import { mitarbeiter } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 
-export default createCRUDService("mitarbeiter", mitarbeiter);
+export default createCRUDService("mitarbeiter", []);
+
+

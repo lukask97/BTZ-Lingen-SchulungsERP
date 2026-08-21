@@ -5,7 +5,7 @@ import OverviewCards from "../../components/OverviewCards";
 import SalesFlowBar from "../../components/SalesFlowBar";
 import { PERMISSIONS } from "../../constants/permissions";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { getBerlinDate } from "../../utils/dateTime";
 
 function ampelStatus(rechnung: any) {
@@ -16,7 +16,7 @@ function ampelStatus(rechnung: any) {
 }
 
 export default function Rechnungen() {
-    useStorageSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen", "nummernkreise"]);
+    useDataSyncRefresh(["auftraege", "bestellungen", "artikel", "zahlungen", "nummernkreise"]);
 
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();

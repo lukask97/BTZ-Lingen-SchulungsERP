@@ -1,5 +1,4 @@
-import { createCRUDService } from "../core/genericService";
-import { rollenRechte } from "../mockup/mockData";
+﻿import { createCRUDService } from "../core/genericService";
 
 export type RollenRecht = {
     id: number | string | null;
@@ -8,7 +7,7 @@ export type RollenRecht = {
     rechtName: string;
 };
 
-const baseService = createCRUDService<RollenRecht>("rollenRechte", rollenRechte);
+const baseService = createCRUDService<RollenRecht>("rollenRechte", []);
 
 function normalizeAssignment(item: RollenRecht) {
     return {
@@ -50,3 +49,5 @@ const rollenRechteService = {
 };
 
 export default rollenRechteService;
+
+

@@ -1,34 +1,38 @@
-function getOptionGroups(individualisierungen = []) {
-    return [...new Set((individualisierungen || []).map(item => item.kategorieId))];
+function getOptionGroups(individualisierungen: any[] = []) {
+    return Array.from(new Set((individualisierungen || []).map(item => String(item.kategorieId)))) as string[];
 }
 
-function addDemand(map, artikelId, menge) {
+function addDemand(map: Record<string, number>, artikelId: any, menge: any) {
     if (!artikelId) return;
     const key = String(artikelId);
     map[key] = Number(map[key] || 0) + Number(menge || 0);
 }
 
-export function getOfferDemandByArtikel(angebote = [], artikelListe = [], isOfferOpen = () => true) {
+export function getOfferDemandByArtikel(
+    angebote: any[] = [],
+    artikelListe: any[] = [],
+    isOfferOpen: (angebot: any) => boolean = () => true
+) {
     return (angebote || [])
         .filter(angebot => isOfferOpen(angebot))
-        .reduce((map, angebot) => {
-            (angebot.positionen || []).forEach(position => {
+        .reduce((map: Record<string, number>, angebot) => {
+            (angebot.positionen || []).forEach((position: any) => {
                 if (String(position.leistungTyp || "").toLowerCase() === "service" || !position.artikelId || position.isOptionForId) {
                     return;
                 }
 
                 addDemand(map, position.artikelId, position.menge);
 
-                const artikelEintrag = (artikelListe || []).find(item => String(item.id) === String(position.artikelId));
+                const artikelEintrag = (artikelListe || []).find((item: any) => String(item.id) === String(position.artikelId));
                 if (!artikelEintrag?.individualisierungen?.length) {
                     return;
                 }
 
                 getOptionGroups(artikelEintrag.individualisierungen).forEach(groupId => {
-                    const gruppenOptionen = artikelEintrag.individualisierungen.filter(item => item.kategorieId === groupId);
-                    const defaultOpt = gruppenOptionen.find(item => item.standard) || gruppenOptionen[0];
-                    const aktuelleOptionId = Number(position.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || 0);
-                    const individuelleAuswahl = gruppenOptionen.find(item => Number(item.individualArtikelId) === aktuelleOptionId);
+                    const gruppenOptionen = artikelEintrag.individualisierungen.filter((item: any) => String(item.kategorieId) === String(groupId));
+                    const defaultOpt = gruppenOptionen.find((item: any) => item.standard) || gruppenOptionen[0];
+                    const aktuelleOptionId = Number(position.selectedOptionen?.[String(groupId)] || defaultOpt?.individualArtikelId || 0);
+                    const individuelleAuswahl = gruppenOptionen.find((item: any) => Number(item.individualArtikelId) === aktuelleOptionId);
                     if (!individuelleAuswahl?.individualArtikelId) {
                         return;
                     }

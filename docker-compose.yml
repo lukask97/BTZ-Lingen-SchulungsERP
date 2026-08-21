@@ -76,8 +76,6 @@ services:
 
     environment:
 
-      ERP_DATA_MODE: postgres
-
       DATABASE_DSN: dbname=erp user=erp password=geheim host=postgres port=5432
 
       ERP_SECRET_KEY: erp-docker-secret

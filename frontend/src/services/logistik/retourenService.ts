@@ -1,9 +1,8 @@
-import { retouren } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import artikelService from "./artikelService";
 import { getCustomerName } from "../../utils/customerReferences";
 
-const baseService = createCRUDService("retouren", retouren);
+const baseService = createCRUDService("retouren", []);
 
 function resolveArticle(item: any = {}) {
     if (item.artikelId) {
@@ -52,3 +51,5 @@ const retourenService = {
 };
 
 export default retourenService;
+
+

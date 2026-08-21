@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import {Link, useLocation} from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import useAuth from "../auth/useAuth";
 import { NAVIGATION_GROUPS, SCENARIO_MENU, SCENARIO_OVERVIEW } from "../constants/navigation";
-import { getDataProvider } from "../services/core/api";
-import { subscribeToServerSystemEvents } from "../services/core/serverEvents";
 import { getUserFullName } from "../utils/userDisplay";
 
 type SidebarProps = {
@@ -13,27 +11,11 @@ type SidebarProps = {
     onToggleDarkMode: () => void;
 };
 
-function getProviderLabel(provider: string) {
-    if (provider === "backend-postgres" || provider === "postgres" || provider === "database") return "JSONB-Postgres";
-    if (provider === "backend-preview-memory") return "Backend-Memory";
-    if (provider === "mock-local-storage") return "Mockup";
-    return provider;
-}
-
-function getBackendModeLabel(mode: string) {
-    if (mode === "postgres" || mode === "backend-postgres" || mode === "database") return "JSONB-Postgres";
-    if (mode === "memory") return "Backend-Memory";
-    return mode;
-}
-
-
 export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onToggleDarkMode }: SidebarProps) {
-
-    const {user, logout, hasFullAccess, hasAccess} = useAuth();
+    const { user, logout, hasFullAccess, hasAccess } = useAuth();
     const isAdmin = hasFullAccess();
     const isVerkaufSenior = String(user.rolle || "").toLowerCase().includes("verkauf senior");
     const location = useLocation();
-    const [providerLabel, setProviderLabel] = useState(() => getProviderLabel(getDataProvider()));
     const visibleGroups = useMemo(
         () => NAVIGATION_GROUPS
             .filter(group =>
@@ -66,17 +48,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
         setCollapsedGroups(current => ({ ...current, [key]: !current[key] }));
     };
 
-    useEffect(() => {
-        setProviderLabel(getProviderLabel(getDataProvider()));
-        return subscribeToServerSystemEvents(payload => {
-            if (!payload.mode) return;
-            setProviderLabel(getBackendModeLabel(String(payload.mode)));
-        });
-    }, []);
-
-
     return (
-
         <nav className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`}>
             <div className="sidebar-topbar">
                 <Link className="sidebar-brand" to="/">ERP</Link>
@@ -94,7 +66,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                 {visibleGroups.map(group => <div key={group.title} className="sidebar-group">
                     <div className="sidebar-section-row">
                         {group.canOpenOverview
-                             ? <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>
+                            ? <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>
                             : <span className="sidebar-section-title">{group.title}</span>}
                         <button type="button" className="sidebar-toggle" onClick={() => toggleGroup(group.key)}>
                             {collapsedGroups[group.key] ? "▸" : "▾"}
@@ -102,14 +74,13 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                     </div>
                     <div className={`sidebar-group-links ${collapsedGroups[group.key] ? "is-collapsed" : ""}`}>
                         {group.visibleItems.map(item =>
-                                <Link key={item.path} to={item.path}>
-                                    {location.pathname === item.path ? "• " : ""}
-                                    {item.title}
-                                </Link>
+                            <Link key={item.path} to={item.path}>
+                                {location.pathname === item.path ? "• " : ""}
+                                {item.title}
+                            </Link>
                         )}
                     </div>
-                </div>
-                )}
+                </div>)}
                 {isAdmin && (
                     <div className="sidebar-group">
                         <div className="sidebar-section-row">
@@ -120,9 +91,9 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                         </div>
                         <div className={`sidebar-group-links sidebar-group-links-scenarios ${scenariosCollapsed ? "is-collapsed" : ""}`}>
                             {SCENARIO_MENU.filter(item => !item.access || hasAccess(item.access)).map(item =>
-                                    <Link key={item.path} className="sidebar-scenario-link" to={item.path}>
-                                        {item.title}
-                                    </Link>
+                                <Link key={item.path} className="sidebar-scenario-link" to={item.path}>
+                                    {item.title}
+                                </Link>
                             )}
                         </div>
                     </div>
@@ -141,15 +112,10 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                     Rolle:
                     <strong>{user.rolle || "-"}</strong>
                 </div>
-                <div className="sidebar-user">
-                    Modus:
-                    <strong>{providerLabel}</strong>
-                </div>
                 <button className="sidebar-logout-button" onClick={() => void logout()}>
                     Logout
                 </button>
             </div>
         </nav>
-
     );
 }

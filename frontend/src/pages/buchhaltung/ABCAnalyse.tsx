@@ -3,7 +3,7 @@ import OverviewCards from "../../components/OverviewCards";
 import DataTable from "../../components/DataTable";
 import kundenService from "../../services/verkauf/customerService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 const euro = betrag => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(betrag || 0));
 
@@ -14,7 +14,7 @@ function berechneKlasse(anteil) {
 }
 
 export default function ABCAnalyse() {
-    useStorageSyncRefresh(["kunden", "auftraege"]);
+    useDataSyncRefresh(["kunden", "auftraege"]);
 
     const kunden = kundenService.getAll();
     const auftraege = auftraegeService.list();

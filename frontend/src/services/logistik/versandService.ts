@@ -1,9 +1,8 @@
-import { versandauftraege } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import auftraegeService from "../verkauf/auftraegeService";
 import { getCustomerName } from "../../utils/customerReferences";
 
-const baseService = createCRUDService("versandauftraege", versandauftraege);
+const baseService = createCRUDService("versandauftraege", []);
 
 function hydrateVersand(item: any = {}) {
     const auftrag = item.auftragId ? auftraegeService.getById(item.auftragId) : null;
@@ -37,3 +36,5 @@ export default {
         return hydrateVersand(baseService.update(idOrItem, splitPayload(payload)));
     }
 };
+
+

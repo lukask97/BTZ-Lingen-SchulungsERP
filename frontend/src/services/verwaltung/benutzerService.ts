@@ -1,8 +1,7 @@
-import { benutzer } from "../mockup/mockData";
-import { createCRUDService } from "../core/genericService";
+﻿import { createCRUDService } from "../core/genericService";
 import { getUserFullName } from "../../utils/userDisplay";
 
-const benutzerService = createCRUDService("benutzer", benutzer);
+const benutzerService = createCRUDService("benutzer", []);
 
 function normalizeUser(item) {
     if (!item) return item;
@@ -36,3 +35,5 @@ export default {
     delete: benutzerService.delete,
     remove: benutzerService.remove
 };
+
+

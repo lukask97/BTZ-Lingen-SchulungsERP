@@ -2,7 +2,7 @@ import json
 from queue import Empty, Queue
 from threading import Lock
 
-from flask import Blueprint, Response, current_app, stream_with_context
+from flask import Blueprint, Response, stream_with_context
 
 events_bp = Blueprint("events", __name__, url_prefix="/api")
 
@@ -31,10 +31,6 @@ def stream_events():
         _subscribers.add(subscriber)
 
     def event_stream():
-        yield _format_sse("system", {
-            "mode": current_app.config["DATA_MODE"]
-        })
-
         try:
             while True:
                 try:

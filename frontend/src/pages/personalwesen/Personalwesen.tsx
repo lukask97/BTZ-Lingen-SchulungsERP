@@ -6,10 +6,10 @@ import mitarbeiterService from "../../services/personalwesen/mitarbeiterService"
 import personalaktenService from "../../services/personalwesen/personalaktenService";
 import schulungenService from "../../services/personalwesen/schulungenService";
 import urlaubsantraegeService from "../../services/personalwesen/urlaubsantraegeService";
-import { useStorageSyncRefresh } from "../../hooks/useStorageSyncRefresh";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 export default function Personalwesen() {
-    useStorageSyncRefresh([
+    useDataSyncRefresh([
         "bewerber", "mitarbeiter", "arbeitszeiten", "urlaubsantraege",
         "krankmeldungen", "schulungen", "personalakten"
     ]);
