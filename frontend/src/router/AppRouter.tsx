@@ -65,6 +65,7 @@ import Benutzer from "../pages/verwaltung/Benutzer";
 import Exporte from "../pages/verwaltung/Exporte";
 import Nummernkreise from "../pages/verwaltung/Nummernkreise";
 import Optionen from "../pages/verwaltung/Optionen";
+import Unternehmen from "../pages/verwaltung/Unternehmen";
 import Rollen from "../pages/verwaltung/Rollen";
 import Rechte from "../pages/verwaltung/Rechte";
 import SzenarienOverview from "../pages/szenarien/SzenarienOverview";
@@ -188,6 +189,10 @@ function AppRouter() {
                 <Route path="urlaubsantraege" element={protectedPage(ACCESS.PERSONALWESEN, <Urlaubsantraege/>)}/>
                 <Route path="krankmeldungen" element={protectedPage(ACCESS.PERSONALWESEN, <Krankmeldungen/>)}/>
                 <Route path="schulungen" element={protectedPage(ACCESS.PERSONALWESEN, <Schulungen/>)}/>
+                <Route
+                    path="unternehmen"
+                    element={protectedPage(ACCESS.BENUTZER, <Unternehmen/>)}
+                />
                 <Route
                     path="benutzer"
                     element={protectedPage(ACCESS.BENUTZER, <Benutzer/>)}

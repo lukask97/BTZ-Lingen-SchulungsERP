@@ -138,6 +138,7 @@ export const NAVIGATION_GROUPS = [
         overviewPath: "/themen/verwaltung",
         access: ACCESS.BENUTZER,
         items: [
+            { title: "Unternehmen", path: "/unternehmen", access: ACCESS.BENUTZER },
             { title: "Benutzer", path: "/benutzer", access: ACCESS.BENUTZER },
             { title: "Nummernkreise", path: "/nummernkreise", access: ACCESS.BENUTZER },
             { title: "Exporte", path: "/exporte", access: ACCESS.BENUTZER },

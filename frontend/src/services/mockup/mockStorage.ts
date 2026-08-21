@@ -86,6 +86,7 @@ export const SYNC_DATA_KEYS = [
     "belege", "freigaben", "berichte", "versandauftraege", "retouren", "bewerber",
     "mitarbeiter", "arbeitszeiten", "urlaubsantraege", "schulungen",
     "firmenkonto",
+    "unternehmen",
     "benutzerSpalten",
     "nummernkreise",
     "lehrkraftOptionen",

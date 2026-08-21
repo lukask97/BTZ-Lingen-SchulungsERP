@@ -3,6 +3,7 @@ import Dialog from "./Dialog";
 import Label from "./form/Label";
 import TextArea from "./form/TextArea";
 import { formatTimestampForDisplay } from "../utils/dateTime";
+import unternehmenService from "../services/verwaltung/unternehmenService";
 
 type ApprovalMessage = {
     id: string | number;
@@ -10,16 +11,28 @@ type ApprovalMessage = {
     zeitpunkt: string;
     senderRolle: string;
     senderName: string;
+    ansprechpartnerName?: string;
+    ansprechpartnerAbteilung?: string;
     betreff: string;
     nachricht: string;
+    typ?: string;
 };
 
 function getApprovalMessageVariant(item: ApprovalMessage) {
     const rolle = String(item.senderRolle || "").toLowerCase();
     const betreff = String(item.betreff || "").toLowerCase();
+    const typ = String(item.typ || "").toLowerCase();
+    const nachricht = String(item.nachricht || "").toLowerCase();
 
     if (rolle.includes("kunde")) return "customer";
-    if (betreff.includes("angebot") || betreff.includes("an kunden")) return "outbound";
+    if (typ.includes("intern") || betreff.includes("intern") || nachricht.includes("wurde intern")) return "internal";
+    if (
+        typ === "angebot"
+        || typ === "antwort"
+        || betreff.startsWith("angebot ")
+        || betreff.includes("an kunden")
+        || betreff.includes("antwort der schülerfirma")
+    ) return "outbound";
     if (rolle.includes("verkauf") || rolle.includes("geschaeftsfuehrung")) return "internal";
     return "internal";
 }
@@ -29,6 +42,58 @@ function getApprovalMessageLabel(item: ApprovalMessage) {
     if (variant === "customer") return "Vom Kunden";
     if (variant === "outbound") return "Zum Kunden";
     return "Intern";
+}
+
+function getFirmenname() {
+    return String(unternehmenService.get().firmenname || "Schülerfirma").trim();
+}
+
+function getPersonName(senderName: string, firmenname: string, senderRolle: string) {
+    const cleaned = String(senderName || "").trim();
+    if (!cleaned) return String(senderRolle || "-");
+    if (cleaned === firmenname || cleaned === "Schülerfirma Verkauf") return String(senderRolle || "-");
+
+    const roleMatch = cleaned.match(/\(([^()]+)\)\s*$/);
+    if (roleMatch) {
+        return cleaned.slice(0, cleaned.length - roleMatch[0].length).trim();
+    }
+
+    return cleaned;
+}
+
+function getPersonRole(senderName: string, senderRolle: string) {
+    const cleaned = String(senderName || "").trim();
+    const roleMatch = cleaned.match(/\(([^()]+)\)\s*$/);
+    if (roleMatch?.[1]) return roleMatch[1].trim();
+    return String(senderRolle || "---");
+}
+
+function getApprovalMessageHeading(item: ApprovalMessage) {
+    const variant = getApprovalMessageVariant(item);
+    const firmenname = getFirmenname();
+    if (variant === "customer") return String(item.senderName || "Kunde");
+    if (variant === "internal") return `${firmenname} (Intern)`;
+    return firmenname;
+}
+
+function getApprovalMessageMeta(item: ApprovalMessage) {
+    const variant = getApprovalMessageVariant(item);
+    const timestamp = formatTimestampForDisplay(item.zeitpunkt || item.datum);
+    const firmenname = getFirmenname();
+
+    if (variant === "customer") {
+        return [
+            String(item.ansprechpartnerName || "Ansprechpartner"),
+            String(item.ansprechpartnerAbteilung || "---"),
+            timestamp
+        ].join(" | ");
+    }
+
+    return [
+        getPersonName(String(item.senderName || ""), firmenname, String(item.senderRolle || "")),
+        getPersonRole(String(item.senderName || ""), String(item.senderRolle || "")),
+        timestamp
+    ].join(" | ");
 }
 
 type ApprovalOfferLink = {
@@ -193,8 +258,8 @@ export default function OfferApprovalDialog({
                                 className={`thread-message ${variant === "customer" ? "thread-message-customer" : variant === "outbound" ? "thread-message-outbound" : "thread-message-internal"}`}
                             >
                                 <div className="thread-message-meta">
-                                    <strong>{String(item.senderName || item.senderRolle || "Nachricht")}</strong>
-                                    <span>{getApprovalMessageLabel(item)} | {formatTimestampForDisplay(item.zeitpunkt || item.datum)} | {String(item.betreff || "")}</span>
+                                    <strong>{getApprovalMessageHeading(item)}</strong>
+                                    <span>{getApprovalMessageMeta(item)}</span>
                                 </div>
                                 <p className="thread-message-text">{String(item.nachricht || "")}</p>
                             </article>

@@ -3318,6 +3318,44 @@
       "inkassoAbTage": 22
     }
   ],
+  "unternehmen": [
+    {
+      "id": 1,
+      "firmenname": "UEF Lin",
+      "branche": "Gross- & Einzelhandel Sport, Freizeit, Rad",
+      "steuernummer": "88 888 89480",
+      "ustIdNr": "DE194227226",
+      "handelsregisterNr": "HRB 5985",
+      "betriebsNr": "11129381",
+      "unternehmerNr": "",
+      "strasse": "Schwarzer Weg 16",
+      "plzOrt": "49809 Lingen (Ems)",
+      "bundesland": "Niedersachsen",
+      "telefon": "0591-97304-58",
+      "mail": "de01BTS@zuef-edu.de",
+      "unternehmensNr": "123456789123 001",
+      "amtsgericht": "Lingen (EMS)",
+      "finanzamtNr": "",
+      "firmaKontoname": "UEF Lin",
+      "firmaBankName": "Ruhrtal-Bank",
+      "firmaIban": "DE36360440810021070851",
+      "firmaKontoNr": "210 708 51",
+      "firmaBic": "RUHRDEE0",
+      "firmaBlz": "360 440 81",
+      "verkaufKontoname": "UEF Lin-VK",
+      "verkaufBankName": "Ruhrtal-Bank",
+      "verkaufIban": "DE36360440810021070852",
+      "verkaufKontoNr": "210 708 52",
+      "verkaufBic": "RUHRDEE0",
+      "verkaufBlz": "360 440 81",
+      "einkaufKontoname": "UEF Lin-EK",
+      "einkaufBankName": "Ruhrtal-Bank",
+      "einkaufIban": "DE36360440810021070853",
+      "einkaufKontoNr": "210 708 53",
+      "einkaufBic": "RUHRDEE0",
+      "einkaufBlz": "360 440 81"
+    }
+  ],
   "feldMetadaten": [
     {
       "id": 1,

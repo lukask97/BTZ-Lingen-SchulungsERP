@@ -110,9 +110,18 @@ function normalizeText(value = "") {
 function getDialogMessageVariant(nachricht) {
     const rolle = String(nachricht.senderRolle || "").toLowerCase();
     const betreff = String(nachricht.betreff || "").toLowerCase();
+    const typ = String(nachricht.typ || "").toLowerCase();
+    const text = String(nachricht.nachricht || "").toLowerCase();
 
     if (rolle.includes("kunde")) return "customer";
-    if (betreff.includes("angebot") || betreff.includes("an kunden")) return "outbound";
+    if (typ.includes("intern") || betreff.includes("intern") || text.includes("wurde intern")) return "internal";
+    if (
+        typ === "angebot"
+        || typ === "antwort"
+        || betreff.startsWith("angebot ")
+        || betreff.includes("an kunden")
+        || betreff.includes("antwort der schülerfirma")
+    ) return "outbound";
     if (rolle.includes("verkauf") || rolle.includes("lehrkraft") || rolle.includes("geschaeftsfuehrung")) return "internal";
     return "internal";
 }
@@ -453,6 +462,7 @@ export default function Angebote() {
     const kundeIdFromQuery = searchParams.get("kundeId") || "";
     const templateOfferIdFromQuery = searchParams.get("templateOfferId") || "";
     const editOfferIdFromQuery = searchParams.get("editOfferId") || "";
+    const approveOfferIdFromQuery = searchParams.get("approveOfferId") || "";
     const defaultKundeId = String(kunden[0]?.id || "");
     const defaultLeistungId = leistungen[0] ? `${leistungen[0].leistungTyp}:${leistungen[0].id}` : "";
     const istErfahrenerVerkaeufer = useMemo(() => {
@@ -482,6 +492,7 @@ export default function Angebote() {
         if (!angebot.anfrageId) return;
         const anfrage = getInquiryForOffer(angebot, anfragen);
         if (!anfrage) return;
+        const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "SchÃ¼lerfirma Verkauf"));
         const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Prüfung zu.`;
 
         nachrichtenService.create({
@@ -492,7 +503,7 @@ export default function Angebote() {
             datum: heute,
             zeitpunkt: getBerlinTimestamp(),
             senderRolle: "Verkauf",
-            senderName: "Schülerfirma Verkauf",
+            senderName: verkaufAbsenderName,
             kanal: anfrage.kanal || "E-Mail",
             betreff: `Angebot ${angebot.angebotsNr}`,
             nachricht: text,
@@ -595,6 +606,15 @@ export default function Angebote() {
         if (!angebot) return;
         angebotBearbeiten(angebot);
     }, [editOfferIdFromQuery, angebote, open, approvalOpen]);
+
+    useEffect(() => {
+        if (!approveOfferIdFromQuery || approvalOpen || open) return;
+        const angebot = angebote.find(item => String(item.id) === String(approveOfferIdFromQuery));
+        if (!angebot) return;
+        setApprovalOffer(angebot);
+        setApprovalNote(String(angebot.freigabeNotiz || ""));
+        setApprovalOpen(true);
+    }, [approveOfferIdFromQuery, angebote, approvalOpen, open]);
 
     useEffect(() => {
         if (!pendingEditOffer || approvalOpen) return;
@@ -795,6 +815,7 @@ export default function Angebote() {
             const freigabeDirektErteilen = (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (brauchtFreigabe ? false : draft.direktSenden);
             const freigabeNoetig = !freigabeDirektErteilen;
             const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
+            const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
 
             const referenzierteAnfrageId = anfrage?.id || "";
             const aktualisiert = {
@@ -829,7 +850,7 @@ export default function Angebote() {
                 datum: heute,
                 zeitpunkt: getBerlinTimestamp(),
                 senderRolle: "Verkauf",
-                senderName: getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf")),
+                senderName: verkaufAbsenderName,
                 betreff: `Angebot ${bestehendesAngebot.angebotsNr} überarbeitet`,
                 nachricht: freigabeDirektErteilen
                      ? "Das Angebot wurde überarbeitet und direkt an den Kunden gesendet."
@@ -850,6 +871,7 @@ export default function Angebote() {
         const freigabeNoetig = !freigabeDirektErteilen;
         const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
         const referenzierteAnfrageId = anfrage?.id || "";
+        const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
         const neuesAngebot = angeboteService.add({
             angebotsNr: `${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`,
             angebotsBasisNr: revisionInfo.angebotsBasisNr,
@@ -912,8 +934,9 @@ export default function Angebote() {
                 angebotId: "",
                 kundeId: anfrage.kundeId || kunde.id,
                 datum: heute,
+                zeitpunkt: getBerlinTimestamp(),
                 senderRolle: "Verkauf",
-                senderName: "Schülerfirma Verkauf",
+                senderName: verkaufAbsenderName,
                 betreff: `Interne Weiterleitung an ${bearbeiterLabel}`,
                 nachricht: `Die Anfrage wurde intern an ${bearbeiterLabel} zur Angebotserstellung weitergeleitet.`,
                 typ: "Interne Weiterleitung"
@@ -928,7 +951,7 @@ export default function Angebote() {
         setOpen(false);
         setEditingOfferId("");
         setDraft(current => ({ ...current, fehler: "", selectedTemplateOfferId: "", direktSenden: brauchtFreigabe, freigabeDurchGf: false }));
-        if (newMode) {
+        if (newMode || editOfferIdFromQuery || approveOfferIdFromQuery) {
             navigate("/angebote", { replace: true });
         }
     };

@@ -95,7 +95,7 @@ export default function Optionen() {
                 <h2>Standardwerte</h2>
                 <span>Aktion</span>
             </div>
-            <p>Damit lassen sich die Regeln schnell auf einen Ausgangszustand zurücksetzen.</p>
+            <p>Die Ausgangswerte kommen zentral aus <code>backend/seed/optionenDefault.json</code> und lassen sich dort jederzeit anpassen.</p>
             <button type="button" onClick={reset}>Standardwerte wiederherstellen</button>
         </section>
     </>;

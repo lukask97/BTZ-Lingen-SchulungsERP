@@ -1,17 +1,10 @@
+import optionenDefault from "../../constants/optionenDefault";
 import { createCRUDService } from "../core/genericService";
+import { fristenOptionen as initialFristenOptionen } from "../mockup/mockData";
 
 const STORAGE_KEY = "fristenOptionen";
 
-const DEFAULT_OPTIONS = {
-    skontoTage: 14,
-    skontoProzent: 5,
-    angebotGfFreigabeAbweichungProzent: 10,
-    zahlungszielTage: 28,
-    zahlungserinnerungTage: 21,
-    mahnung1AbTage: 1,
-    mahnung2AbTage: 8,
-    inkassoAbTage: 22
-};
+const DEFAULT_OPTIONS = optionenDefault.fristenOptionen;
 
 function toNonNegativeNumber(value: unknown, fallback: number) {
     const numericValue = Number(value);
@@ -60,28 +53,22 @@ function sanitizeOptions(value: any = {}) {
 }
 
 const baseService = createCRUDService(STORAGE_KEY, [
-    {
-        id: 1,
-        ...DEFAULT_OPTIONS
-    }
+    ...(initialFristenOptionen || [])
 ]);
 
 function getStoredOptions() {
     try {
         return baseService.getById(1) || baseService.list()[0] || baseService.create({
-            id: 1,
-            ...DEFAULT_OPTIONS
+            ...(initialFristenOptionen?.[0] || { id: 1 })
         });
     } catch {
         try {
             return baseService.create({
-                id: 1,
-                ...DEFAULT_OPTIONS
+                ...(initialFristenOptionen?.[0] || { id: 1 })
             });
         } catch {
             return {
-                id: 1,
-                ...DEFAULT_OPTIONS
+                ...(initialFristenOptionen?.[0] || { id: 1 })
             };
         }
     }

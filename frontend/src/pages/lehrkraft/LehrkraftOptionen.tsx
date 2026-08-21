@@ -143,6 +143,10 @@ export default function LehrkraftOptionen() {
         }));
     };
 
+    const reset = () => {
+        setOptionen(lehrkraftOptionenService.reset());
+    };
+
     return <>
         <h1>Lehrkraft-Optionen</h1>
         <p>Diese Hilfsseite steuert automatische Vereinfachungen für die Lehrkraftsicht. Ziel ist, dass Standardfälle möglichst ohne Zusatzarbeit abgefangen werden und die Lehrkraft nur noch bei echten Ausnahmen eingreifen muss.</p>
@@ -242,6 +246,19 @@ export default function LehrkraftOptionen() {
                             </div>
                         </article>;
                     })}
+                </div>
+            </section>
+
+            <section className="module-panel">
+                <div className="dashboard-panel-header">
+                    <h2>Standardwerte</h2>
+                    <span>Reset</span>
+                </div>
+                <p>Die Ausgangswerte kommen zentral aus <code>backend/seed/optionenDefault.json</code> und lassen sich dort jederzeit anpassen.</p>
+                <div className="lehrkraft-options-actions">
+                    <button type="button" className="button-secondary" onClick={reset}>
+                        Standardwerte wiederherstellen
+                    </button>
                 </div>
             </section>
 

@@ -4,6 +4,7 @@ import Dialog from "./Dialog";
 import Label from "./form/Label";
 import TextArea from "./form/TextArea";
 import { formatTimestampForDisplay } from "../utils/dateTime";
+import unternehmenService from "../services/verwaltung/unternehmenService";
 
 type ThreadMessage = {
     id: string | number;
@@ -11,8 +12,11 @@ type ThreadMessage = {
     zeitpunkt: string;
     senderRolle: string;
     senderName: string;
+    ansprechpartnerName?: string;
+    ansprechpartnerAbteilung?: string;
     betreff: string;
     nachricht: string;
+    typ?: string;
 };
 
 type ThreadOffer = {
@@ -50,11 +54,20 @@ function renderActionButton(item: ThreadActionLink | ThreadDocumentLink) {
 function getThreadMessageVariant(item: ThreadMessage, ownRole: string) {
     const rolle = String(item.senderRolle || "").toLowerCase();
     const betreff = String(item.betreff || "").toLowerCase();
-    const eigeneNachricht = String(item.senderRolle || "") === String(ownRole || "");
+    const typ = String(item.typ || "").toLowerCase();
+    const nachricht = String(item.nachricht || "").toLowerCase();
+    const eigeneNachricht = String(item.senderRolle || "").toLowerCase() === String(ownRole || "").toLowerCase();
 
     if (rolle.includes("kunde")) return "customer";
-    if (betreff.includes("angebot") || betreff.includes("an kunden")) return "outbound";
-    if (eigeneNachricht) return "outbound";
+    if (typ.includes("intern") || betreff.includes("intern") || nachricht.includes("wurde intern")) return "internal";
+    if (
+        typ === "angebot"
+        || typ === "antwort"
+        || betreff.startsWith("angebot ")
+        || betreff.includes("an kunden")
+        || betreff.includes("antwort der schülerfirma")
+    ) return "outbound";
+    if (eigeneNachricht) return "internal";
     if (rolle.includes("verkauf") || rolle.includes("geschaeftsfuehrung") || rolle.includes("lehrkraft")) return "internal";
     return "internal";
 }
@@ -64,6 +77,58 @@ function getThreadMessageLabel(item: ThreadMessage, ownRole: string) {
     if (variant === "customer") return "Vom Kunden";
     if (variant === "outbound") return "Zum Kunden";
     return "Intern";
+}
+
+function getFirmenname() {
+    return String(unternehmenService.get().firmenname || "Schülerfirma").trim();
+}
+
+function getPersonName(senderName: string, firmenname: string, senderRolle: string) {
+    const cleaned = String(senderName || "").trim();
+    if (!cleaned) return String(senderRolle || "-");
+    if (cleaned === firmenname || cleaned === "Schülerfirma Verkauf") return String(senderRolle || "-");
+
+    const roleMatch = cleaned.match(/\(([^()]+)\)\s*$/);
+    if (roleMatch) {
+        return cleaned.slice(0, cleaned.length - roleMatch[0].length).trim();
+    }
+
+    return cleaned;
+}
+
+function getPersonRole(senderName: string, senderRolle: string) {
+    const cleaned = String(senderName || "").trim();
+    const roleMatch = cleaned.match(/\(([^()]+)\)\s*$/);
+    if (roleMatch?.[1]) return roleMatch[1].trim();
+    return String(senderRolle || "---");
+}
+
+function getThreadMessageHeading(item: ThreadMessage, ownRole: string) {
+    const variant = getThreadMessageVariant(item, ownRole);
+    const firmenname = getFirmenname();
+    if (variant === "customer") return String(item.senderName || "Kunde");
+    if (variant === "internal") return `${firmenname} (Intern)`;
+    return firmenname;
+}
+
+function getThreadMessageMeta(item: ThreadMessage, ownRole: string) {
+    const variant = getThreadMessageVariant(item, ownRole);
+    const timestamp = formatTimestampForDisplay(item.zeitpunkt || item.datum);
+    const firmenname = getFirmenname();
+
+    if (variant === "customer") {
+        return [
+            String(item.ansprechpartnerName || "Ansprechpartner"),
+            String(item.ansprechpartnerAbteilung || "---"),
+            timestamp
+        ].join(" | ");
+    }
+
+    return [
+        getPersonName(String(item.senderName || ""), firmenname, String(item.senderRolle || "")),
+        getPersonRole(String(item.senderName || ""), String(item.senderRolle || "")),
+        timestamp
+    ].join(" | ");
 }
 
 type ThreadChatDialogProps = {
@@ -153,12 +218,12 @@ export default function ThreadChatDialog({
 
         return <div
             key={item.id}
-            className={`thread-message-row ${variant === "customer" ? "thread-message-row-customer" : variant === "outbound" ? "thread-message-row-outbound" : "thread-message-row-internal"}`}
+                className={`thread-message-row ${variant === "customer" ? "thread-message-row-customer" : variant === "outbound" ? "thread-message-row-outbound" : "thread-message-row-internal"}`}
         >
             <article className={`thread-message ${variant === "customer" ? "thread-message-customer" : variant === "outbound" ? "thread-message-outbound" : "thread-message-internal"}`}>
                 <div className="thread-message-meta">
-                    <strong>{String(item.senderName || item.senderRolle || "Nachricht")}</strong>
-                    <span>{getThreadMessageLabel(item, ownRole)} | {formatTimestampForDisplay(item.zeitpunkt || item.datum)} | {String(item.betreff || "")}</span>
+                    <strong>{getThreadMessageHeading(item, ownRole)}</strong>
+                    <span>{getThreadMessageMeta(item, ownRole)}</span>
                 </div>
                 <p className="thread-message-text">{String(item.nachricht || "")}</p>
             </article>

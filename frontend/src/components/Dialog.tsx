@@ -23,7 +23,7 @@ export default function Dialog({
     if (!open) return null;
 
     return (
-        <div className="dialog-overlay" onClick={onClose}>
+        <div className="dialog-overlay">
             <div
                 className="dialog"
                 onClick={e => e.stopPropagation()}

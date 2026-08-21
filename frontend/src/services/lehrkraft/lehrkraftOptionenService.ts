@@ -1,20 +1,12 @@
+import optionenDefault from "../../constants/optionenDefault";
 import { createCRUDService } from "../core/genericService";
+import { lehrkraftOptionen as initialLehrkraftOptionen } from "../mockup/mockData";
 
 const STORAGE_KEY = "lehrkraftOptionen";
 
-const DEFAULT_PAYMENT_RULES = [
-    { id: "regel-1", startTag: 0, endTag: 0, gewichtung: 1 },
-    { id: "regel-2", startTag: 3, endTag: 14, gewichtung: 35 },
-    { id: "regel-3", startTag: 15, endTag: 28, gewichtung: 61 },
-    { id: "regel-4", startTag: 29, endTag: 42, gewichtung: 2 },
-    { id: "regel-5", startTag: 43, endTag: 56, gewichtung: 1 }
-];
+const DEFAULT_PAYMENT_RULES = optionenDefault.lehrkraftOptionen.debitorenzahlungRegeln;
 
-const DEFAULT_OPTIONS = {
-    autoLieferannahmeNach1Tag: false,
-    autoDebitorenzahlungNach1Tag: false,
-    debitorenzahlungRegeln: DEFAULT_PAYMENT_RULES
-};
+const DEFAULT_OPTIONS = optionenDefault.lehrkraftOptionen;
 
 function toNonNegativeInteger(value: any, fallback: number) {
     const parsed = Number.parseInt(String(value ?? ""), 10);
@@ -46,28 +38,22 @@ function sanitizeOptions(value: any = {}) {
 }
 
 const baseService = createCRUDService(STORAGE_KEY, [
-    {
-        id: 1,
-        ...DEFAULT_OPTIONS
-    }
+    ...(initialLehrkraftOptionen || [])
 ]);
 
 function getStoredOptions() {
     try {
         return baseService.getById(1) || baseService.list()[0] || baseService.create({
-            id: 1,
-            ...DEFAULT_OPTIONS
+            ...(initialLehrkraftOptionen?.[0] || { id: 1 })
         });
     } catch {
         try {
             return baseService.create({
-                id: 1,
-                ...DEFAULT_OPTIONS
+                ...(initialLehrkraftOptionen?.[0] || { id: 1 })
             });
         } catch {
             return {
-                id: 1,
-                ...DEFAULT_OPTIONS
+                ...(initialLehrkraftOptionen?.[0] || { id: 1 })
             };
         }
     }

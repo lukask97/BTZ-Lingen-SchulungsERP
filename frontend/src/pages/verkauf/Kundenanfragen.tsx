@@ -263,6 +263,7 @@ export default function Kundenanfragen() {
     const ausgewaehltesAngebot = getSelectedOffer(vorgangAngebote);
     const kannAngebotErstellen = !!threadItem?.kundeId && (vorgangAngebote.length === 0 || aktuellesAngebot?.status === "abgelehnt");
     const kannAngebotSenden = !!aktuellesAngebot && !angebotWurdeBereitsGesendet(aktuellesAngebot);
+    const angebotIstInternVorbereitet = String(aktuellesAngebot?.status || "").toLowerCase() === "in vorbereitung";
     const threadActionLinks = [
         ...(kannAngebotErstellen ? [{
             id: "prepare-offer",
@@ -271,8 +272,10 @@ export default function Kundenanfragen() {
         }] : []),
         ...(kannAngebotSenden ? [{
             id: "send-offer",
-            label: "Angebot senden",
-            onClick: angebotSenden
+            label: angebotIstInternVorbereitet ? "Angebot prüfen" : "Angebot senden",
+            onClick: angebotIstInternVorbereitet
+                ? () => navigate(`/angebote?approveOfferId=${aktuellesAngebot?.id || ""}`)
+                : angebotSenden
         }] : [])
     ];
 
@@ -345,7 +348,11 @@ export default function Kundenanfragen() {
                 { field: "typ", title: "Typ" },
                 { field: "kanal", title: "Kanal" },
                 { field: "status", title: "Status" },
-                { field: "anliegen", title: "Anliegen" }
+                {
+                    field: "betreff",
+                    title: "Betreff",
+                    render: row => String(row.betreff || row.anliegen || "-")
+                }
             ]}
             detailLinkResolver={({ field, row, value }) => {
                 if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
