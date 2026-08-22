@@ -18,7 +18,7 @@ import LehrkraftRechnungen from "../pages/lehrkraft/LehrkraftRechnungen";
 import LehrkraftOptionen from "../pages/lehrkraft/LehrkraftOptionen";
 import EinkaufOverview from "../pages/einkauf/EinkaufOverview";
 import Lieferanten from "../pages/einkauf/Lieferanten";
-import Lieferantenvergleich from "../pages/einkauf/Lieferantenvergleich";
+import Lieferantenkonditionen from "../pages/einkauf/Lieferantenkonditionen";
 import Bestellungen from "../pages/einkauf/Bestellungen";
 import Einkaufsdokumente from "../pages/einkauf/Einkaufsdokumente";
 import Wareneingaenge from "../pages/einkauf/Wareneingaenge";
@@ -133,7 +133,8 @@ function AppRouter() {
                 <Route path="admin/backup" element={protectedPage(ACCESS.BENUTZER, <Backup/>)}/>
                 <Route path="themen/szenarien" element={<SzenarienOverview/>}/>
                 <Route path="lieferanten" element={protectedPage(ACCESS.EINKAUF, <Lieferanten/>)}/>
-                <Route path="lieferantenvergleich" element={protectedPage(ACCESS.EINKAUF, <Lieferantenvergleich/>)}/>
+                <Route path="lieferantenvergleich" element={<Navigate to="/lieferantenkonditionen" replace />} />
+                <Route path="lieferantenkonditionen" element={protectedPage(ACCESS.EINKAUF, <Lieferantenkonditionen/>)}/>
                 <Route path="bestellungen" element={protectedPage(ACCESS.EINKAUF, <Bestellungen/>)}/>
                 <Route path="einkaufsdokumente" element={protectedPage(ACCESS.EINKAUF, <Einkaufsdokumente/>)}/>
                 <Route path="wareneingaenge" element={protectedPage(ACCESS.LAGER, <Wareneingaenge/>)}/>

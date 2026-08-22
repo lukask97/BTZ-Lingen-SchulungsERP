@@ -1,14 +1,14 @@
 {
   "fristenOptionen": {
     "id": 1,
-    "skontoTage": 7,
-    "skontoProzent": 2,
+    "skontoTage": 14,
+    "skontoProzent": 3,
     "angebotGfFreigabeAbweichungProzent": 10,
-    "zahlungszielTage": 14,
+    "zahlungszielTage": 28,
     "zahlungserinnerungTage": 3,
-    "mahnung1AbTage": 1,
-    "mahnung2AbTage": 8,
-    "inkassoAbTage": 22
+    "mahnung1AbTage": 7,
+    "mahnung2AbTage": 14,
+    "inkassoAbTage": 21
   },
   "lehrkraftOptionen": {
     "id": 1,

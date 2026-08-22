@@ -9,7 +9,8 @@ function normalizeStaffel(item: any = {}) {
         lieferantId: item.lieferantId || "",
         mindestbestellmenge: Number(item.mindestbestellmenge || 1),
         stueckpreis: Number(item.stueckpreis || 0),
-        lieferzeitTage: Number(item.lieferzeitTage || 1)
+        lieferzeitTage: Number(item.lieferzeitTage || 1),
+        notiz: String(item.notiz || "").trim()
     };
 }
 
@@ -72,7 +73,7 @@ export default {
                 staffeln: gruppe.staffeln.sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0)),
                 staffeltext: gruppe.staffeln
                     .sort((a, b) => Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0))
-                    .map(item => `ab ${Number(item.mindestbestellmenge || 0)} Stk: ${Number(item.stueckpreis || 0).toFixed(2)} EUR, ${Number(item.lieferzeitTage || 0)} Tage`)
+                    .map(item => String(Number(item.mindestbestellmenge || 0)))
                     .join(" | ")
             }))
             .sort((a, b) => `${a.artikelNr}${a.lieferant}`.localeCompare(`${b.artikelNr}${b.lieferant}`));

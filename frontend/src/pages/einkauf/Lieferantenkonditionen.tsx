@@ -5,14 +5,15 @@ import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
 import SaveButton from "../../components/SaveButton";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { PERMISSIONS } from "../../constants/permissions";
 import { INITIAL_DATA } from "../../constants/schemas";
-import artikelService from "../../services/logistik/artikelService";
-import lieferantenService from "../../services/einkauf/lieferantenService";
 import lieferantenArtikelStaffelnService from "../../services/einkauf/lieferantenArtikelStaffelnService";
-import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
+import lieferantenService from "../../services/einkauf/lieferantenService";
+import artikelService from "../../services/logistik/artikelService";
 
 function createDraft() {
     return {
@@ -23,7 +24,7 @@ function createDraft() {
     };
 }
 
-export default function Lieferantenvergleich() {
+export default function Lieferantenkonditionen() {
     const navigate = useNavigate();
     const syncTick = useDataSyncRefresh(["lieferanten", "artikel", "lieferantenArtikelStaffeln"]);
     const [open, setOpen] = useState(false);
@@ -56,7 +57,10 @@ export default function Lieferantenvergleich() {
     }, [search, staffelGruppen]);
 
     const besterPreis = staffelGruppen.reduce((min, gruppe) => {
-        const lokalesMin = gruppe.staffeln.reduce((innerMin, staffel) => Math.min(innerMin, Number(staffel.stueckpreis || 0)), Number.POSITIVE_INFINITY);
+        const lokalesMin = gruppe.staffeln.reduce(
+            (innerMin: number, staffel: any) => Math.min(innerMin, Number(staffel.stueckpreis || 0)),
+            Number.POSITIVE_INFINITY
+        );
         return Math.min(min, lokalesMin);
     }, Number.POSITIVE_INFINITY);
 
@@ -72,16 +76,18 @@ export default function Lieferantenvergleich() {
         setOpen(true);
     };
 
-    const bearbeiten = gruppe => {
+    const bearbeiten = (gruppe: any) => {
         setDraft({
             artikelId: String(gruppe.artikelId || ""),
             lieferantId: String(gruppe.lieferantId || ""),
-            staffeln: gruppe.staffeln.map(item => ({
+            staffeln: gruppe.staffeln.map((item: any) => ({
                 id: item.id,
                 artikelId: item.artikelId,
                 lieferantId: item.lieferantId,
                 mindestbestellmenge: Number(item.mindestbestellmenge || 1),
-                stueckpreis: Number(item.stueckpreis || 0)
+                stueckpreis: Number(item.stueckpreis || 0),
+                lieferzeitTage: Number(item.lieferzeitTage || 1),
+                notiz: String(item.notiz || "")
             })),
             fehler: ""
         });
@@ -89,11 +95,11 @@ export default function Lieferantenvergleich() {
         setOpen(true);
     };
 
-    const loeschen = gruppe => {
+    const loeschen = (gruppe: any) => {
         if (!confirm(`Möchten Sie alle Staffelungen für ${gruppe.artikel} bei ${gruppe.lieferant} wirklich löschen?`)) {
             return;
         }
-        gruppe.staffeln.forEach(item => {
+        gruppe.staffeln.forEach((item: any) => {
             if (item.id != null) {
                 lieferantenArtikelStaffelnService.remove(item.id);
             }
@@ -107,30 +113,34 @@ export default function Lieferantenvergleich() {
         }));
     };
 
-    const updateStaffel = (index, feld, wert) => {
+    const updateStaffel = (index: number, feld: string, wert: unknown) => {
         setDraft(current => ({
             ...current,
-            staffeln: current.staffeln.map((item, staffelIndex) => staffelIndex === index ? { ...item, [feld]: wert } : item),
+            staffeln: current.staffeln.map((item: any, staffelIndex: number) => (
+                staffelIndex === index ? { ...item, [feld]: wert } : item
+            )),
             fehler: ""
         }));
     };
 
-    const removeStaffel = index => {
+    const removeStaffel = (index: number) => {
         setDraft(current => ({
             ...current,
-            staffeln: current.staffeln.filter((_, staffelIndex) => staffelIndex !== index),
+            staffeln: current.staffeln.filter((_: unknown, staffelIndex: number) => staffelIndex !== index),
             fehler: ""
         }));
     };
 
     const speichern = () => {
         const staffeln = draft.staffeln
-            .map(item => ({
+            .map((item: any) => ({
                 ...item,
                 mindestbestellmenge: Number(item.mindestbestellmenge || 0),
-                stueckpreis: Number(item.stueckpreis || 0)
+                stueckpreis: Number(item.stueckpreis || 0),
+                lieferzeitTage: Number(item.lieferzeitTage || 0),
+                notiz: String(item.notiz || "").trim()
             }))
-            .filter(item => item.mindestbestellmenge > 0 || item.stueckpreis > 0);
+            .filter((item: any) => item.mindestbestellmenge > 0 || item.stueckpreis > 0 || item.lieferzeitTage > 0 || item.notiz);
 
         if (!draft.artikelId || !draft.lieferantId) {
             setDraft(current => ({ ...current, fehler: "Bitte einen Artikel und einen Lieferanten auswählen." }));
@@ -142,13 +152,18 @@ export default function Lieferantenvergleich() {
             return false;
         }
 
-        if (staffeln.some(item => Number(item.mindestbestellmenge || 0) <= 0)) {
+        if (staffeln.some((item: any) => Number(item.mindestbestellmenge || 0) <= 0)) {
             setDraft(current => ({ ...current, fehler: "Die Mindestbestellmenge muss größer als 0 sein." }));
             return false;
         }
 
-        if (staffeln.some(item => Number(item.stueckpreis || 0) < 0)) {
+        if (staffeln.some((item: any) => Number(item.stueckpreis || 0) < 0)) {
             setDraft(current => ({ ...current, fehler: "Der Stückpreis darf nicht negativ sein." }));
+            return false;
+        }
+
+        if (staffeln.some((item: any) => Number(item.lieferzeitTage || 0) <= 0)) {
+            setDraft(current => ({ ...current, fehler: "Die erwartete Lieferzeit muss größer als 0 sein." }));
             return false;
         }
 
@@ -161,11 +176,11 @@ export default function Lieferantenvergleich() {
     return <>
         <OverviewCards cards={[
             { label: "Artikel-Lieferanten-Kombinationen", value: staffelGruppen.length },
-            { label: "Hinterlegte Staffelzeilen", value: staffelGruppen.reduce((summe, item) => summe + item.staffeln.length, 0) },
+            { label: "Hinterlegte Staffelzeilen", value: staffelGruppen.reduce((summe: number, item: any) => summe + item.staffeln.length, 0) },
             { label: "Bester Staffelpreis", value: Number.isFinite(besterPreis) ? `${besterPreis.toFixed(2)} EUR` : "-" }
         ]}/>
         <DataTable
-            title="Lieferantenvergleich"
+            title="Lieferantenkonditionen"
             selectableColumns={false}
             data={sichtbareDaten}
             searchable
@@ -183,13 +198,13 @@ export default function Lieferantenvergleich() {
             ]}
             rowActions={[
                 { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: bearbeiten },
-                { name: "new", label: "Anfrage starten", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: row => navigate(`/bestellungen?new=lieferantenvergleich&lieferantId=${row.lieferantId}`), variant: "secondary" },
+                { name: "new", label: "Anfrage starten", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: (row: any) => navigate(`/bestellungen?new=lieferantenvergleich&lieferantId=${row.lieferantId}`), variant: "secondary" },
                 { name: "delete", label: "Löschen", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: loeschen, variant: "danger" }
             ]}
         />
         <Dialog
             open={open}
-            title={editMode ? "Staffelungen bearbeiten" : "Neue Lieferantenstaffelung"}
+            title={editMode ? "Staffelungen bearbeiten" : "Neue Lieferantenkondition"}
             onClose={dialogZuruecksetzen}
             footer={<SaveButton onSave={speichern} onSuccess={dialogZuruecksetzen}>Speichern</SaveButton>}
         >
@@ -212,17 +227,25 @@ export default function Lieferantenvergleich() {
                             <tr>
                                 <th>Mindestbestellmenge</th>
                                 <th>Preis pro Stück</th>
+                                <th>Erwartete Lieferzeit in Tag(e)</th>
+                                <th>Notiz</th>
                                 <th>Aktion</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {draft.staffeln.map((staffel, index) => (
+                            {draft.staffeln.map((staffel: any, index: number) => (
                                 <tr key={staffel.id || `staffel-${index}`}>
                                     <td>
                                         <NumberField value={staffel.mindestbestellmenge} min="1" step="1" onChange={value => updateStaffel(index, "mindestbestellmenge", Number(value || 0))}/>
                                     </td>
                                     <td>
                                         <NumberField value={staffel.stueckpreis} min="0" step="0.01" onChange={value => updateStaffel(index, "stueckpreis", Number(value || 0))}/>
+                                    </td>
+                                    <td>
+                                        <NumberField value={staffel.lieferzeitTage} min="1" step="1" onChange={value => updateStaffel(index, "lieferzeitTage", Number(value || 0))}/>
+                                    </td>
+                                    <td>
+                                        <TextArea rows={2} value={staffel.notiz || ""} onChange={value => updateStaffel(index, "notiz", value)}/>
                                     </td>
                                     <td>
                                         <button type="button" className="link-button" onClick={() => removeStaffel(index)} disabled={draft.staffeln.length === 1}>
@@ -235,7 +258,7 @@ export default function Lieferantenvergleich() {
                     </table>
                 </div>
             </div>
-            {draft.error && <p className="form-error">{draft.error}</p>}
+            {draft.fehler && <p className="form-error">{draft.fehler}</p>}
         </Dialog>
     </>;
 }

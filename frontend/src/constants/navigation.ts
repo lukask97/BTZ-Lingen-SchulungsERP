@@ -33,7 +33,7 @@ export const NAVIGATION_GROUPS = [
         access: ACCESS.EINKAUF,
         items: [
             { title: "Lieferanten", path: "/lieferanten", access: ACCESS.EINKAUF },
-            { title: "Lieferantenvergleich", path: "/lieferantenvergleich", access: ACCESS.EINKAUF },
+            { title: "Lieferantenkonditionen", path: "/lieferantenkonditionen", access: ACCESS.EINKAUF },
             { title: "Bestellungen", path: "/bestellungen", access: ACCESS.EINKAUF },
             { title: "Wareneingänge", path: "/wareneingaenge", access: ACCESS.LAGER }
         ]

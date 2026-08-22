@@ -20,6 +20,7 @@ import { getBerlinDate } from "../../utils/dateTime";
 import { canBookGoodsReceipt, getPurchaseStep, getPurchaseStepLabel } from "../../utils/processFlow";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 import { getOfferDemandByArtikel } from "../../utils/offerDemand";
+import { exportPurchaseDemandWorkbook } from "../../utils/purchaseDemandWorkbook";
 
 function createBestellungDialogState(lieferanten: any[], artikel: any[]) {
     const ersterLieferant = lieferanten[0];
@@ -46,7 +47,7 @@ function normalizeText(value: any) {
 }
 
 function getAnfrageQuelleLabel(bestellung: any) {
-    if (bestellung.anfrageQuelle === "lieferantenvergleich") return "Lieferantenvergleich";
+    if (bestellung.anfrageQuelle === "lieferantenvergleich") return "Lieferantenkonditionen";
     return "Bedarfsmeldung";
 }
 
@@ -85,6 +86,26 @@ function getVerplanteMengen(auftraege: any[] = []) {
 
 function getOpenOfferCountByArtikel(angebote: any[] = []) {
     return getOfferDemandByArtikel(angebote, artikelService.getAll(), istOffenesAngebot);
+}
+
+function getVerkauftLetzterMonat(auftraege: any[] = []) {
+    const today = new Date();
+    const cutoff = new Date(today);
+    cutoff.setDate(cutoff.getDate() - 30);
+
+    return auftraege.reduce((map: Record<string, number>, auftrag: any) => {
+        const auftragsDatum = new Date(String(auftrag.datum || auftrag.erstelltAm || ""));
+        if (Number.isNaN(auftragsDatum.getTime()) || auftragsDatum < cutoff) {
+            return map;
+        }
+
+        (auftrag.positionen || []).forEach((position: any) => {
+            const key = String(position.artikelId || "");
+            if (!key) return;
+            map[key] = Number(map[key] || 0) + Number(position.menge || 0);
+        });
+        return map;
+    }, {});
 }
 
 function getArtikelInfoText({
@@ -126,12 +147,14 @@ export default function Bestellungen() {
     const [suchbegriff, setSuchbegriff] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [quellenFilter, setQuellenFilter] = useState("");
+    const [isExportingExcel, setIsExportingExcel] = useState(false);
     const [selectedBedarfIds, setSelectedBedarfIds] = useState<Array<string | number>>([]);
     const lieferanten = lieferantenService.getAll();
     const artikel = artikelService.getAll().filter(item => item.istEinkaufbar);
     const auftraege = auftraegeService.getAll();
     const angebote = angeboteService.getAll();
     const automatischeBedarfsmeldungen = useMemo(() => getAutomatischeBedarfsmeldungen(), [bestellungen]);
+    const verkauftLetzterMonat = useMemo(() => getVerkauftLetzterMonat(auftraege), [auftraege]);
     const bedarfsmeldungen = useMemo(
         () => bestellungen.filter(item => item.status === "bedarf gemeldet"),
         [bestellungen]
@@ -352,10 +375,52 @@ export default function Bestellungen() {
         });
     };
 
+    const exportiereBedarfsmeldungenNachExcel = async () => {
+        setIsExportingExcel(true);
+        await new Promise(resolve => window.requestAnimationFrame(() => resolve(null)));
+        const staffelnByArtikelId = automatischeBedarfsmeldungen.reduce((map: Record<string, any[]>, row: any) => {
+            map[String(row.artikelId)] = lieferantenArtikelStaffelnService.listByArtikel(row.artikelId)
+                .map((staffel: any) => {
+                    const lieferant = lieferanten.find(item => String(item.id) === String(staffel.lieferantId));
+                    return {
+                        lieferant: lieferant?.firma || `Lieferant ${staffel.lieferantId}`,
+                        mindestbestellmenge: Number(staffel.mindestbestellmenge || 0),
+                        stueckpreis: Number(staffel.stueckpreis || 0),
+                        lieferzeitTage: Number(staffel.lieferzeitTage || 0),
+                        notiz: String(staffel.notiz || "")
+                    };
+                })
+                .sort((a: any, b: any) => {
+                    const supplierDelta = String(a.lieferant || "").localeCompare(String(b.lieferant || ""));
+                    if (supplierDelta !== 0) return supplierDelta;
+                    return Number(a.mindestbestellmenge || 0) - Number(b.mindestbestellmenge || 0);
+                });
+            return map;
+        }, {});
+
+        try {
+            await exportPurchaseDemandWorkbook({
+                fileName: `Bestellung_offene_Bedarfsmeldungen_${today}`,
+                bedarfe: automatischeBedarfsmeldungen.map((row: any) => ({
+                    artikelId: row.artikelId,
+                    artikelNr: row.artikelNr,
+                    artikel: row.artikel,
+                    bestand: Number(row.bestand || 0),
+                    verfuegbar: Number(row.bestand || 0) - Number(verplanteMengen[String(row.artikelId)] || 0),
+                    bedarfsmeldungBei: Number(row.bedarfsmeldungBei || 0),
+                    verkauftLetzterMonat: Number(verkauftLetzterMonat[String(row.artikelId)] || 0)
+                })),
+                staffelnByArtikelId
+            });
+        } finally {
+            setIsExportingExcel(false);
+        }
+    };
+
     const speichern = () => {
         const lieferant = lieferanten.find(item => item.id === Number(dialogState.lieferantId));
         if (dialogState.anfrageQuelle === "lieferantenvergleich" && !lieferant) {
-            setDialogState(current => ({ ...current, fehler: "Bitte für den Lieferantenvergleich einen Lieferanten auswählen." }));
+            setDialogState(current => ({ ...current, fehler: "Bitte für die Lieferantenkonditionen einen Lieferanten auswählen." }));
             return false;
         }
         if (dialogState.positionen.length === 0) {
@@ -406,7 +471,7 @@ export default function Bestellungen() {
             { label: "Bedarf gemeldet", value: gemeldeteBedarfe },
             { label: "Kritische Bedarfsmeldungen", value: offeneAutomatischeBedarfe },
             { label: "Anfragen offen", value: angefragteBestellungen },
-            { label: "Aus Lieferantenvergleich", value: bestellungen.filter(item => item.anfrageQuelle === "lieferantenvergleich").length },
+            { label: "Aus Lieferantenkonditionen", value: bestellungen.filter(item => item.anfrageQuelle === "lieferantenvergleich").length },
             { label: "Wareneingang gebucht", value: eingegangeneBestellungen }
         ]}/>
         <DataTable
@@ -432,6 +497,14 @@ export default function Bestellungen() {
                     onClick: gruppenbestellungStarten,
                     variant: "success",
                     isDisabled: () => selectedBedarfIds.length === 0
+                },
+                {
+                    name: "excel-export",
+                    label: isExportingExcel ? "Export wird erstellt..." : "Excel für Bestellung",
+                    permission: PERMISSIONS.EINKAUF_BEARBEITEN,
+                    onClick: exportiereBedarfsmeldungenNachExcel,
+                    variant: "secondary",
+                    isDisabled: () => automatischeBedarfsmeldungen.length === 0 || isExportingExcel
                 }
             ]}
             rowActions={[
@@ -490,7 +563,7 @@ export default function Bestellungen() {
                     label: "Auslöser",
                     options: [
                         { value: "bedarfsmeldung", label: "Bedarfsmeldung" },
-                        { value: "lieferantenvergleich", label: "Lieferantenvergleich" }
+                        { value: "lieferantenvergleich", label: "Lieferantenkonditionen" }
                     ]
                 }
             ]}
@@ -513,14 +586,14 @@ export default function Bestellungen() {
             <div><Label required glossaryKey="ausloeser">Auslöser</Label>
                 <select value={dialogState.anfrageQuelle} onChange={event => setDialogState(item => ({ ...item, anfrageQuelle: event.target.value, fehler: "" }))}>
                     <option value="bedarfsmeldung">Aufgrund einer Bedarfsmeldung</option>
-                    <option value="lieferantenvergleich">Aufgrund eines Lieferantenvergleichs</option>
+                    <option value="lieferantenvergleich">Aufgrund von Lieferantenkonditionen</option>
                 </select>
             </div>
             {dialogState.anfrageQuelle === "bedarfsmeldung" && <div>
                 <Label glossaryKey="bedarfsmeldung">Bestehende Bedarfsmeldung übernehmen</Label>
                 <LookupField value={dialogState.bedarfsmeldungId} options={bedarfOptionen} onChange={bedarfsmeldungUebernehmen} placeholder="Bedarfsmeldung auswählen..."/>
             </div>}
-            <div><Label glossaryKey="lieferantenvergleich">{dialogState.anfrageQuelle === "lieferantenvergleich" ? "Lieferant aus Vergleich" : "Lieferant (optional)"}</Label>
+            <div><Label glossaryKey="lieferantenvergleich">{dialogState.anfrageQuelle === "lieferantenvergleich" ? "Lieferant aus Konditionen" : "Lieferant (optional)"}</Label>
                 <LookupField value={dialogState.lieferantId} options={lieferantenOptionen} onChange={value => setDialogState(item => ({ ...item, lieferantId: value, fehler: "" }))} placeholder="Lieferant suchen..."/>
             </div>
             <div><Label>Bestelldatum</Label><input type="date" value={today} disabled/></div>

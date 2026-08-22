@@ -23,7 +23,7 @@ function getInvoiceViewStatus(rechnung: any) {
 }
 
 function getAnfrageQuelleLabel(bestellung: any) {
-    if (bestellung.anfrageQuelle === "lieferantenvergleich") return "Lieferantenvergleich";
+    if (bestellung.anfrageQuelle === "lieferantenvergleich") return "Lieferantenkonditionen";
     return "Bedarfsmeldung";
 }
 

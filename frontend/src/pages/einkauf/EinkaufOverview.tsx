@@ -21,7 +21,7 @@ export default function EinkaufOverview() {
 
     return <>
         <h1>Einkauf</h1>
-        <p>Der Einkauf bleibt bewusst einfach: Die Schülerfirma erfasst Artikelnummern und benötigte Mengen in einer Anfrage. Dabei kann zwischen Bedarfsmeldung und Lieferantenvergleich unterschieden werden. Die Lehrkraft erstellt darauf aufbauend ein Angebot, bestätigt die Bestellung und markiert sie anschließend als versendet.</p>
+        <p>Der Einkauf bleibt bewusst einfach: Die Schülerfirma erfasst Artikelnummern und benötigte Mengen in einer Anfrage. Dabei kann zwischen Bedarfsmeldung und Lieferantenkonditionen unterschieden werden. Die Lehrkraft erstellt darauf aufbauend ein Angebot, bestätigt die Bestellung und markiert sie anschließend als versendet.</p>
 
         <div className="kennzahlen">
             <div className="kennzahl"><span>Lieferanten</span><strong>{lieferanten.length}</strong><small>{bewerteteLieferanten} bewertet</small></div>
@@ -34,7 +34,7 @@ export default function EinkaufOverview() {
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header"><h2>Einfache Reihenfolge</h2><span>Ablauf</span></div>
                 <ul className="dashboard-note-list">
-                    <li>Artikelbedarf feststellen oder einen Lieferantenvergleich auswerten.</li>
+                    <li>Artikelbedarf feststellen oder Lieferantenkonditionen auswerten.</li>
                     <li>Einkaufsanfrage mit Artikelnummer und benötigter Menge anlegen.</li>
                     <li>Lehrkraft erstellt ein Angebot und bestätigt anschließend die Bestellung.</li>
                     <li>Wareneingang buchen und Bestand automatisch erhöhen.</li>
@@ -61,7 +61,7 @@ export default function EinkaufOverview() {
             <h2>Direkte Einstiege</h2>
             <div className="link-list">
                 <Link className="button-link" to="/lieferanten">Lieferanten</Link>
-                <Link className="button-link" to="/lieferantenvergleich">Lieferantenvergleich</Link>
+                <Link className="button-link" to="/lieferantenkonditionen">Lieferantenkonditionen</Link>
                 <Link className="button-link" to="/bestellungen">Bestellungen</Link>
                 <Link className="button-link" to="/wareneingaenge">Wareneingänge</Link>
                 <Link className="button-link" to="/lager">Lager</Link>
