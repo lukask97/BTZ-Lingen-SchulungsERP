@@ -5,6 +5,7 @@ import { getCurrentBackendUser, logoutSession } from "../services/auth/authServi
 import { userHasAccess, userHasFullAccess, userHasPermission } from "./permissions";
 
 const AUTH_STORAGE_KEY = "session-user";
+export const SESSION_EXPIRED_MESSAGE_KEY = "session-expired-message";
 
 function readInitialUser(): AuthUser | null {
     const rawUser = sessionStorage.getItem(AUTH_STORAGE_KEY);
@@ -31,12 +32,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 const backendUser = await getCurrentBackendUser();
                 if (!isMounted) return;
 
+                const hadStoredUser = Boolean(readInitialUser());
                 setUser(backendUser);
                 setAuthError("");
 
                 if (backendUser) {
                     sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(backendUser));
+                    sessionStorage.removeItem(SESSION_EXPIRED_MESSAGE_KEY);
                 } else {
+                    if (hadStoredUser) {
+                        sessionStorage.setItem(SESSION_EXPIRED_MESSAGE_KEY, "Deine Sitzung ist aufgrund Inaktivität abgelaufen");
+                    }
                     sessionStorage.removeItem(AUTH_STORAGE_KEY);
                 }
             } catch (error) {

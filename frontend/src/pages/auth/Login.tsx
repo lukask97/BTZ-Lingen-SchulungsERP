@@ -1,7 +1,8 @@
-﻿import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
+import { SESSION_EXPIRED_MESSAGE_KEY } from "../../auth/AuthContext";
 import { login as loginService } from "../../services/auth/authService";
 import { BACKEND_ORIGIN } from "../../services/core/api";
 
@@ -20,21 +21,38 @@ const QUICK_LOGINS = [
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-
     const [error, setError] = useState("");
+    const [sessionExpiredMessage, setSessionExpiredMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { login, authError } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const authErrorMessage = authError.includes("Backend unter")
         ? authError
         : `${authError} Backend unter \`${BACKEND_ORIGIN}\` starten.`;
+
+    useEffect(() => {
+        const state = location.state as { sessionExpired?: boolean } | null;
+        const storedMessage = sessionStorage.getItem(SESSION_EXPIRED_MESSAGE_KEY);
+        if (!state?.sessionExpired && !storedMessage) {
+            return;
+        }
+
+        const message = storedMessage || "Deine Sitzung ist aufgrund Inaktivität abgelaufen";
+        setSessionExpiredMessage(message);
+        sessionStorage.removeItem(SESSION_EXPIRED_MESSAGE_KEY);
+        if (state?.sessionExpired) {
+            navigate(location.pathname, { replace: true, state: null });
+        }
+    }, [location.pathname, location.state, navigate]);
 
     async function anmelden(e) {
         e.preventDefault();
         if (isSubmitting) return;
 
         setError("");
+        setSessionExpiredMessage("");
         setIsSubmitting(true);
 
         let user = null;
@@ -44,7 +62,7 @@ export default function Login() {
         } catch (loginError) {
             setError(
                 loginError instanceof Error
-                     ? loginError.message
+                    ? loginError.message
                     : "Anmeldung derzeit nicht möglich"
             );
             setPassword("");
@@ -100,6 +118,11 @@ export default function Login() {
                         {authErrorMessage}
                     </div>
                 )}
+                {sessionExpiredMessage && (
+                    <div className="login-error">
+                        {sessionExpiredMessage}
+                    </div>
+                )}
                 {error && <div className="login-error">{error}</div>}
                 <br />
                 <button type="submit" disabled={isSubmitting}>
@@ -117,7 +140,7 @@ export default function Login() {
                         {user.label}
                     </button>
                 ))}
-                 <h2>Danach auf "Anmelden" klicken</h2>
+                <h2>Danach auf "Anmelden" klicken</h2>
             </div>
         </div>
     );

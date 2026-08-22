@@ -57,4 +57,13 @@ def create_app():
     app.register_blueprint(resources_bp)
     app.register_blueprint(events_bp)
 
+    @app.before_request
+    def refresh_active_session():
+        from flask import session
+
+        # Keep logged-in users active while they continue using the app/API.
+        if session.get("user_id"):
+            session.permanent = True
+            session.modified = True
+
     return app

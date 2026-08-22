@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import useAuth from "./useAuth";
 import AccessDenied from "../components/AccessDenied";
 import type { ProtectedRouteProps } from "../types/auth";
+import { SESSION_EXPIRED_MESSAGE_KEY } from "./AuthContext";
 
 
 export default function ProtectedRoute({
@@ -18,7 +19,8 @@ export default function ProtectedRoute({
 
 
     if (!user) {
-        return <Navigate to="/login"/>;
+        const sessionExpiredMessage = sessionStorage.getItem(SESSION_EXPIRED_MESSAGE_KEY);
+        return <Navigate to="/login" replace state={sessionExpiredMessage ? { sessionExpired: true } : undefined}/>;
     }
 
 

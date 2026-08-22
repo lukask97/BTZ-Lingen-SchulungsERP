@@ -52,6 +52,20 @@ function parseApiPayload(responseText: string) {
     }
 }
 
+function handleUnauthorizedSession() {
+    const message = "Deine Sitzung ist aufgrund Inaktivität abgelaufen";
+
+    try {
+        sessionStorage.setItem("session-expired-message", message);
+    } catch {
+        // Ignore storage errors and still redirect.
+    }
+
+    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+        window.location.replace("/login");
+    }
+}
+
 function resolveApiUrl(path: string) {
     if (/^https?:\/\//.test(path)) {
         return path;
@@ -93,6 +107,10 @@ export function syncApiRequest(path: string, options: { method?: string; body?: 
 
     const data = parseApiPayload(request.responseText);
 
+    if (request.status === 401) {
+        handleUnauthorizedSession();
+    }
+
     if (request.status < 200 || request.status >= 300) {
         const message = data?.message || `API request failed with status ${request.status}`;
         throw new Error(message);
@@ -127,6 +145,10 @@ export async function apiRequest(path: string, options: RequestInit = {}) {
 
     const text = await response.text();
     const data = parseApiPayload(text);
+
+    if (response.status === 401) {
+        handleUnauthorizedSession();
+    }
 
     if (!response.ok) {
         const message = data?.message || `API request failed with status ${response.status}`;
