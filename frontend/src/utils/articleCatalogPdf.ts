@@ -10,6 +10,13 @@ type CatalogArticle = {
     beschreibung: string;
     kategoriePfad: string;
     bilder: CatalogImage[];
+    individualisierungen?: Array<{
+        kategorieLabel: string;
+        optionen: Array<{
+            artikel: string;
+            standard?: boolean;
+        }>;
+    }>;
 };
 
 function safe(value: unknown) {
@@ -21,6 +28,23 @@ function safe(value: unknown) {
 
 function formatCurrency(value: unknown) {
     return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(value || 0));
+}
+
+function renderIndividualisierungen(article: CatalogArticle) {
+    if (!Array.isArray(article.individualisierungen) || article.individualisierungen.length === 0) {
+        return "";
+    }
+
+    return `
+        <div class="article-individualizations">
+            ${article.individualisierungen.map(group => `
+                <p class="article-individualization-line">
+                    <strong>${safe(group.kategorieLabel || "Kategorie")}:</strong>
+                    <span>${safe((group.optionen || []).map(option => option.standard ? `Standard (${option.artikel})` : option.artikel).join(", "))}</span>
+                </p>
+            `).join("")}
+        </div>
+    `;
 }
 
 export function openArticleCatalogPdf({
@@ -59,6 +83,7 @@ export function openArticleCatalogPdf({
                                 <div class="article-price">${safe(formatCurrency(article.verkaufspreis))}</div>
                             </div>
                             <p class="article-description">${safe(article.beschreibung || "Keine Beschreibung hinterlegt.")}</p>
+                            ${renderIndividualisierungen(article)}
                             ${(article.bilder || []).length > 0
                                 ? `<div class="article-images">
                                     ${(article.bilder || []).map(image => `
@@ -173,6 +198,22 @@ export function openArticleCatalogPdf({
             margin: 0 0 14px;
             min-height: 48px;
             white-space: pre-wrap;
+        }
+        .article-individualizations {
+            display: grid;
+            gap: 6px;
+            margin: 0 0 14px;
+        }
+        .article-individualization-line {
+            margin: 0;
+            line-height: 1.45;
+        }
+        .article-individualization-line strong {
+            font-weight: 700;
+        }
+        .article-individualization-line span {
+            margin-left: 0.35rem;
+            overflow-wrap: anywhere;
         }
         .article-images {
             display: grid;

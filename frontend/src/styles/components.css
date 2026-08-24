@@ -1334,51 +1334,67 @@ button:disabled {
 
 .thread-decision-panel {
     display: grid;
-    gap: 12px;
-}
-
-.thread-decision-select {
-    display: grid;
     gap: 6px;
-    max-width: 340px;
 }
 
-.thread-decision-select select {
-    width: 100%;
-    padding: 8px;
-}
-
-.thread-decision-inline {
+.thread-decision-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
-.thread-decision-inline select {
-    min-width: 140px;
-    padding: 8px;
+.thread-decision-row-label {
+    flex: 0 0 96px;
+    font-size: 0.9rem;
+    color: #52607a;
 }
 
-.thread-decision-inline button,
-.thread-decision-inline span {
-    flex: 0 0 auto;
+.thread-decision-hint {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #52607a;
 }
 
-.thread-decision-inline-accept {
-    display: inline-flex;
+.thread-decision-row-select select {
+    min-width: 180px;
+    max-width: 220px;
+    padding: 6px 8px;
+}
+
+.thread-decision-row-actions {
+    gap: 6px;
+}
+
+.thread-decision-row-followup {
+    gap: 6px;
     flex-wrap: nowrap;
-    align-items: center;
-    white-space: nowrap;
-    overflow-x: auto;
-    max-width: 100%;
 }
 
-.thread-decision-inline-accept select {
-    width: auto;
-    min-width: 120px;
-    max-width: 180px;
+.thread-decision-followup {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: default;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.thread-decision-followup input {
+    width: 4.25rem;
+    padding: 6px 8px;
+}
+
+.thread-decision-row button,
+.thread-decision-row span,
+.thread-decision-followup span {
     flex: 0 0 auto;
+}
+
+.thread-decision-row .thread-document-link,
+.thread-decision-row .thread-inline-link {
+    padding: 4px 8px;
+    line-height: 1.2;
 }
 
 .thread-template-panel {
@@ -1397,7 +1413,7 @@ button:disabled {
 }
 
 .thread-dialog-footer {
-    margin-top: 12px;
+    margin-top: 4px;
 }
 
 .thread-form-grid {
@@ -1474,9 +1490,54 @@ button:disabled {
 }
 
 .thread-reply-actions {
-    margin-top: 10px;
+    margin-top: 4px;
     display: flex;
     justify-content: flex-end;
+}
+
+.thread-reply-toolbar {
+    margin-top: 4px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.thread-reply-toolbar .thread-reply-actions {
+    margin-top: 0;
+    order: 2;
+}
+
+.thread-reply-toolbar .thread-dialog-footer {
+    margin-top: 0;
+    order: 1;
+    flex: 1 1 420px;
+}
+
+.thread-reply-template-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 0;
+}
+
+.thread-reply-template-label {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    flex: 0 0 auto;
+}
+
+.thread-reply-template-links {
+    gap: 8px;
+}
+
+.thread-reply-template-links .thread-document-link {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 13px;
 }
 
 .thread-reply-box .form-textarea {

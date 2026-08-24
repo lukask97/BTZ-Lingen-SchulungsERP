@@ -16,7 +16,7 @@ import kundenService from "../../services/verkauf/customerService";
 import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
 import { angebotInAuftragUebernehmen } from "../../services/verkauf/verkaufService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
-import { formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
+import { addDaysToIsoDate, formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
 import { openDocumentPdf } from "../../utils/documentPdf";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { getPaymentOpenItemStatus, isPendingPayment } from "../../utils/openItems";
@@ -46,6 +46,7 @@ const FILTER_OPTIONS = {
     angebote: [
         { value: "in vorbereitung", label: "In Vorbereitung", defaultSelected: false },
         { value: "wartet auf antwort", label: "Wartet auf Antwort", defaultSelected: true },
+        { value: "wiedervorlage", label: "Wiedervorlage", defaultSelected: true },
         { value: "angenommen", label: "Angenommen", defaultSelected: false },
         { value: "abgelehnt", label: "Abgelehnt", defaultSelected: false },
         { value: "beendet", label: "Beendet", defaultSelected: false }
@@ -76,6 +77,7 @@ const STATUS_HELP = {
     angebote: [
         { label: "In Vorbereitung", text: "Das Angebot wird intern vorbereitet und zählt noch nicht zu den offenen Angeboten beim Kunden." },
         { label: "Wartet auf Antwort", text: "Das Angebot liegt dem Kunden vor und wartet auf Rückmeldung." },
+        { label: "Wiedervorlage", text: "Der Kunde bittet darum, das Angebot zu einem späteren Prüfdatum erneut vorzulegen." },
         { label: "Angenommen", text: "Der Kunde hat das Angebot akzeptiert." },
         { label: "Abgelehnt", text: "Der Kunde hat das Angebot nicht angenommen." },
         { label: "Beendet", text: "Das Angebot ist abgeschlossen und für die weitere Bearbeitung nicht mehr aktiv." }
@@ -194,6 +196,7 @@ export default function LehrkraftKundenkorrespondenz() {
     const [threadOpen, setThreadOpen] = useState(false);
     const [threadItem, setThreadItem] = useState<any>(null);
     const [customerReplyText, setCustomerReplyText] = useState("");
+    const [wiedervorlageTage, setWiedervorlageTage] = useState(7);
     const [current, setCurrent] = useState(() => createAnfrageDraft());
     const anfragen = useMemo(() => customerInquiryService.list(), [refreshKey, syncTick]);
     const dokumente = useMemo(() => vertriebsdokumenteService.list(), [refreshKey, syncTick]);
@@ -434,6 +437,7 @@ export default function LehrkraftKundenkorrespondenz() {
     const vorgangOeffnen = (row: any) => {
         setThreadItem(row);
         setCustomerReplyText("");
+        setWiedervorlageTage(7);
         setThreadOpen(true);
     };
 
@@ -485,6 +489,15 @@ export default function LehrkraftKundenkorrespondenz() {
                 : `Wir möchten die Verhandlung zu ${angebot.angebotsNr} hiermit beenden.`;
         setThreadItem(angebot);
         setCustomerReplyText(vorbereiteteNachricht);
+        setThreadOpen(true);
+    };
+
+    const wiedervorlageVorbereiten = (angebot: any) => {
+        if (!angebot) return;
+        const tage = Math.max(1, Number(wiedervorlageTage || 0));
+        const pruefdatum = addDaysToIsoDate(today, tage);
+        setThreadItem(angebot);
+        setCustomerReplyText(`Geben Sie uns das Angebot ${angebot.angebotsNr} wenn möglich in ${tage} Tagen zur Wiedervorlage. Wir prüfen es dann erneut und melden uns bei Ihnen.`);
         setThreadOpen(true);
     };
 
@@ -886,6 +899,28 @@ export default function LehrkraftKundenkorrespondenz() {
                 { id: "reject-offer", label: "Ablehnen", onClick: () => entscheidungVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId), "abgelehnt") },
                 { id: "end-negotiation", label: "Verhandlung beenden", onClick: () => entscheidungVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId), "beendet") }
             ] : []}
+            customActionSection={aktuellesAngebotZuVorgang(threadItem.vorgangId) && OFFER_OPEN_STATUSES.includes(normalizeStatus(aktuellesAngebotZuVorgang(threadItem.vorgangId).status)) ? <div
+                className="thread-document-link"
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "6px 10px", borderRadius: "8px", fontSize: "13px" }}
+            >
+                    <span>Wiedervorlage in</span>
+                    <input
+                        type="number"
+                        min={1}
+                        value={wiedervorlageTage}
+                        onChange={event => setWiedervorlageTage(Math.max(1, Number(event.target.value || 1)))}
+                        style={{ width: "4rem", padding: "2px 6px", borderRadius: "6px", border: "1px solid #bfdbfe", background: "#fff" }}
+                    />
+                    <button
+                        type="button"
+                        className="thread-inline-link"
+                        style={{ whiteSpace: "nowrap" }}
+                        onClick={() => wiedervorlageVorbereiten(aktuellesAngebotZuVorgang(threadItem.vorgangId))}
+                    >
+                        Tagen
+                    </button>
+            </div> : null}
+            actionSectionLabel="Textvorlagen"
             replyLabel="Nachricht aus Kundensicht"
             replyValue={customerReplyText}
             replyPlaceholder="Antwort, Nachfrage oder Kommentar aus Sicht des Kunden dokumentieren..."

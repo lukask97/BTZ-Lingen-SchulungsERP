@@ -52,6 +52,7 @@ const heute = getBerlinDate();
 const STATUS_FILTER_OPTIONS = [
     { value: "in vorbereitung", label: "In Vorbereitung", defaultSelected: true },
     { value: "wartet auf antwort", label: "Wartet auf Antwort", defaultSelected: true },
+    { value: "wiedervorlage", label: "Wiedervorlage", defaultSelected: true },
     { value: "angenommen", label: "Angenommen", defaultSelected: true },
     { value: "abgelehnt", label: "Abgelehnt", defaultSelected: true },
     { value: "beendet", label: "Beendet", defaultSelected: true }
@@ -59,6 +60,7 @@ const STATUS_FILTER_OPTIONS = [
 const STATUS_HELP = [
     { label: "In Vorbereitung", text: "Das Angebot wird intern vorbereitet und zählt noch nicht zu den offenen Angeboten beim Kunden." },
     { label: "Wartet auf Antwort", text: "Das Angebot liegt dem Kunden vor und wartet auf Rückmeldung." },
+    { label: "Wiedervorlage", text: "Das Angebot soll zu einem festgelegten Prüfdatum erneut vorgelegt werden." },
     { label: "Angenommen", text: "Der Kunde hat das Angebot akzeptiert." },
     { label: "Abgelehnt", text: "Der Kunde hat das Angebot nicht angenommen." },
     { label: "Beendet", text: "Das Angebot ist abgeschlossen und für die weitere Bearbeitung nicht mehr aktiv." }
@@ -912,7 +914,10 @@ export default function Angebote() {
     };
 
     const laufendeAngebote = neuesteAngebote.filter(item => istOffenesAngebot(item));
-    const freizugebendeAngebote = neuesteAngebote.filter(item => item.statusNormalized === "in vorbereitung");
+    const freizugebendeAngebote = neuesteAngebote.filter(item =>
+        item.statusNormalized === "in vorbereitung"
+        || (item.statusNormalized === "wiedervorlage" && String(item.wiedervorlageAm || "") <= heute)
+    );
     const ueberarbeitungen = neuesteAngebote.filter(item =>
         item.statusNormalized === "in vorbereitung" && String(item.freigabeStatus || "") === "intern_abgelehnt"
     );

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import DataTable from "../../components/DataTable";
 import artikelService from "../../services/logistik/artikelService";
 import artikelBilderService from "../../services/logistik/artikelBilderService";
+import { getKategoriePfad } from "../../services/logistik/kategorienService";
 import { getAllTableColumns } from "../../constants/schemas";
 import { exportRowsToExcel } from "../../utils/excelExport";
 import { openArticleCatalogPdf } from "../../utils/articleCatalogPdf";
@@ -100,7 +101,22 @@ export default function Exporte() {
                         verkaufspreis: Number(item.verkaufspreis || 0),
                         beschreibung: item.beschreibung || "",
                         kategoriePfad: item.kategoriePfad || item.kategorie || "Ohne Kategorie",
-                        bilder: await artikelBilderService.list(item.id)
+                        bilder: await artikelBilderService.list(item.id),
+                        individualisierungen: Array.from(new Set((item.individualisierungen || []).map(eintrag => String(eintrag.kategorieId))))
+                            .map(kategorieId => ({
+                                kategorieLabel: getKategoriePfad(kategorieId, `Kategorie ${kategorieId}`) || `Kategorie ${kategorieId}`,
+                                optionen: (item.individualisierungen || [])
+                                    .filter(eintrag => String(eintrag.kategorieId) === kategorieId)
+                                    .sort((a, b) => {
+                                        if (a.standard && !b.standard) return -1;
+                                        if (!a.standard && b.standard) return 1;
+                                        return String(a.artikel || "").localeCompare(String(b.artikel || ""), "de");
+                                    })
+                                    .map(eintrag => ({
+                                        artikel: String(eintrag.artikel || ""),
+                                        standard: Boolean(eintrag.standard)
+                                    }))
+                            }))
                     }))
             );
 

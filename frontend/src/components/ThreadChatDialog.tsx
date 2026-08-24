@@ -292,9 +292,22 @@ export default function ThreadChatDialog({
                 <Label>{replyLabel || "Nachricht"}</Label>
             </div>
             <TextArea rows={3} value={replyValue} onChange={onReplyChange} placeholder={replyPlaceholder} onKeyDown={handleReplyKeyDown}/>
-            <div className="thread-reply-actions">
-                <button type="button" onClick={onReplySend}>Nachricht senden</button>
+            <div className="thread-reply-toolbar">
+                <div className="thread-reply-actions">
+                    <button type="button" onClick={onReplySend}>Nachricht senden</button>
+                </div>
+                {sichereAktionslinks.length > 0 && <div className="thread-dialog-footer">
+                    <div className="thread-reply-template-row">
+                        <span className="thread-reply-template-label">{actionSectionLabel}:</span>
+                        <div className="thread-document-links thread-reply-template-links">
+                            {sichereAktionslinks.map(renderActionButton)}
+                        </div>
+                    </div>
+                </div>}
             </div>
+        </div>}
+        {customActionSection && <div className="form-row thread-section">
+            {customActionSection}
         </div>}
         <div className="form-row thread-section">
             <div className="thread-section-header">
@@ -315,14 +328,5 @@ export default function ThreadChatDialog({
             </div>}
             </>}
         </div>
-        {customActionSection}
-        {sichereAktionslinks.length > 0 && <div className="form-row thread-section">
-            <div className="thread-section-header">
-                <Label>{actionSectionLabel}</Label>
-            </div>
-            <div className="thread-document-links">
-                {sichereAktionslinks.map(renderActionButton)}
-            </div>
-        </div>}
     </Dialog>;
 }

@@ -11,7 +11,7 @@ import angeboteService from "../../services/verkauf/angeboteService";
 import { subscribeToDataSync } from "../../services/seed/dataSync";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import { naechsteAuftragsnummer } from "../../services/verkauf/verkaufService";
-import { getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
+import { addDaysToIsoDate, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
 import { getCustomerName } from "../../utils/customerReferences";
 import { openDocumentPdf } from "../../utils/documentPdf";
 import useAuth from "../../auth/useAuth";
@@ -55,6 +55,7 @@ export default function Kundenanfragen() {
     const [activeTab, setActiveTab] = useState("offen");
     const [threadOpen, setThreadOpen] = useState(false);
     const [replyText, setReplyText] = useState("");
+    const [wiedervorlageTage, setWiedervorlageTage] = useState(7);
     const [threadItem, setThreadItem] = useState<any>(null);
     const [selectedOfferId, setSelectedOfferId] = useState<string>("");
     const angebote = angeboteService.getAll();
@@ -70,6 +71,7 @@ export default function Kundenanfragen() {
     const vorgangOeffnen = (item) => {
         setThreadItem(item);
         setReplyText("");
+        setWiedervorlageTage(7);
         setThreadOpen(true);
     };
 
@@ -137,6 +139,26 @@ export default function Kundenanfragen() {
         setThreadItem(aktualisierteAnfrage);
     };
 
+    const dokumentiereAngebotsentscheidung = (angebot, betreff: string, nachricht: string, extra: Record<string, any> = {}) => {
+        if (!threadItem || !angebot) return;
+        nachrichtenService.create({
+            vorgangId: getVorgangId(threadItem),
+            anfrageId: threadItem.id,
+            angebotId: angebot.id,
+            kundeId: threadItem.kundeId || angebot.kundeId || "",
+            auftragId: threadItem.auftragId || "",
+            datum: today,
+            zeitpunkt: getBerlinTimestamp(),
+            senderRolle: "Verkauf",
+            senderName: verkaufAbsenderName,
+            kanal: "Intern",
+            betreff,
+            nachricht,
+            typ: "Interne Notiz",
+            ...extra
+        });
+    };
+
     const aktualisiereAngebotsstatus = (angebot, status) => {
         if (!threadItem) return;
         const vorgangAngebote = angeboteZuVorgang(angebot.vorgangId);
@@ -180,6 +202,63 @@ export default function Kundenanfragen() {
             auftragId: status === "angenommen" ? neuerAuftragId : (threadItem.auftragId || ""),
             status: status === "angenommen" ? "erledigt" : threadItem.status
         };
+
+        if (status === "angenommen") {
+            dokumentiereAngebotsentscheidung(
+                angebot,
+                `Angebot ${angebot.angebotsNr} intern als angenommen vermerkt`,
+                `Die Angebotsentscheidung wurde intern dokumentiert: ${angebot.angebotsNr} wurde als angenommen markiert.${neuerAuftragId ? ` Auftrag ${neuerAuftragId} wurde zugeordnet.` : ""}`,
+                { auftragId: neuerAuftragId || "" }
+            );
+        } else if (status === "abgelehnt") {
+            dokumentiereAngebotsentscheidung(
+                angebot,
+                `Angebot ${angebot.angebotsNr} intern als abgelehnt vermerkt`,
+                `Die Angebotsentscheidung wurde intern dokumentiert: ${angebot.angebotsNr} wurde als abgelehnt markiert.`
+            );
+        } else if (status === "beendet") {
+            dokumentiereAngebotsentscheidung(
+                angebot,
+                `Angebot ${angebot.angebotsNr} intern als beendet vermerkt`,
+                `Die Angebotsentscheidung wurde intern dokumentiert: ${angebot.angebotsNr} wurde als beendet markiert.`
+            );
+        }
+
+        customerInquiryService.update(aktualisierteAnfrage);
+        refreshInquiryState();
+        setThreadItem(aktualisierteAnfrage);
+    };
+
+    const angebotAufWiedervorlageSetzen = (angebot) => {
+        if (!threadItem || !angebot) return;
+        const tage = Math.max(1, Number(wiedervorlageTage || 0));
+        const pruefdatum = addDaysToIsoDate(today, tage);
+        const aktualisiertesAngebot = {
+            ...angebot,
+            status: "Wiedervorlage",
+            freigabeStatus: "angefragt",
+            direktSendenGewuenscht: false,
+            freigabeNotiz: `Kunde bittet um Wiedervorlage am ${pruefdatum}.`,
+            wiedervorlageTage: tage,
+            wiedervorlageAm: pruefdatum
+        };
+        angeboteService.update(aktualisiertesAngebot);
+
+        const aktualisierteAnfrage = {
+            ...threadItem,
+            angebotId: angebot.id,
+            status: "beantwortet",
+            wiedervorlageAngebotId: angebot.id,
+            wiedervorlageAm: pruefdatum,
+            beantwortetAm: today
+        };
+
+        dokumentiereAngebotsentscheidung(
+            angebot,
+            `Angebot ${angebot.angebotsNr} intern auf Wiedervorlage gesetzt`,
+            `Die Angebotsentscheidung wurde intern dokumentiert: ${angebot.angebotsNr} wurde auf Wiedervorlage zum ${pruefdatum} gesetzt.`,
+            { wiedervorlageAm: pruefdatum }
+        );
 
         customerInquiryService.update(aktualisierteAnfrage);
         refreshInquiryState();
@@ -259,6 +338,7 @@ export default function Kundenanfragen() {
     }, [activeTab, anfragen]);
     const aktuellesAngebot = vorgangAngebote[vorgangAngebote.length - 1];
     const ausgewaehltesAngebot = getSelectedOffer(vorgangAngebote);
+    const ausgewaehltesAngebotLabel = ausgewaehltesAngebot?.angebotsNr || "kein Angebot ausgewaehlt";
     const kannAngebotErstellen = !!threadItem?.kundeId && (vorgangAngebote.length === 0 || aktuellesAngebot?.status === "abgelehnt");
     const kannAngebotSenden = !!aktuellesAngebot && !angebotWurdeBereitsGesendet(aktuellesAngebot);
     const angebotIstInternVorbereitet = String(aktuellesAngebot?.status || "").toLowerCase() === "in vorbereitung";
@@ -384,42 +464,61 @@ export default function Kundenanfragen() {
                     <div className="form-row">
                         <Label>Angebotsentscheidung</Label>
                         <div className="thread-decision-panel">
-                            <div className="thread-decision-inline">
-                                <button
-                                    type="button"
-                                    className="thread-document-link"
-                                    onClick={() => aktuellesAngebot && aktualisiereAngebotsstatus(aktuellesAngebot, "abgelehnt")}
-                                    disabled={!aktuellesAngebot || aktuellesAngebot.status === "abgelehnt"}
-                                >
-                                    Als abgelehnt markieren
-                                </button>
-                                <button
-                                    type="button"
-                                    className="thread-document-link"
-                                    onClick={() => aktuellesAngebot && aktualisiereAngebotsstatus(aktuellesAngebot, "beendet")}
-                                    disabled={!aktuellesAngebot || aktuellesAngebot.status === "beendet"}
-                                >
-                                    Als beendet markieren
-                                </button>
-                            </div>
-                            <div className="thread-decision-inline thread-decision-inline-accept">
-                                <span>Angebot</span>
+                            <div className="thread-decision-row thread-decision-row-select">
+                                <span className="thread-decision-row-label">Angebot</span>
                                 <select value={selectedOfferId} onChange={event => setSelectedOfferId(event.target.value)}>
                                     {vorgangAngebote.map(item => <option key={item.id} value={String(item.id)}>
                                         {item.angebotsNr}
                                     </option>)}
                                 </select>
+                                <p className="thread-decision-hint">Aktionen fuer <strong>{ausgewaehltesAngebotLabel}</strong>.</p>
+                            </div>
+                            <div className="thread-decision-row thread-decision-row-actions">
                                 <button
                                     type="button"
                                     className="thread-document-link"
-                                    onClick={() => {
-                                        if (!ausgewaehltesAngebot) return;
-                                        aktualisiereAngebotsstatus(ausgewaehltesAngebot, "angenommen");
-                                    }}
+                                    onClick={() => ausgewaehltesAngebot && aktualisiereAngebotsstatus(ausgewaehltesAngebot, "angenommen")}
                                     disabled={!ausgewaehltesAngebot || ausgewaehltesAngebot.status === "angenommen"}
                                 >
-                                    als akzeptiert markieren
+                                    {ausgewaehltesAngebot ? `${ausgewaehltesAngebot.angebotsNr} als angenommen markieren` : "Als angenommen markieren"}
                                 </button>
+                                <button
+                                    type="button"
+                                    className="thread-document-link"
+                                    onClick={() => ausgewaehltesAngebot && aktualisiereAngebotsstatus(ausgewaehltesAngebot, "abgelehnt")}
+                                    disabled={!ausgewaehltesAngebot || ausgewaehltesAngebot.status === "abgelehnt"}
+                                >
+                                    {ausgewaehltesAngebot ? `${ausgewaehltesAngebot.angebotsNr} als abgelehnt markieren` : "Als abgelehnt markieren"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="thread-document-link"
+                                    onClick={() => ausgewaehltesAngebot && aktualisiereAngebotsstatus(ausgewaehltesAngebot, "beendet")}
+                                    disabled={!ausgewaehltesAngebot || ausgewaehltesAngebot.status === "beendet"}
+                                >
+                                    {ausgewaehltesAngebot ? `${ausgewaehltesAngebot.angebotsNr} als beendet markieren` : "Als beendet markieren"}
+                                </button>
+                            </div>
+                            <div className="thread-decision-row thread-decision-row-followup">
+                                <span className="thread-decision-row-label">Wiedervorlage</span>
+                                <label className="thread-decision-followup">
+                                    <span>in</span>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={wiedervorlageTage}
+                                        onChange={event => setWiedervorlageTage(Math.max(1, Number(event.target.value || 1)))}
+                                    />
+                                    <span>Tagen</span>
+                                    <button
+                                        type="button"
+                                        className="thread-inline-link"
+                                        onClick={() => ausgewaehltesAngebot && angebotAufWiedervorlageSetzen(ausgewaehltesAngebot)}
+                                        disabled={!ausgewaehltesAngebot}
+                                    >
+                                        markieren
+                                    </button>
+                                </label>
                             </div>
                         </div>
                     </div>
