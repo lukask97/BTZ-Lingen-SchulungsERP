@@ -54,13 +54,17 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                 <Link className="sidebar-brand" to="/">ERP</Link>
                 <button
                     type="button"
-                    className="sidebar-collapse-button"
+                    className="sidebar-collapse-button button is-light"
                     onClick={onToggleCollapse}
-                    aria-label={isCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
-                    title={isCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
+                    aria-label={isCollapsed ? "Navigation ausklappen" : "Navigation einklappen"}
+                    title={isCollapsed ? "Navigation ausklappen" : "Navigation einklappen"}
                 >
                     {isCollapsed ? ">" : "<"}
                 </button>
+            </div>
+            <div className="sidebar-intro">
+                <p className="sidebar-intro-kicker">Lernnavigation</p>
+                <p className="sidebar-intro-text">Module, Rollen und Prozesse verwenden eine gemeinsame Bedienlogik.</p>
             </div>
             <div className="sidebar-menu">
                 {visibleGroups.map(group => <div key={group.title} className="sidebar-group">
@@ -68,14 +72,14 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                         {group.canOpenOverview
                             ? <Link className="sidebar-section-title sidebar-section-link" to={group.overviewPath}>{group.title}</Link>
                             : <span className="sidebar-section-title">{group.title}</span>}
-                        <button type="button" className="sidebar-toggle" onClick={() => toggleGroup(group.key)}>
-                            {collapsedGroups[group.key] ? "▸" : "▾"}
+                        <button type="button" className="sidebar-toggle button is-white" onClick={() => toggleGroup(group.key)}>
+                            {collapsedGroups[group.key] ? ">" : "v"}
                         </button>
                     </div>
                     <div className={`sidebar-group-links ${collapsedGroups[group.key] ? "is-collapsed" : ""}`}>
                         {group.visibleItems.map(item =>
                             <Link key={item.path} to={item.path}>
-                                {location.pathname === item.path ? "• " : ""}
+                                {location.pathname === item.path ? "* " : ""}
                                 {item.title}
                             </Link>
                         )}
@@ -85,8 +89,8 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                     <div className="sidebar-group">
                         <div className="sidebar-section-row">
                             <Link className="sidebar-section-title sidebar-section-link" to={SCENARIO_OVERVIEW.path}>{SCENARIO_OVERVIEW.title}</Link>
-                            <button type="button" className="sidebar-toggle" onClick={() => setScenariosCollapsed(current => !current)}>
-                                {scenariosCollapsed ? "▸" : "▾"}
+                            <button type="button" className="sidebar-toggle button is-white" onClick={() => setScenariosCollapsed(current => !current)}>
+                                {scenariosCollapsed ? ">" : "v"}
                             </button>
                         </div>
                         <div className={`sidebar-group-links sidebar-group-links-scenarios ${scenariosCollapsed ? "is-collapsed" : ""}`}>
@@ -101,7 +105,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
             </div>
 
             <div className="sidebar-footer">
-                <button className="sidebar-theme-button" onClick={onToggleDarkMode}>
+                <button className="sidebar-theme-button button is-link is-light" onClick={onToggleDarkMode}>
                     {isDarkMode ? "Light Mode" : "Dark Mode"}
                 </button>
                 <div className="sidebar-user">
@@ -112,7 +116,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                     Rolle:
                     <strong>{user.rolle || "-"}</strong>
                 </div>
-                <button className="sidebar-logout-button" onClick={() => void logout()}>
+                <button className="sidebar-logout-button button is-danger is-light" onClick={() => void logout()}>
                     Logout
                 </button>
             </div>

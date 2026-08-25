@@ -5,6 +5,7 @@ import App from "./App";
 
 import { AuthProvider } from "./auth/AuthContext";
 
+import "./styles/bulma.css";
 import "./styles/app.css";
 
 

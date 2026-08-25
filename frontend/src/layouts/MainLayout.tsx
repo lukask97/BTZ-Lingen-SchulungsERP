@@ -28,20 +28,20 @@ function MainLayout() {
     }, [isDarkMode]);
 
     return (
-        <div className="layout">
+        <div className="layout erp-shell">
             <Sidebar
                 isCollapsed={isSidebarCollapsed}
                 onToggleCollapse={() => setIsSidebarCollapsed(current => !current)}
                 isDarkMode={isDarkMode}
                 onToggleDarkMode={() => setIsDarkMode(current => !current)}
             />
-            <div className="content">
+            <div className="content erp-shell-content">
                 <Header
                     isSidebarCollapsed={isSidebarCollapsed}
                     onToggleSidebar={() => setIsSidebarCollapsed(current => !current)}
                 />
                 <div className={isTeacherView ? "content-shell content-shell-teacher" : "content-shell"}>
-                    <main>
+                    <main className="erp-page-stack">
                         <Outlet />
                     </main>
                     {isTeacherView && <TeacherNotesPanel />}

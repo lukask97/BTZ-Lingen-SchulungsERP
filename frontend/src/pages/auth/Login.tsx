@@ -15,7 +15,7 @@ const QUICK_LOGINS = [
     { label: "Buchhaltung", username: "buchhaltung", password: "buchhaltung" },
     { label: "Marketing", username: "marketing", password: "marketing" },
     { label: "Personalwesen", username: "personalwesen", password: "personalwesen" },
-    { label: "Geschäftsführung", username: "gf", password: "gf" }
+    { label: "Geschaeftsfuehrung", username: "gf", password: "gf" }
 ];
 
 export default function Login() {
@@ -33,13 +33,13 @@ export default function Login() {
         : `${authError} Backend unter \`${BACKEND_ORIGIN}\` starten.`;
 
     useEffect(() => {
-        const state = location.state as { sessionExpired?: boolean } | null;
+        const state = location.state as { sessionExpired: boolean } | null;
         const storedMessage = sessionStorage.getItem(SESSION_EXPIRED_MESSAGE_KEY);
         if (!state?.sessionExpired && !storedMessage) {
             return;
         }
 
-        const message = storedMessage || "Deine Sitzung ist aufgrund Inaktivität abgelaufen";
+        const message = storedMessage || "Deine Sitzung ist aufgrund Inaktivitaet abgelaufen";
         setSessionExpiredMessage(message);
         sessionStorage.removeItem(SESSION_EXPIRED_MESSAGE_KEY);
         if (state?.sessionExpired) {
@@ -63,7 +63,7 @@ export default function Login() {
             setError(
                 loginError instanceof Error
                     ? loginError.message
-                    : "Anmeldung derzeit nicht möglich"
+                    : "Anmeldung derzeit nicht moeglich"
             );
             setPassword("");
             setIsSubmitting(false);
@@ -87,61 +87,91 @@ export default function Login() {
 
     return (
         <div className="login">
-            <h1>Anmeldung</h1>
-            <form onSubmit={anmelden}>
-                <input
-                    name="username"
-                    disabled={isSubmitting}
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Benutzername"
-                    autoFocus
-                />
-                <br />
-                <br />
-                <input
-                    name="password"
-                    disabled={isSubmitting}
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Passwort"
-                />
-                <br />
-                {isSubmitting && (
-                    <div className="login-status">
-                        Anmeldung läuft, Daten werden geladen...
+            <section className="login-hero">
+                <div className="login-copy">
+                    <h1 className="title is-2">Schulungs-ERP</h1>
+                    <p className="subtitle is-5">
+                        Wilkommen auf der Login Seite für die Demo von dem Schulungs-ERP
+                    </p>
+                </div>
+                <div className="login-card card">
+                    <div className="card-content">
+                        <p className="login-card-kicker">Anmeldung</p>
+                        <h2 className="title is-4">Zugang waehlen</h2>
+                        <form onSubmit={anmelden} className="login-form">
+                            <div className="field">
+                                <label className="label" htmlFor="login-username">Benutzername</label>
+                                <div className="control">
+                                    <input
+                                        id="login-username"
+                                        className="input"
+                                        name="username"
+                                        disabled={isSubmitting}
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        placeholder="Benutzername"
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+                            <div className="field">
+                                <label className="label" htmlFor="login-password">Passwort</label>
+                                <div className="control">
+                                    <input
+                                        id="login-password"
+                                        className="input"
+                                        name="password"
+                                        disabled={isSubmitting}
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Passwort"
+                                    />
+                                </div>
+                            </div>
+                            {isSubmitting && (
+                                <div className="notification is-info is-light login-status">
+                                    Anmeldung läuft, Daten werden geladen...
+                                </div>
+                            )}
+                            {authError && (
+                                <div className="notification is-danger is-light login-error">
+                                    {authErrorMessage}
+                                </div>
+                            )}
+                            {sessionExpiredMessage && (
+                                <div className="notification is-warning is-light login-error">
+                                    {sessionExpiredMessage}
+                                </div>
+                            )}
+                            {error && <div className="notification is-danger is-light login-error">{error}</div>}
+                            <button className="button is-primary is-fullwidth" type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? "Anmeldung läuft..." : "Anmelden"}
+                            </button>
+                        </form>
                     </div>
-                )}
-                {authError && (
-                    <div className="login-error">
-                        {authErrorMessage}
-                    </div>
-                )}
-                {sessionExpiredMessage && (
-                    <div className="login-error">
-                        {sessionExpiredMessage}
-                    </div>
-                )}
-                {error && <div className="login-error">{error}</div>}
-                <br />
-                <button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Anmeldung läuft..." : "Anmelden"}
-                </button>
-            </form>
-            <div className="quick-logins">
-                <h1>Demo Nutzer:</h1>
-                {QUICK_LOGINS.map((user) => (
-                    <button
-                        key={user.username}
-                        onClick={() => quickLogin(user)}
-                        disabled={isSubmitting}
-                    >
-                        {user.label}
-                    </button>
-                ))}
-                <h2>Danach auf "Anmelden" klicken</h2>
-            </div>
+                </div>
+            </section>
+            <section className="quick-logins">
+                <div className="quick-logins-header">
+                    <p className="quick-logins-kicker">Demo-Rollen</p>
+                    <h2 className="title is-4">Schnelleinstiege für Unterricht und Tests</h2>
+                    <p>Rolle auswaehlen, Zugangsdaten uebernehmen und danach auf <strong>Anmelden</strong> klicken.</p>
+                </div>
+                <div className="quick-logins-grid">
+                    {QUICK_LOGINS.map((user) => (
+                        <button
+                            className="button is-link is-light quick-login-button"
+                            key={user.username}
+                            onClick={() => quickLogin(user)}
+                            disabled={isSubmitting}
+                            type="button"
+                        >
+                            {user.label}
+                        </button>
+                    ))}
+                </div>
+            </section>
         </div>
     );
 }

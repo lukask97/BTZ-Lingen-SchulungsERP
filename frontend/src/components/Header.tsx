@@ -8,13 +8,16 @@ function Header({ isSidebarCollapsed, onToggleSidebar }: HeaderProps) {
         <header className="header">
             <button
                 type="button"
-                className="mobile-sidebar-button"
+                className="mobile-sidebar-button button is-light"
                 onClick={onToggleSidebar}
-                aria-label={isSidebarCollapsed ? "Navigation öffnen" : "Navigation schließen"}
+                aria-label={isSidebarCollapsed ? "Navigation oeffnen" : "Navigation schliessen"}
             >
-                {isSidebarCollapsed ? "Menü" : "Schließen"}
+                {isSidebarCollapsed ? "Menue" : "Schliessen"}
             </button>
-            <h3>Willkommen</h3>
+            <div className="header-copy">
+                <p className="header-kicker">Schulungs-ERP</p>
+                <h3>Willkommen im Lernsystem</h3>
+            </div>
         </header>
     );
 }
