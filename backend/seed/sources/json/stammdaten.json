@@ -13,10 +13,10 @@
       "optionen": [
         "Fahrradbekleidung",
         "Sicherheitsbekleidung",
-        "SonderfahrrÃ¤der",
+        "Sonderfahrräder",
         "Lastenbikes"
       ],
-      "notiz": "",
+      "notiz": "Bestandskunde mit regelmaessigen Anfragen zu Sicherheitsausstattung und Filialbedarf.",
       "ansprechpartner": [
         {
           "id": "kp-1-1",
@@ -46,7 +46,7 @@
         "Reparatur Service"
       ],
       "website": "https://www.emsland.com/",
-      "notiz": "",
+      "notiz": "Projektkunde mit saisonalen Bestellungen und enger Abstimmung zu Veranstaltungsterminen.",
       "ansprechpartner": [
         {
           "id": "kp-2-1",
@@ -93,7 +93,7 @@
     {
       "id": 4,
       "kundenNr": "DB10004",
-      "firma": "Stadtwerke Lingen MobilitÃ¤t",
+      "firma": "Stadtwerke Lingen Mobilität",
       "anschrift": "KaiserstraÃŸe 14",
       "plz": "49808",
       "ort": "Lingen",
@@ -110,7 +110,7 @@
         {
           "id": "kp-4-1",
           "name": "Nadine Albers",
-          "abteilung": "MobilitÃ¤tsmanagement"
+          "abteilung": "Mobilitätsmanagement"
         },
         {
           "id": "kp-4-2",
@@ -131,11 +131,11 @@
       "abc": "C",
       "iban": "DE12500105171234567890",
       "optionen": [
-        "SchulungsfahrrÃ¤der",
+        "Schulungsfahrräder",
         "Helme",
         "Projektmaterial"
       ],
-      "website": "",
+      "website": "https://www.jugendwerkstatt-ems-vechte.de/",
       "ansprechpartner": [
         {
           "id": "kp-5-1",
@@ -157,15 +157,15 @@
       "artikelNr": "ART001",
       "name": "Schulungsfahrrad City",
       "kategorieId": 4,
-      "kategorie": "FahrrÃ¤der",
-      "kategoriePfad": "FahrrÃ¤der > Citybike",
+      "kategorie": "Fahrräder",
+      "kategoriePfad": "Fahrräder > Citybike",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 420,
       "verkaufspreis": 799,
       "bestand": 4,
       "mindestmenge": 3,
       "bedarfsmeldungBei": 5,
-      "beschreibung": "Komplettes Fahrrad als Beispiel fÃ¼r einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
+      "beschreibung": "Komplettes Fahrrad als Beispiel für einen zusammengesetzten Artikel. Bereits nachbestellt und daher im Zulauf."
     },
     {
       "id": 2,
@@ -187,15 +187,15 @@
       "artikelNr": "ART003",
       "name": "Fahrradhelm",
       "kategorieId": 8,
-      "kategorie": "ZubehÃ¶r",
-      "kategoriePfad": "ZubehÃ¶r > Helm",
+      "kategorie": "Zubehör",
+      "kategoriePfad": "Zubehör > Helm",
       "artikelTyp": "Einzelartikel",
       "einkaufspreis": 24.5,
       "verkaufspreis": 59.99,
       "bestand": 12,
       "mindestmenge": 10,
       "bedarfsmeldungBei": 15,
-      "beschreibung": "Sicherer Fahrradhelm mit Zertifikat. ZusÃ¤tzliche Menge ist bereits bestellt."
+      "beschreibung": "Sicherer Fahrradhelm mit Zertifikat. Zusätzliche Menge ist bereits bestellt."
     },
     {
       "id": 4,
@@ -210,7 +210,7 @@
       "bestand": 8,
       "mindestmenge": 6,
       "bedarfsmeldungBei": 9,
-      "beschreibung": "Rahmen als Einzelkomponente fÃ¼r Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
+      "beschreibung": "Rahmen als Einzelkomponente für Schulungsbeispiele. Bedarfsmeldung wird bereits erreicht."
     },
     {
       "id": 5,
@@ -225,7 +225,7 @@
       "bestand": 9,
       "mindestmenge": 10,
       "bedarfsmeldungBei": 12,
-      "beschreibung": "Lenker fÃ¼r Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
+      "beschreibung": "Lenker für Fahrradmontage. Sicherheitsbestand ist aktuell unterschritten."
     },
     {
       "id": 6,
@@ -255,7 +255,7 @@
       "bestand": 14,
       "mindestmenge": 8,
       "bedarfsmeldungBei": 10,
-      "beschreibung": "Komfortsattel fÃ¼r SchulungsfahrrÃ¤der mit ausreichend freiem Bestand."
+      "beschreibung": "Komfortsattel für Schulungsfahrräder mit ausreichend freiem Bestand."
     },
     {
       "id": 8,
@@ -270,7 +270,7 @@
       "bestand": 10,
       "mindestmenge": 5,
       "bedarfsmeldungBei": 8,
-      "beschreibung": "Sportsattel fÃ¼r die Individualisierung."
+      "beschreibung": "Sportsattel für die Individualisierung."
     },
     {
       "id": 9,
@@ -292,23 +292,23 @@
       "artikelNr": "ART010",
       "name": "Schulungsfahrrad Premium",
       "kategorieId": 4,
-      "kategorie": "FahrrÃ¤der",
-      "kategoriePfad": "FahrrÃ¤der > Citybike",
+      "kategorie": "Fahrräder",
+      "kategoriePfad": "Fahrräder > Citybike",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 500,
       "verkaufspreis": 999,
       "bestand": 2,
       "mindestmenge": 1,
       "bedarfsmeldungBei": 3,
-      "beschreibung": "Premium Fahrrad, bei dem Komponenten individualisiert werden kÃ¶nnen."
+      "beschreibung": "Premium Fahrrad, bei dem Komponenten individualisiert werden können."
     },
     {
       "id": 11,
       "artikelNr": "ART011",
       "name": "Schulungsfahrrad Trekking",
       "kategorieId": 4,
-      "kategorie": "FahrrÃ¤der",
-      "kategoriePfad": "FahrrÃ¤der > Trekking",
+      "kategorie": "Fahrräder",
+      "kategoriePfad": "Fahrräder > Trekking",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 550,
       "verkaufspreis": 1099,
@@ -322,30 +322,30 @@
       "artikelNr": "ART012",
       "name": "Schulungsfahrrad Urban Flex",
       "kategorieId": 4,
-      "kategorie": "FahrrÃ¤der",
-      "kategoriePfad": "FahrrÃ¤der > Citybike",
+      "kategorie": "Fahrräder",
+      "kategoriePfad": "Fahrräder > Citybike",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 470,
       "verkaufspreis": 939,
       "bestand": 4,
       "mindestmenge": 2,
       "bedarfsmeldungBei": 3,
-      "beschreibung": "Urbanes Schulungsrad mit mehreren Individualisierungsoptionen fÃ¼r Demo-Angebote."
+      "beschreibung": "Urbanes Schulungsrad mit mehreren Individualisierungsoptionen für Demo-Angebote."
     },
     {
       "id": 13,
       "artikelNr": "ART013",
       "name": "Schulungsfahrrad Cargo Start",
       "kategorieId": 4,
-      "kategorie": "FahrrÃ¤der",
-      "kategoriePfad": "FahrrÃ¤der > Lastenrad",
+      "kategorie": "Fahrräder",
+      "kategoriePfad": "Fahrräder > Lastenrad",
       "artikelTyp": "Baugruppe",
       "einkaufspreis": 690,
       "verkaufspreis": 1399,
       "bestand": 2,
       "mindestmenge": 1,
       "bedarfsmeldungBei": 2,
-      "beschreibung": "Einfaches Lastenrad fÃ¼r Schulungs- und VorfÃ¼hrzwecke mit konfigurierbaren Komponenten."
+      "beschreibung": "Einfaches Lastenrad für Schulungs- und Vorführzwecke mit konfigurierbaren Komponenten."
     },
     {
       "id": 14,
@@ -360,7 +360,7 @@
       "bestand": 7,
       "mindestmenge": 4,
       "bedarfsmeldungBei": 5,
-      "beschreibung": "Breiter Komfortlenker als Upgrade fÃ¼r individualisierbare Baugruppen."
+      "beschreibung": "Breiter Komfortlenker als Upgrade für individualisierbare Baugruppen."
     },
     {
       "id": 15,
@@ -375,7 +375,7 @@
       "bestand": 11,
       "mindestmenge": 6,
       "bedarfsmeldungBei": 8,
-      "beschreibung": "Pannensicherer Reifen als Upgrade fÃ¼r intensive SchulungseinsÃ¤tze."
+      "beschreibung": "Pannensicherer Reifen als Upgrade für intensive Schulungseinsätze."
     },
     {
       "id": 16,
@@ -390,7 +390,7 @@
       "bestand": 9,
       "mindestmenge": 4,
       "bedarfsmeldungBei": 6,
-      "beschreibung": "Gel-Sattel fÃ¼r lÃ¤ngere Fahrten und Komfort-Demos."
+      "beschreibung": "Gel-Sattel für längere Fahrten und Komfort-Demos."
     }
   ],
   "artikelStueckliste": [
@@ -698,7 +698,7 @@
       "zeEinheit": "",
       "einkaufspreis": 0,
       "verkaufspreis": 65,
-      "beschreibung": "Einfache Werkstattleistung fÃ¼r Reparaturen."
+      "beschreibung": "Einfache Werkstattleistung für Reparaturen."
     },
     {
       "id": 2,
@@ -709,7 +709,7 @@
       "zeEinheit": "",
       "einkaufspreis": 0,
       "verkaufspreis": 89,
-      "beschreibung": "Wartungspaket fÃ¼r FahrrÃ¤der oder Fuhrpark."
+      "beschreibung": "Wartungspaket für Fahrräder oder Fuhrpark."
     },
     {
       "id": 3,
@@ -946,7 +946,7 @@
       "username": "gf",
       "email": "gf@test.de",
       "password": "gf",
-      "rolle": "GeschÃ¤ftsfÃ¼hrung",
+      "rolle": "Geschäftsführung",
       "vorname": "Chef",
       "nachname": "Carsten",
       "permissions": [
@@ -958,12 +958,12 @@
     {
       "id": 1,
       "name": "Admin",
-      "beschreibung": "VollstÃ¤ndiger Zugriff auf alle Funktionen"
+      "beschreibung": "Vollständiger Zugriff auf alle Funktionen"
     },
     {
       "id": 2,
       "name": "Lager",
-      "beschreibung": "Verwaltung des Lagers und BestÃ¤nde"
+      "beschreibung": "Verwaltung des Lagers und Bestände"
     },
     {
       "id": 3,
@@ -993,7 +993,7 @@
     {
       "id": 8,
       "name": "Verkauf Azubi",
-      "beschreibung": "Verkauf fÃ¼r Auszubildende"
+      "beschreibung": "Verkauf für Auszubildende"
     },
     {
       "id": 9,
@@ -1002,8 +1002,8 @@
     },
     {
       "id": 10,
-      "name": "GeschÃ¤ftsfÃ¼hrung",
-      "beschreibung": "Vollzugriff fÃ¼r die GeschÃ¤ftsfÃ¼hrung"
+      "name": "Geschäftsführung",
+      "beschreibung": "Vollzugriff für die Geschäftsführung"
     }
   ],
   "rechte": [
@@ -1090,12 +1090,12 @@
     {
       "id": 17,
       "name": "gf.lesen",
-      "beschreibung": "GeschÃ¤ftsfÃ¼hrungsdaten lesen"
+      "beschreibung": "Geschäftsführungsdaten lesen"
     },
     {
       "id": 18,
       "name": "gf.bearbeiten",
-      "beschreibung": "GeschÃ¤ftsfÃ¼hrungsdaten bearbeiten"
+      "beschreibung": "Geschäftsführungsdaten bearbeiten"
     },
     {
       "id": 19,
@@ -1120,7 +1120,7 @@
     {
       "id": 23,
       "name": "kunde.loeschen",
-      "beschreibung": "Kundendaten lÃ¶schen"
+      "beschreibung": "Kundendaten löschen"
     },
     {
       "id": 24,
@@ -1145,7 +1145,7 @@
     {
       "id": 28,
       "name": "artikel.loeschen",
-      "beschreibung": "Artikeldaten lÃ¶schen"
+      "beschreibung": "Artikeldaten löschen"
     },
     {
       "id": 29,
@@ -1170,7 +1170,7 @@
     {
       "id": 33,
       "name": "rechnung.loeschen",
-      "beschreibung": "Rechnungen lÃ¶schen"
+      "beschreibung": "Rechnungen löschen"
     },
     {
       "id": 34,
@@ -1195,7 +1195,7 @@
     {
       "id": 38,
       "name": "lager.loeschen",
-      "beschreibung": "Lagerdaten lÃ¶schen"
+      "beschreibung": "Lagerdaten löschen"
     },
     {
       "id": 39,
@@ -1225,7 +1225,7 @@
     {
       "id": 44,
       "name": "benutzer.loeschen",
-      "beschreibung": "Benutzerdaten lÃ¶schen"
+      "beschreibung": "Benutzerdaten löschen"
     },
     {
       "id": 45,
@@ -1250,7 +1250,7 @@
     {
       "id": 49,
       "name": "rollen.loeschen",
-      "beschreibung": "Rollen lÃ¶schen"
+      "beschreibung": "Rollen löschen"
     },
     {
       "id": 50,
@@ -1275,7 +1275,7 @@
     {
       "id": 54,
       "name": "rechte.loeschen",
-      "beschreibung": "Rechte lÃ¶schen"
+      "beschreibung": "Rechte löschen"
     }
   ],
   "rollenRechte": [
@@ -1600,7 +1600,7 @@
     {
       "id": 54,
       "rolleId": 10,
-      "rolleName": "GeschÃ¤ftsfÃ¼hrung",
+      "rolleName": "Geschäftsführung",
       "rechtName": "*"
     }
   ]

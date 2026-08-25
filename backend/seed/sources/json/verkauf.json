@@ -12,7 +12,7 @@
       "gueltigBis": "2026-08-04",
       "rabattBetrag": 0,
       "gesamtbetrag": 1348.5,
-      "status": "Ã¼berarbeitet"
+      "status": "überarbeitet"
     },
     {
       "id": 2,
@@ -697,7 +697,7 @@
       "reklamationsNr": "REK-2026-001",
       "kundeId": 2,
       "datum": "2026-07-24",
-      "beschreibung": "Ein Fahrradhelm wurde beschÃ¤digt geliefert.",
+      "beschreibung": "Ein Fahrradhelm wurde beschädigt geliefert.",
       "status": "neu"
     }
   ],
@@ -708,7 +708,7 @@
       "titel": "Sommeraktion Lastenbikes",
       "datum": "2026-08-01",
       "status": "geplant",
-      "beschreibung": "Regionale Kampagne fÃ¼r Lastenbikes und ZubehÃ¶r."
+      "beschreibung": "Regionale Kampagne für Lastenbikes und Zubehör."
     },
     {
       "id": 2,
@@ -716,7 +716,7 @@
       "titel": "Newsletter August",
       "datum": "2026-08-05",
       "status": "Entwurf",
-      "beschreibung": "Neue FahrrÃ¤der, Serviceangebote und Termine."
+      "beschreibung": "Neue Fahrräder, Serviceangebote und Termine."
     },
     {
       "id": 3,
@@ -736,7 +736,7 @@
       "aufgaben": [
         "Ãœberweisungen",
         "Lohn und Gehalt",
-        "BankÃ¼bersicht"
+        "Bankübersicht"
       ]
     },
     {
@@ -745,7 +745,7 @@
       "name": "Einkauf",
       "zuordnung": "B â€“ Materialwirtschaft",
       "aufgaben": [
-        "EK-RechnungsprÃ¼fung",
+        "EK-Rechnungsprüfung",
         "Wareneingang"
       ]
     },
@@ -814,18 +814,18 @@
       "zuordnung": "D â€“ Stabsstelle unter BÃ¼rowesen",
       "aufgaben": [
         "IT-Ausstattung",
-        "Webshop, Flyer und PrÃ¤sentationen",
+        "Webshop, Flyer und Präsentationen",
         "Bilder und Gestaltung",
-        "Schnittstelle fÃ¼r WW, BW und AGF"
+        "Schnittstelle für WW, BW und AGF"
       ]
     },
     {
       "id": 9,
       "kuerzel": "AGF",
-      "name": "Stellvertretende GeschÃ¤ftsfÃ¼hrung",
+      "name": "Stellvertretende Geschäftsführung",
       "zuordnung": "Ãœbergeordnet",
       "aufgaben": [
-        "Stellvertretende Leitung fÃ¼r die GeschÃ¤ftsfÃ¼hrung"
+        "Stellvertretende Leitung für die Geschäftsführung"
       ]
     }
   ],
@@ -839,7 +839,7 @@
       "kanal": "Telefon",
       "status": "in Bearbeitung",
       "datum": "2026-07-24",
-      "anliegen": "Frage nach Lieferzeiten fÃ¼r Sicherheitsjacken."
+      "anliegen": "Frage nach Lieferzeiten für Sicherheitsjacken."
     },
     {
       "id": 2,
@@ -850,7 +850,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-07-28",
-      "anliegen": "Bitte Angebot Ã¼ber 30 Fahrradhelme mit kurzfristiger Lieferung senden."
+      "anliegen": "Bitte Angebot über 30 Fahrradhelme mit kurzfristiger Lieferung senden."
     },
     {
       "id": 3,
@@ -861,7 +861,7 @@
       "kanal": "Telefon",
       "status": "offen",
       "datum": "2026-08-05",
-      "anliegen": "Wir benÃ¶tigen kurzfristig ein Schulungsfahrrad fÃ¼r eine VorfÃ¼hrung."
+      "anliegen": "Wir benötigen kurzfristig ein Schulungsfahrrad für eine Vorführung."
     },
     {
       "id": 4,
@@ -872,7 +872,7 @@
       "kanal": "E-Mail",
       "status": "erledigt",
       "datum": "2026-08-01",
-      "anliegen": "Bitte Angebot fÃ¼r eine mobile Wartung von sechs FahrrÃ¤dern erstellen."
+      "anliegen": "Bitte Angebot für eine mobile Wartung von sechs Fahrrädern erstellen."
     },
     {
       "id": 5,
@@ -883,7 +883,7 @@
       "kanal": "Telefon",
       "status": "offen",
       "datum": "2026-08-10",
-      "anliegen": "Anfrage fÃ¼r Helme und SchulungsfahrrÃ¤der fÃ¼r ein Herbstprojekt."
+      "anliegen": "Anfrage für Helme und Schulungsfahrräder für ein Herbstprojekt."
     },
     {
       "id": 14,
@@ -894,7 +894,7 @@
       "kanal": "E-Mail",
       "status": "offen",
       "datum": "2026-08-18",
-      "anliegen": "Bitte ein Angebot fÃ¼r zwei SchulungsfahrrÃ¤der Premium mit Komfort- oder Sportsattel als AuswahlmÃ¶glichkeit erstellen."
+      "anliegen": "Bitte ein Angebot für zwei Schulungsfahrräder Premium mit Komfort- oder Sportsattel als Auswahlmöglichkeit erstellen."
     },
     {
       "id": 6,
@@ -905,7 +905,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-03-09",
-      "anliegen": "Bitte drei zusÃ¤tzliche Helme fÃ¼r den FrÃ¼hjahrsworkshop anbieten."
+      "anliegen": "Bitte drei zusätzliche Helme für den Frühjahrsworkshop anbieten."
     },
     {
       "id": 7,
@@ -916,7 +916,7 @@
       "kanal": "Telefon",
       "status": "angenommen",
       "datum": "2026-03-27",
-      "anliegen": "Zwei SchulungsfahrrÃ¤der fÃ¼r eine interne Aktion werden benÃ¶tigt."
+      "anliegen": "Zwei Schulungsfahrräder für eine interne Aktion werden benötigt."
     },
     {
       "id": 8,
@@ -927,7 +927,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-04-16",
-      "anliegen": "Bitte Sicherheitsjacken fÃ¼r eine kleine Besuchergruppe kalkulieren."
+      "anliegen": "Bitte Sicherheitsjacken für eine kleine Besuchergruppe kalkulieren."
     },
     {
       "id": 9,
@@ -938,7 +938,7 @@
       "kanal": "Telefon",
       "status": "angenommen",
       "datum": "2026-05-05",
-      "anliegen": "Wartung von sechs SchulungsrÃ¤dern vor einem Aktionstag."
+      "anliegen": "Wartung von sechs Schulungsrädern vor einem Aktionstag."
     },
     {
       "id": 10,
@@ -949,7 +949,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-05-20",
-      "anliegen": "Drei Sicherheitsjacken fÃ¼r neue Teilnehmende anfragen."
+      "anliegen": "Drei Sicherheitsjacken für neue Teilnehmende anfragen."
     },
     {
       "id": 11,
@@ -960,7 +960,7 @@
       "kanal": "Telefon",
       "status": "angenommen",
       "datum": "2026-06-08",
-      "anliegen": "Kurze Wartung eines VorfÃ¼hrrads anfragen."
+      "anliegen": "Kurze Wartung eines Vorführrads anfragen."
     },
     {
       "id": 12,
@@ -971,7 +971,7 @@
       "kanal": "E-Mail",
       "status": "angenommen",
       "datum": "2026-06-25",
-      "anliegen": "Zwei weitere Helme fÃ¼r Sommertermine werden benÃ¶tigt."
+      "anliegen": "Zwei weitere Helme für Sommertermine werden benötigt."
     },
     {
       "id": 13,
@@ -982,7 +982,7 @@
       "kanal": "Telefon",
       "status": "angenommen",
       "datum": "2026-07-07",
-      "anliegen": "Ein zusÃ¤tzliches Schulungsfahrrad fÃ¼r den Juli bestellen."
+      "anliegen": "Ein zusätzliches Schulungsfahrrad für den Juli bestellen."
     }
   ],
   "nachrichten": [
@@ -996,8 +996,8 @@
       "senderRolle": "Kunde",
       "senderName": "Campus Baumarkt GmbH",
       "kanal": "Telefon",
-      "betreff": "Lieferzeiten fÃ¼r Sicherheitsjacken",
-      "nachricht": "Wir benÃ¶tigen eine RÃ¼ckmeldung zu Lieferzeiten und mÃ¶glichen Mengenstaffeln.",
+      "betreff": "Lieferzeiten für Sicherheitsjacken",
+      "nachricht": "Wir benötigen eine Rückmeldung zu Lieferzeiten und möglichen Mengenstaffeln.",
       "typ": "Anfrage"
     },
     {
@@ -1008,10 +1008,10 @@
       "kundeId": 1,
       "datum": "2026-07-25",
       "senderRolle": "Verkauf",
-      "senderName": "SchÃ¼lerfirma Verkauf",
+      "senderName": "Schülerfirma Verkauf",
       "kanal": "E-Mail",
       "betreff": "Angebot ANG-2026-001.0",
-      "nachricht": "Ein erstes Angebot wurde erstellt und an den Kunden zur PrÃ¼fung weitergegeben.",
+      "nachricht": "Ein erstes Angebot wurde erstellt und an den Kunden zur Prüfung weitergegeben.",
       "typ": "Angebot"
     },
     {
@@ -1024,8 +1024,8 @@
       "senderRolle": "Kunde",
       "senderName": "Nordrad Campus Service",
       "kanal": "E-Mail",
-      "betreff": "Mobile Wartung fÃ¼r sechs FahrrÃ¤der",
-      "nachricht": "Bitte senden Sie uns ein Angebot fÃ¼r eine mobile Wartung von sechs FahrrÃ¤dern vor Ort.",
+      "betreff": "Mobile Wartung für sechs Fahrräder",
+      "nachricht": "Bitte senden Sie uns ein Angebot für eine mobile Wartung von sechs Fahrrädern vor Ort.",
       "typ": "Anfrage"
     },
     {
@@ -1037,10 +1037,10 @@
       "kundeId": 3,
       "datum": "2026-08-02",
       "senderRolle": "Verkauf",
-      "senderName": "SchÃ¼lerfirma Verkauf",
+      "senderName": "Schülerfirma Verkauf",
       "kanal": "E-Mail",
       "betreff": "Angebot ANG-2026-004.0",
-      "nachricht": "Das Serviceangebot wurde erstellt und vom Kunden direkt bestÃ¤tigt.",
+      "nachricht": "Das Serviceangebot wurde erstellt und vom Kunden direkt bestätigt.",
       "typ": "Angebot"
     },
     {
@@ -1054,7 +1054,7 @@
       "senderName": "Jugendwerkstatt Ems-Vechte",
       "kanal": "Telefon",
       "betreff": "Projektanfrage Herbst",
-      "nachricht": "Wir planen ein Herbstprojekt und benÃ¶tigen SchulungsfahrrÃ¤der sowie mehrere Helme.",
+      "nachricht": "Wir planen ein Herbstprojekt und benötigen Schulungsfahrräder sowie mehrere Helme.",
       "typ": "Anfrage"
     },
     {
@@ -1066,7 +1066,7 @@
       "kundeId": 5,
       "datum": "2026-08-11",
       "senderRolle": "Verkauf",
-      "senderName": "SchÃ¼lerfirma Verkauf",
+      "senderName": "Schülerfirma Verkauf",
       "kanal": "E-Mail",
       "betreff": "Angebot ANG-2026-005.0",
       "nachricht": "Das Angebot ist intern vorbereitet und wartet noch auf die finale Freigabe vor dem Versand.",
@@ -1246,7 +1246,7 @@
       "rechnungId": 2,
       "datum": "2026-07-21",
       "status": "archiviert",
-      "beschreibung": "Digitale Ablage fÃ¼r die erste Beispielrechnung."
+      "beschreibung": "Digitale Ablage für die erste Beispielrechnung."
     },
     {
       "id": 2,
@@ -1264,7 +1264,7 @@
       "rechnungId": 1,
       "datum": "2026-07-23",
       "status": "versendet",
-      "beschreibung": "1. Mahnung fÃ¼r eine fÃ¤llige Ausgangsrechnung."
+      "beschreibung": "1. Mahnung für eine fällige Ausgangsrechnung."
     },
     {
       "id": 4,
@@ -1300,7 +1300,7 @@
       "titel": "Rabattfreigabe GroÃŸkunde",
       "bereich": "verkauf",
       "status": "offen",
-      "verantwortung": "GeschÃ¤ftsfÃ¼hrung",
+      "verantwortung": "Geschäftsführung",
       "datum": "2026-07-25",
       "bezug": "GroÃŸbestellung Nordrad Einkauf",
       "notiz": "10 % Mengenrabatt fÃ¼r den GroÃŸkunden prÃ¼fen."
@@ -1322,11 +1322,11 @@
     },
     {
       "id": 2,
-      "titel": "LagerÃ¼berblick",
+      "titel": "Lagerüberblick",
       "bereich": "logistik",
       "datum": "2026-07-25",
       "status": "Entwurf",
-      "zusammenfassung": "Niedrige BestÃ¤nde bei LastenrÃ¤dern und Helmen.",
+      "zusammenfassung": "Niedrige Bestände bei Lastenrädern und Helmen.",
       "zielgruppe": "Klasse",
       "empfohlenAktion": "Bedarfsmeldung und Bestellung aus dem Lagerstand ableiten.",
       "startdatum": "2026-07-01",
@@ -1375,7 +1375,7 @@
     {
       "id": 1,
       "name": "Lena Fischer",
-      "stelle": "KaufmÃ¤nnische Assistenz",
+      "stelle": "Kaufmännische Assistenz",
       "datum": "2026-07-20",
       "status": "eingegangen",
       "notiz": "Gute Vorkenntnisse in Excel und Kundenkontakt."
@@ -1425,7 +1425,7 @@
       "mitarbeiterId": 1,
       "von": "2026-07-24",
       "bis": "2026-07-26",
-      "grund": "ErkÃ¤ltung",
+      "grund": "Erkältung",
       "status": "eingegangen"
     }
   ],
@@ -1447,7 +1447,7 @@
       "titel": "Arbeitsvertrag Fachkraft Lager",
       "datum": "2024-08-01",
       "status": "archiviert",
-      "notiz": "Grundlage fÃ¼r die simulierte Personalakte."
+      "notiz": "Grundlage für die simulierte Personalakte."
     },
     {
       "id": 2,
@@ -1474,7 +1474,7 @@
       "titel": "Marketing-Schulung Kampagnenplanung",
       "datum": "2026-07-15",
       "status": "archiviert",
-      "notiz": "Teilnahmebescheinigung fÃ¼r interne Weiterbildung."
+      "notiz": "Teilnahmebescheinigung für interne Weiterbildung."
     }
   ],
   "vertriebsdokumente": [
@@ -1484,11 +1484,11 @@
       "angebotId": 1,
       "anfrageId": 1,
       "vorgangId": "anfrage-1",
-      "dokumentTyp": "AuftragsbestÃ¤tigung",
-      "titel": "AuftragsbestÃ¤tigung AU-2026-001",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-001",
       "datum": "2026-07-25",
       "status": "fertig",
-      "notiz": "Bestellung bestÃ¤tigt und Liefertermin angekÃ¼ndigt."
+      "notiz": "Bestellung bestätigt und Liefertermin angekündigt."
     },
     {
       "id": 2,
@@ -1509,12 +1509,12 @@
       "angebotId": 3,
       "anfrageId": 2,
       "vorgangId": "anfrage-2",
-      "dokumentTyp": "AuftragsbestÃ¤tigung",
-      "titel": "AuftragsbestÃ¤tigung AU-2026-002",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-002",
       "datum": "2026-07-30",
       "status": "versendet",
       "versendetAm": "2026-07-30",
-      "notiz": "Kunde hat die AuftragsbestÃ¤tigung am selben Tag erhalten."
+      "notiz": "Kunde hat die Auftragsbestätigung am selben Tag erhalten."
     },
     {
       "id": 4,
@@ -1542,7 +1542,7 @@
       "datum": "2026-07-31",
       "status": "versendet",
       "versendetAm": "2026-07-31",
-      "notiz": "Begleitpapier fÃ¼r die Helm-Lieferung."
+      "notiz": "Begleitpapier für die Helm-Lieferung."
     },
     {
       "id": 6,
@@ -1550,12 +1550,12 @@
       "angebotId": 5,
       "anfrageId": 4,
       "vorgangId": "anfrage-4",
-      "dokumentTyp": "AuftragsbestÃ¤tigung",
-      "titel": "AuftragsbestÃ¤tigung AU-2026-004",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-004",
       "datum": "2026-08-03",
       "status": "versendet",
       "versendetAm": "2026-08-03",
-      "notiz": "Serviceauftrag wurde direkt bestÃ¤tigt."
+      "notiz": "Serviceauftrag wurde direkt bestätigt."
     },
     {
       "id": 7,
@@ -1568,7 +1568,7 @@
       "datum": "2026-08-04",
       "status": "versendet",
       "versendetAm": "2026-08-04",
-      "notiz": "Einsatzunterlagen fÃ¼r das mobile Serviceteam."
+      "notiz": "Einsatzunterlagen für das mobile Serviceteam."
     },
     {
       "id": 8,
@@ -1576,8 +1576,8 @@
       "angebotId": 6,
       "anfrageId": 5,
       "vorgangId": "anfrage-5",
-      "dokumentTyp": "AuftragsbestÃ¤tigung",
-      "titel": "AuftragsbestÃ¤tigung AU-2026-005",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-005",
       "datum": "2026-08-12",
       "status": "erstellt",
       "notiz": "Liegt vorbereitet vor und wartet auf den Versand nach Abschluss der Freigabe."
@@ -1600,7 +1600,7 @@
       "titel": "Anfrage Lieferzeit und Staffelpreise",
       "datum": "2026-07-19",
       "status": "versendet",
-      "notiz": "Lieferant soll Lieferzeit und Preisstaffel bestÃ¤tigen."
+      "notiz": "Lieferant soll Lieferzeit und Preisstaffel bestätigen."
     },
     {
       "id": 3,
@@ -1609,7 +1609,35 @@
       "titel": "Bestellung EK-2026-001",
       "datum": "2026-07-20",
       "status": "fertig",
-      "notiz": "Verbindliche Bestellung ausgelÃ¶st."
+      "notiz": "Verbindliche Bestellung ausgelöst."
+    },
+    {
+      "id": 4,
+      "bestellungId": 2,
+      "dokumentTyp": "Bedarfsmeldung",
+      "titel": "Bedarfsmeldung Schulungsfahrrad City",
+      "datum": "2026-07-31",
+      "status": "freigegeben",
+      "notiz": "Niedriger Bestand bei Citybikes hat eine Nachbestellung ausgeloest."
+    },
+    {
+      "id": 5,
+      "bestellungId": 2,
+      "dokumentTyp": "Bestellung",
+      "titel": "Bestellung EK-2026-002",
+      "datum": "2026-08-01",
+      "status": "versendet",
+      "versendetAm": "2026-08-02",
+      "notiz": "Bestellung wurde nach Bedarfsmeldung an Kalkhoff Werke versendet."
+    },
+    {
+      "id": 6,
+      "bestellungId": 2,
+      "dokumentTyp": "Warenannahmeprotokoll",
+      "titel": "Warenannahmeprotokoll EK-2026-002",
+      "datum": "2026-08-06",
+      "status": "fertig",
+      "notiz": "Fuenf Citybikes wurden geprueft, angenommen und fuer die Eingangsrechnung freigegeben."
     }
   ]
 }

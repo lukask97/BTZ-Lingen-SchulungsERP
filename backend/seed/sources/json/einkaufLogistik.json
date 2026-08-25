@@ -21,9 +21,9 @@
       "anschrift": "Max-Weber Str. 2",
       "plz": "49716",
       "ort": "Meppen",
-      "segment": "Fahrradbekleidung, Sicherheitsbekleidung, SonderfahrrÃ¤der, Lastenbikes",
+      "segment": "Fahrradbekleidung, Sicherheitsbekleidung, Sonderfahrräder, Lastenbikes",
       "iban": "DE91500105178640732418",
-      "fuerBts": "Alternativlieferant fÃ¼r ZubehÃ¶r und Lastenbikes",
+      "fuerBts": "Alternativlieferant für Zubehör und Lastenbikes",
       "bewertung": 4,
       "abc": "B"
     },
@@ -34,9 +34,9 @@
       "anschrift": "Europa-Allee 26",
       "plz": "49685",
       "ort": "Emstek",
-      "segment": "Fahrradwerk, FahrradzubehÃ¶r, Einzelteile, Service",
+      "segment": "Fahrradwerk, Fahrradzubehör, Einzelteile, Service",
       "iban": "DE68500500001234567890",
-      "fuerBts": "",
+      "fuerBts": "Hauptlieferant fuer Fahrraeder, Ersatzteile und Werkstattbedarf",
       "bewertung": 5,
       "abc": "A"
     },
@@ -45,11 +45,11 @@
       "lieferantenNr": "KR10003",
       "firma": "Meister Handels GmbH",
       "anschrift": "IndustriestraÃŸe 9",
-      "plz": "",
-      "ort": "",
-      "segment": "",
+      "plz": "49477",
+      "ort": "Ibbenbueren",
+      "segment": "Zubehoer, Helme, Kleinserien und kurzfristige Nachlieferungen",
       "iban": "DE30500105170648489890",
-      "fuerBts": "",
+      "fuerBts": "Ergaenzungslieferant fuer schnelle Kleinmengen und Vergleichsangebote",
       "bewertung": 3,
       "abc": "C"
     },
@@ -240,19 +240,21 @@
       "lehrkraftAngebotAm": "2026-07-21",
       "lehrkraftAngebotPreis": 73.5,
       "lehrkraftLieferzeitTage": 5,
-      "lehrkraftAngebotText": "Standardangebot fÃ¼r drei Helme aus dem Vergleich."
+      "lehrkraftAngebotText": "Standardangebot für drei Helme aus dem Vergleich."
     },
     {
       "id": 2,
       "bestellNr": "EK-2026-002",
       "lieferantId": 2,
       "datum": "2026-08-01",
-      "status": "versendet",
+      "status": "eingegangen",
       "anfrageQuelle": "bedarfsmeldung",
       "bedarfsmeldungId": "auto-artikel-1",
       "rechnungStatus": "offen",
       "faelligAm": "2026-08-20",
-      "anfrageNotiz": "Nachbestellung fÃ¼r Citybikes im Zulauf."
+      "versendetAm": "2026-08-02",
+      "wareneingangAm": "2026-08-06",
+      "anfrageNotiz": "Nachbestellung für Citybikes im Zulauf."
     }
   ],
   "bestellpositionen": [
@@ -276,15 +278,15 @@
   "kategorien": [
     {
       "id": 1,
-      "name": "FahrrÃ¤der",
+      "name": "Fahrräder",
       "parentId": "",
-      "beschreibung": "Komplette FahrrÃ¤der und fahrbereite Baugruppen."
+      "beschreibung": "Komplette Fahrräder und fahrbereite Baugruppen."
     },
     {
       "id": 4,
       "name": "Citybike",
       "parentId": 1,
-      "beschreibung": "Komplette City- und SchulungsfahrrÃ¤der."
+      "beschreibung": "Komplette City- und Schulungsfahrräder."
     },
     {
       "id": 5,
@@ -296,11 +298,11 @@
       "id": 6,
       "name": "Sicherheitsbekleidung",
       "parentId": 5,
-      "beschreibung": "Warn- und Schutzkleidung fÃ¼r den Einsatz."
+      "beschreibung": "Warn- und Schutzkleidung für den Einsatz."
     },
     {
       "id": 7,
-      "name": "ZubehÃ¶r",
+      "name": "Zubehör",
       "parentId": "",
       "beschreibung": "Zusatzprodukte rund ums Fahrrad."
     },
@@ -308,7 +310,7 @@
       "id": 8,
       "name": "Helm",
       "parentId": 7,
-      "beschreibung": "Helme und SchutzzubehÃ¶r."
+      "beschreibung": "Helme und Schutzzubehör."
     },
     {
       "id": 9,
@@ -344,7 +346,7 @@
       "id": 14,
       "name": "Fahrradkette",
       "parentId": 9,
-      "beschreibung": "Antriebskomponenten wie Ketten und KettenrÃ¤der."
+      "beschreibung": "Antriebskomponenten wie Ketten und Kettenräder."
     }
   ]
 }
