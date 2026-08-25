@@ -1,5 +1,6 @@
 import json
 from collections import Counter, defaultdict
+from datetime import date
 from pathlib import Path
 
 
@@ -22,6 +23,15 @@ REFERENCE_MAP = {
     "rolleId": "rollen",
     "lagerId": "lager",
     "kategorieId": "kategorien",
+}
+
+SALES_DOCUMENT_ORDER = {
+    "auftragsbestaetigung": 1,
+    "auftragsbestätigung": 1,
+    "lieferschein": 2,
+    "warenbegleitpapier": 3,
+    "transportpapier": 3,
+    "warenempfang": 4,
 }
 
 
@@ -164,6 +174,156 @@ def audit_lifecycle(payload):
     return issues
 
 
+def parse_iso_date(value):
+    if value in (None, ""):
+        return None
+    try:
+        return date.fromisoformat(str(value))
+    except ValueError:
+        return None
+
+
+def normalize_text(value):
+    return str(value or "").strip().lower()
+
+
+def collect_sales_context(payload):
+    return {
+        "anfragen": {item["id"]: item for item in payload.get("kundenanfragen", []) if isinstance(item, dict) and item.get("id") not in (None, "")},
+        "angebote": {item["id"]: item for item in payload.get("angebote", []) if isinstance(item, dict) and item.get("id") not in (None, "")},
+        "auftraege": {item["id"]: item for item in payload.get("auftraege", []) if isinstance(item, dict) and item.get("id") not in (None, "")},
+        "rechnungen": {item["id"]: item for item in payload.get("rechnungen", []) if isinstance(item, dict) and item.get("id") not in (None, "")},
+        "dokumente": [item for item in payload.get("vertriebsdokumente", []) if isinstance(item, dict)],
+    }
+
+
+def audit_process_order(payload):
+    issues = []
+    context = collect_sales_context(payload)
+    anfragen = context["anfragen"]
+    angebote = context["angebote"]
+    auftraege = context["auftraege"]
+
+    dokumente_pro_auftrag = defaultdict(list)
+    for dokument in context["dokumente"]:
+        if dokument.get("auftragId") not in (None, ""):
+            dokumente_pro_auftrag[str(dokument.get("auftragId"))].append(dokument)
+
+    for angebot in angebote.values():
+        anfrage_id = angebot.get("anfrageId")
+        if anfrage_id in (None, ""):
+            continue
+        anfrage = anfragen.get(anfrage_id)
+        if not anfrage:
+            continue
+        angebot_datum = parse_iso_date(angebot.get("datum"))
+        anfrage_datum = parse_iso_date(anfrage.get("datum"))
+        if angebot_datum and anfrage_datum and angebot_datum < anfrage_datum:
+            issues.append({
+                "table": "angebote",
+                "id": angebot.get("id"),
+                "issue": "Angebot liegt zeitlich vor der verknuepften Kundenanfrage.",
+                "details": {"angebotDatum": angebot.get("datum"), "anfrageDatum": anfrage.get("datum")}
+            })
+
+    for auftrag in auftraege.values():
+        angebot_id = auftrag.get("angebotId")
+        if angebot_id in (None, ""):
+            continue
+        angebot = angebote.get(angebot_id)
+        if not angebot:
+            continue
+        auftrag_datum = parse_iso_date(auftrag.get("datum"))
+        angebot_datum = parse_iso_date(angebot.get("datum"))
+        if auftrag_datum and angebot_datum and auftrag_datum < angebot_datum:
+            issues.append({
+                "table": "auftraege",
+                "id": auftrag.get("id"),
+                "issue": "Auftrag liegt zeitlich vor dem verknuepften Angebot.",
+                "details": {"auftragDatum": auftrag.get("datum"), "angebotDatum": angebot.get("datum")}
+            })
+
+    for auftrag in auftraege.values():
+        auftrag_id = str(auftrag.get("id"))
+        auftrag_datum = parse_iso_date(auftrag.get("datum"))
+        dokumente = dokumente_pro_auftrag.get(auftrag_id, [])
+        dispatch_docs = []
+        goods_receipt = None
+        highest_order_seen = 0
+
+        for dokument in sorted(dokumente, key=lambda item: (item.get("datum") or "", SALES_DOCUMENT_ORDER.get(normalize_text(item.get("dokumentTyp")), 99), item.get("id") or 0)):
+            dokument_typ = normalize_text(dokument.get("dokumentTyp"))
+            dokument_order = SALES_DOCUMENT_ORDER.get(dokument_typ)
+            dokument_datum = parse_iso_date(dokument.get("datum"))
+
+            if dokument_datum and auftrag_datum and dokument_datum < auftrag_datum:
+                issues.append({
+                    "table": "vertriebsdokumente",
+                    "id": dokument.get("id"),
+                    "issue": "Vertriebsdokument liegt zeitlich vor dem Auftrag.",
+                    "details": {"dokumentTyp": dokument.get("dokumentTyp"), "dokumentDatum": dokument.get("datum"), "auftragDatum": auftrag.get("datum")}
+                })
+
+            if dokument_order and dokument_order < highest_order_seen:
+                issues.append({
+                    "table": "vertriebsdokumente",
+                    "id": dokument.get("id"),
+                    "issue": "Dokumentreihenfolge im Auftrag ist fachlich ruecklaeufig.",
+                    "details": {"dokumentTyp": dokument.get("dokumentTyp"), "auftragId": auftrag.get("id")}
+                })
+            if dokument_order:
+                highest_order_seen = max(highest_order_seen, dokument_order)
+
+            if dokument_typ in ("warenbegleitpapier", "transportpapier"):
+                dispatch_docs.append(dokument)
+            if dokument_typ == "warenempfang":
+                goods_receipt = dokument
+
+        if len(dispatch_docs) > 1:
+            issues.append({
+                "table": "vertriebsdokumente",
+                "id": auftrag.get("id"),
+                "issue": "Pro Auftrag ist nur eines von Warenbegleitpapier oder Transportpapier zulaessig.",
+                "details": {"auftragId": auftrag.get("id"), "dokumentIds": [item.get("id") for item in dispatch_docs]}
+            })
+
+        for invoice in payload.get("rechnungen", []):
+            if str(invoice.get("auftragId") or "") != auftrag_id:
+                continue
+            if normalize_text(invoice.get("rechnungstyp")) != "ausgangsrechnung":
+                continue
+
+            invoice_date = parse_iso_date(invoice.get("datum"))
+            if goods_receipt is None:
+                issues.append({
+                    "table": "rechnungen",
+                    "id": invoice.get("id"),
+                    "issue": "Ausgangsrechnung ohne dokumentierten Warenempfang.",
+                    "details": {"auftragId": auftrag.get("id"), "rechnungsnr": invoice.get("rechnungsnr")}
+                })
+                continue
+
+            receipt_date = parse_iso_date(goods_receipt.get("annahmeAm") or goods_receipt.get("datum"))
+            if invoice_date and receipt_date and invoice_date < receipt_date:
+                issues.append({
+                    "table": "rechnungen",
+                    "id": invoice.get("id"),
+                    "issue": "Ausgangsrechnung liegt zeitlich vor dem bestaetigten Warenempfang.",
+                    "details": {"rechnungsDatum": invoice.get("datum"), "warenempfangAm": goods_receipt.get("annahmeAm") or goods_receipt.get("datum")}
+                })
+
+            goods_receipt_status = normalize_text(goods_receipt.get("status"))
+            if goods_receipt_status not in ("entgegengenommen", "angenommen", "bestaetigt"):
+                issues.append({
+                    "table": "rechnungen",
+                    "id": invoice.get("id"),
+                    "issue": "Ausgangsrechnung ohne bestaetigten Warenempfangsstatus.",
+                    "details": {"warenempfangStatus": goods_receipt.get("status"), "auftragId": auftrag.get("id")}
+                })
+
+    return issues
+
+
 def summarize_process_maturity(payload):
     summary = {}
     summary["angebote_status"] = Counter(item.get("status", "ohne Status") for item in payload.get("angebote", []))
@@ -221,6 +381,7 @@ def main():
     reference_issues = audit_references(payload, known_ids)
     duplicate_issues = audit_duplicates(payload)
     lifecycle_issues = audit_lifecycle(payload)
+    order_issues = audit_process_order(payload)
     process_summary = summarize_process_maturity(payload)
 
     print("SEED-AUDIT")
@@ -249,6 +410,13 @@ def main():
     print("\nLebenszyklus-/Prozessfehler:")
     if lifecycle_issues:
         for issue in lifecycle_issues:
+            print(f"  - {issue}")
+    else:
+        print("  - keine")
+
+    print("\nReihenfolge-/Ablauffehler:")
+    if order_issues:
+        for issue in order_issues:
             print(f"  - {issue}")
     else:
         print("  - keine")

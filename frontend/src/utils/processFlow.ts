@@ -6,6 +6,7 @@ export const SALES_STEPS = {
     AUFTRAGSBESTAETIGUNG_GESENDET: 5,
     VERSAND_ERSTELLT: 6,
     VERSAND_VERSENDET: 7,
+    WARENEMPFANG_ERFASST: 8,
     ANGEBOT_ABGELEHNT: 98
 };
 
@@ -25,6 +26,19 @@ function isConfirmationDocumentType(value) {
     return normalized === "auftragsbestaetigung"
         || normalized === "auftragsbestätigung"
         || normalized === "auftragsbestã¤tigung";
+}
+
+function normalizeDocumentType(value) {
+    return normalize(value).toLowerCase();
+}
+
+export function isGoodsDispatchDocumentType(value) {
+    const normalized = normalizeDocumentType(value);
+    return normalized === "warenbegleitpapier" || normalized === "transportpapier";
+}
+
+export function isGoodsReceiptDocumentType(value) {
+    return normalizeDocumentType(value) === "warenempfang";
 }
 
 export function getVorgangId(item) {
@@ -107,6 +121,21 @@ export function getConfirmationDocument(auftragId, dokumente = []) {
     return getSalesDocumentsForOrder(auftragId, dokumente).find(item => isConfirmationDocumentType(item.dokumentTyp));
 }
 
+export function getGoodsDispatchDocuments(auftragId, dokumente = []) {
+    return getSalesDocumentsForOrder(auftragId, dokumente).filter(item => isGoodsDispatchDocumentType(item.dokumentTyp));
+}
+
+export function getGoodsReceiptDocument(auftragId, dokumente = []) {
+    return getSalesDocumentsForOrder(auftragId, dokumente).find(item => isGoodsReceiptDocumentType(item.dokumentTyp)) || null;
+}
+
+export function hasAcceptedGoodsReceipt(auftragId, dokumente = []) {
+    const warenempfang = getGoodsReceiptDocument(auftragId, dokumente);
+    if (!warenempfang) return false;
+    const status = normalizeDocumentType(warenempfang.status);
+    return status === "entgegengenommen" || status === "angenommen" || status === "bestaetigt";
+}
+
 export function getSalesStepForOrder(auftrag, dokumente = [], versandauftraege = []) {
     if (!auftrag) return SALES_STEPS.ANGEBOT_ANGENOMMEN;
     const bestaetigung = getConfirmationDocument(auftrag.id, dokumente);
@@ -116,7 +145,8 @@ export function getSalesStepForOrder(auftrag, dokumente = [], versandauftraege =
     const versand = versandauftraege.find(item => normalize(item.auftragId) === normalize(auftrag.id));
     if (!versand) return SALES_STEPS.AUFTRAGSBESTAETIGUNG_GESENDET;
     if (versand.status !== "versendet") return SALES_STEPS.VERSAND_ERSTELLT;
-    return SALES_STEPS.VERSAND_VERSENDET;
+    if (!hasAcceptedGoodsReceipt(auftrag.id, dokumente)) return SALES_STEPS.VERSAND_VERSENDET;
+    return SALES_STEPS.WARENEMPFANG_ERFASST;
 }
 
 export function getSalesStep(angebot, auftraege = [], dokumente = [], versandauftraege = []) {
@@ -146,6 +176,8 @@ export function getSalesStepLabel(step) {
             return "6. Versand vorbereitet";
         case SALES_STEPS.VERSAND_VERSENDET:
             return "7. Versand versendet";
+        case SALES_STEPS.WARENEMPFANG_ERFASST:
+            return "8. Warenempfang bestaetigt";
         case SALES_STEPS.ANGEBOT_ABGELEHNT:
             return "Angebot abgelehnt";
         default:
@@ -156,6 +188,10 @@ export function getSalesStepLabel(step) {
 export function canStartShipping(auftragId, dokumente = []) {
     const bestaetigung = getConfirmationDocument(auftragId, dokumente);
     return Boolean(bestaetigung && bestaetigung.status === "versendet");
+}
+
+export function canCreateOutgoingInvoice(auftragId, dokumente = []) {
+    return hasAcceptedGoodsReceipt(auftragId, dokumente);
 }
 
 export function getReadyForShippingOrders(auftraege = [], dokumente = []) {

@@ -8,6 +8,8 @@ import { getSupplierName } from "../../utils/supplierReferences";
 import { getInvoiceLifecycle, getInvoiceNextAction, getSuggestedDueDate, getHighestMahnstufe } from "../../utils/accountingWorkflow";
 import { getBerlinDate } from "../../utils/dateTime";
 import { getRechnungsnummer as buildInvoiceNumber } from "../core/documentNumbering";
+import vertriebsdokumenteService from "../verkauf/vertriebsdokumenteService";
+import { canCreateOutgoingInvoice } from "../../utils/processFlow";
 
 const baseService = createCRUDService("rechnungen", []);
 const reminderBaseService = createCRUDService("mahnungen", []);
@@ -167,6 +169,8 @@ const rechnungenService = {
 
         const auftrag = auftraegeService.getById(auftragId);
         if (!auftrag) return null;
+        const dokumente = safeLookup(() => vertriebsdokumenteService.list(), []);
+        if (!canCreateOutgoingInvoice(auftrag.id, dokumente)) return null;
 
         return this.create({
             rechnungsnr: buildInvoiceNumber(auftrag.auftragNr || "", auftrag.datum || getBerlinDate()),

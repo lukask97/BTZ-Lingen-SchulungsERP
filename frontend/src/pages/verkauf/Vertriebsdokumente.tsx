@@ -15,13 +15,13 @@ import angeboteService from "../../services/verkauf/angeboteService";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import { openDocumentPdf } from "../../utils/documentPdf";
 import { formatTimestampForDisplay, getBerlinDate } from "../../utils/dateTime";
-import { getConfirmationDocument, getInquiryForOrder, getOfferForOrder, getOffersForVorgang, getProcessContextForDocument } from "../../utils/processFlow";
+import { canCreateOutgoingInvoice, getConfirmationDocument, getGoodsDispatchDocuments, getGoodsReceiptDocument, getInquiryForOrder, getOfferForOrder, getOffersForVorgang, getProcessContextForDocument, hasAcceptedGoodsReceipt } from "../../utils/processFlow";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 import { PERMISSIONS } from "../../constants/permissions";
 import { getLieferscheinnummer } from "../../services/core/documentNumbering";
 import kundenService from "../../services/verkauf/customerService";
 
-const dokumentTypen = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
+const dokumentTypen = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier", "Warenempfang"];
 const AUFTRAGS_FILTER = [
     { value: "alle", label: "Alle Aufträge" },
     { value: "offen", label: "Nur offene Aufträge" },
@@ -100,8 +100,8 @@ function getDokumentStatusByTyp(dokumente = [], dokumentTyp) {
 function getNaechstenDokumentSchritt(auftrag, dokumente = []) {
     const bestaetigung = getDokumentStatusByTyp(dokumente, "Auftragsbestätigung");
     const lieferschein = getDokumentStatusByTyp(dokumente, "Lieferschein");
-    const warenbegleitpapier = getDokumentStatusByTyp(dokumente, "Warenbegleitpapier");
-    const transportpapier = getDokumentStatusByTyp(dokumente, "Transportpapier");
+    const versanddokumente = getGoodsDispatchDocuments(auftrag?.id, dokumente);
+    const warenempfang = getGoodsReceiptDocument(auftrag?.id, dokumente);
 
     if (bestaetigung === "fehlt") {
         return {
@@ -127,27 +127,51 @@ function getNaechstenDokumentSchritt(auftrag, dokumente = []) {
             tone: "good"
         };
     }
-    if (warenbegleitpapier === "fehlt") {
+    if (versanddokumente.length === 0) {
         return {
             status: "Vorbereiten",
-            schritt: "Warenbegleitpapier prüfen",
-            detail: "Zum Versand fehlt noch das Warenbegleitpapier.",
+            schritt: "Versanddokument wählen",
+            detail: "Lege entweder ein Warenbegleitpapier fuer eigene Lieferung oder ein Transportpapier fuer Versand per Spedition an.",
             tone: "good"
         };
     }
-    if (transportpapier === "fehlt") {
+    if (versanddokumente.length > 1) {
         return {
-            status: "Optional offen",
-            schritt: "Transportpapier ergänzen",
-            detail: "Die Kernunterlagen sind da. Jetzt kann bei Bedarf noch das Transportpapier ergänzt werden.",
+            status: "Pruefen",
+            schritt: "Versanddokument bereinigen",
+            detail: "Es darf nur eines von beiden geben: Warenbegleitpapier fuer eigene Lieferung oder Transportpapier fuer Speditionsversand.",
+            tone: "warn"
+        };
+    }
+    if (!warenempfang) {
+        return {
+            status: "Warten",
+            schritt: "Warenempfang erfassen",
+            detail: "Die Ware ist unterwegs oder zugestellt. Erst nach bestaetigtem Warenempfang darf die Rechnung erstellt werden.",
             tone: "good"
+        };
+    }
+    if (!hasAcceptedGoodsReceipt(auftrag?.id, dokumente)) {
+        return {
+            status: "Warten",
+            schritt: "Warenempfang bestaetigen",
+            detail: "Die Ware wurde dokumentiert, aber noch nicht als vom Kunden angenommen bestaetigt.",
+            tone: "warn"
+        };
+    }
+    if (!canCreateOutgoingInvoice(auftrag?.id, dokumente)) {
+        return {
+            status: "Warten",
+            schritt: "Rechnungsfreigabe offen",
+            detail: "Die Rechnung bleibt gesperrt, bis der Warenempfang als angenommen dokumentiert ist.",
+            tone: "warn"
         };
     }
 
     return {
         status: "Komplett",
-        schritt: "Dokumentenkette vollständig",
-        detail: "Für diesen Auftrag sind alle Vertriebsdokumente bereits angelegt.",
+        schritt: "Rechnung freigegeben",
+        detail: "Die Dokumentenkette ist vollstaendig. Der Auftrag kann jetzt auf Rechnung fakturiert werden.",
         tone: "good"
     };
 }
@@ -267,7 +291,7 @@ export default function Vertriebsdokumente() {
         : null;
     const vorgangsverbindungen = useMemo(() => {
         if (!selectedAuftrag) return [];
-        const dokumentReihenfolge = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier"];
+        const dokumentReihenfolge = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier", "Warenempfang"];
         const dokumentEintraege = dokumentReihenfolge.map(typ => {
             const dokument = gefilterteDokumente.find(item => item.dokumentTyp === typ);
             return {
@@ -351,12 +375,26 @@ export default function Vertriebsdokumente() {
         const auftrag = auftraege.find(item => String(item.id) === String(current.auftragId));
         if (!auftrag) return null;
         const vorhandeneBestaetigung = getConfirmationDocument(auftrag.id, dokumente);
+        const vorhandeneVersanddokumente = getGoodsDispatchDocuments(auftrag.id, dokumente);
+        const vorhandenerWarenempfang = getGoodsReceiptDocument(auftrag.id, dokumente);
         if (current.dokumentTyp === "Auftragsbestätigung" && vorhandeneBestaetigung) {
             alert("Für diesen Auftrag wurde die Auftragsbestätigung bereits erstellt.");
             return null;
         }
         if (current.dokumentTyp !== "Auftragsbestätigung" && !vorhandeneBestaetigung) {
             alert("Bitte zuerst die Auftragsbestätigung erstellen.");
+            return null;
+        }
+        if ((current.dokumentTyp === "Warenbegleitpapier" || current.dokumentTyp === "Transportpapier") && vorhandeneVersanddokumente.length > 0) {
+            alert("Bitte lege entweder ein Warenbegleitpapier oder ein Transportpapier an, nicht beides.");
+            return null;
+        }
+        if (current.dokumentTyp === "Warenempfang" && vorhandenerWarenempfang) {
+            alert("Für diesen Auftrag wurde der Warenempfang bereits angelegt.");
+            return null;
+        }
+        if (current.dokumentTyp === "Warenempfang" && vorhandeneVersanddokumente.length !== 1) {
+            alert("Bitte zuerst genau ein Versanddokument anlegen, bevor der Warenempfang erfasst wird.");
             return null;
         }
 
@@ -367,7 +405,8 @@ export default function Vertriebsdokumente() {
             dokumentNr: current.dokumentTyp === "Lieferschein" ? getLieferscheinnummer(auftrag.auftragNr, auftrag.datum) : (current.dokumentNr || ""),
             titel,
             versendetAm: current.versendetAm || "",
-            status: current.status || "erstellt",
+            status: current.status || (current.dokumentTyp === "Warenempfang" ? "entgegengenommen" : "erstellt"),
+            annahmeAm: current.annahmeAm || (current.dokumentTyp === "Warenempfang" ? current.datum : ""),
             notiz: current.notiz.trim()
         };
     };

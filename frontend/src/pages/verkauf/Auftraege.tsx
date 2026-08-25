@@ -22,7 +22,7 @@ import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import { kundenanfrageInAuftragUebernehmen, naechsteAuftragsnummer } from "../../services/verkauf/verkaufService";
 import { getCustomerName } from "../../utils/customerReferences";
 import { getBerlinDate, getRelativeBerlinDate } from "../../utils/dateTime";
-import { canStartShipping, getInquiryForOrder, getSalesStepForOrder, getSalesStepLabel } from "../../utils/processFlow";
+import { canCreateOutgoingInvoice, canStartShipping, getInquiryForOrder, getSalesStepForOrder, getSalesStepLabel } from "../../utils/processFlow";
 import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 
@@ -252,7 +252,7 @@ export default function Auftraege() {
                         setRefreshKey(value => value + 1);
                     },
                     variant: "success",
-                    isVisible: row => row.rechnungNr === "-"
+                    isVisible: row => row.rechnungNr === "-" && canCreateOutgoingInvoice(row.id, vertriebsdokumente)
                 },
                 {
                     name: "invoice-open",

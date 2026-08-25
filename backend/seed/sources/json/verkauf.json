@@ -8,7 +8,7 @@
       "vorgangId": "anfrage-1",
       "anfrageId": 1,
       "kundeId": 1,
-      "datum": "2026-07-22",
+      "datum": "2026-07-24",
       "gueltigBis": "2026-08-04",
       "rabattBetrag": 0,
       "gesamtbetrag": 1348.5,
@@ -1016,6 +1016,65 @@
     },
     {
       "id": 3,
+      "vorgangId": "anfrage-1",
+      "anfrageId": 1,
+      "angebotId": 2,
+      "auftragId": 1,
+      "kundeId": 1,
+      "datum": "2026-07-26",
+      "senderRolle": "Verkauf",
+      "senderName": "Schülerfirma Verkauf",
+      "kanal": "E-Mail",
+      "betreff": "Versandunterlagen zu AU-2026-001",
+      "nachricht": "Lieferschein und Warenbegleitpapier wurden vorbereitet. Der Kunde hat den Warenempfang bestätigt, daher wurde die Rechnung freigegeben.",
+      "typ": "Versand"
+    },
+    {
+      "id": 4,
+      "vorgangId": "anfrage-2",
+      "anfrageId": 2,
+      "angebotId": "",
+      "kundeId": 2,
+      "datum": "2026-07-28",
+      "senderRolle": "Kunde",
+      "senderName": "Emsland Tourismus GmbH",
+      "kanal": "E-Mail",
+      "betreff": "Angebot über 30 Fahrradhelme",
+      "nachricht": "Bitte senden Sie uns kurzfristig ein Angebot über 30 Fahrradhelme inklusive Lieferung.",
+      "typ": "Anfrage"
+    },
+    {
+      "id": 5,
+      "vorgangId": "anfrage-2",
+      "anfrageId": 2,
+      "angebotId": 3,
+      "auftragId": 2,
+      "kundeId": 2,
+      "datum": "2026-07-30",
+      "senderRolle": "Verkauf",
+      "senderName": "Schülerfirma Verkauf",
+      "kanal": "E-Mail",
+      "betreff": "Angebot ANG-2026-002.0 bestätigt",
+      "nachricht": "Vielen Dank für Ihre Zusage. Wir haben den Auftrag AU-2026-002 angelegt und versenden die Auftragsbestätigung im Anschluss.",
+      "typ": "Angebot"
+    },
+    {
+      "id": 6,
+      "vorgangId": "anfrage-2",
+      "anfrageId": 2,
+      "angebotId": 3,
+      "auftragId": 2,
+      "kundeId": 2,
+      "datum": "2026-08-01",
+      "senderRolle": "Kunde",
+      "senderName": "Emsland Tourismus GmbH",
+      "kanal": "E-Mail",
+      "betreff": "Warenempfang bestätigt",
+      "nachricht": "Die Lieferung mit Lieferschein LS-2026-002 und Warenbegleitpapier ist vollständig eingetroffen. Sie können die Rechnung zusenden.",
+      "typ": "Warenempfang"
+    },
+    {
+      "id": 7,
       "vorgangId": "anfrage-4",
       "anfrageId": 4,
       "angebotId": "",
@@ -1029,7 +1088,7 @@
       "typ": "Anfrage"
     },
     {
-      "id": 4,
+      "id": 8,
       "vorgangId": "anfrage-4",
       "anfrageId": 4,
       "angebotId": 5,
@@ -1044,7 +1103,22 @@
       "typ": "Angebot"
     },
     {
-      "id": 5,
+      "id": 9,
+      "vorgangId": "anfrage-4",
+      "anfrageId": 4,
+      "angebotId": 5,
+      "auftragId": 4,
+      "kundeId": 3,
+      "datum": "2026-08-04",
+      "senderRolle": "Verkauf",
+      "senderName": "Schülerfirma Verkauf",
+      "kanal": "E-Mail",
+      "betreff": "Transportpapier zu AU-2026-004",
+      "nachricht": "Für den mobilen Einsatz wurde ein Transportpapier angelegt. Der Warenempfang steht nach Rückmeldung des Kunden noch aus.",
+      "typ": "Versand"
+    },
+    {
+      "id": 10,
       "vorgangId": "anfrage-5",
       "anfrageId": 5,
       "angebotId": "",
@@ -1058,7 +1132,7 @@
       "typ": "Anfrage"
     },
     {
-      "id": 6,
+      "id": 11,
       "vorgangId": "anfrage-5",
       "anfrageId": 5,
       "angebotId": 6,
@@ -1071,6 +1145,84 @@
       "betreff": "Angebot ANG-2026-005.0",
       "nachricht": "Das Angebot ist intern vorbereitet und wartet noch auf die finale Freigabe vor dem Versand.",
       "typ": "Angebot"
+    },
+    {
+      "id": 12,
+      "vorgangId": "debitorenfall-015",
+      "auftragId": 15,
+      "kundeId": 2,
+      "datum": "2026-06-24",
+      "senderRolle": "Verkauf",
+      "senderName": "Schülerfirma Verkauf",
+      "kanal": "E-Mail",
+      "betreff": "Auftragsunterlagen AU-2026-015",
+      "nachricht": "Auftragsbestätigung, Lieferschein und Warenbegleitpapier wurden für den Debitorenfall AU-2026-015 dokumentiert.",
+      "typ": "Auftrag"
+    },
+    {
+      "id": 13,
+      "vorgangId": "debitorenfall-015",
+      "auftragId": 15,
+      "kundeId": 2,
+      "datum": "2026-06-25",
+      "senderRolle": "Kunde",
+      "senderName": "Emsland Tourismus GmbH",
+      "kanal": "E-Mail",
+      "betreff": "Warenempfang zu AU-2026-015",
+      "nachricht": "Die Ware wurde vollständig empfangen. Die Rechnung kann auf Ziel gestellt werden.",
+      "typ": "Warenempfang"
+    },
+    {
+      "id": 14,
+      "vorgangId": "debitorenfall-018",
+      "auftragId": 18,
+      "kundeId": 4,
+      "datum": "2026-08-10",
+      "senderRolle": "Verkauf",
+      "senderName": "Schülerfirma Verkauf",
+      "kanal": "E-Mail",
+      "betreff": "Versandunterlagen AU-2026-018",
+      "nachricht": "Für den Versand per Spedition wurden Auftragsbestätigung, Lieferschein und Transportpapier angelegt.",
+      "typ": "Versand"
+    },
+    {
+      "id": 15,
+      "vorgangId": "debitorenfall-018",
+      "auftragId": 18,
+      "kundeId": 4,
+      "datum": "2026-08-11",
+      "senderRolle": "Kunde",
+      "senderName": "Stadtwerke Lingen Mobilität",
+      "kanal": "E-Mail",
+      "betreff": "Warenempfang AU-2026-018",
+      "nachricht": "Die Lieferung ist vollständig angekommen. Sie können die Rechnung übersenden.",
+      "typ": "Warenempfang"
+    },
+    {
+      "id": 16,
+      "vorgangId": "debitorenfall-019",
+      "auftragId": 19,
+      "kundeId": 1,
+      "datum": "2026-08-19",
+      "senderRolle": "Verkauf",
+      "senderName": "Schülerfirma Verkauf",
+      "kanal": "E-Mail",
+      "betreff": "Versandunterlagen AU-2026-019",
+      "nachricht": "Lieferschein und Warenbegleitpapier wurden zur Auslieferung vorbereitet und versendet.",
+      "typ": "Versand"
+    },
+    {
+      "id": 17,
+      "vorgangId": "debitorenfall-019",
+      "auftragId": 19,
+      "kundeId": 1,
+      "datum": "2026-08-20",
+      "senderRolle": "Kunde",
+      "senderName": "Campus Baumarkt GmbH",
+      "kanal": "E-Mail",
+      "betreff": "Warenempfang AU-2026-019",
+      "nachricht": "Die Bestellung ist vollständig eingetroffen. Die Rechnung kann nun erstellt werden.",
+      "typ": "Warenempfang"
     }
   ],
   "rechnungen": [
@@ -1080,7 +1232,7 @@
       "kundeId": 1,
       "rechnungsnr": "RG-2026-001",
       "rechnungstyp": "Ausgangsrechnung",
-      "datum": "2026-07-18",
+      "datum": "2026-07-28",
       "faelligAm": "2026-08-06",
       "betrag": 1348.5,
       "status": "offen",
@@ -1092,8 +1244,8 @@
       "kundeId": 2,
       "rechnungsnr": "RG-2026-002",
       "rechnungstyp": "Ausgangsrechnung",
-      "datum": "2026-07-21",
-      "faelligAm": "2026-07-22",
+      "datum": "2026-08-01",
+      "faelligAm": "2026-08-15",
       "betrag": 1799.7,
       "status": "bezahlt",
       "mahnstufe": "-"
@@ -1116,7 +1268,7 @@
       "kundeId": 2,
       "rechnungsnr": "RG-2026-005",
       "rechnungstyp": "Ausgangsrechnung",
-      "datum": "2026-06-24",
+      "datum": "2026-06-26",
       "faelligAm": "2026-07-08",
       "betrag": 1073.95,
       "status": "offen",
@@ -1128,7 +1280,7 @@
       "kundeId": 4,
       "rechnungsnr": "RG-2026-008",
       "rechnungstyp": "Ausgangsrechnung",
-      "datum": "2026-08-10",
+      "datum": "2026-08-12",
       "faelligAm": "2026-08-24",
       "betrag": 1098.96,
       "status": "offen",
@@ -1140,7 +1292,7 @@
       "kundeId": 1,
       "rechnungsnr": "RG-2026-009",
       "rechnungstyp": "Ausgangsrechnung",
-      "datum": "2026-08-19",
+      "datum": "2026-08-21",
       "faelligAm": "2026-09-02",
       "betrag": 2097.9,
       "status": "offen",
@@ -1153,9 +1305,9 @@
       "auftragId": 2,
       "rechnungId": 2,
       "zahlungsart": "Eingang",
-      "datum": "2026-07-22",
-      "ausfuehrenAm": "2026-07-22",
-      "ausfuehrungsdatum": "2026-07-22",
+      "datum": "2026-08-02",
+      "ausfuehrenAm": "2026-08-02",
+      "ausfuehrungsdatum": "2026-08-02",
       "betrag": 1799.7,
       "name": "Emsland Tourismus GmbH",
       "iban": "DE75512108001245126199",
@@ -1233,7 +1385,7 @@
     {
       "id": 1,
       "rechnungId": 1,
-      "datum": "2026-07-23",
+      "datum": "2026-08-10",
       "status": "gesendet",
       "stufe": "1. Mahnung"
     }
@@ -1244,7 +1396,7 @@
       "typ": "Rechnungskopie",
       "bezugTyp": "Rechnung",
       "rechnungId": 2,
-      "datum": "2026-07-21",
+      "datum": "2026-08-01",
       "status": "archiviert",
       "beschreibung": "Digitale Ablage für die erste Beispielrechnung."
     },
@@ -1253,7 +1405,7 @@
       "typ": "Zahlungsbeleg",
       "bezugTyp": "Rechnung",
       "rechnungId": 2,
-      "datum": "2026-07-22",
+      "datum": "2026-08-02",
       "status": "archiviert",
       "beschreibung": "Zahlungseingang per Ãœberweisung wurde abgelegt."
     },
@@ -1262,7 +1414,7 @@
       "typ": "Mahnschreiben",
       "bezugTyp": "Rechnung",
       "rechnungId": 1,
-      "datum": "2026-07-23",
+      "datum": "2026-08-10",
       "status": "versendet",
       "beschreibung": "1. Mahnung für eine fällige Ausgangsrechnung."
     },
@@ -1271,7 +1423,7 @@
       "typ": "Rechnungskopie",
       "bezugTyp": "Rechnung",
       "rechnungId": 4,
-      "datum": "2026-06-24",
+      "datum": "2026-06-26",
       "status": "archiviert",
       "beschreibung": "Rechnung RG-2026-005 liegt fuer den Buchhaltungsfall mit unzulaessigem Skonto vor."
     },
@@ -1280,7 +1432,7 @@
       "typ": "Rechnungskopie",
       "bezugTyp": "Rechnung",
       "rechnungId": 5,
-      "datum": "2026-08-10",
+      "datum": "2026-08-12",
       "status": "archiviert",
       "beschreibung": "Rechnung RG-2026-008 ist als puenktlich bezahlbarer Fall vorbereitet."
     },
@@ -1289,7 +1441,7 @@
       "typ": "Rechnungskopie",
       "bezugTyp": "Rechnung",
       "rechnungId": 6,
-      "datum": "2026-08-19",
+      "datum": "2026-08-21",
       "status": "archiviert",
       "beschreibung": "Rechnung RG-2026-009 dient als Beispiel fuer eine Ueberzahlung."
     }
@@ -1487,7 +1639,8 @@
       "dokumentTyp": "Auftragsbestätigung",
       "titel": "Auftragsbestätigung AU-2026-001",
       "datum": "2026-07-25",
-      "status": "fertig",
+      "status": "versendet",
+      "versendetAm": "2026-07-25",
       "notiz": "Bestellung bestätigt und Liefertermin angekündigt."
     },
     {
@@ -1500,8 +1653,9 @@
       "dokumentNr": "LS-2026-001",
       "titel": "Lieferschein LS-2026-001",
       "datum": "2026-07-26",
-      "status": "Entwurf",
-      "notiz": "Wird mit dem Versand abgestimmt."
+      "status": "versendet",
+      "versendetAm": "2026-07-26",
+      "notiz": "Die Lieferung wurde für den Kundenversand freigegeben."
     },
     {
       "id": 3,
@@ -1526,10 +1680,9 @@
       "dokumentNr": "LS-2026-002",
       "titel": "Lieferschein LS-2026-002",
       "datum": "2026-07-31",
-      "status": "entgegengenommen",
+      "status": "versendet",
       "versendetAm": "2026-07-31",
-      "annahmeAm": "2026-08-01",
-      "notiz": "Lieferung wurde beim Kunden angenommen."
+      "notiz": "Die Helm-Lieferung wurde mit Lieferschein angekündigt."
     },
     {
       "id": 5,
@@ -1581,6 +1734,180 @@
       "datum": "2026-08-12",
       "status": "erstellt",
       "notiz": "Liegt vorbereitet vor und wartet auf den Versand nach Abschluss der Freigabe."
+    },
+    {
+      "id": 9,
+      "auftragId": 1,
+      "angebotId": 2,
+      "anfrageId": 1,
+      "vorgangId": "anfrage-1",
+      "dokumentTyp": "Warenbegleitpapier",
+      "titel": "Warenbegleitpapier AU-2026-001",
+      "datum": "2026-07-26",
+      "status": "versendet",
+      "versendetAm": "2026-07-26",
+      "notiz": "Begleitpapier für die Auslieferung der Sicherheitsjacken."
+    },
+    {
+      "id": 10,
+      "auftragId": 1,
+      "angebotId": 2,
+      "anfrageId": 1,
+      "vorgangId": "anfrage-1",
+      "dokumentTyp": "Warenempfang",
+      "titel": "Warenempfang AU-2026-001",
+      "datum": "2026-07-27",
+      "status": "entgegengenommen",
+      "annahmeAm": "2026-07-27",
+      "notiz": "Kunde hat die Sicherheitsjacken vollständig angenommen. Die Rechnung ist freigegeben."
+    },
+    {
+      "id": 11,
+      "auftragId": 2,
+      "angebotId": 3,
+      "anfrageId": 2,
+      "vorgangId": "anfrage-2",
+      "dokumentTyp": "Warenempfang",
+      "titel": "Warenempfang AU-2026-002",
+      "datum": "2026-08-01",
+      "status": "entgegengenommen",
+      "annahmeAm": "2026-08-01",
+      "notiz": "Der Kunde hat die Helm-Lieferung vollständig bestätigt. Die Rechnung kann auf Ziel erstellt werden."
+    },
+    {
+      "id": 12,
+      "auftragId": 15,
+      "vorgangId": "debitorenfall-015",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-015",
+      "datum": "2026-06-24",
+      "status": "versendet",
+      "versendetAm": "2026-06-24",
+      "notiz": "Debitorenfall mit bereits dokumentierter Auftragsbestätigung."
+    },
+    {
+      "id": 13,
+      "auftragId": 15,
+      "vorgangId": "debitorenfall-015",
+      "dokumentTyp": "Lieferschein",
+      "dokumentNr": "LS-2026-015",
+      "titel": "Lieferschein LS-2026-015",
+      "datum": "2026-06-24",
+      "status": "versendet",
+      "versendetAm": "2026-06-24",
+      "notiz": "Die Ware wurde zur eigenen Lieferung bereitgestellt."
+    },
+    {
+      "id": 14,
+      "auftragId": 15,
+      "vorgangId": "debitorenfall-015",
+      "dokumentTyp": "Warenbegleitpapier",
+      "titel": "Warenbegleitpapier AU-2026-015",
+      "datum": "2026-06-24",
+      "status": "versendet",
+      "versendetAm": "2026-06-24",
+      "notiz": "Begleitpapier für die eigene Lieferung des Debitorenfalls."
+    },
+    {
+      "id": 15,
+      "auftragId": 15,
+      "vorgangId": "debitorenfall-015",
+      "dokumentTyp": "Warenempfang",
+      "titel": "Warenempfang AU-2026-015",
+      "datum": "2026-06-25",
+      "status": "entgegengenommen",
+      "annahmeAm": "2026-06-25",
+      "notiz": "Kunde hat die Ware empfangen. Damit ist die Rechnung fachlich freigegeben."
+    },
+    {
+      "id": 16,
+      "auftragId": 18,
+      "vorgangId": "debitorenfall-018",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-018",
+      "datum": "2026-08-10",
+      "status": "versendet",
+      "versendetAm": "2026-08-10",
+      "notiz": "Debitorenfall mit Versand über Spedition."
+    },
+    {
+      "id": 17,
+      "auftragId": 18,
+      "vorgangId": "debitorenfall-018",
+      "dokumentTyp": "Lieferschein",
+      "dokumentNr": "LS-2026-018",
+      "titel": "Lieferschein LS-2026-018",
+      "datum": "2026-08-10",
+      "status": "versendet",
+      "versendetAm": "2026-08-10",
+      "notiz": "Die Lieferung wurde für den Versand vorbereitet."
+    },
+    {
+      "id": 18,
+      "auftragId": 18,
+      "vorgangId": "debitorenfall-018",
+      "dokumentTyp": "Transportpapier",
+      "titel": "Transportpapier AU-2026-018",
+      "datum": "2026-08-10",
+      "status": "versendet",
+      "versendetAm": "2026-08-10",
+      "notiz": "Transportpapier für die Auslieferung durch eine Spedition."
+    },
+    {
+      "id": 19,
+      "auftragId": 18,
+      "vorgangId": "debitorenfall-018",
+      "dokumentTyp": "Warenempfang",
+      "titel": "Warenempfang AU-2026-018",
+      "datum": "2026-08-11",
+      "status": "entgegengenommen",
+      "annahmeAm": "2026-08-11",
+      "notiz": "Der Kunde hat die Speditionslieferung angenommen. Die Rechnung ist damit freigegeben."
+    },
+    {
+      "id": 20,
+      "auftragId": 19,
+      "vorgangId": "debitorenfall-019",
+      "dokumentTyp": "Auftragsbestätigung",
+      "titel": "Auftragsbestätigung AU-2026-019",
+      "datum": "2026-08-19",
+      "status": "versendet",
+      "versendetAm": "2026-08-19",
+      "notiz": "Auftrag wurde bestätigt und zur Lieferung freigegeben."
+    },
+    {
+      "id": 21,
+      "auftragId": 19,
+      "vorgangId": "debitorenfall-019",
+      "dokumentTyp": "Lieferschein",
+      "dokumentNr": "LS-2026-019",
+      "titel": "Lieferschein LS-2026-019",
+      "datum": "2026-08-19",
+      "status": "versendet",
+      "versendetAm": "2026-08-19",
+      "notiz": "Lieferschein zur Auslieferung an den Kunden."
+    },
+    {
+      "id": 22,
+      "auftragId": 19,
+      "vorgangId": "debitorenfall-019",
+      "dokumentTyp": "Warenbegleitpapier",
+      "titel": "Warenbegleitpapier AU-2026-019",
+      "datum": "2026-08-19",
+      "status": "versendet",
+      "versendetAm": "2026-08-19",
+      "notiz": "Begleitpapier für die direkte Auslieferung der Ware."
+    },
+    {
+      "id": 23,
+      "auftragId": 19,
+      "vorgangId": "debitorenfall-019",
+      "dokumentTyp": "Warenempfang",
+      "titel": "Warenempfang AU-2026-019",
+      "datum": "2026-08-20",
+      "status": "entgegengenommen",
+      "annahmeAm": "2026-08-20",
+      "notiz": "Der Kunde hat den Wareneingang bestätigt. Die Rechnung kann erstellt werden."
     }
   ],
   "einkaufsdokumente": [
@@ -1641,3 +1968,4 @@
     }
   ]
 }
+
