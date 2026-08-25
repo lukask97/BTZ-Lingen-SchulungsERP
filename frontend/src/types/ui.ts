@@ -24,6 +24,7 @@ export interface LookupFieldProps {
     placeholder?: string;
     disabled?: boolean;
     required?: boolean;
+    autoComplete?: string;
 }
 
 export interface TextFieldProps {

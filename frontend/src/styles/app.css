@@ -479,6 +479,137 @@ body {
     gap: 4px;
 }
 
+.accounting-dialog-section {
+    margin-bottom: 14px;
+    padding: 14px;
+}
+
+.accounting-dialog-step {
+    display: inline-flex;
+    margin-bottom: 10px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #eaf3ff;
+    color: #1f4f82;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.accounting-dialog-facts,
+.accounting-dialog-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.accounting-dialog-fact-card,
+.accounting-dialog-summary-card {
+    border: 1px solid #dbe4f0;
+    border-radius: 10px;
+    background: #f8fbff;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.accounting-dialog-fact-card span,
+.accounting-dialog-summary-card span {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.accounting-dialog-fact-card strong,
+.accounting-dialog-summary-card strong {
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.accounting-dialog-fact-card--accent,
+.accounting-dialog-summary-card--accent {
+    background: #edf7ef;
+    border-color: #c9e5cf;
+}
+
+.accounting-dialog-fact-card--wide {
+    grid-column: span 2;
+}
+
+.accounting-dialog-summary-card--success {
+    background: #edf7ef;
+    border-color: #c9e5cf;
+}
+
+.accounting-dialog-summary-card--warning {
+    background: #fff6e8;
+    border-color: #f0d2a1;
+}
+
+.accounting-dialog-compact-list {
+    display: grid;
+    gap: 8px;
+}
+
+.accounting-dialog-compact-list div {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.accounting-dialog-compact-list span {
+    color: #64748b;
+}
+
+.accounting-dialog-feedback {
+    border: 1px solid #dbe4f0;
+    border-radius: 10px;
+    background: #f8fbff;
+    padding: 10px 12px;
+    margin: 10px 0 12px;
+}
+
+.accounting-dialog-feedback strong,
+.accounting-dialog-feedback p {
+    margin: 0;
+}
+
+.accounting-dialog-feedback p {
+    margin-top: 4px;
+}
+
+.accounting-dialog-feedback.is-success {
+    background: #edf7ef;
+    border-color: #c9e5cf;
+}
+
+.accounting-dialog-feedback.is-warning {
+    background: #fff6e8;
+    border-color: #f0d2a1;
+}
+
+.accounting-dialog-inline-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr);
+    gap: 12px;
+    align-items: start;
+}
+
+.accounting-dialog-inline-row--single {
+    grid-template-columns: 1fr;
+}
+
+@media (max-width: 900px) {
+    .accounting-dialog-fact-card--wide {
+        grid-column: auto;
+    }
+
+    .accounting-dialog-inline-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 .ampel-card span {
     font-size: 12px;
     font-weight: 700;

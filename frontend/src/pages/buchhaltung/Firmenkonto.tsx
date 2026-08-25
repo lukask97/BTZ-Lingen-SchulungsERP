@@ -57,7 +57,21 @@ export default function Firmenkonto() {
         if (canManageAllAccounts) return KONTO_TYPEN.FIRMA;
         return visibleAccounts[0] || KONTO_TYPEN.VERKAUF;
     });
-    const [current, setCurrent] = useState({ datum: today, konto: selectedAccount, betreff: "", info: "", soll: 0, haben: 0 });
+    const [current, setCurrent] = useState({
+        valuta: today,
+        konto: selectedAccount,
+        senderId: "",
+        senderTyp: "unternehmen",
+        senderName: "",
+        senderIban: "",
+        empfaengerId: "",
+        empfaengerTyp: "kunde",
+        empfaengerName: "",
+        empfaengerIban: "",
+        verwendungszweck: "",
+        soll: 0,
+        haben: 0
+    });
 
     const rowsByAccount = useMemo(() => ({
         [KONTO_TYPEN.FIRMA]: withSaldo(rows.filter(row => row.konto === KONTO_TYPEN.FIRMA)),
@@ -85,14 +99,13 @@ export default function Firmenkonto() {
     const firmensaldo = rowsByAccount[KONTO_TYPEN.FIRMA].at(-1)?.saldo || 0;
 
     const speichern = () => {
-        if (!current.betreff.trim()) return false;
+        if (!current.verwendungszweck.trim()) return false;
 
         const payload = {
             ...current,
-            datum: current.datum || today,
+            valuta: current.valuta || today,
             konto: current.konto || activeAccount,
-            betreff: current.betreff.trim(),
-            info: current.info.trim(),
+            verwendungszweck: current.verwendungszweck.trim(),
             soll: Number(current.soll || 0),
             haben: Number(current.haben || 0)
         };
@@ -104,7 +117,21 @@ export default function Firmenkonto() {
         }
 
         setRows(firmenkontoService.list());
-        setCurrent({ datum: today, konto: activeAccount, betreff: "", info: "", soll: 0, haben: 0 });
+        setCurrent({
+            valuta: today,
+            konto: activeAccount,
+            senderId: "",
+            senderTyp: "unternehmen",
+            senderName: "",
+            senderIban: "",
+            empfaengerId: "",
+            empfaengerTyp: "kunde",
+            empfaengerName: "",
+            empfaengerIban: "",
+            verwendungszweck: "",
+            soll: 0,
+            haben: 0
+        });
         setEditId(null);
         setStatus("Buchung gespeichert.");
         return true;
@@ -112,10 +139,17 @@ export default function Firmenkonto() {
 
     const bearbeiten = (row) => {
         setCurrent({
-            datum: row.datum || today,
+            valuta: row.valuta || today,
             konto: row.konto || activeAccount,
-            betreff: row.betreff || "",
-            info: row.info || "",
+            senderId: row.senderId || "",
+            senderTyp: row.senderTyp || "unternehmen",
+            senderName: row.senderName || "",
+            senderIban: row.senderIban || "",
+            empfaengerId: row.empfaengerId || "",
+            empfaengerTyp: row.empfaengerTyp || "kunde",
+            empfaengerName: row.empfaengerName || "",
+            empfaengerIban: row.empfaengerIban || "",
+            verwendungszweck: row.verwendungszweck || "",
             soll: Number(row.soll || 0),
             haben: Number(row.haben || 0)
         });
@@ -130,7 +164,21 @@ export default function Firmenkonto() {
     };
 
     const abbrechen = () => {
-        setCurrent({ datum: today, konto: activeAccount, betreff: "", info: "", soll: 0, haben: 0 });
+        setCurrent({
+            valuta: today,
+            konto: activeAccount,
+            senderId: "",
+            senderTyp: "unternehmen",
+            senderName: "",
+            senderIban: "",
+            empfaengerId: "",
+            empfaengerTyp: "kunde",
+            empfaengerName: "",
+            empfaengerIban: "",
+            verwendungszweck: "",
+            soll: 0,
+            haben: 0
+        });
         setEditId(null);
         setOpen(false);
     };
@@ -214,10 +262,11 @@ export default function Firmenkonto() {
             <table className="datatable firmenkonto-table">
                 <thead>
                 <tr>
-                    <th>Datum</th>
+                    <th>Valuta</th>
                     {canManageAllAccounts && <th>Konto</th>}
-                    <th>Betreff</th>
-                    <th>Info</th>
+                    <th>Sender</th>
+                    <th>Empfaenger</th>
+                    <th>Verwendungszweck</th>
                     <th>Soll</th>
                     <th>Haben</th>
                     <th>Saldo</th>
@@ -226,12 +275,13 @@ export default function Firmenkonto() {
                 </thead>
                 <tbody>
                 {activeRows.length === 0 ? <tr>
-                    <td colSpan={canManageAllAccounts ? 8 : 6}>Noch keine Buchungen vorhanden.</td>
+                    <td colSpan={canManageAllAccounts ? 8 : 7}>Noch keine Buchungen vorhanden.</td>
                 </tr> : activeRows.map(row => <tr key={row.id}>
-                    <td>{row.datum || ""}</td>
+                    <td>{row.valuta || ""}</td>
                     {canManageAllAccounts && <td>{getAccountLabel(row.konto)}</td>}
-                    <td>{row.betreff || ""}</td>
-                    <td>{row.info || ""}</td>
+                    <td>{row.senderName || ""}</td>
+                    <td>{row.empfaengerName || ""}</td>
+                    <td>{row.verwendungszweck || ""}</td>
                     <td>{Number(row.soll || 0) > 0 ? euro(row.soll) : ""}</td>
                     <td>{Number(row.haben || 0) > 0 ? euro(row.haben) : ""}</td>
                     <td>{euro(row.saldo)}</td>
@@ -252,14 +302,21 @@ export default function Firmenkonto() {
             onClose={abbrechen}
             footer={<SaveButton onSave={speichern} onSuccess={abbrechen}>{editId ? "Änderungen speichern" : "Speichern"}</SaveButton>}
         >
-            <div><Label>Datum</Label><TextField type="date" value={current.datum} onChange={value => setCurrent(item => ({ ...item, datum: value }))}/></div>
+            <div><Label glossaryKey="valuta">Valuta</Label><TextField type="date" value={current.valuta} onChange={value => setCurrent(item => ({ ...item, valuta: value }))}/></div>
             <div><Label>Konto</Label><select value={current.konto} onChange={event => setCurrent(item => ({ ...item, konto: event.target.value }))}>
                 <option value={KONTO_TYPEN.FIRMA}>Firmenkonto</option>
                 <option value={KONTO_TYPEN.VERKAUF}>Verkaufskonto</option>
                 <option value={KONTO_TYPEN.EINKAUF}>Einkaufskonto</option>
             </select></div>
-            <div><Label>Betreff</Label><TextField value={current.betreff} onChange={value => setCurrent(item => ({ ...item, betreff: value }))}/></div>
-            <div className="form-row"><Label>Info</Label><TextField value={current.info} onChange={value => setCurrent(item => ({ ...item, info: value }))}/></div>
+            <div className="form-row">
+                <div><Label>Sender</Label><TextField value={current.senderName} onChange={value => setCurrent(item => ({ ...item, senderName: value }))}/></div>
+                <div><Label>Sender-IBAN</Label><TextField value={current.senderIban} onChange={value => setCurrent(item => ({ ...item, senderIban: value }))}/></div>
+            </div>
+            <div className="form-row">
+                <div><Label>Empfaenger</Label><TextField value={current.empfaengerName} onChange={value => setCurrent(item => ({ ...item, empfaengerName: value }))}/></div>
+                <div><Label>Empfaenger-IBAN</Label><TextField value={current.empfaengerIban} onChange={value => setCurrent(item => ({ ...item, empfaengerIban: value }))}/></div>
+            </div>
+            <div className="form-row"><Label>Verwendungszweck</Label><TextField value={current.verwendungszweck} onChange={value => setCurrent(item => ({ ...item, verwendungszweck: value }))}/></div>
             <div><Label>Soll</Label><NumberField value={current.soll} min="0" onChange={value => setCurrent(item => ({ ...item, soll: Number(value || 0) }))}/></div>
             <div><Label>Haben</Label><NumberField value={current.haben} min="0" onChange={value => setCurrent(item => ({ ...item, haben: Number(value || 0) }))}/></div>
         </Dialog>

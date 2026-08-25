@@ -32,7 +32,7 @@ do update set
 class PostgresStore:
     def __init__(self, dsn):
         self.dsn = dsn
-        self.seed_path = Path(__file__).resolve().parent.parent / "seed" / "mock_seed.json"
+        self.seed_dir = Path(__file__).resolve().parent.parent / "seed" / "sources" / "json"
         self.seed_data = self._load_seed_data()
         self._bootstrap()
 
@@ -161,10 +161,33 @@ class PostgresStore:
             connection.commit()
 
     def _load_seed_data(self):
-        if not self.seed_path.exists():
+        if not self.seed_dir.exists():
             return {}
 
-        return json.loads(self.seed_path.read_text(encoding="utf-8"))
+        payload = {}
+        for seed_file in sorted(self.seed_dir.glob("*.json")):
+            content = json.loads(seed_file.read_text(encoding="utf-8"))
+            payload.update(content)
+
+        return {
+            table_name: self._normalize_seed_items(items)
+            for table_name, items in payload.items()
+        }
+
+    def _normalize_seed_items(self, items):
+        normalized_items = []
+
+        for index, item in enumerate(items or [], start=1):
+            if isinstance(item, dict) and item.get("id") in (None, ""):
+                normalized_items.append({
+                    **item,
+                    "id": index
+                })
+                continue
+
+            normalized_items.append(item)
+
+        return normalized_items
 
     def _next_id(self, table_name):
         with self._connect() as connection, connection.cursor() as cursor:

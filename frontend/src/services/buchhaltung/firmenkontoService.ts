@@ -1,4 +1,7 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
+import kundenService from "../verkauf/customerService";
+import lieferantenService from "../einkauf/lieferantenService";
+import unternehmenService from "../verwaltung/unternehmenService";
 
 const baseService = createCRUDService("firmenkonto", []);
 
@@ -22,12 +25,113 @@ function normalizeNumber(value: unknown) {
     return Number(value || 0);
 }
 
+function buildReferencePurpose(zahlung: any) {
+    if (zahlung?.rechnungsnr) {
+        return String(zahlung.rechnungsnr || "").startsWith("ER-")
+            ? `Eingangsrechnung ${zahlung.rechnungsnr}`
+            : `Rechnung ${zahlung.rechnungsnr}`;
+    }
+    if (zahlung?.bestellNr) return `Bestellung ${zahlung.bestellNr}`;
+    return String(zahlung?.verwendungszweck || "").trim();
+}
+
+function getCompanyAccountMeta(konto: string) {
+    const unternehmen = unternehmenService.get();
+    if (konto === KONTO_TYPEN.VERKAUF) {
+        return {
+            id: unternehmen.id || 1,
+            typ: "unternehmen",
+            name: unternehmen.verkaufKontoname || unternehmen.firmenname || "Verkaufskonto",
+            iban: unternehmen.verkaufIban || ""
+        };
+    }
+    if (konto === KONTO_TYPEN.EINKAUF) {
+        return {
+            id: unternehmen.id || 1,
+            typ: "unternehmen",
+            name: unternehmen.einkaufKontoname || unternehmen.firmenname || "Einkaufskonto",
+            iban: unternehmen.einkaufIban || ""
+        };
+    }
+    return {
+        id: unternehmen.id || 1,
+        typ: "unternehmen",
+        name: unternehmen.firmaKontoname || unternehmen.firmenname || "Firmenkonto",
+        iban: unternehmen.firmaIban || ""
+    };
+}
+
+function getPartyMeta({
+    id,
+    typ,
+    name,
+    iban
+}: {
+    id?: number | string;
+    typ?: string;
+    name?: string;
+    iban?: string;
+}) {
+    return {
+        id: id || "",
+        typ: typ || "",
+        name: name || "",
+        iban: iban || ""
+    };
+}
+
+function resolveCounterpartyForPayment(zahlung: any, isIncoming: boolean) {
+    if (isIncoming && zahlung.kundeId) {
+        const kunde = kundenService.getById(zahlung.kundeId);
+        return getPartyMeta({
+            id: kunde?.id || zahlung.kundeId,
+            typ: "kunde",
+            name: kunde?.firma || zahlung.name || "",
+            iban: kunde?.iban || zahlung.iban || ""
+        });
+    }
+    if (!isIncoming && zahlung.lieferantId) {
+        const lieferant = lieferantenService.getById(zahlung.lieferantId);
+        return getPartyMeta({
+            id: lieferant?.id || zahlung.lieferantId,
+            typ: "lieferant",
+            name: lieferant?.firma || zahlung.name || "",
+            iban: lieferant?.iban || zahlung.iban || ""
+        });
+    }
+
+    return getPartyMeta({
+        id: "",
+        typ: isIncoming ? "kunde" : "lieferant",
+        name: zahlung.name || "",
+        iban: zahlung.iban || ""
+    });
+}
+
 function normalizeRow(item: any = {}) {
     return {
         ...item,
         konto: normalizeAccountType(item.konto),
+        valuta: item.valuta || item.datum || "",
+        verwendungszweck: item.verwendungszweck || item.info || item.betreff || "",
+        senderId: item.senderId || "",
+        senderTyp: item.senderTyp || "",
+        senderName: item.senderName || "",
+        senderIban: item.senderIban || "",
+        empfaengerId: item.empfaengerId || "",
+        empfaengerTyp: item.empfaengerTyp || "",
+        empfaengerName: item.empfaengerName || "",
+        empfaengerIban: item.empfaengerIban || "",
         soll: normalizeNumber(item.soll),
-        haben: normalizeNumber(item.haben)
+        haben: normalizeNumber(item.haben),
+        statusBearbeitung: item.statusBearbeitung || "",
+        bankbewegungTyp: item.bankbewegungTyp || "",
+        bearbeitetAm: item.bearbeitetAm || "",
+        matchResult: item.matchResult || "",
+        zahlungId: item.zahlungId || "",
+        rechnungId: item.rechnungId || "",
+        restbetrag: normalizeNumber(item.restbetrag),
+        ueberzahlung: normalizeNumber(item.ueberzahlung)
     };
 }
 
@@ -59,36 +163,53 @@ function writeSettings(settings: { einkaufskontoZiel: number }) {
 }
 
 function buildTransferRows({
-    datum,
+    valuta,
     betrag,
     von,
     nach,
-    betreff,
-    info
+    verwendungszweck
 }: {
-    datum: string;
+    valuta: string;
     betrag: number;
     von: string;
     nach: string;
-    betreff: string;
-    info: string;
+    verwendungszweck: string;
 }) {
+    const sender = getCompanyAccountMeta(von);
+    const empfaenger = getCompanyAccountMeta(nach);
+
     return [
         normalizeRow({
-            datum,
+            valuta,
             konto: von,
-            betreff,
-            info,
+            verwendungszweck,
+            senderId: sender.id,
+            senderTyp: "konto-intern",
+            senderName: sender.name,
+            senderIban: sender.iban,
+            empfaengerId: empfaenger.id,
+            empfaengerTyp: "konto-intern",
+            empfaengerName: empfaenger.name,
+            empfaengerIban: empfaenger.iban,
             soll: betrag,
-            haben: 0
+            haben: 0,
+            bankbewegungTyp: "transfer"
         }),
         normalizeRow({
-            datum,
+            valuta,
             konto: nach,
-            betreff,
-            info,
+            verwendungszweck,
+            senderId: sender.id,
+            senderTyp: "konto-intern",
+            senderName: sender.name,
+            senderIban: sender.iban,
+            empfaengerId: empfaenger.id,
+            empfaengerTyp: "konto-intern",
+            empfaengerName: empfaenger.name,
+            empfaengerIban: empfaenger.iban,
             soll: 0,
-            haben: betrag
+            haben: betrag,
+            bankbewegungTyp: "transfer"
         })
     ];
 }
@@ -101,7 +222,7 @@ const firmenkontoService = {
         return item ? normalizeRow(item) : undefined;
     },
     create: (payload: any) => normalizeRow(baseService.create(normalizeRow(payload))),
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             return normalizeRow(baseService.update(normalizeRow(idOrItem)));
         }
@@ -121,24 +242,23 @@ const firmenkontoService = {
             einkaufskontoZiel: normalizeNumber(payload.einkaufskontoZiel) || STANDARD_EINKAUFSKONTO_ZIEL
         });
     },
-    transferSalesToCompany: (datum: string) => {
+    transferSalesToCompany: (valuta: string) => {
         const verkaufssaldo = firmenkontoService.getSaldoByAccount(KONTO_TYPEN.VERKAUF);
         if (verkaufssaldo <= 0) {
             return { amount: 0, rows: [] as any[] };
         }
 
         const rows = buildTransferRows({
-            datum,
+            valuta,
             betrag: verkaufssaldo,
             von: KONTO_TYPEN.VERKAUF,
             nach: KONTO_TYPEN.FIRMA,
-            betreff: "Wochentransfer Verkauf -> Firmenkonto",
-            info: "Automatischer Abschluss der Verkaufseinnahmen"
+            verwendungszweck: "Wochentransfer Verkauf -> Firmenkonto"
         }).map(row => firmenkontoService.create(row));
 
         return { amount: verkaufssaldo, rows };
     },
-    topUpPurchasingAccount: (datum: string, zielbetrag: number) => {
+    topUpPurchasingAccount: (valuta: string, zielbetrag: number) => {
         const target = normalizeNumber(zielbetrag) || readSettings().einkaufskontoZiel;
         const einkaufssaldo = firmenkontoService.getSaldoByAccount(KONTO_TYPEN.EINKAUF);
         const differenz = Math.max(0, target - einkaufssaldo);
@@ -148,26 +268,70 @@ const firmenkontoService = {
         }
 
         const rows = buildTransferRows({
-            datum,
+            valuta,
             betrag: differenz,
             von: KONTO_TYPEN.FIRMA,
             nach: KONTO_TYPEN.EINKAUF,
-            betreff: "Auffuellung Firmenkonto -> Einkauf",
-            info: `Zielbestand Einkaufskonto: ${target.toFixed(2)} EUR`
+            verwendungszweck: `Auffuellung Firmenkonto -> Einkauf (${target.toFixed(2)} EUR Zielbestand)`
         }).map(row => firmenkontoService.create(row));
 
         return { amount: differenz, rows, target };
     },
-    runWeeklyTransfer: (datum: string, zielbetrag: number) => {
-        const salesTransfer = firmenkontoService.transferSalesToCompany(datum);
-        const purchasingTransfer = firmenkontoService.topUpPurchasingAccount(datum, zielbetrag);
+    runWeeklyTransfer: (valuta: string, zielbetrag: number) => {
+        const salesTransfer = firmenkontoService.transferSalesToCompany(valuta);
+        const purchasingTransfer = firmenkontoService.topUpPurchasingAccount(valuta, zielbetrag);
         return {
             salesTransfer,
             purchasingTransfer
         };
+    },
+    findByPaymentId: (zahlungId: number | string) => firmenkontoService.list()
+        .find(item => String(item.zahlungId || "") === String(zahlungId)) || null,
+    ensureBookingForPayment: (zahlung: any) => {
+        if (!zahlung || String(zahlung.status || "").toLowerCase() !== "ausgefuehrt") return null;
+
+        const existing = firmenkontoService.findByPaymentId(zahlung.id);
+        const isIncoming = String(zahlung.zahlungsart || "").toLowerCase() !== "ausgang";
+        const konto = isIncoming ? KONTO_TYPEN.VERKAUF : KONTO_TYPEN.EINKAUF;
+        const ownParty = getCompanyAccountMeta(konto);
+        const otherParty = resolveCounterpartyForPayment(zahlung, isIncoming);
+
+        const payload = normalizeRow({
+            ...(existing || {}),
+            valuta: zahlung.ausfuehrungsdatum || zahlung.ausfuehrenAm || zahlung.datum || "",
+            konto,
+            verwendungszweck: buildReferencePurpose(zahlung),
+            senderId: isIncoming ? otherParty.id : ownParty.id,
+            senderTyp: isIncoming ? otherParty.typ : "unternehmen",
+            senderName: isIncoming ? otherParty.name : ownParty.name,
+            senderIban: isIncoming ? otherParty.iban : ownParty.iban,
+            empfaengerId: isIncoming ? ownParty.id : otherParty.id,
+            empfaengerTyp: isIncoming ? "unternehmen" : otherParty.typ,
+            empfaengerName: isIncoming ? ownParty.name : otherParty.name,
+            empfaengerIban: isIncoming ? ownParty.iban : otherParty.iban,
+            soll: isIncoming ? 0 : Number(zahlung.betrag || 0),
+            haben: isIncoming ? Number(zahlung.betrag || 0) : 0,
+            zahlungId: zahlung.id,
+            rechnungId: zahlung.rechnungId || "",
+            statusBearbeitung: isIncoming ? (existing?.statusBearbeitung || "unbearbeitet") : (existing?.statusBearbeitung || "bearbeitet"),
+            bankbewegungTyp: isIncoming ? "zahlungseingang" : "zahlungsausgang"
+        });
+
+        return existing
+            ? firmenkontoService.update(existing.id, payload)
+            : firmenkontoService.create(payload);
+    },
+    listSalesPaymentEntries: () => firmenkontoService.list()
+        .filter(item => item.konto === KONTO_TYPEN.VERKAUF && item.bankbewegungTyp === "zahlungseingang"),
+    markSalesPaymentProcessed: (entryId: number | string, payload: any = {}) => {
+        const current = firmenkontoService.getById(entryId);
+        if (!current) return null;
+        return firmenkontoService.update(entryId, {
+            ...current,
+            ...payload,
+            statusBearbeitung: payload.statusBearbeitung || "bearbeitet"
+        });
     }
 };
 
 export default firmenkontoService;
-
-

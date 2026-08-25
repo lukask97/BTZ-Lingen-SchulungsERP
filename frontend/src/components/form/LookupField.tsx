@@ -9,9 +9,10 @@ export default function LookupField({
     onChange,
     onCreate,
     onEdit,
-    placeholder = "Bitte auswählen...",
+    placeholder = "Bitte auswaehlen...",
     disabled = false,
-    required = false
+    required = false,
+    autoComplete = "off"
 }: LookupFieldProps) {
     const generatedId = useId();
     const fieldId = id || `lookup-field-${generatedId}`;
@@ -62,6 +63,7 @@ export default function LookupField({
                 value={query}
                 disabled={disabled}
                 required={required}
+                autoComplete={autoComplete}
                 placeholder={placeholder}
                 onFocus={() => setOpen(true)}
                 onChange={(event) => {
@@ -98,7 +100,7 @@ export default function LookupField({
             onClick={() => onEdit(value)}
             title="Bearbeiten"
         >
-            ✎
+            Bearbeiten
         </button>}
     </div>;
 }

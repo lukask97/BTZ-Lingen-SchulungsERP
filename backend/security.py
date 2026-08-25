@@ -40,6 +40,7 @@ TABLE_ACCESS_MAP = {
     "fristenOptionen": "benutzer",
     "rechte": "rechte",
     "reklamationen": "service",
+    "rechnungen": "rechnung",
     "retouren": "logistik",
     "rollen": "rollen",
     "rollenRechte": "rollen",
@@ -65,6 +66,9 @@ TABLE_ACTION_PERMISSION_OVERRIDES = {
     "freigaben": {
         "create": ("gf.bearbeiten", "verkauf.bearbeiten"),
         "update": ("gf.bearbeiten", "verkauf.bearbeiten"),
+    },
+    "rechnungen": {
+        "update": ("rechnung.bearbeiten", "buchhaltung.bearbeiten", "benutzer.bearbeiten"),
     }
 }
 

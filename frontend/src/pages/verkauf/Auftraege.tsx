@@ -18,6 +18,7 @@ import servicesService from "../../services/verkauf/servicesService";
 import versandService from "../../services/logistik/versandService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
+import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import { kundenanfrageInAuftragUebernehmen, naechsteAuftragsnummer } from "../../services/verkauf/verkaufService";
 import { getCustomerName } from "../../utils/customerReferences";
 import { getBerlinDate, getRelativeBerlinDate } from "../../utils/dateTime";
@@ -122,13 +123,17 @@ export default function Auftraege() {
 
     const data = auftraege.map(auftrag => {
         const anfrage = getInquiryForOrder(auftrag, [], anfragen);
+        const rechnung = rechnungenService.getByAuftragId(auftrag.id);
         return {
             ...auftrag,
             kunde: getCustomerName(auftrag.kundeId, auftrag.kunde),
             anfrageId: auftrag.anfrageId || anfrage?.id || "",
             anliegenText: anfrage?.anliegen || "-",
             positionenText: (auftrag.positionen || []).map(position => `${position.artikel} (${position.menge})`).join(", "),
-            prozess: getSalesStepLabel(getSalesStepForOrder(auftrag, vertriebsdokumente, versandauftraege))
+            prozess: getSalesStepLabel(getSalesStepForOrder(auftrag, vertriebsdokumente, versandauftraege)),
+            rechnungNr: rechnung?.rechnungsnr || "-",
+            buchhaltungStatus: rechnung?.lifecycleStatus || "noch nicht fakturiert",
+            buchhaltungAktion: rechnung?.nextAction || "Rechnung erzeugen"
         };
     });
 
@@ -220,6 +225,9 @@ export default function Auftraege() {
                 { field: "status", title: "Status", helpText: "Zeigt, ob der Auftrag noch offen ist oder bereits weiterverarbeitet wurde." },
                 { field: "anliegenText", title: "Anliegen", helpText: "Kurzbeschreibung der ursprünglichen Kundenanfrage oder des Auslösers." },
                 { field: "prozess", title: "Prozess", helpText: "Zeigt, an welcher Stelle sich der Auftrag im Vertriebs- und Versandablauf befindet." },
+                { field: "rechnungNr", title: "Rechnung" },
+                { field: "buchhaltungStatus", title: "Buchhaltung" },
+                { field: "buchhaltungAktion", title: "Naechster Schritt" },
                 { field: "positionenText", title: "Positionen" }
             ]}
             focusRowId={searchParams.get("focus") || ""}
@@ -234,7 +242,26 @@ export default function Auftraege() {
             toolbarActions={[{ name: "new", label: "Neuer Auftrag", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: neu }]}
             rowActions={[
                 { name: "thread", label: "Chat", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => row.anfrageId && navigate(`/kundenanfragen?focus=${row.anfrageId}`), variant: "secondary", isDisabled: row => !row.anfrageId },
-                { name: "confirm", label: "Dokumente", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => navigate(`/vertriebsdokumente/auftrag/${row.id}`), variant: "secondary" }
+                { name: "confirm", label: "Dokumente", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: row => navigate(`/vertriebsdokumente/auftrag/${row.id}`), variant: "secondary" },
+                {
+                    name: "invoice",
+                    label: "Rechnung erzeugen",
+                    permission: PERMISSIONS.RECHNUNG_ANLEGEN,
+                    onClick: row => {
+                        rechnungenService.createFromAuftrag(row.id);
+                        setRefreshKey(value => value + 1);
+                    },
+                    variant: "success",
+                    isVisible: row => row.rechnungNr === "-"
+                },
+                {
+                    name: "invoice-open",
+                    label: "Zur Rechnung",
+                    permission: PERMISSIONS.RECHNUNG_LESEN,
+                    onClick: row => row.rechnungNr !== "-" && navigate(`/ausgangsrechnungen?focus=${row.rechnungNr}`),
+                    variant: "secondary",
+                    isVisible: row => row.rechnungNr !== "-"
+                }
             ]}
         />
         <Dialog

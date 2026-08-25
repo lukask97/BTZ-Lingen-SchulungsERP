@@ -5,8 +5,13 @@ import kundenService from "../verkauf/customerService";
 import lieferantenService from "../einkauf/lieferantenService";
 import { getCustomerName } from "../../utils/customerReferences";
 import { getSupplierName } from "../../utils/supplierReferences";
+import { getInvoiceLifecycle, getInvoiceNextAction, getSuggestedDueDate, getHighestMahnstufe } from "../../utils/accountingWorkflow";
+import { getBerlinDate } from "../../utils/dateTime";
+import { getRechnungsnummer as buildInvoiceNumber } from "../core/documentNumbering";
 
 const baseService = createCRUDService("rechnungen", []);
+const reminderBaseService = createCRUDService("mahnungen", []);
+const paymentBaseService = createCRUDService("zahlungen", []);
 
 function safeLookup<T>(reader: () => T, fallback: T) {
     try {
@@ -37,6 +42,12 @@ function normalizeInvoice(item: any = {}) {
         : getSupplierName(item.lieferantId, item.kunde || lieferant?.firma || "");
     const auftrag = item.auftragId ? safeLookup(() => auftraegeService.getById(item.auftragId), null) : null;
     const bestellung = item.bestellungId ? safeLookup(() => bestellungenService.getById(item.bestellungId), null) : null;
+    const alleMahnungen = safeLookup(() => reminderBaseService.list(), []);
+    const alleZahlungen = safeLookup(() => paymentBaseService.list(), []);
+    const invoiceReminders = alleMahnungen.filter(entry => String(entry.rechnungId || "") === String(item.id || ""));
+    const invoicePayments = alleZahlungen.filter(entry => String(entry.rechnungId || "") === String(item.id || ""));
+    const mahnstufe = item.mahnstufe || getHighestMahnstufe(invoiceReminders);
+    const status = getInvoiceLifecycle({ ...item, mahnstufe }, invoicePayments, invoiceReminders);
 
     return {
         ...item,
@@ -48,9 +59,17 @@ function normalizeInvoice(item: any = {}) {
         lieferantId: item.lieferantId || "",
         kunde: partnerName,
         iban: outgoingInvoice ? (kunde?.iban || item.iban || "") : (lieferant?.iban || item.iban || ""),
-        faelligAm: item.faelligAm || "",
+        faelligAm: item.faelligAm || bestellung?.faelligAm || auftrag?.faelligAm || getSuggestedDueDate(item.datum || getBerlinDate()),
         betrag: Number(item.betrag || 0),
-        mahnstufe: item.mahnstufe || "-"
+        mahnstufe,
+        status,
+        lifecycleStatus: status,
+        mahnungen: invoiceReminders,
+        zahlungen: invoicePayments,
+        nextAction: getInvoiceNextAction({ ...item, rechnungstyp: item.rechnungstyp, mahnstufe, status }, invoicePayments, invoiceReminders),
+        inkassoStatus: item.inkassoStatus || "",
+        inkassoAm: item.inkassoAm || "",
+        inkassoGrund: item.inkassoGrund || ""
     };
 }
 
@@ -80,7 +99,7 @@ function syncSourceDocument(invoice: any) {
         if (!bestellung) return;
         bestellungenService.update({
             ...bestellung,
-            rechnungStatus: invoice.status === "bezahlt" ? "bezahlt" : "offen",
+            rechnungStatus: invoice.status === "bezahlt" ? "bezahlt" : invoice.status,
             faelligAm: invoice.faelligAm || bestellung.faelligAm || ""
         });
         return;
@@ -135,6 +154,55 @@ const rechnungenService = {
         return this.list().filter(item =>
             Object.values(item).join(" ").toLowerCase().includes(query.toLowerCase())
         );
+    },
+    getByAuftragId(auftragId: number | string) {
+        return this.list().find(item => String(item.auftragId || "") === String(auftragId)) || null;
+    },
+    getByBestellungId(bestellungId: number | string) {
+        return this.list().find(item => String(item.bestellungId || "") === String(bestellungId)) || null;
+    },
+    createFromAuftrag(auftragId: number | string) {
+        const bestehend = this.getByAuftragId(auftragId);
+        if (bestehend) return bestehend;
+
+        const auftrag = auftraegeService.getById(auftragId);
+        if (!auftrag) return null;
+
+        return this.create({
+            rechnungsnr: buildInvoiceNumber(auftrag.auftragNr || "", auftrag.datum || getBerlinDate()),
+            rechnungstyp: "Ausgangsrechnung",
+            auftragId: auftrag.id,
+            kundeId: auftrag.kundeId || "",
+            datum: getBerlinDate(),
+            faelligAm: auftrag.faelligAm || getSuggestedDueDate(getBerlinDate()),
+            betrag: Number(auftrag.gesamtbetrag || 0),
+            status: "offen",
+            mahnstufe: "-",
+            inkassoStatus: ""
+        });
+    },
+    createFromBestellung(bestellungId: number | string, payload: any = {}) {
+        const bestehend = this.getByBestellungId(bestellungId);
+        if (bestehend) return bestehend;
+
+        const bestellung = bestellungenService.getById(bestellungId);
+        if (!bestellung) return null;
+        const betrag = payload.betrag || (bestellung.positionen || []).reduce(
+            (summe: number, position: any) => summe + Number(position.menge || 0) * Number(position.einzelpreis || 0),
+            0
+        );
+
+        return this.create({
+            rechnungsnr: payload.rechnungsnr || `ER-${String(bestellung.bestellNr || bestellung.id).replace(/[^A-Za-z0-9-]/g, "")}`,
+            rechnungstyp: "Eingangsrechnung",
+            bestellungId: bestellung.id,
+            lieferantId: bestellung.lieferantId || "",
+            datum: payload.datum || getBerlinDate(),
+            faelligAm: payload.faelligAm || bestellung.faelligAm || getSuggestedDueDate(getBerlinDate()),
+            betrag: Number(betrag || 0),
+            status: "offen",
+            mahnstufe: "-"
+        });
     }
 };
 

@@ -14,7 +14,7 @@ Es gibt nur noch einen technischen Betriebsweg:
 
 - Backend auf Flask
 - Persistenz in PostgreSQL mit JSONB
-- Seed-Daten aus `backend/seed/mock_seed.json`
+- Seed-Daten aus `backend/seed/sources/json/`
 - Reset ueber das Backend
 - keine lokalen Mock- oder Memory-Modi mehr
 
@@ -27,13 +27,12 @@ Wichtige Einstiegspunkte:
 - `backend/app_factory.py`: App-Erzeugung, Blueprints, CORS, Store
 - `backend/repositories/postgres_store.py`: zentrale JSONB-Persistenz
 - `backend/routes/`: API-Module
-- `backend/seed/mock_seed.json`: zentrale Demo- und Reset-Daten
+- `backend/seed/sources/json/`: zentrale, fachlich getrennte Demo- und Reset-Daten
 - `backend/seed/optionenDefault.json`: Standardwerte fuer gezielte Resets
 - `backend/seed/README.md`: Erklaerung der Seed- und Reset-Struktur
-- `backend/scripts/generate_seed.mjs`: erzeugt `mock_seed.json` aus den gepflegten Seed-Quellen
 - `frontend/src/router/AppRouter.tsx`: Frontend-Routing
 - `frontend/src/services/`: fachliche Frontend-Services
-- `frontend/src/services/seed/data/`: Quellmodule fuer Seed- und Demo-Daten
+- `backend/seed/sources/json/`: fachlich gepflegte Seed-Quellen fuer Demo- und Reset-Daten
 
 ## Aktueller Aufraeumstand
 
@@ -100,7 +99,7 @@ Alle fachlichen Daten laufen ueber das Backend:
 - CRUD-Endpunkte unter `/api/datenbanken/*`
 - Login und Session im Backend
 - Server-Events fuer Tabellen-Updates und Resets
-- zentrale Seed-Daten in `backend/seed/mock_seed.json`
+- zentrale Seed-Daten in `backend/seed/sources/json/`
 
 Resets funktionieren in zwei klaren Formen:
 
@@ -109,23 +108,17 @@ Resets funktionieren in zwei klaren Formen:
 
 ## Seed-Daten pflegen
 
-Die gepflegten Quelldateien liegen im Frontend unter:
+Die gepflegten Quelldateien liegen zentral im Backend unter:
 
-- `frontend/src/services/seed/data/stammdaten.ts`
-- `frontend/src/services/seed/data/einkaufLogistik.ts`
-- `frontend/src/services/seed/data/verkauf.ts`
-- `frontend/src/services/seed/data/verwaltung.ts`
-- `frontend/src/services/seed/fieldMetadata.ts`
+- `backend/seed/sources/json/stammdaten.json`
+- `backend/seed/sources/json/einkaufLogistik.json`
+- `backend/seed/sources/json/verkauf.json`
+- `backend/seed/sources/json/verwaltung.json`
+- `backend/seed/sources/json/fieldMetadata.json`
 
-Wenn daraus die zentrale Seed-Datei neu erzeugt werden soll:
+Diese Dateien werden direkt vom Backend fuer Initialbefuellung und Reset verwendet:
 
-```bash
-node backend/scripts/generate_seed.mjs
-```
-
-Die Ausgabe landet in:
-
-- `backend/seed/mock_seed.json`
+- `backend/seed/sources/json/`
 
 Mehr Details zur Aufteilung stehen in:
 
@@ -168,12 +161,12 @@ Das Projekt ist schon deutlich klarer, aber diese Schritte wuerden es weiter ver
 
 1. Grosse Seiten wie `Angebote.tsx`, `Kundenanfragen.tsx` und aehnliche Dialog-Workflows in kleinere Teilkomponenten zerlegen.
 2. Lange Service-Dateien fachlich trennen, zum Beispiel in Datenzugriff, Hydration, Berechnungen und UI-Helfer.
-3. Fuer `frontend/src/services/seed/data/` ein kleines README ergaenzen, das erklaert, welche Datei welche Domaene beschreibt.
+3. Fuer `backend/seed/sources/json/` die fachliche Aufteilung weiter schaerfen, zum Beispiel in noch klarere Buchhaltungs- und Prozessdateien.
 4. Haeufig genutzte Typen aus Seiten und Services in gemeinsame Typdateien auslagern, damit weniger implizite `any`-Strukturen im Projekt bleiben.
 5. Den `docs/`-Ordner in wenige klare Bereiche wie `architektur`, `prozesse` und `betrieb` aufteilen.
 6. Fachlogik aus sehr langen React-Seiten in Hooks oder Hilfsmodule verlagern, damit Komponenten kuerzer und einfacher lesbar werden.
 7. Reset-Defaults und Backend-Seed-Struktur langfristig aus einer einzigen Quelle ableiten, damit doppelte Pflege weiter sinkt.
-8. Die gepflegten Seed-Quellen langfristig aus dem Frontend in einen neutralen gemeinsamen Ordner verschieben, damit Demo-Daten und UI-Code klarer getrennt sind.
+8. Die JSON-Seedquellen bei weiterem Wachstum noch feiner nach Fachbereichen schneiden, damit Buchhaltung, Vertrieb und Einkauf separat wartbar bleiben.
 9. Bei neuen Strukturverbesserungen bewusst keine Dateiflut erzeugen: erst pruefen, ob ein bestehendes Hilfsmodul erweitert werden kann.
 
 ## Dokumentation

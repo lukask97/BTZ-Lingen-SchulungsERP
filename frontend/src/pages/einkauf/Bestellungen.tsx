@@ -9,6 +9,7 @@ import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import TextField from "../../components/form/TextField";
 import { PERMISSIONS } from "../../constants/permissions";
+import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import bestellungenService, { getAutomatischeBedarfsmeldungen, naechsteBestellnummer } from "../../services/einkauf/bestellungenService";
 import lieferantenService from "../../services/einkauf/lieferantenService";
 import lieferantenArtikelStaffelnService from "../../services/einkauf/lieferantenArtikelStaffelnService";
@@ -451,7 +452,9 @@ export default function Bestellungen() {
             artikelnummernText: (bestellung.positionen || []).map(position => position.artikelNr || "-").join(", "),
             anfrageQuelleLabel: getAnfrageQuelleLabel(bestellung),
             angebotsStatus: getAngebotsStatusLabel(bestellung),
-            prozess: getPurchaseStepLabel(getPurchaseStep(bestellung))
+            prozess: getPurchaseStepLabel(getPurchaseStep(bestellung)),
+            rechnungNr: rechnungenService.getByBestellungId(bestellung.id)?.rechnungsnr || "-",
+            buchhaltungStatus: rechnungenService.getByBestellungId(bestellung.id)?.lifecycleStatus || "noch nicht erfasst"
         }))
         .filter(bestellung => {
             const passtZumStatus = !statusFilter || bestellung.status === statusFilter;
@@ -538,6 +541,8 @@ export default function Bestellungen() {
                 { field: "status", title: "Status" },
                 { field: "angebotsStatus", title: "Lehrkraftangebot" },
                 { field: "prozess", title: "Prozess" },
+                { field: "rechnungNr", title: "Eingangsrechnung" },
+                { field: "buchhaltungStatus", title: "Buchhaltung" },
                 { field: "positionenText", title: "Positionen" }
             ]}
             data={data}
@@ -574,7 +579,26 @@ export default function Bestellungen() {
             toolbarActions={[{ name: "new", label: "Neue Anfrage", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: () => neu() }]}
             rowActions={[
                 { name: "derive", label: "Anfrage ableiten", permission: PERMISSIONS.EINKAUF_BEARBEITEN, onClick: row => neu({ anfrageQuelle: "bedarfsmeldung", bedarfsmeldungId: row.id }), variant: "secondary", isVisible: row => row.status === "bedarf gemeldet" },
-                { name: "goods", label: "Wareneingang", permission: PERMISSIONS.LAGER_BUCHEN, onClick: row => navigate(`/wareneingaenge?focus=${row.id}`), variant: "secondary", isVisible: row => canBookGoodsReceipt(row) }
+                { name: "goods", label: "Wareneingang", permission: PERMISSIONS.LAGER_BUCHEN, onClick: row => navigate(`/wareneingaenge?focus=${row.id}`), variant: "secondary", isVisible: row => canBookGoodsReceipt(row) },
+                {
+                    name: "incoming-invoice",
+                    label: "Eingangsrechnung",
+                    permission: PERMISSIONS.RECHNUNG_ANLEGEN,
+                    onClick: row => {
+                        rechnungenService.createFromBestellung(row.id);
+                        setBestellungen(bestellungenService.getAll());
+                    },
+                    variant: "success",
+                    isVisible: row => row.rechnungNr === "-"
+                },
+                {
+                    name: "incoming-invoice-open",
+                    label: "Zur Rechnung",
+                    permission: PERMISSIONS.RECHNUNG_LESEN,
+                    onClick: row => row.rechnungNr !== "-" && navigate(`/eingangsrechnungen?focus=${row.rechnungNr}`),
+                    variant: "secondary",
+                    isVisible: row => row.rechnungNr !== "-"
+                }
             ]}
         />
         <Dialog

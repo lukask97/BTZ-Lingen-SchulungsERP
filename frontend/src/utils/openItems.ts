@@ -1,3 +1,4 @@
+import { getInvoiceLifecycle, getMahnlaufPhase } from "./accountingWorkflow";
 import { getBerlinDate } from "./dateTime";
 
 function getToday() {
@@ -7,9 +8,11 @@ function getToday() {
 export function getOpenItemStatus(rechnung: any) {
     const today = getToday();
     if (!rechnung) return "offen";
-    if (rechnung.status === "bezahlt") return "bezahlt";
-    if (rechnung.status === "storniert") return "storniert";
-    if (rechnung.faelligAm && rechnung.faelligAm < today) return "ueberfaellig";
+    const lifecycle = getInvoiceLifecycle(rechnung, [], [], today);
+    if (lifecycle === "bezahlt") return "bezahlt";
+    if (lifecycle === "storniert") return "storniert";
+    if (["inkasso", "gemahnt", "ueberfaellig"].includes(lifecycle)) return "ueberfaellig";
+    if (lifecycle === "faellig" || getMahnlaufPhase(rechnung, today) === "zahlungserinnerung") return "offen";
     return "offen";
 }
 

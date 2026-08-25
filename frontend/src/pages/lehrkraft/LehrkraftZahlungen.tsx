@@ -89,18 +89,13 @@ export default function LehrkraftZahlungen() {
     };
 
     const ausfuehren = (zahlung: any) => {
-        zahlungenService.update(zahlung.id, { ...zahlung, status: "ausgefuehrt", datum: today });
-        if (zahlung.rechnungId) {
-            const rechnung = rechnungenService.getById(zahlung.rechnungId);
-            if (rechnung) rechnungenService.update({ ...rechnung, status: "bezahlt" });
-        }
+        zahlungenService.markExecuted(zahlung.id, today);
         setZahlungen(zahlungenService.list());
     };
 
     const stornieren = (zahlung: any) => {
         if (zahlung.rechnungId && zahlung.status === "ausgefuehrt") {
-            const rechnung = rechnungenService.getById(zahlung.rechnungId);
-            if (rechnung) rechnungenService.update({ ...rechnung, status: "offen" });
+            zahlungenService.unmatch(zahlung.id);
         }
         zahlungenService.remove(zahlung.id);
         setZahlungen(zahlungenService.list());

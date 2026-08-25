@@ -1,5 +1,5 @@
-import InvoiceLedgerPage from "./InvoiceLedgerPage";
+import RechnungsprozessPage from "./RechnungsprozessPage";
 
 export default function Eingangsrechnungen() {
-    return <InvoiceLedgerPage mode="eingang" />;
+    return <RechnungsprozessPage mode="eingang" />;
 }

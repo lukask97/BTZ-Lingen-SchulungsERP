@@ -30,6 +30,7 @@
   "segment": "Das Segment beschreibt eine grobe fachliche Einordnung, zum Beispiel Branche oder Einsatzbereich.",
   "soll": "Soll zeigt bei einem Konto einen Abgang oder eine Belastung auf diesem Konto.",
   "stueckliste": "Die Stueckliste zeigt, aus welchen Komponenten eine Baugruppe oder ein zusammengesetzter Artikel besteht.",
+  "valuta": "Die Valuta ist das Datum, zu dem eine Zahlung auf dem Konto wirksam gutgeschrieben oder belastet wird.",
   "verkaufspreis": "Der Verkaufspreis ist der Preis, zu dem ein Artikel oder eine Leistung an Kunden angeboten oder verkauft wird.",
   "ze": "ZE steht fuer Zeiteinheit. Damit wird angegeben, auf welche Zeitspanne sich eine abrechenbare Leistung bezieht."
   ,
