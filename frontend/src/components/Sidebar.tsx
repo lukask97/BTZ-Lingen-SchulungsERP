@@ -62,10 +62,6 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                     {isCollapsed ? ">" : "<"}
                 </button>
             </div>
-            <div className="sidebar-intro">
-                <p className="sidebar-intro-kicker">Lernnavigation</p>
-                <p className="sidebar-intro-text">Module, Rollen und Prozesse verwenden eine gemeinsame Bedienlogik.</p>
-            </div>
             <div className="sidebar-menu">
                 {visibleGroups.map(group => <div key={group.title} className="sidebar-group">
                     <div className="sidebar-section-row">

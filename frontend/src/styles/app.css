@@ -42,11 +42,13 @@
 html,
 body,
 #root {
+    height: 100%;
     min-height: 100%;
 }
 
 body {
     margin: 0;
+    overflow: hidden;
     font-family: var(--bulma-family-primary);
     background:
         radial-gradient(circle at top left, rgba(15, 108, 189, 0.09), transparent 28%),
@@ -68,14 +70,17 @@ a {
 
 .layout {
     display: flex;
+    height: 100vh;
     min-height: 100vh;
     width: 100%;
+    overflow: hidden;
 }
 
 .content {
     flex: 1;
     min-width: 0;
-    min-height: 100vh;
+    min-height: 0;
+    height: 100vh;
     padding: 24px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -135,6 +140,7 @@ a {
 .sidebar {
     width: 290px;
     min-width: 290px;
+    height: 100vh;
     padding: 18px;
     background: rgba(255, 255, 255, 0.9);
     border-right: 1px solid var(--erp-border);
@@ -142,6 +148,7 @@ a {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    overflow: hidden;
     transition: width 0.2s ease, min-width 0.2s ease, padding 0.2s ease;
 }
 

@@ -3,7 +3,7 @@ import {
     useLocation
 }
     from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
@@ -16,6 +16,7 @@ function MainLayout() {
     useDataSyncRefresh(SYNC_DATA_KEYS);
     const location = useLocation();
     const isTeacherView = location.pathname.startsWith("/lehrkraft");
+    const contentRef = useRef<HTMLDivElement | null>(null);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(() => {
         if (typeof window === "undefined") return false;
@@ -27,6 +28,12 @@ function MainLayout() {
         window.localStorage.setItem("erp-dark-mode", String(isDarkMode));
     }, [isDarkMode]);
 
+    useEffect(() => {
+        if (contentRef.current) {
+            contentRef.current.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+    }, [location.pathname]);
+
     return (
         <div className="layout erp-shell">
             <Sidebar
@@ -35,7 +42,7 @@ function MainLayout() {
                 isDarkMode={isDarkMode}
                 onToggleDarkMode={() => setIsDarkMode(current => !current)}
             />
-            <div className="content erp-shell-content">
+            <div ref={contentRef} className="content erp-shell-content">
                 <Header
                     isSidebarCollapsed={isSidebarCollapsed}
                     onToggleSidebar={() => setIsSidebarCollapsed(current => !current)}
