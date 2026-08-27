@@ -424,9 +424,17 @@ a {
     min-height: 100vh;
 }
 
+.login-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
 .login {
     display: grid;
     gap: 24px;
+    width: min(1100px, 100%);
     padding: 40px 24px;
 }
 
@@ -493,6 +501,11 @@ a {
 }
 
 @media (max-width: 860px) {
+    .login-layout {
+        display: block;
+        padding: 0;
+    }
+
     .layout {
         display: block;
     }

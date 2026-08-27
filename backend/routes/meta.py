@@ -103,6 +103,7 @@ def build_api_overview_html(store):
         <ul>
           <li><a href="/api/"><code>GET /api</code></a></li>
           <li><a href="/api/health"><code>GET /api/health</code></a></li>
+          <li><a href="/api/info"><code>GET /api/info</code></a></li>
           <li><a href="/api/meta"><code>GET /api/meta</code></a></li>
           <li><code>POST /api/reset</code></li>
           <li><code>/api/datenbanken/&lt;tabelle&gt;</code> fuer CRUD-Zugriffe</li>
@@ -162,6 +163,7 @@ def health():
 
 
 @meta_bp.get("/meta")
+@meta_bp.get("/info")
 def meta():
     store = get_store()
     return json_response({

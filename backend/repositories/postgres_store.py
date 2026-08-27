@@ -107,6 +107,8 @@ class PostgresStore:
 
     def get_meta(self, table_name):
         self._require_table(table_name)
+        records = self._list_records(table_name)
+
         with self._connect() as connection, connection.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(
                 """
@@ -122,7 +124,8 @@ class PostgresStore:
             "name": table_name,
             "count": row.get("count", 0),
             "updatedAt": row.get("updated_at").isoformat() if row.get("updated_at") else None,
-            "provider": "postgres"
+            "provider": "postgres",
+            "fields": self._describe_fields(records),
         }
 
     def reset(self):
@@ -250,3 +253,42 @@ class PostgresStore:
     def _require_table(self, table_name):
         if not self.table_exists(table_name):
             raise KeyError(table_name)
+
+    def _describe_fields(self, records):
+        field_types = {}
+        required_fields = {}
+
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+
+            for field_name, value in record.items():
+                field_types.setdefault(field_name, set()).add(self._infer_value_type(value))
+                required_fields[field_name] = required_fields.get(field_name, 0) + 1
+
+        total_records = len(records)
+        return [
+            {
+                "name": field_name,
+                "types": sorted(field_types[field_name]),
+                "required": required_fields.get(field_name, 0) == total_records if total_records else False,
+            }
+            for field_name in sorted(field_types.keys())
+        ]
+
+    def _infer_value_type(self, value):
+        if value is None:
+            return "null"
+        if isinstance(value, bool):
+            return "boolean"
+        if isinstance(value, int) and not isinstance(value, bool):
+            return "integer"
+        if isinstance(value, float):
+            return "number"
+        if isinstance(value, str):
+            return "string"
+        if isinstance(value, list):
+            return "array"
+        if isinstance(value, dict):
+            return "object"
+        return type(value).__name__
