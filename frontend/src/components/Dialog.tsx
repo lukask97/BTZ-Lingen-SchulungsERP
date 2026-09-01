@@ -47,7 +47,7 @@ export default function Dialog({
                     </div>
                     <button
                         type="button"
-                        aria-label="Dialog schliessen"
+                        aria-label="Dialog schließen"
                         className="dialog-close button is-light is-rounded"
                         onClick={(e) => {
                             e.preventDefault();
@@ -55,7 +55,7 @@ export default function Dialog({
                             onClose();
                         }}
                     >
-                        <span aria-hidden="true">Schliessen</span>
+                        <span aria-hidden="true">Schließen</span>
                     </button>
                 </div>
 

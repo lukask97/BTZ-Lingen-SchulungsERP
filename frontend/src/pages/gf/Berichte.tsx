@@ -80,7 +80,7 @@ function generateSummary(bereich: string, startdatum: string, enddatum: string) 
         const artikel = artikelService.getAll();
         const kritisch = artikel.filter(item => Number(item.bestand || 0) <= Number(item.bedarfsmeldungBei || 0)).length;
         const bestellungenImZulauf = bestellungenService.list().filter(item => ["angefragt", "bestaetigt", "versendet"].includes(String(item.status || "").toLowerCase())).length;
-        return `${kritisch} kritische Artikelbestände und ${bestellungenImZulauf} Bestellungen im Zulauf.`;
+        return `${kritisch} kritische Artikelbestände und ${bestellungenImZulauf} nachbestellte Bestellungen.`;
     }
     if (bereich === "marketing") {
         const freigaben = freigabenService.list().filter(item => item.bereich === "marketing" && isDateInRange(item.datum, startdatum, enddatum)).length;

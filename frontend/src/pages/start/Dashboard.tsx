@@ -23,12 +23,12 @@ import { getUnifiedOpenItems, isOpenItem, isOverdueOpenItem, isPendingPayment, i
 import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 
 const DASHBOARD_AREAS = [
-    { access: ACCESS.EINKAUF, title: "Einkauf", text: "Lieferanten vergleichen, Bestellungen anlegen und WareneingÃ¤nge bearbeiten.", to: "/themen/einkauf", link: "Zum Einkauf" },
-    { access: ACCESS.VERKAUF, title: "Verkauf", text: "Kundenanfragen, Angebote und AuftrÃ¤ge miteinander verknÃ¼pfen.", to: "/themen/verkauf", link: "Zum Verkauf" },
+    { access: ACCESS.EINKAUF, title: "Einkauf", text: "Lieferanten vergleichen, Bestellungen anlegen und Wareneingänge bearbeiten.", to: "/themen/einkauf", link: "Zum Einkauf" },
+    { access: ACCESS.VERKAUF, title: "Verkauf", text: "Kundenanfragen, Angebote und Aufträge miteinander verknüpfen.", to: "/themen/verkauf", link: "Zum Verkauf" },
     { access: ACCESS.BUCHHALTUNG, title: "Buchhaltung", text: "Rechnungen, Zahlungen, Mahnungen und Belege einfach einordnen.", to: "/buchhaltung", link: "Zur Buchhaltung" },
     { access: ACCESS.PERSONALWESEN, title: "Personal", text: "Mitarbeiter, Personalakte und Formulare im Zusammenhang bearbeiten.", to: "/personalwesen", link: "Zum Personal" },
     { access: ACCESS.MARKETING, title: "Marketing", text: "Aktionen, Feedback und Events als Zusatzbereich dokumentieren.", to: "/marketing", link: "Zum Marketing" },
-    { access: ACCESS.LOGISTIK, title: "Logistik", text: "Versand, Lager und Retouren als unterstÃ¼tzende Bereiche nutzen.", to: "/logistik", link: "Zur Logistik" }
+    { access: ACCESS.LOGISTIK, title: "Logistik", text: "Versand, Lager und Retouren als unterstützende Bereiche nutzen.", to: "/logistik", link: "Zur Logistik" }
 ];
 
 function dateScore(dateValue = "") {
@@ -171,7 +171,7 @@ function Dashboard() {
     const offeneBewerbungen = bewerber.filter(item => item.status === "eingegangen").length;
     const geplanteSchulungen = schulungen.filter(item => item.status === "geplant").length;
     const kennzahlen = [
-        { label: "Offene AuftrÃ¤ge", value: offeneAuftraege },
+        { label: "Offene Aufträge", value: offeneAuftraege },
         { label: "Offene Posten gesamt", value: offenePosten },
         { label: "Offene Posten (Debitor)", value: offeneDebitorenPosten },
         { label: "Offene Posten (Kreditor)", value: offeneKreditorenPosten },
@@ -180,13 +180,13 @@ function Dashboard() {
     ];
 
     const schuelerAufgaben = [
-        buildTask("Kundenanfragen beantworten", offeneAnfragen, `${offeneAnfragen} Anfragen warten auf Bearbeitung oder RÃ¼ckmeldung.`, "/kundenanfragen", "Anfragen Ã¶ffnen"),
-        buildTask("AuftrÃ¤ge weiterbearbeiten", offeneAuftraege, `${offeneAuftraege} AuftrÃ¤ge sind noch offen und kÃ¶nnen geprÃ¼ft oder versendet werden.`, "/auftraege", "AuftrÃ¤ge prÃ¼fen"),
-        buildTask("WareneingÃ¤nge vorbereiten", offeneWareneingaengeEinkauf, `${offeneWareneingaengeEinkauf} Bestellungen wurden versendet und kÃ¶nnen jetzt als Wareneingang gebucht werden.`, "/wareneingaenge", "WareneingÃ¤nge ansehen"),
-        buildTask("Offene Posten prÃ¼fen", offenePosten, `${offenePosten} Posten sind intern noch nicht geklÃ¤rt oder ausgeglichen.`, "/buchhaltung", "Offene Posten Ã¶ffnen"),
-        buildTask("PersonalvorgÃ¤nge prÃ¼fen", offeneUrlaubsantraege, `${offeneUrlaubsantraege} UrlaubsantrÃ¤ge warten auf eine Entscheidung.`, "/urlaubsantraege", "AntrÃ¤ge Ã¶ffnen"),
-        buildTask("Krankmeldungen bestÃ¤tigen", offeneKrankmeldungen, `${offeneKrankmeldungen} Krankmeldungen sind neu eingegangen und sollten in Akte und Status Ã¼bernommen werden.`, "/krankmeldungen", "Krankmeldungen Ã¶ffnen"),
-        buildTask("Freigaben nachvollziehen", offeneFreigaben, `${offeneFreigaben} Freigaben kÃ¶nnen als FÃ¼hrungsentscheidung betrachtet werden.`, "/freigaben", "Freigaben Ã¶ffnen")
+        buildTask("Kundenanfragen beantworten", offeneAnfragen, `${offeneAnfragen} Anfragen warten auf Bearbeitung oder Rückmeldung.`, "/kundenanfragen", "Anfragen öffnen"),
+        buildTask("Aufträge weiterbearbeiten", offeneAuftraege, `${offeneAuftraege} Aufträge sind noch offen und können geprüft oder versendet werden.`, "/auftraege", "Aufträge prüfen"),
+        buildTask("Wareneingänge vorbereiten", offeneWareneingaengeEinkauf, `${offeneWareneingaengeEinkauf} Bestellungen wurden versendet und können jetzt als Wareneingang gebucht werden.`, "/wareneingaenge", "Wareneingänge ansehen"),
+        buildTask("Offene Posten prüfen", offenePosten, `${offenePosten} Posten sind intern noch nicht geklärt oder ausgeglichen.`, "/buchhaltung", "Offene Posten öffnen"),
+        buildTask("Personalvorgänge prüfen", offeneUrlaubsantraege, `${offeneUrlaubsantraege} Urlaubsanträge warten auf eine Entscheidung.`, "/urlaubsantraege", "Anträge öffnen"),
+        buildTask("Krankmeldungen bestätigen", offeneKrankmeldungen, `${offeneKrankmeldungen} Krankmeldungen sind neu eingegangen und sollten in Akte und Status übernommen werden.`, "/krankmeldungen", "Krankmeldungen öffnen"),
+        buildTask("Freigaben nachvollziehen", offeneFreigaben, `${offeneFreigaben} Freigaben können als Führungsentscheidung betrachtet werden.`, "/freigaben", "Freigaben öffnen")
     ].filter(Boolean);
 
     const letzteAktivitaeten = buildUniqueActivityKeys([
@@ -202,18 +202,18 @@ function Dashboard() {
     const hinweise = isTeacherView ? [
         "Nutze die Fallakten als Arbeitsauftrag und lasse die Ergebnisse auf den Kernseiten dokumentieren.",
         "Achte bei Auswertungen besonders auf Belegbezug, Statuspflege und die richtige Prozessreihenfolge.",
-        "Offene oder fehlerhafte VorgÃ¤nge eignen sich gut fÃ¼r kurze ReflexionsgesprÃ¤che im Unterricht."
+        "Offene oder fehlerhafte Vorgänge eignen sich gut für kurze Reflexionsgespräche im Unterricht."
     ] : [
         "Beginne mit den offenen Aufgaben und dokumentiere jeden Schritt auf der passenden Fachseite.",
-        "Arbeite mit den vorhandenen DatensÃ¤tzen, statt neue Daten ohne Bezug anzulegen.",
-        "PrÃ¼fe am Ende Status, VerknÃ¼pfungen und zugehÃ¶rige Belege, damit der Vorgang vollstÃ¤ndig ist."
+        "Arbeite mit den vorhandenen Datensätzen, statt neue Daten ohne Bezug anzulegen.",
+        "Prüfe am Ende Status, Verknüpfungen und zugehörige Belege, damit der Vorgang vollständig ist."
     ];
 
     const unternehmensstatus = [
         buildStatusItem("Vertrieb", offeneAuftraege, "stabil", "offen"),
         buildStatusItem("Einkauf", offeneBestellungen, "geordnet", "aktiv"),
         buildStatusItem("Buchhaltung", offenePosten, "ausgeglichen", "offen"),
-        buildStatusItem("Personal", offeneZeitbuchungen, "aktuell", "zu prÃ¼fen")
+        buildStatusItem("Personal", offeneZeitbuchungen, "aktuell", "zu prüfen")
     ];
 
     const lehrkraftKlassen = [
@@ -223,15 +223,15 @@ function Dashboard() {
     ];
 
     const lehrkraftAufgaben = [
-        buildTask("Kundenanfragen beantworten", offeneLehrkraftAnfragen, `${offeneLehrkraftAnfragen} externe Anfragen oder RÃ¼ckmeldungen warten auf Antwort oder Einordnung.`, "/lehrkraft/kundenkorrespondenz", "Kundenkorrespondenz Ã¶ffnen"),
-        buildTask("Angebote prÃ¼fen", offeneLehrkraftAngebote, `${offeneLehrkraftAngebote} Angebote warten auf Annahme, Ablehnung oder RÃ¼ckmeldung des Kunden.`, "/lehrkraft/kundenkorrespondenz", "Offene Angebote Ã¶ffnen"),
-        buildTask("Warenannahme rÃ¼ckmelden", offeneWarenannahmen, `${offeneWarenannahmen} Liefer- oder Transportunterlagen warten noch auf die externe RÃ¼ckmeldung der Lehrkraft.`, "/lehrkraft/kundenkorrespondenz", "Warenannahmen Ã¶ffnen"),
-        buildTask("ÃœberfÃ¤llige Posten besprechen", ueberfaelligePosten, `${ueberfaelligePosten} Posten sind am ${today} bereits fÃ¤llig und eignen sich fÃ¼r Offene-Posten- oder MahnungsÃ¼bungen.`, "/buchhaltung", "Buchhaltung Ã¶ffnen"),
-        buildTask("Offene Freigaben begleiten", offeneFreigaben, `${offeneFreigaben} Freigaben warten auf eine Entscheidung und passen gut zu FÃ¼hrungs- oder KooperationsfÃ¤llen.`, "/freigaben", "Freigaben Ã¶ffnen"),
-        buildTask("Personalentscheidungen prÃ¼fen", offeneUrlaubsantraege, `${offeneUrlaubsantraege} UrlaubsantrÃ¤ge kÃ¶nnen als einfacher Genehmigungsprozess besprochen werden.`, "/urlaubsantraege", "UrlaubsantrÃ¤ge Ã¶ffnen"),
-        buildTask("Krankmeldungen mit Aktenbezug prÃ¼fen", offeneKrankmeldungen, `${offeneKrankmeldungen} Krankmeldungen sind noch nicht bestÃ¤tigt und eignen sich fÃ¼r AktenfÃ¼hrung und Statusarbeit.`, "/krankmeldungen", "Krankmeldungen Ã¶ffnen"),
-        buildTask("Zeitbuchungen freigeben", offeneZeitbuchungen, `${offeneZeitbuchungen} Arbeitszeiten sind erfasst, aber noch nicht freigegeben.`, "/arbeitszeiten", "Arbeitszeiten Ã¶ffnen"),
-        buildTask("Bewerberprozess auswerten", offeneBewerbungen, `${offeneBewerbungen} Bewerbungen sind noch offen und kÃ¶nnen fÃ¼r PersonalgesprÃ¤che genutzt werden.`, "/bewerber", "Bewerber Ã¶ffnen")
+        buildTask("Kundenanfragen beantworten", offeneLehrkraftAnfragen, `${offeneLehrkraftAnfragen} externe Anfragen oder Rückmeldungen warten auf Antwort oder Einordnung.`, "/lehrkraft/kundenkorrespondenz", "Kundenkorrespondenz öffnen"),
+        buildTask("Angebote prüfen", offeneLehrkraftAngebote, `${offeneLehrkraftAngebote} Angebote warten auf Annahme, Ablehnung oder Rückmeldung des Kunden.`, "/lehrkraft/kundenkorrespondenz", "Offene Angebote öffnen"),
+        buildTask("Warenannahme rückmelden", offeneWarenannahmen, `${offeneWarenannahmen} Liefer- oder Transportunterlagen warten noch auf die externe Rückmeldung der Lehrkraft.`, "/lehrkraft/kundenkorrespondenz", "Warenannahmen öffnen"),
+        buildTask("Überfällige Posten besprechen", ueberfaelligePosten, `${ueberfaelligePosten} Posten sind am ${today} bereits fällig und eignen sich für Offene-Posten- oder Mahnungsübungen.`, "/buchhaltung", "Buchhaltung öffnen"),
+        buildTask("Offene Freigaben begleiten", offeneFreigaben, `${offeneFreigaben} Freigaben warten auf eine Entscheidung und passen gut zu Führungs- oder Kooperationsfällen.`, "/freigaben", "Freigaben öffnen"),
+        buildTask("Personalentscheidungen prüfen", offeneUrlaubsantraege, `${offeneUrlaubsantraege} Urlaubsanträge können als einfacher Genehmigungsprozess besprochen werden.`, "/urlaubsantraege", "Urlaubsanträge öffnen"),
+        buildTask("Krankmeldungen mit Aktenbezug prüfen", offeneKrankmeldungen, `${offeneKrankmeldungen} Krankmeldungen sind noch nicht bestätigt und eignen sich für Aktenführung und Statusarbeit.`, "/krankmeldungen", "Krankmeldungen öffnen"),
+        buildTask("Zeitbuchungen freigeben", offeneZeitbuchungen, `${offeneZeitbuchungen} Arbeitszeiten sind erfasst, aber noch nicht freigegeben.`, "/arbeitszeiten", "Arbeitszeiten öffnen"),
+        buildTask("Bewerberprozess auswerten", offeneBewerbungen, `${offeneBewerbungen} Bewerbungen sind noch offen und können für Personalgespräche genutzt werden.`, "/bewerber", "Bewerber öffnen")
     ].filter(Boolean);
     const lehrkraftWarnstatus = [
         buildTeacherAlert("Offene Anfragen", offeneLehrkraftAnfragen),
@@ -246,15 +246,15 @@ function Dashboard() {
     ];
 
     const unterrichtsimpulse = [
-        { title: "Buchhaltung und Mahnung", text: "Offene oder fÃ¤llige Rechnungen lassen sich mit Zahlungen, Mahnungen und Belegen im Zusammenhang besprechen.", to: "/buchhaltung" },
-        { title: "Einkauf und Wareneingang", text: "Bestellung, Wareneingang und Eingangsrechnung eignen sich gut fÃ¼r eine einfache Prozesskette.", to: "/themen/einkauf" },
-        { title: "Personal und Formulare", text: "UrlaubsantrÃ¤ge, Personalakte und Zeitbuchungen bieten einfache VerwaltungsfÃ¤lle fÃ¼r die Klasse.", to: "/personalwesen" }
+        { title: "Buchhaltung und Mahnung", text: "Offene oder fällige Rechnungen lassen sich mit Zahlungen, Mahnungen und Belegen im Zusammenhang besprechen.", to: "/buchhaltung" },
+        { title: "Einkauf und Wareneingang", text: "Bestellung, Wareneingang und Eingangsrechnung eignen sich gut für eine einfache Prozesskette.", to: "/themen/einkauf" },
+        { title: "Personal und Formulare", text: "Urlaubsanträge, Personalakte und Zeitbuchungen bieten einfache Verwaltungsfälle für die Klasse.", to: "/personalwesen" }
     ];
 
     const haeufigeFehler = [
-        offenePosten > 0 && "Offene Posten wurden intern noch nicht in Zahlungen, Mahnungen oder Belege weitergefÃ¼hrt.",
-        offeneBestellungen > 0 && "Bestellungen wurden erfasst, aber WareneingÃ¤nge noch nicht dokumentiert.",
-        niedrigeBestaende > 0 && "Niedrige BestÃ¤nde wurden erkannt, aber noch nicht mit Einkauf oder Lager verknÃ¼pft.",
+        offenePosten > 0 && "Offene Posten wurden intern noch nicht in Zahlungen, Mahnungen oder Belege weitergeführt.",
+        offeneBestellungen > 0 && "Bestellungen wurden erfasst, aber Wareneingänge noch nicht dokumentiert.",
+        niedrigeBestaende > 0 && "Niedrige Bestände wurden erkannt, aber noch nicht mit Einkauf oder Lager verknüpft.",
         offeneFreigaben > 0 && "Freigaben bleiben offen, obwohl der Folgeprozess im Verkauf oder Marketing schon vorbereitet ist."
     ].filter(Boolean);
 
@@ -262,7 +262,7 @@ function Dashboard() {
         <div className="dashboard-heading">
             <div>
                 <h1>Dashboard</h1>
-                <p>Willkommen, {user.name || user.username}. Startseite fÃ¼r Aufgaben, betriebliche ZusammenhÃ¤nge und digitale ArbeitsablÃ¤ufe.</p>
+                <p>Willkommen, {user.name || user.username}. Startseite für Aufgaben, betriebliche Zusammenhänge und digitale Arbeitsabläufe.</p>
             </div>
         </div>
 
@@ -294,7 +294,7 @@ function Dashboard() {
                     {hinweise.map(hinweis => <li key={hinweis}>{hinweis}</li>)}
                 </ul>
                 <div className="dashboard-mini-links">
-                    <Link className="button-link" to="/themen/szenarien">Szenarien Ã¶ffnen</Link>
+                    <Link className="button-link" to="/themen/szenarien">Szenarien öffnen</Link>
                     <Link className="button-link" to="/geschaeftsfuehrung">Freigaben und Berichte</Link>
                 </div>
             </article>
@@ -303,8 +303,8 @@ function Dashboard() {
         <section className="dashboard-two-column">
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header">
-                    <h2>Letzte AktivitÃ¤ten</h2>
-                    <span>{letzteAktivitaeten.length} EintrÃ¤ge</span>
+                    <h2>Letzte Aktivitäten</h2>
+                    <span>{letzteAktivitaeten.length} Einträge</span>
                 </div>
                 <div className="activity-list">
                     {letzteAktivitaeten.map(item => <Link key={item.key} className="activity-row" to={item.to}>
@@ -319,8 +319,8 @@ function Dashboard() {
 
             <article className="dashboard-panel">
                 <div className="dashboard-panel-header">
-                    <h2>Status der Ãœbungsfirma</h2>
-                    <span>bereichsÃ¼bergreifend</span>
+                    <h2>Status der Übungsfirma</h2>
+                    <span>bereichsübergreifend</span>
                 </div>
                 <div className="status-grid">
                     {unternehmensstatus.map(item => <div key={item.label} className={`status-card tone-${item.tone}`}>
@@ -332,7 +332,7 @@ function Dashboard() {
         </section>
 
         <section className="prozess-einstiege">
-            <h2>Prozesse fÃ¼r die Demo</h2>
+            <h2>Prozesse für die Demo</h2>
             <div className="prozess-grid">
                 {DASHBOARD_AREAS.filter(bereich => hasAccess(bereich.access)).map(bereich => (
                     <article className="prozess-karte" key={bereich.access}>
@@ -349,13 +349,13 @@ function Dashboard() {
             <div className="prozess-grid">
                 <article className="prozess-karte">
                     <h3>Personalprozesse</h3>
-                    <p>{mitarbeiter.length} Mitarbeiter, {bewerber.length} Bewerber, {offeneUrlaubsantraege} offene UrlaubsantrÃ¤ge und {offeneKrankmeldungen} neue Krankmeldungen bieten AnlÃ¤sse fÃ¼r Akten- und Formulararbeit.</p>
+                    <p>{mitarbeiter.length} Mitarbeiter, {bewerber.length} Bewerber, {offeneUrlaubsantraege} offene Urlaubsanträge und {offeneKrankmeldungen} neue Krankmeldungen bieten Anlässe für Akten- und Formulararbeit.</p>
                     <Link to="/personalwesen">Zum Personalwesen</Link>
                 </article>
                 <article className="prozess-karte">
                     <h3>Schulungen und Zeitbuchung</h3>
-                    <p>{schulungen.length} Schulungen und {offeneZeitbuchungen} offene Zeitbuchungen kÃ¶nnen als Dokumentations- und Entscheidungsaufgabe genutzt werden.</p>
-                    <Link to="/arbeitszeiten">Arbeitszeiten Ã¶ffnen</Link>
+                    <p>{schulungen.length} Schulungen und {offeneZeitbuchungen} offene Zeitbuchungen können als Dokumentations- und Entscheidungsaufgabe genutzt werden.</p>
+                    <Link to="/arbeitszeiten">Arbeitszeiten öffnen</Link>
                 </article>
             </div>
         </section>
@@ -365,7 +365,7 @@ function Dashboard() {
             <div className="dashboard-two-column">
                 <article className="dashboard-panel">
                     <div className="dashboard-panel-header">
-                        <h2>KlassenÃ¼bersicht</h2>
+                        <h2>Klassenübersicht</h2>
                         <span>Mockup</span>
                     </div>
                     <div className="teacher-class-list">
@@ -379,7 +379,7 @@ function Dashboard() {
 
                 <article className="dashboard-panel">
                     <div className="dashboard-panel-header">
-                        <h2>Offene und Ã¼berfÃ¤llige Aufgaben</h2>
+                        <h2>Offene und überfällige Aufgaben</h2>
                         <span>Unterrichtsrelevant</span>
                     </div>
                     <div className="status-grid">
@@ -419,7 +419,7 @@ function Dashboard() {
 
                 <article className="dashboard-panel">
                     <div className="dashboard-panel-header">
-                        <h2>HÃ¤ufige Fehler und Auswertungen</h2>
+                        <h2>Häufige Fehler und Auswertungen</h2>
                         <span>Unterrichtsimpulse</span>
                     </div>
                     <ul className="dashboard-note-list">
@@ -430,8 +430,8 @@ function Dashboard() {
                         )}
                     </ul>
                     <div className="dashboard-mini-links">
-                        <Link className="button-link" to="/berichte">Berichte prÃ¼fen</Link>
-                        <Link className="button-link" to="/freigaben">Freigaben prÃ¼fen</Link>
+                        <Link className="button-link" to="/berichte">Berichte prüfen</Link>
+                        <Link className="button-link" to="/freigaben">Freigaben prüfen</Link>
                     </div>
                 </article>
             </div>
@@ -444,7 +444,7 @@ function Dashboard() {
                     {unterrichtsimpulse.map(item => <div key={item.title} className="task-card">
                         <strong>{item.title}</strong>
                         <p>{item.text}</p>
-                        <Link to={item.to}>Ã–ffnen</Link>
+                        <Link to={item.to}>Öffnen</Link>
                     </div>)}
                 </div>
             </article>

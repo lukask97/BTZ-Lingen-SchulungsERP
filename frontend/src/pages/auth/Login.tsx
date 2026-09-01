@@ -91,7 +91,7 @@ export default function Login() {
                 <div className="login-copy">
                     <h1 className="title is-2">Schulungs-ERP</h1>
                     <p className="subtitle is-5">
-                        Wilkommen auf der Login Seite für die Demo von dem Schulungs-ERP
+                        Willkommen auf der Login-Seite für die Demo des Schulungs-ERP
                     </p>
                 </div>
                 <div className="login-card card">

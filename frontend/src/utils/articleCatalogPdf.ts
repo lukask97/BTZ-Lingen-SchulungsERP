@@ -269,7 +269,7 @@ export function openArticleCatalogPdf({
 <body>
     <div class="actions">
         <button onclick="window.print()">Als PDF drucken</button>
-        <button class="secondary" onclick="window.close()">Schliessen</button>
+        <button class="secondary" onclick="window.close()">Schließen</button>
     </div>
     <section class="catalog-cover">
         <h1>${safe(title)}</h1>

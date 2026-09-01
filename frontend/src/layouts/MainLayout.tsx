@@ -17,7 +17,10 @@ function MainLayout() {
     const location = useLocation();
     const isTeacherView = location.pathname.startsWith("/lehrkraft");
     const contentRef = useRef<HTMLDivElement | null>(null);
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+        if (typeof window === "undefined") return false;
+        return window.innerWidth <= 860;
+    });
     const [isDarkMode, setIsDarkMode] = useState(() => {
         if (typeof window === "undefined") return false;
         return window.localStorage.getItem("erp-dark-mode") === "true";
@@ -31,6 +34,9 @@ function MainLayout() {
     useEffect(() => {
         if (contentRef.current) {
             contentRef.current.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+        if (window.innerWidth <= 860) {
+            setIsSidebarCollapsed(true);
         }
     }, [location.pathname]);
 

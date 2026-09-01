@@ -270,7 +270,7 @@ export function openDocumentPdf({
 <body>
     <div class="actions">
         <button onclick="window.print()">Drucken</button>
-        <button class="secondary" onclick="window.close()">Schliessen</button>
+        <button class="secondary" onclick="window.close()">Schließen</button>
     </div>
     ${allPagesHtml}
     <p class="footer">Automatisch erzeugtes Schulungsdokument</p>

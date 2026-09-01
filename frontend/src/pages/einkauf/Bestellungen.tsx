@@ -134,7 +134,7 @@ function getArtikelInfoText({
     const unterschreitetSicherheitsbestand = projected < sicherheitsbestand;
 
     return {
-        text: `Verfügbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Bedarfbestand: ${projected} | Sicherheitsbestand: ${sicherheitsbestand}` : ""}`,
+        text: `Bestand: ${verfuegbar} | Lager-Bestand: ${bestand} | Für Aufträge reserviert: ${verplant} | Nachbestellt: ${imZulauf} | In offenen Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Bestand danach: ${projected} | Eiserner Bestand: ${sicherheitsbestand}` : ""}`,
         istKritisch: Number(menge || 0) > verfuegbar || (highlightDemand && unterschreitetSicherheitsbestand)
     };
 }
@@ -177,7 +177,7 @@ export default function Bestellungen() {
     const [dialogState, setDialogState] = useState(() => createBestellungDialogState(lieferanten, artikel));
     const artikelOptionen = artikel.map(item => ({
         value: String(item.id),
-        label: `${item.artikelNr} - ${item.name} [${item.artikelTyp}] (EK: ${Number(item.einkaufspreis || item.preis || 0).toFixed(2)} EUR, Bestand: ${item.bestand})`
+        label: `${item.artikelNr} - ${item.name} [${item.artikelTyp}] (EK: ${Number(item.einkaufspreis || item.preis || 0).toFixed(2)} EUR, Lager-Bestand: ${item.bestand})`
     }));
     const bedarfOptionen = bedarfsmeldungen.map(item => ({
         value: String(item.id),
@@ -487,9 +487,9 @@ export default function Bestellungen() {
             columns={[
                 { field: "artikelNr", title: "Artikelnummer" },
                 { field: "artikel", title: "Artikel" },
-                { field: "bestand", title: "Bestand" },
-                { field: "bedarfsmeldungBei", title: "Bedarfsmeldung bei" },
-                { field: "mindestmenge", title: "Sicherheitsbestand" },
+                { field: "bestand", title: "Lager-Bestand" },
+                { field: "bedarfsmeldungBei", title: "Nachbestellen ab" },
+                { field: "mindestmenge", title: "Eiserner Bestand" },
                 { field: "empfohleneMenge", title: "Empfohlene Bestellmenge" }
             ]}
             toolbarActions={[

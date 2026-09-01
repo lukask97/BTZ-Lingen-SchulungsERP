@@ -344,9 +344,9 @@ export async function exportPurchaseDemandWorkbook(options: {
     bestellungSheet.addRow([
         "Artikelnummer",
         "Artikel",
+        "Lager-Bestand",
         "Bestand",
-        "Verfuegbar",
-        "Bedarfsmeldung bei",
+        "Nachbestellen ab",
         "Verkauft letzter Monat",
         "Menge",
         "Lieferantenauswahl",
@@ -496,9 +496,9 @@ export async function exportPurchaseDemandWorkbook(options: {
     bestellungV2Sheet.addRow([
         "Artikelnummer",
         "Artikel",
+        "Lager-Bestand",
         "Bestand",
-        "Verfuegbar",
-        "Bedarfsmeldung bei",
+        "Nachbestellen ab",
         "Verkauft letzter Monat",
         "Menge",
         "Lieferantenauswahl",

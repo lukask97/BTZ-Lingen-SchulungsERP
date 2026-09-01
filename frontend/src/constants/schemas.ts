@@ -239,9 +239,9 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "artikelTyp", title: "Typ" },
         { field: "einkaufspreis", title: "Einkaufspreis" },
         { field: "verkaufspreis", title: "Verkaufspreis" },
-        { field: "bestand", title: "Bestand" },
-        { field: "mindestmenge", title: "Sicherheitsbestand" },
-        { field: "bedarfsmeldungBei", title: "Bedarfsmeldung bei" },
+        { field: "bestand", title: "Lager-Bestand" },
+        { field: "mindestmenge", title: "Eiserner Bestand" },
+        { field: "bedarfsmeldungBei", title: "Nachbestellen ab" },
         { field: "beschreibung", title: "Beschreibung", visible: false },
         { field: "komponenten", title: "Komponenten", visible: false }
     ],

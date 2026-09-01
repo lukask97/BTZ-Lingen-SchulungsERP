@@ -96,9 +96,9 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
 
     return <Dialog
         open={open}
-        title={editingOfferId  "Angebot bearbeiten" : (draft.sourceInquiryId  "Angebot aus Kundenanfrage erstellen" : "Neues Angebot")}
+        title={editingOfferId ? "Angebot bearbeiten" : (draft.sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot")}
         onClose={handleClose}
-        footer={<SaveButton onSave={speichern} onSuccess={handleClose}>{editingOfferId  "Änderungen speichern" : "Angebot speichern"}</SaveButton>}
+        footer={<SaveButton onSave={speichern} onSuccess={handleClose}>{editingOfferId ? "Änderungen speichern" : "Angebot speichern"}</SaveButton>}
     >
         {draft.sourceInquiryId && anfrageImDialog && <div className="offer-forward-panel form-row thread-section">
             <div className="thread-section-header">
@@ -120,14 +120,14 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
             </div>
             <div className="offer-forward-card thread-subcard">
                 <Label>Chat-Ausschnitt zum Nachlesen</Label>
-                {weiterleitungsAusschnitt.length === 0  <p>Noch keine weiterleitbaren Nachrichten vorhanden.</p> : <div className="offer-forward-thread">
+                {weiterleitungsAusschnitt.length === 0 ? <p>Noch keine weiterleitbaren Nachrichten vorhanden.</p> : <div className="offer-forward-thread">
                     {weiterleitungsAusschnitt.map((nachricht: any) => {
                         const variant = getDialogMessageVariant(nachricht);
                         return <div
                             key={nachricht.id}
-                            className={`thread-message-row ${variant === "customer"  "thread-message-row-customer" : variant === "outbound"  "thread-message-row-outbound" : "thread-message-row-internal"}`}
+                            className={`thread-message-row ${variant === "customer" ? "thread-message-row-customer" : variant === "outbound" ? "thread-message-row-outbound" : "thread-message-row-internal"}`}
                         >
-                            <article className={`thread-message ${variant === "customer"  "thread-message-customer" : variant === "outbound"  "thread-message-outbound" : "thread-message-internal"}`}>
+                            <article className={`thread-message ${variant === "customer" ? "thread-message-customer" : variant === "outbound" ? "thread-message-outbound" : "thread-message-internal"}`}>
                                 <div className="thread-message-meta">
                                     <strong>{nachricht.senderName || nachricht.senderRolle}</strong>
                                     <span>{getDialogMessageLabel(nachricht)} | {formatTimestampForDisplay(nachricht.zeitpunkt || nachricht.datum)} | {nachricht.betreff}</span>
@@ -152,7 +152,7 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                     {bisherigeAngeboteImDialog.map((item: any) => <button
                         key={`dialog-template-${item.id}`}
                         type="button"
-                        className={`thread-document-link${String(draft.selectedTemplateOfferId) === String(item.id)  " is-active" : ""}`}
+                        className={`thread-document-link${String(draft.selectedTemplateOfferId) === String(item.id) ? " is-active" : ""}`}
                         onClick={() => angebotAlsVorlageUebernehmen(String(item.id))}
                     >
                         {item.angebotsNr} übernehmen
@@ -186,7 +186,7 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
             <div className="thread-section-header">
                 <Label glossaryKey="angebotspositionen">Angebotspositionen</Label>
             </div>
-            {draft.positionenDraft.filter((position: any) => !position.isOptionForId).length === 0  <p>Noch keine Position vorhanden.</p> : <div className="position-table-wrapper">
+            {draft.positionenDraft.filter((position: any) => !position.isOptionForId).length === 0 ? <p>Noch keine Position vorhanden.</p> : <div className="position-table-wrapper">
                 <table className="position-table">
                     <thead>
                         <tr>
@@ -206,11 +206,12 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                                 && String(item.leistungTyp || "") === String(position.leistungTyp || "")
                             );
                             const nummer = String(leistung.nummer || position.artikelId || position.serviceId || "-");
-                            const positionMitIndividualisierung = hasIndividualisierungen(leistung);
+                            const positionMitIndividualisierung = hasIndividualisierungen(leistung) && !position.istMietBaugruppe;
                             const optionGroups = positionMitIndividualisierung
-                                 getOptionGroups(leistung.individualisierungen)
+                                ? getOptionGroups(leistung.individualisierungen)
                                 : [];
-                            const endpreisProEinheit = Number(position.einzelpreis || 0) + calculateOptionAufpreisProEinheit(position, leistung);
+                            const optionAufpreisProEinheit = positionMitIndividualisierung ? calculateOptionAufpreisProEinheit(position, leistung) : 0;
+                            const endpreisProEinheit = Number(position.einzelpreis || 0) + optionAufpreisProEinheit;
                             const endpreisGesamt = endpreisProEinheit * Number(position.menge || 0);
 
                             return <Fragment key={`${position.leistungTyp}-${position.artikelId || position.serviceId || index}-${position.rowId}`}>
@@ -223,13 +224,13 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                                             min="1"
                                             onChange={wert => setDraft((items: any) => {
                                                 const aktualisiertePositionen = items.positionenDraft.map((item: any) => item.rowId === position.rowId
-                                                     { ...item, menge: wert }
+                                                    ? { ...item, menge: wert }
                                                     : item
                                                 );
                                                 const parentPosition = aktualisiertePositionen.find((item: any) => item.rowId === position.rowId);
                                                 return {
                                                     ...items,
-                                                    positionenDraft: parentPosition  syncOptionRows(aktualisiertePositionen, parentPosition, leistung, artikel) : aktualisiertePositionen
+                                                    positionenDraft: positionMitIndividualisierung && parentPosition ? syncOptionRows(aktualisiertePositionen, parentPosition, leistung, artikel) : aktualisiertePositionen
                                                 };
                                             })}
                                         />
@@ -246,20 +247,20 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                                 <tr className="position-table-detail-row">
                                     <td colSpan={6}>
                                         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                                            <p className={`position-availability${verfuegbarkeit.istKritisch  " position-availability-critical" : ""}`}>
+                                            <p className={`position-availability${verfuegbarkeit.istKritisch ? " position-availability-critical" : ""}`}>
                                                 {verfuegbarkeit.text}
                                             </p>
                                             {optionGroups.length > 0 && (
                                                 <div style={{ padding: "0.75rem", background: "var(--background-alt)", borderRadius: "var(--radius-sm)", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                                                     <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
                                                         <strong>Konfiguration</strong>
-                                                        <span>Änderung: {calculateOptionAufpreisProEinheit(position, leistung) > 0  "+" : ""}{calculateOptionAufpreisProEinheit(position, leistung).toFixed(2)} EUR</span>
+                                                        <span>Änderung: {optionAufpreisProEinheit > 0 ? "+" : ""}{optionAufpreisProEinheit.toFixed(2)} EUR</span>
                                                     </div>
                                                     <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                                                         {optionGroups.map((groupId: any) => {
                                                             const gruppenOptionen = leistung.individualisierungen.filter((i: any) => i.kategorieId === groupId);
                                                             const defaultOpt = gruppenOptionen.find((i: any) => i.standard) || gruppenOptionen[0];
-                                                            const currentVal = position.selectedOptionen.[groupId] || defaultOpt.individualArtikelId || "";
+                                                            const currentVal = position.selectedOptionen?.[groupId] || defaultOpt.individualArtikelId || "";
                                                             const aktuelleOption = gruppenOptionen.find((opt: any) => String(opt.individualArtikelId) === String(currentVal)) || defaultOpt;
                                                             const optionsArtikel = artikel.find((item: any) => String(item.id) === String(aktuelleOption.individualArtikelId));
                                                             const optionsBestand = Number(optionsArtikel.bestand || 0);
@@ -278,15 +279,15 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                                                                 >
                                                                     {gruppenOptionen.map((opt: any) => (
                                                                         <option key={opt.individualArtikelId} value={opt.individualArtikelId}>
-                                                                            {opt.artikel} {Number(opt.preisaenderung || 0) > 0  `(+${Number(opt.preisaenderung).toFixed(2)} EUR)` : Number(opt.preisaenderung || 0) < 0  `(${Number(opt.preisaenderung).toFixed(2)} EUR)` : ""}
+                                                                            {opt.artikel} {Number(opt.preisaenderung || 0) > 0 ? `(+${Number(opt.preisaenderung).toFixed(2)} EUR)` : Number(opt.preisaenderung || 0) < 0 ? `(${Number(opt.preisaenderung).toFixed(2)} EUR)` : ""}
                                                                         </option>
                                                                     ))}
                                                                 </select>
                                                                 <small
-                                                                    className={optionsKritisch  "form-error" : undefined}
-                                                                    title={`Im Zulauf: ${Number(offeneBestellmengen[String(aktuelleOption.individualArtikelId || "")] || 0)}${optionsProjected < optionsMindestbestand  ` | Sicherheitsbestand von ${optionsMindestbestand} wird unterschritten` : ""}`}
+                                                                    className={optionsKritisch ? "form-error" : undefined}
+                                                                    title={`Nachbestellt: ${Number(offeneBestellmengen[String(aktuelleOption.individualArtikelId || "")] || 0)}${optionsProjected < optionsMindestbestand ? ` | Eiserner Bestand von ${optionsMindestbestand} wird unterschritten` : ""}`}
                                                                 >
-                                                                    Bestand: {optionsBestand} | Verfuegbar: {optionsVerfuegbar}
+                                                                    Lager-Bestand: {optionsBestand} | Bestand: {optionsVerfuegbar}
                                                                 </small>
                                                             </div>;
                                                         })}
@@ -308,8 +309,8 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                     {draft.preispositionenDraft.length > 0 && draft.preispositionenDraft.map((position: any) => {
                         const baseTotal = calculatePositionenTotal(draft.positionenDraft);
                         return <div key={position.id}>
-                            <span>{position.beschreibung || (position.typ === "percent"  "Prozent-Anpassung" : "Betrag")}</span>
-                            <strong>{position.typ === "percent"  `${Number(position.wert || 0).toFixed(2)} % ≈ ${(baseTotal * Number(position.wert || 0) / 100).toFixed(2)} EUR` : `${Number(position.wert || 0).toFixed(2)} EUR`}</strong>
+                            <span>{position.beschreibung || (position.typ === "percent" ? "Prozent-Anpassung" : "Betrag")}</span>
+                            <strong>{position.typ === "percent" ? `${Number(position.wert || 0).toFixed(2)} % ≈ ${(baseTotal * Number(position.wert || 0) / 100).toFixed(2)} EUR` : `${Number(position.wert || 0).toFixed(2)} EUR`}</strong>
                         </div>;
                     })}
                     <div className="offer-total"><span>Gesamtbetrag exkl. MwSt</span><strong style={{ fontSize: "1.15em" }}>{calculateNetto(draft.positionenDraft, draft.preispositionenDraft, draft.rabattBetrag).toFixed(2)} EUR</strong></div>
@@ -342,7 +343,7 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                                         placeholder="z. B. Bundle-Rabatt oder Expresslieferung"
                                         onChange={event => setDraft((current: any) => ({
                                             ...current,
-                                            preispositionenDraft: current.preispositionenDraft.map((item: any) => item.id === position.id  { ...item, beschreibung: event.target.value } : item)
+                                            preispositionenDraft: current.preispositionenDraft.map((item: any) => item.id === position.id ? { ...item, beschreibung: event.target.value } : item)
                                         }))}
                                     />
                                 </td>
@@ -351,7 +352,7 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                                         value={position.typ}
                                         onChange={event => setDraft((current: any) => ({
                                             ...current,
-                                            preispositionenDraft: current.preispositionenDraft.map((item: any) => item.id === position.id  { ...item, typ: event.target.value } : item)
+                                            preispositionenDraft: current.preispositionenDraft.map((item: any) => item.id === position.id ? { ...item, typ: event.target.value } : item)
                                         }))}
                                     >
                                         <option value="amount">Betrag</option>
@@ -363,10 +364,10 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                                         value={position.wert}
                                         min="-999999"
                                         step="0.01"
-                                        format={position.typ === "percent"  "percent" : "currency"}
+                                        format={position.typ === "percent" ? "percent" : "currency"}
                                         onChange={wert => setDraft((current: any) => ({
                                             ...current,
-                                            preispositionenDraft: current.preispositionenDraft.map((item: any) => item.id === position.id  { ...item, wert } : item)
+                                            preispositionenDraft: current.preispositionenDraft.map((item: any) => item.id === position.id ? { ...item, wert } : item)
                                         }))}
                                     />
                                 </td>
@@ -398,10 +399,10 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                 Beim Kunden fehlen Adressdaten. Bitte vor dem Versenden des Angebots Anschrift, PLZ und Ort beim Kunden nachfragen.
             </p>}
             <div className="offer-send-checkbox-row">
-                <Checkbox checked={!brauchtFreigabe && draft.direktSenden} onChange={value => setDraft((item: any) => ({ ...item, direktSenden: value, freigabeDurchGf: value  false : item.freigabeDurchGf }))} disabled={brauchtFreigabe || gfFreigabeAktivImDialog}>
+                <Checkbox checked={!brauchtFreigabe && draft.direktSenden} onChange={value => setDraft((item: any) => ({ ...item, direktSenden: value, freigabeDurchGf: value ? false : item.freigabeDurchGf }))} disabled={brauchtFreigabe || gfFreigabeAktivImDialog}>
                     Freigabe direkt erteilen
                 </Checkbox>
-                <Checkbox checked={gfFreigabeAktivImDialog} onChange={value => setDraft((item: any) => ({ ...item, freigabeDurchGf: value, direktSenden: value  false : item.direktSenden }))} disabled={automatischeGfFreigabeImDialog || draft.direktSenden}>
+                <Checkbox checked={gfFreigabeAktivImDialog} onChange={value => setDraft((item: any) => ({ ...item, freigabeDurchGf: value, direktSenden: value ? false : item.direktSenden }))} disabled={automatischeGfFreigabeImDialog || draft.direktSenden}>
                     Freigabe durch GF
                 </Checkbox>
             </div>
@@ -409,7 +410,7 @@ export default function AngebotBearbeitenDialog(props: AngebotBearbeitenDialogPr
                 <p>Du hast keine Berechtigung zur eigenständigen Freigabe.</p>
             </div>}
             {sicherheitsbestandFreigabeImDialog && <p className="form-error">
-                Die GF-Freigabe wurde automatisch gesetzt, da ein Artikel unter den Sicherheitsbestand gerät.
+                Die GF-Freigabe wurde automatisch gesetzt, da ein Artikel unter den Eisernen Bestand gerät.
             </p>}
             {preisabweichungFreigabeImDialog && <p className="form-error">
                 Die GF-Freigabe wurde automatisch gesetzt, weil die Abweichung zur Artikelsumme den Grenzwert von {Number(optionen.angebotGfFreigabeAbweichungProzent || 10).toFixed(1)} % erreicht oder überschreitet.

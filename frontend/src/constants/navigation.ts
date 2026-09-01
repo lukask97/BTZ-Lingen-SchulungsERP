@@ -69,7 +69,7 @@ export const NAVIGATION_GROUPS = [
         access: ACCESS.LOGISTIK,
         items: [
             { title: "Logistik", path: "/logistik", access: ACCESS.LOGISTIK },
-            { title: "Bestand", path: "/bestand", access: ACCESS.LAGER },
+            { title: "Lager-Bestand", path: "/bestand", access: ACCESS.LAGER },
             { title: "Artikel", path: "/artikel", access: ACCESS.ARTIKEL },
             { title: "Kategorien", path: "/kategorien", access: ACCESS.ARTIKEL },
             { title: "Versand", path: "/versand", access: ACCESS.LOGISTIK },

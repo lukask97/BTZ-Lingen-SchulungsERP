@@ -120,7 +120,7 @@ function hydrateAuftraege(items: any[] = []) {
                 artikel: referenz?.name || position.artikel || "",
                 artikelTyp: istService ? "Dienstleistung" : (referenz?.artikelTyp || position.artikelTyp || "Einzelartikel"),
                 leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
-                einzelpreis: Number(position.einzelpreis || referenz?.verkaufspreis || referenz?.preis || 0)
+                einzelpreis: Number(position.einzelpreis ?? referenz?.verkaufspreis ?? referenz?.preis ?? 0)
             };
             const { auftragId, ...rest } = hydrated;
             return rest;
@@ -152,7 +152,13 @@ function splitPayload(payload = {}) {
                 serviceId: hydrated.leistungTyp === "Service" ? hydrated.serviceId : "",
                 leistungTyp: hydrated.leistungTyp,
                 menge: Number(hydrated.menge || 0),
-                einzelpreis: Number(hydrated.einzelpreis || 0)
+                einzelpreis: Number(hydrated.einzelpreis || 0),
+                vertragsStart: hydrated.vertragsStart || "",
+                vertragsEnde: hydrated.vertragsEnde || "",
+                mietArtikelId: hydrated.mietArtikelId || "",
+                mietArtikelName: hydrated.mietArtikelName || "",
+                istMietBaugruppe: Boolean(hydrated.istMietBaugruppe),
+                mietvertragServiceRowId: hydrated.mietvertragServiceRowId || ""
             };
         })
     };
@@ -171,7 +177,7 @@ function hydratePosition(position: any = {}) {
         artikel: referenz?.name || position.artikel || "",
         artikelTyp: istService ? "Dienstleistung" : (referenz?.artikelTyp || position.artikelTyp || "Einzelartikel"),
         leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
-        einzelpreis: Number(position.einzelpreis || referenz?.verkaufspreis || referenz?.preis || 0)
+        einzelpreis: Number(position.einzelpreis ?? referenz?.verkaufspreis ?? referenz?.preis ?? 0)
     };
 }
 

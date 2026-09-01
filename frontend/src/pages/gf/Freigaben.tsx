@@ -229,7 +229,7 @@ export default function Freigaben() {
         const inAngeboten = Number(offeneAngeboteJeArtikel[String(position.artikelId)] || 0);
 
         return {
-            text: `Verfügbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | In Angeboten: ${inAngeboten}`,
+            text: `Bestand: ${verfuegbar} | Lager-Bestand: ${bestand} | Für Aufträge reserviert: ${verplant} | In offenen Angeboten: ${inAngeboten}`,
             istKritisch: Number(position.menge || 0) > verfuegbar
         };
     };

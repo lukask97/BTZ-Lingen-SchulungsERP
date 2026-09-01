@@ -37,7 +37,7 @@ export default function EinkaufOverview() {
                     <li>Artikelbedarf feststellen oder Lieferantenkonditionen auswerten.</li>
                     <li>Einkaufsanfrage mit Artikelnummer und benötigter Menge anlegen.</li>
                     <li>Lehrkraft erstellt ein Angebot und bestätigt anschließend die Bestellung.</li>
-                    <li>Wareneingang buchen und Bestand automatisch erhöhen.</li>
+                    <li>Wareneingang buchen und Lager-Bestand automatisch erhöhen.</li>
                     <li>Danach erscheint die Eingangsrechnung in der Buchhaltung.</li>
                 </ul>
             </article>

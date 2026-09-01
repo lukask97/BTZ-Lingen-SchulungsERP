@@ -10,9 +10,9 @@ function Header({ isSidebarCollapsed, onToggleSidebar }: HeaderProps) {
                 type="button"
                 className="mobile-sidebar-button button is-light"
                 onClick={onToggleSidebar}
-                aria-label={isSidebarCollapsed ? "Navigation oeffnen" : "Navigation schliessen"}
+                aria-label={isSidebarCollapsed ? "Navigation öffnen" : "Navigation schließen"}
             >
-                {isSidebarCollapsed ? "Menue" : "Schliessen"}
+                {isSidebarCollapsed ? "Menü" : "Schließen"}
             </button>
             <div className="header-copy">
                 <p className="header-kicker">Schulungs-ERP</p>

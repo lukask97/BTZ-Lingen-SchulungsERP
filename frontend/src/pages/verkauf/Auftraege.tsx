@@ -120,6 +120,17 @@ export default function Auftraege() {
     }, [newMode, inquiryIdFromQuery, kundeIdFromQuery, defaultKundeId, defaultLeistungId]);
 
     const findeVersandZuAuftrag = (auftragId) => versandauftraege.find(item => String(item.auftragId) === String(auftragId));
+    const kannMietvertragAbschliessen = auftrag => (auftrag.positionen || []).some(position =>
+        position.leistungTyp === "Service"
+        && position.vertragsEnde
+        && String(position.vertragsEnde) <= today
+    ) && !["beendet", "abgeschlossen"].includes(String(auftrag.status || "").toLowerCase());
+    const mietvertragAbschliessen = auftrag => {
+        if (!kannMietvertragAbschliessen(auftrag)) return;
+        if (!window.confirm(`Mietvertrag ${auftrag.auftragNr} abschliessen? Die reservierte Baugruppe wird wieder verfuegbar.`)) return;
+        auftraegeService.update({ ...auftrag, status: "beendet", abgeschlossenAm: today });
+        setRefreshKey(value => value + 1);
+    };
 
     const data = auftraege.map(auftrag => {
         const anfrage = getInquiryForOrder(auftrag, [], anfragen);
@@ -237,7 +248,7 @@ export default function Auftraege() {
                 if (field === "anfrageId" && row.anfrageId) return `/kundenanfragen?focus=${row.anfrageId}`;
                 return null;
             }}
-            filters={[{ name: "status", label: "Status", options: [{ value: "offen", label: "Offen" }, { value: "abgerechnet", label: "Abgerechnet" }, { value: "bezahlt", label: "Bezahlt" }] }]}
+            filters={[{ name: "status", label: "Status", options: [{ value: "offen", label: "Offen" }, { value: "abgerechnet", label: "Abgerechnet" }, { value: "bezahlt", label: "Bezahlt" }, { value: "beendet", label: "Beendet" }] }]}
             onFilter={filters => setStatusFilter(filters.status || "")}
             toolbarActions={[{ name: "new", label: "Neuer Auftrag", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: neu }]}
             rowActions={[
@@ -261,6 +272,14 @@ export default function Auftraege() {
                     onClick: row => row.rechnungNr !== "-" && navigate(`/ausgangsrechnungen?focus=${row.rechnungNr}`),
                     variant: "secondary",
                     isVisible: row => row.rechnungNr !== "-"
+                },
+                {
+                    name: "close-rental",
+                    label: "Mietvertrag abschliessen",
+                    permission: PERMISSIONS.VERKAUF_BEARBEITEN,
+                    onClick: mietvertragAbschliessen,
+                    variant: "success",
+                    isVisible: kannMietvertragAbschliessen
                 }
             ]}
         />

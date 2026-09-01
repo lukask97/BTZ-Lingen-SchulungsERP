@@ -75,8 +75,11 @@ const toLeistung = (item, typ) => ({
     artikelTyp: typ === "Service" ? "Dienstleistung" : item.artikelTyp,
     berechnungstyp: typ === "Service" ? String(item.berechnungstyp || "Pauschal") : "",
     zeEinheit: typ === "Service" ? String(item.zeEinheit || "") : "",
+    kategorie: typ === "Service" ? String(item.kategorie || "") : "",
     individualisierungen: item.individualisierungen || []
 });
+
+const istVertragsService = service => String(service?.kategorie || "").toLowerCase() === "vertrag";
 
 function normalizeText(value = "") {
     return String(value || "").toLowerCase();
@@ -122,10 +125,13 @@ function withPermissionFallback<T>(reader: () => T, fallback: T) {
 
 function getVerplanteMengen(auftraege) {
     return auftraege
-        .filter(auftrag => AKTIVE_AUFTRAGSSTATUS.includes(String(auftrag.status || "").toLowerCase()))
         .reduce((map, auftrag) => {
             (auftrag.positionen || [])
                 .filter(position => position.leistungTyp !== "Service" && position.artikelId)
+                .filter(position => position.istMietBaugruppe
+                    ? !["beendet", "abgeschlossen"].includes(String(auftrag.status || "").toLowerCase())
+                    : AKTIVE_AUFTRAGSSTATUS.includes(String(auftrag.status || "").toLowerCase())
+                )
                 .forEach(position => {
                     const key = String(position.artikelId);
                     map[key] = Number(map[key] || 0) + Number(position.menge || 0);
@@ -207,6 +213,22 @@ function createAngebotPositionDraft(auswahl, menge) {
     };
 }
 
+function createMietBaugruppenPosition(servicePosition, baugruppe) {
+    return {
+        rowId: `miete-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        artikelId: baugruppe.id,
+        artikel: `${baugruppe.name} (Mietbaugruppe)`,
+        artikelTyp: "Baugruppe",
+        leistungTyp: "Artikel",
+        serviceId: "",
+        menge: Number(servicePosition.menge || 1),
+        einzelpreis: 0,
+        selectedOptionen: {},
+        istMietBaugruppe: true,
+        mietvertragServiceRowId: servicePosition.rowId
+    };
+}
+
 function createPreispositionDraft() {
     return {
         id: `preis-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -231,7 +253,13 @@ function normalizeVorlagenPosition(position, leistungen = []) {
             selectedOptionen: position.selectedOptionen || draft.selectedOptionen,
             isOptionForId: position.isOptionForId,
             optionKategorieId: position.optionKategorieId,
-            einzelpreis: Number(position.einzelpreis || auswahl.preis || 0)
+            einzelpreis: Number(position.einzelpreis || auswahl.preis || 0),
+            vertragsStart: position.vertragsStart || "",
+            vertragsEnde: position.vertragsEnde || "",
+            mietArtikelId: position.mietArtikelId || "",
+            mietArtikelName: position.mietArtikelName || "",
+            istMietBaugruppe: Boolean(position.istMietBaugruppe),
+            mietvertragServiceRowId: position.mietvertragServiceRowId || ""
         };
     }
 
@@ -248,7 +276,13 @@ function normalizeVorlagenPosition(position, leistungen = []) {
         zeEinheit: position.zeEinheit || "",
         selectedOptionen: position.selectedOptionen || {},
         isOptionForId: position.isOptionForId,
-        optionKategorieId: position.optionKategorieId
+        optionKategorieId: position.optionKategorieId,
+        vertragsStart: position.vertragsStart || "",
+        vertragsEnde: position.vertragsEnde || "",
+        mietArtikelId: position.mietArtikelId || "",
+        mietArtikelName: position.mietArtikelName || "",
+        istMietBaugruppe: Boolean(position.istMietBaugruppe),
+        mietvertragServiceRowId: position.mietvertragServiceRowId || ""
     };
 }
 
@@ -441,7 +475,7 @@ export default function Angebote() {
         if (!angebot.anfrageId) return;
         const anfrage = getInquiryForOffer(angebot, anfragen);
         if (!anfrage) return;
-        const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "SchÃ¼lerfirma Verkauf"));
+        const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
         const text = `Wir senden Ihnen das Angebot ${angebot.angebotsNr} zur Prüfung zu.`;
 
         nachrichtenService.create({
@@ -697,7 +731,7 @@ export default function Angebote() {
         const unterschreitetSicherheitsbestand = projected < sicherheitsbestand;
 
         return {
-            text: `Verfügbar: ${verfuegbar} | Bestand: ${bestand} | Reserviert: ${verplant} | Im Zulauf: ${imZulauf} | In Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Sicherheitsbestand von ${sicherheitsbestand} wird unterschritten` : ""}`,
+            text: `Bestand: ${verfuegbar} | Lager-Bestand: ${bestand} | Für Aufträge reserviert: ${verplant} | Nachbestellt: ${imZulauf} | In offenen Angeboten: ${inAngeboten}${unterschreitetSicherheitsbestand ? ` | Eiserner Bestand von ${sicherheitsbestand} wird unterschritten` : ""}`,
             istKritisch: gesamtbedarfImDialog > verfuegbar || unterschreitetSicherheitsbestand
         };
     };
@@ -706,8 +740,8 @@ export default function Angebote() {
         const auswahl = leistungen.find(item => `${item.leistungTyp}:${item.id}` === String(draft.leistungId));
         if (!auswahl || Number(draft.menge) <= 0) return;
         setDraft(vorherige => {
-            const istKonfigurierbar = hasIndividualisierungen(auswahl);
-            const vorhanden = istKonfigurierbar
+            const positionSeparat = hasIndividualisierungen(auswahl) || istVertragsService(auswahl);
+            const vorhanden = positionSeparat
                 ? null
                 : vorherige.positionenDraft.find(item => item.artikelId === auswahl.id && item.leistungTyp === auswahl.leistungTyp && !item.isOptionForId);
             const aktualisiertePositionen = vorhanden
@@ -739,6 +773,23 @@ export default function Angebote() {
         });
     };
 
+    const handleMietBaugruppeChange = (serviceRowId, artikelId) => {
+        const baugruppe = artikel.find(item => String(item.id) === String(artikelId));
+        if (!baugruppe) return;
+        setDraft(current => {
+            const servicePosition = current.positionenDraft.find(item => item.rowId === serviceRowId);
+            if (!servicePosition) return current;
+            const aktualisierterService = { ...servicePosition, mietArtikelId: baugruppe.id, mietArtikelName: baugruppe.name };
+            return {
+                ...current,
+                positionenDraft: current.positionenDraft
+                    .filter(item => item.mietvertragServiceRowId !== serviceRowId)
+                    .map(item => item.rowId === serviceRowId ? aktualisierterService : item)
+                    .concat(createMietBaugruppenPosition(aktualisierterService, baugruppe))
+            };
+        });
+    };
+
     const speichern = () => {
         const kunde = kunden.find(item => String(item.id) === String(draft.kundeId));
         const anfrage = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId));
@@ -748,6 +799,17 @@ export default function Angebote() {
         const automatischeGfFreigabe = mindestmengenFreigabeNoetig || (positionsZwischensumme > 0 && abweichungZurZwischensumme >= gfFreigabeSchwelle);
         const gfFreigabeAktiv = draft.freigabeDurchGf || automatischeGfFreigabe;
         const gfFreigabeNoetig = gfFreigabeAktiv;
+
+        const unvollstaendigerVertrag = draft.positionenDraft.find(position => {
+            if (position.leistungTyp !== "Service") return false;
+            const service = leistungen.find(item => item.leistungTyp === "Service" && String(item.id) === String(position.serviceId || position.artikelId));
+            const mietbaugruppen = draft.positionenDraft.filter(item => item.mietvertragServiceRowId === position.rowId);
+            return istVertragsService(service) && (!position.vertragsStart || !position.vertragsEnde || !position.mietArtikelId || position.vertragsEnde < position.vertragsStart || mietbaugruppen.length !== 1);
+        });
+        if (unvollstaendigerVertrag) {
+            setDraft(current => ({ ...current, fehler: "Fuer Mietvertraege bitte Vertragsbeginn, Vertragsende und eine Baugruppe angeben. Das Ende darf nicht vor dem Beginn liegen." }));
+            return false;
+        }
 
         if (!kunde || draft.positionenDraft.length === 0) {
             setDraft(current => ({ ...current, fehler: "Bitte einen Kunden und mindestens eine Position auswählen." }));
@@ -781,7 +843,7 @@ export default function Angebote() {
                 direktSendenGewuenscht: freigabeDirektErteilen,
                 freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
                 freigabeNotiz: mindestmengenFreigabeNoetig
-                     ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                     ? `Eiserner Bestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
                     : gfFreigabeNoetig
                          ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
                     : "",
@@ -842,7 +904,7 @@ export default function Angebote() {
             freigabeAngefragtVon: user.username || draft.bearbeiter,
             freigegebenVon: freigabeDirektErteilen ? (user.username || "") : "",
             freigabeNotiz: mindestmengenFreigabeNoetig
-                 ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                 ? `Eiserner Bestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
                 : gfFreigabeNoetig
                      ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
                 : ""
@@ -850,7 +912,7 @@ export default function Angebote() {
 
         if (mindestmengenFreigabeNoetig || gfFreigabeNoetig) {
             freigabenService.create({
-                titel: `${mindestmengenFreigabeNoetig ? "Sicherheitsbestandsfreigabe" : "Preisfreigabe"} ${neuesAngebot.angebotsNr}`,
+                titel: `${mindestmengenFreigabeNoetig ? "Freigabe Eiserner Bestand" : "Preisfreigabe"} ${neuesAngebot.angebotsNr}`,
                 bereich: "verkauf",
                 verantwortung: "Geschäftsführung",
                 status: "offen",
@@ -859,7 +921,7 @@ export default function Angebote() {
                 angebotId: neuesAngebot.id,
                 vorgangId,
                 notiz: mindestmengenFreigabeNoetig
-                     ? `Sicherheitsbestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
+                     ? `Eiserner Bestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
                     : `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
             });
         }
@@ -1222,11 +1284,13 @@ export default function Angebote() {
                                     && String(item.leistungTyp || "") === String(position.leistungTyp || "")
                                 );
                                 const nummer = String(leistung?.nummer || position.artikelId || position.serviceId || "-");
-                                const positionMitIndividualisierung = hasIndividualisierungen(leistung);
+                                const positionIstMietvertrag = position.leistungTyp === "Service" && istVertragsService(leistung);
+                                const positionMitIndividualisierung = hasIndividualisierungen(leistung) && !positionIstMietvertrag && !position.istMietBaugruppe;
                                 const optionGroups = positionMitIndividualisierung
                                     ? getOptionGroups(leistung.individualisierungen)
                                     : [];
-                                const endpreisProEinheit = Number(position.einzelpreis || 0) + calculateOptionAufpreisProEinheit(position, leistung);
+                                const optionAufpreisProEinheit = positionMitIndividualisierung ? calculateOptionAufpreisProEinheit(position, leistung) : 0;
+                                const endpreisProEinheit = Number(position.einzelpreis || 0) + optionAufpreisProEinheit;
                                 const endpreisGesamt = endpreisProEinheit * Number(position.menge || 0);
 
                                 return <Fragment key={`${position.leistungTyp}-${position.artikelId || position.serviceId || index}-${position.rowId}`}>
@@ -1240,12 +1304,14 @@ export default function Angebote() {
                                                 onChange={wert => setDraft(items => {
                                                     const aktualisiertePositionen = items.positionenDraft.map(item => item.rowId === position.rowId
                                                         ? { ...item, menge: wert }
+                                                        : item.mietvertragServiceRowId === position.rowId
+                                                            ? { ...item, menge: wert }
                                                         : item
                                                     );
                                                     const parentPosition = aktualisiertePositionen.find(item => item.rowId === position.rowId);
                                                     return {
                                                         ...items,
-                                                        positionenDraft: parentPosition ? syncOptionRows(aktualisiertePositionen, parentPosition, leistung, artikel) : aktualisiertePositionen
+                                                            positionenDraft: positionMitIndividualisierung && parentPosition ? syncOptionRows(aktualisiertePositionen, parentPosition, leistung, artikel) : aktualisiertePositionen
                                                     };
                                                 })}
                                             />
@@ -1253,10 +1319,10 @@ export default function Angebote() {
                                         <td>{endpreisProEinheit.toFixed(2)} EUR</td>
                                         <td>{endpreisGesamt.toFixed(2)} EUR</td>
                                         <td>
-                                            <button type="button" className="link-button" onClick={() => setDraft(items => ({
+                                            {position.istMietBaugruppe ? <small>An Vertragsposition gekoppelt</small> : <button type="button" className="link-button" onClick={() => setDraft(items => ({
                                                 ...items,
-                                                positionenDraft: items.positionenDraft.filter(item => item.rowId !== position.rowId && item.isOptionForId !== position.rowId)
-                                            }))}>Entfernen</button>
+                                                positionenDraft: items.positionenDraft.filter(item => item.rowId !== position.rowId && item.isOptionForId !== position.rowId && item.mietvertragServiceRowId !== position.rowId)
+                                            }))}>Entfernen</button>}
                                         </td>
                                     </tr>
                                     <tr className="position-table-detail-row">
@@ -1265,11 +1331,30 @@ export default function Angebote() {
                                                 <p className={`position-availability${verfuegbarkeit.istKritisch ? " position-availability-critical" : ""}`}>
                                                     {verfuegbarkeit.text}
                                                 </p>
+                                                {positionIstMietvertrag && (
+                                                    <div style={{ padding: "0.75rem", background: "var(--background-alt)", borderRadius: "var(--radius-sm)", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                                                        <div><Label>Vertragsbeginn</Label><input type="date" value={position.vertragsStart || ""} onChange={event => setDraft(items => ({ ...items, positionenDraft: items.positionenDraft.map(item => item.rowId === position.rowId ? { ...item, vertragsStart: event.target.value } : item) }))}/></div>
+                                                        <div><Label>Vertragsende</Label><input type="date" value={position.vertragsEnde || ""} min={position.vertragsStart || undefined} onChange={event => setDraft(items => ({ ...items, positionenDraft: items.positionenDraft.map(item => item.rowId === position.rowId ? { ...item, vertragsEnde: event.target.value } : item) }))}/></div>
+                                                        <div style={{ minWidth: "220px" }}>
+                                                            <Label>Mietbaugruppe</Label>
+                                                            <select
+                                                                value={position.mietArtikelId || ""}
+                                                                onChange={event => handleMietBaugruppeChange(position.rowId, event.target.value)}
+                                                            >
+                                                                <option value="">Baugruppe auswählen...</option>
+                                                                {artikel
+                                                                    .filter(item => item.artikelTyp === "Baugruppe" && item.istVerkaeuflich)
+                                                                    .map(item => <option key={item.id} value={item.id}>{item.artikelNr} - {item.name}</option>)}
+                                                            </select>
+                                                        </div>
+                                                        <small>Die Baugruppe wird mit 0,00 EUR berechnet und ist nicht individualisierbar.</small>
+                                                    </div>
+                                                )}
                                                 {optionGroups.length > 0 && (
                                                     <div style={{ padding: "0.75rem", background: "var(--background-alt)", borderRadius: "var(--radius-sm)", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                                                         <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
                                                             <strong>Konfiguration</strong>
-                                                            <span>Änderung: {calculateOptionAufpreisProEinheit(position, leistung) > 0 ? "+" : ""}{calculateOptionAufpreisProEinheit(position, leistung).toFixed(2)} EUR</span>
+                                                            <span>Änderung: {optionAufpreisProEinheit > 0 ? "+" : ""}{optionAufpreisProEinheit.toFixed(2)} EUR</span>
                                                         </div>
                                                         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                                                         {optionGroups.map(groupId => {
@@ -1298,16 +1383,11 @@ export default function Angebote() {
                                                                             </option>
                                                                         ))}
                                                                     </select>
-                                                                    <>
                                                                     <small
                                                                         className={optionsKritisch ? "form-error" : undefined}
-                                                                        title={`Im Angebot: ${optionsAngebotsbedarf} | Im Zulauf: ${Number(offeneBestellmengen[String(aktuelleOption?.individualArtikelId || "")] || 0)}${optionsProjected < optionsMindestbestand ? ` | Sicherheitsbestand von ${optionsMindestbestand} wird unterschritten` : ""}`}
+                                                                        title={`Im Angebot: ${optionsAngebotsbedarf} | Nachbestellt: ${Number(offeneBestellmengen[String(aktuelleOption?.individualArtikelId || "")] || 0)}${optionsProjected < optionsMindestbestand ? ` | Eiserner Bestand von ${optionsMindestbestand} wird unterschritten` : ""}`}
                                                                     >
-                                                                        Bestand: {optionsBestand} | Verfuegbar: {optionsVerfuegbar}
-                                                                    </small>
-                                                                    </>
-                                                                    <small style={{ display: "none" }}>
-                                                                        Bestand: {optionsBestand} | Verfügbar: {optionsVerfuegbar} | Im Angebot: {optionsAngebotsbedarf}
+                                                                        Lager-Bestand: {optionsBestand} | Bestand: {optionsVerfuegbar}
                                                                     </small>
                                                                 </div>
                                                             );
@@ -1438,7 +1518,7 @@ export default function Angebote() {
                     {brauchtFreigabe && <p>Du hast keine Berechtigung zur eigenständigen Freigabe.</p>}
                 </div>}
                 {sicherheitsbestandFreigabeImDialog && <p className="form-error">
-                    Die GF-Freigabe wurde automatisch gesetzt, da ein Artikel unter den Sicherheitsbestand gerät.
+                    Die GF-Freigabe wurde automatisch gesetzt, da ein Artikel unter den Eisernen Bestand gerät.
                 </p>}
                 {preisabweichungFreigabeImDialog && <p className="form-error">
                     Die GF-Freigabe wurde automatisch gesetzt, weil die Abweichung zur Artikelsumme den Grenzwert von {Number(optionen.angebotGfFreigabeAbweichungProzent || 10).toFixed(1)} % erreicht oder überschreitet.

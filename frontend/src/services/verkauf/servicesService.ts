@@ -29,7 +29,9 @@ function normalizeService(item: any = {}) {
         zeEinheit: item.berechnungstyp === "ZE" ? (item.zeEinheit || "1 Tag") : "",
         einkaufspreis: Number(item.einkaufspreis || basisPreis),
         verkaufspreis: Number(item.verkaufspreis || basisPreis),
-        beschreibung: item.beschreibung || ""
+        beschreibung: item.beschreibung || "",
+        // "Vertrag" kennzeichnet Services, die eine Mietbaugruppe und Laufzeit benötigen.
+        kategorie: item.kategorie || ""
     };
 }
 

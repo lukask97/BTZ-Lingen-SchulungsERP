@@ -555,22 +555,22 @@ export default function Artikel() {
                     <p>Ohne EK-Preis gilt der Artikel als selbst hergestellt. Ohne VK-Preis ist er nicht verkaufbar. Komponenten und Baugruppen können verkauft werden, sobald ein VK-Preis hinterlegt ist.</p>
                 </div>
 
-                <Label>Bestand</Label>
+                <Label>Lager-Bestand</Label>
                 <NumberField value={currentItem.bestand} min="0" step="1" onChange={v => handleFieldChange("bestand", Number(v || 0))} />
 
                 <div className="form-row">
                     <div>
-                        <Label>Sicherheitsbestand</Label>
+                        <Label>Eiserner Bestand</Label>
                         <NumberField value={currentItem.mindestmenge || 0} min="0" step="1" onChange={v => handleFieldChange("mindestmenge", Number(v || 0))} />
                     </div>
                     <div>
-                        <Label>Bedarfsmeldung bei</Label>
+                        <Label>Nachbestellen ab</Label>
                         <NumberField value={currentItem.bedarfsmeldungBei || 0} min="0" step="1" onChange={v => handleFieldChange("bedarfsmeldungBei", Number(v || 0))} />
                     </div>
                 </div>
 
                 <div className="form-row">
-                    <p>Der Sicherheitsbestand steuert die Freigabepflicht im Verkauf. Die Bedarfsmeldung taucht im Einkauf auf, sobald der Bestand diesen Wert erreicht oder unterschreitet.</p>
+                    <p>Der Eiserne Bestand steuert die Freigabepflicht im Verkauf. Die Bedarfsmeldung taucht im Einkauf auf, sobald der Bestand diesen Wert erreicht oder unterschreitet.</p>
                 </div>
 
                 {currentItem.artikelTyp === "Baugruppe" && <>

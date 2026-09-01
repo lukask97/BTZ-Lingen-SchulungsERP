@@ -16,9 +16,9 @@ const AKTIVE_AUFTRAGSSTATUS = ["offen", "abgerechnet"];
 const OFFENE_ANGEBOTSSTATUS = ["wartet auf antwort"];
 const FARBEN = [
     { key: "weiss", label: "Weiß", beschreibung: "Normal, kein aktueller Handlungsbedarf.", chipClass: "stock-legend-chip-normal", rowClass: "" },
-    { key: "orange", label: "Orange", beschreibung: "Bedarfsmeldung erreicht oder unterschritten.", chipClass: "stock-legend-chip-warning", rowClass: "datatable-row-critical-light" },
-    { key: "rot", label: "Rot", beschreibung: "Sicherheitsbestand unterschritten.", chipClass: "stock-legend-chip-critical", rowClass: "datatable-row-critical-dark" },
-    { key: "blau", label: "Blau", beschreibung: "Artikel ist nachbestellt und im Zulauf.", chipClass: "stock-legend-chip-order", rowClass: "datatable-row-inbound" }
+    { key: "orange", label: "Orange", beschreibung: "Nachbestellen ab erreicht oder unterschritten.", chipClass: "stock-legend-chip-warning", rowClass: "datatable-row-critical-light" },
+    { key: "rot", label: "Rot", beschreibung: "Eiserner Bestand unterschritten.", chipClass: "stock-legend-chip-critical", rowClass: "datatable-row-critical-dark" },
+    { key: "blau", label: "Blau", beschreibung: "Artikel ist nachbestellt.", chipClass: "stock-legend-chip-order", rowClass: "datatable-row-inbound" }
 ];
 
 function getFarbstatus({ imZulauf, verfuegbar, mindestmenge, bedarfsmeldungBei }) {
@@ -137,11 +137,11 @@ export default function Bestand() {
     };
 
     return <>
-        <h1>Bestand</h1>
-        <p>Im Mockup gibt es ein zentrales Lager. Hier sieht die Logistik den aktuellen Bestand, bereits verplante Mengen aus aktiven Aufträgen und den daraus verbleibenden verfügbaren Bestand.</p>
-        <div className="stock-legend" aria-label="Farblegende Bestand">
+        <h1>Lager-Bestand</h1>
+        <p>Im Mockup gibt es ein zentrales Lager. Hier sieht die Logistik den aktuellen Lager-Bestand, bereits verplante Mengen aus aktiven Aufträgen und den daraus verbleibenden Bestand.</p>
+        <div className="stock-legend" aria-label="Farblegende Lager-Bestand">
             <strong>Farblegende</strong>
-            <div className="stock-legend-table" role="table" aria-label="Bedeutung der Bestandsfarben">
+            <div className="stock-legend-table" role="table" aria-label="Bedeutung der Lagerbestandsfarben">
                 <div className="stock-legend-row stock-legend-head" role="row">
                     <span role="columnheader">Farbe</span>
                     <span role="columnheader">Anzahl</span>
@@ -160,7 +160,7 @@ export default function Bestand() {
             </div>
         </div>
         <DataTable
-            title="Bestand im Hauptlager"
+            title="Lager-Bestand im Hauptlager"
             data={daten}
             selectableColumns={false}
             searchable
@@ -192,37 +192,37 @@ export default function Bestand() {
                 { field: "artikelNr", title: "Artikelnummer" },
                 { field: "name", title: "Artikel", render: row => <Link className="detail-link" to={`/artikel?focus=${row.id}`}>{row.name}</Link> },
                 { field: "artikelTyp", title: "Typ" },
-                { field: "bestand", title: "Bestand", helpText: "Aktueller physischer Lagerbestand des Artikels." },
-                { field: "verplant", title: "Reserviert", helpText: "Menge, die bereits reserviert ist." },
-                { field: "verfuegbar", title: "Verfügbar", helpText: "Bestand minus bereits reservierte Menge. Dieser Wert ist für neue Zusagen relevant." },
-                { field: "imZulauf", title: "Im Zulauf", helpText: "Offene Bestellmenge aus angefragten, bestätigten oder versendeten Bestellungen." },
-                { field: "bedarfsmeldungBei", title: "Bedarfsmeldung bei", helpText: "Unterhalb dieses Werts soll der Einkauf den Bedarf sehen." },
-                { field: "mindestmenge", title: "Sicherheitsbestand", helpText: "Unterhalb dieses Werts wird der Bestand als besonders kritisch behandelt." },
-                { field: "inAngeboten", title: "In Angeboten", helpText: "Summierte Menge aus aktuell offenen Angeboten mit Status 'Wartet auf Antwort', in denen der Artikel verwendet wird." }
+                { field: "bestand", title: "Lager-Bestand", helpText: "Aktueller physischer Lagerbestand des Artikels." },
+                { field: "verplant", title: "Reserv.", helpText: "Menge, die bereits für aktive Aufträge reserviert ist." },
+                { field: "verfuegbar", title: "Bestand", helpText: "Lager-Bestand minus bereits reservierte Menge. Dieser Wert ist für neue Zusagen relevant." },
+                { field: "imZulauf", title: "Nachbestellt", helpText: "Offene Bestellmenge aus angefragten, bestätigten oder versendeten Bestellungen." },
+                { field: "bedarfsmeldungBei", title: "Nachbestellen ab", helpText: "Unterhalb dieses Werts soll der Einkauf den Bedarf sehen." },
+                { field: "mindestmenge", title: "Eiserner Bestand", helpText: "Unterhalb dieses Werts wird der Bestand als besonders kritisch behandelt." },
+                { field: "inAngeboten", title: "In offenen Angeboten", helpText: "Summierte Menge aus aktuell offenen Angeboten mit Status 'Wartet auf Antwort', in denen der Artikel verwendet wird." }
             ]}
             rowClassName={row => FARBEN.find(farbe => farbe.key === row.farbstatus)?.rowClass || ""}
             detailLinkResolver={({ field, row }) => field === "name" ? `/artikel?focus=${row.id}` : null}
             rowActions={[
-                { name: "edit", label: "Bestand anpassen", permission: PERMISSIONS.LAGER_BEARBEITEN, onClick: bestandAnpassen, variant: "secondary" }
+                { name: "edit", label: "Lager-Bestand anpassen", permission: PERMISSIONS.LAGER_BEARBEITEN, onClick: bestandAnpassen, variant: "secondary" }
             ]}
         />
 
-        <Dialog open={bestandDialogOpen} title="Bestand anpassen" onClose={() => {
+        <Dialog open={bestandDialogOpen} title="Lager-Bestand anpassen" onClose={() => {
             setBestandDialogOpen(false);
             setAusgewaehlterArtikel(null);
         }}>
             <div className="form-row">
                 <div><Label>Artikel</Label><p>{ausgewaehlterArtikel?.artikelNr || "-"} - {ausgewaehlterArtikel?.name || "-"}</p></div>
-                <div><Label>Reserviert</Label><p>{ausgewaehlterArtikel?.verplant || 0}</p></div>
+                <div><Label>Für Aufträge reserviert</Label><p>{ausgewaehlterArtikel?.verplant || 0}</p></div>
             </div>
             <div className="form-row">
-                <div><Label>Aktueller Bestand</Label><p>{ausgewaehlterArtikel?.bestand || 0}</p></div>
-                <div><Label>Neuer Bestand</Label><NumberField value={neuerBestand} min="0" step="1" onChange={wert => setNeuerBestand(Number(wert || 0))}/></div>
+                <div><Label>Aktueller Lager-Bestand</Label><p>{ausgewaehlterArtikel?.bestand || 0}</p></div>
+                <div><Label>Neuer Lager-Bestand</Label><NumberField value={neuerBestand} min="0" step="1" onChange={wert => setNeuerBestand(Number(wert || 0))}/></div>
             </div>
             <div className="form-row">
-                <p>Die Anpassung ändert nur den Lagerbestand. Allgemeine Artikelpflege erfolgt weiterhin auf der Artikelseite.</p>
+                <p>Die Anpassung ändert nur den Lager-Bestand. Allgemeine Artikelpflege erfolgt weiterhin auf der Artikelseite.</p>
             </div>
-            <div className="form-row"><button type="button" onClick={bestandSpeichern}>Bestand speichern</button></div>
+            <div className="form-row"><button type="button" onClick={bestandSpeichern}>Lager-Bestand speichern</button></div>
         </Dialog>
     </>;
 }

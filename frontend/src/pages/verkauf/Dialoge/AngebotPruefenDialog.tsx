@@ -53,7 +53,7 @@ export default function AngebotPruefenDialog({
         currentOfferLabel={approvalOffer.angebotsNr}
         currentOfferAmount={`${gesamtNachAbzug(approvalOffer.positionen, approvalOffer.preispositionen || [], approvalOffer.rabattBetrag).toFixed(2)} EUR`}
         currentOfferNote={approvalOffer.verguenstigungsGrund || ""}
-        discountLabel={Number(approvalOffer.rabattBetrag || 0) > 0  `${Number(approvalOffer.rabattBetrag || 0).toFixed(2)} EUR` : "Keine"}
+        discountLabel={Number(approvalOffer.rabattBetrag || 0) > 0 ? `${Number(approvalOffer.rabattBetrag || 0).toFixed(2)} EUR` : "Keine"}
         totalAmountLabel={`${gesamtNachAbzug(approvalOffer.positionen, approvalOffer.preispositionen || [], approvalOffer.rabattBetrag).toFixed(2)} EUR`}
         onOpenCurrentOffer={() => angebotAlsPdf(approvalOffer)}
         positionInfos={(approvalOffer.positionen || []).map((position: any, index: number) => {

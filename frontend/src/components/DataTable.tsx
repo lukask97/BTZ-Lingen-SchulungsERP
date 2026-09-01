@@ -543,7 +543,7 @@ export default function DataTable({
           disabled={page <= 1}
           onClick={() => onPageChange && onPageChange(page - 1)}
         >
-          ◀
+          Zurück
         </button>
 
         <span>
@@ -555,7 +555,7 @@ export default function DataTable({
           disabled={page >= totalPages}
           onClick={() => onPageChange && onPageChange(page + 1)}
         >
-          ▶
+          Weiter
         </button>
 
         <select
@@ -602,7 +602,7 @@ export default function DataTable({
               type="button"
               onClick={() => setShowColumnMenu(!showColumnMenu)}
             >
-              ⚙️
+              Spalten
             </button>
           )}
 
@@ -659,7 +659,7 @@ export default function DataTable({
                     <span>{column.title}</span>
                     {column.helpText && <HelpHint text={column.helpText} delay={500} />}
                     {sortField === column.field &&
-                      <span>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                      <span>{sortOrder === "asc" ? " aufsteigend" : " absteigend"}</span>}
                   </span>
                 </th>
               ))}

@@ -94,7 +94,7 @@ function hydrateAngebote(items: any[] = []) {
                 artikel: referenz.name || position.artikel || "",
                 artikelTyp: istService ? "Dienstleistung" : (referenz.artikelTyp || position.artikelTyp || "Einzelartikel"),
                 leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
-                einzelpreis: Number(position.einzelpreis || referenz.verkaufspreis || referenz.preis || 0)
+                einzelpreis: Number(position.einzelpreis ?? referenz.verkaufspreis ?? referenz.preis ?? 0)
             };
             const { angebotId, ...rest } = hydrated;
             return rest;
@@ -122,7 +122,7 @@ function hydratePosition(position: any = {}) {
         artikel: referenz.name || position.artikel || "",
         artikelTyp: istService ? "Dienstleistung" : (referenz.artikelTyp || position.artikelTyp || "Einzelartikel"),
         leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
-        einzelpreis: Number(position.einzelpreis || referenz.verkaufspreis || referenz.preis || 0)
+        einzelpreis: Number(position.einzelpreis ?? referenz.verkaufspreis ?? referenz.preis ?? 0)
     };
 }
 
@@ -140,7 +140,13 @@ function splitPayload(payload: any = {}) {
                 serviceId: hydrated.leistungTyp === "Service" ? hydrated.serviceId : "",
                 leistungTyp: hydrated.leistungTyp,
                 menge: Number(hydrated.menge || 0),
-                einzelpreis: Number(hydrated.einzelpreis || 0)
+                einzelpreis: Number(hydrated.einzelpreis || 0),
+                vertragsStart: hydrated.vertragsStart || "",
+                vertragsEnde: hydrated.vertragsEnde || "",
+                mietArtikelId: hydrated.mietArtikelId || "",
+                mietArtikelName: hydrated.mietArtikelName || "",
+                istMietBaugruppe: Boolean(hydrated.istMietBaugruppe),
+                mietvertragServiceRowId: hydrated.mietvertragServiceRowId || ""
             };
         })
     };

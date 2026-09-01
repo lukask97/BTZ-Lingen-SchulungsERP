@@ -198,13 +198,13 @@ export default function Einkaufsdokumente() {
                     <span>Lernhilfe</span>
                 </div>
                 <div className="personalakte-summary">
-                    <div><span>Aktueller Bestand</span><strong>{bedarfSummary.aktuellerBestand}</strong></div>
+                    <div><span>Aktueller Lager-Bestand</span><strong>{bedarfSummary.aktuellerBestand}</strong></div>
                     <div><span>Meldebestand</span><strong>{bedarfSummary.meldebestand}</strong></div>
                     <div><span>Bedarf erkannt</span><strong>{bedarfSummary.bedarfErkannt ? "Ja" : "Nein"}</strong></div>
                     <div><span>Bestellwert</span><strong>{euro(bedarfSummary.bestellwert)}</strong></div>
                 </div>
                 <div className="dashboard-two-column">
-                    <div><Label>Aktueller Bestand</Label><NumberField value={bedarf.aktuellerBestand} min="0" onChange={value => setBedarf(item => ({ ...item, aktuellerBestand: Number(value) }))}/></div>
+                    <div><Label>Aktueller Lager-Bestand</Label><NumberField value={bedarf.aktuellerBestand} min="0" onChange={value => setBedarf(item => ({ ...item, aktuellerBestand: Number(value) }))}/></div>
                     <div><Label glossaryKey="bedarfsmeldung">Meldebestand</Label><NumberField value={bedarf.meldebestand} min="0" onChange={value => setBedarf(item => ({ ...item, meldebestand: Number(value) }))}/></div>
                     <div><Label glossaryKey="bedarfsmeldung">Bestellmenge</Label><NumberField value={bedarf.bestellmenge} min="0" onChange={value => setBedarf(item => ({ ...item, bestellmenge: Number(value) }))}/></div>
                     <div><Label glossaryKey="einkaufspreis">Einzelpreis</Label><NumberField value={bedarf.einzelpreis} min="0" onChange={value => setBedarf(item => ({ ...item, einzelpreis: Number(value) }))}/></div>
