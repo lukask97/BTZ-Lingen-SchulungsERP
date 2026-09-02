@@ -17,12 +17,26 @@ function toNonNegativeDecimal(value: unknown, fallback: number) {
     return Math.round(numericValue * 100) / 100;
 }
 
+function toTime(value: unknown, fallback: string) {
+    const time = String(value || "");
+    const match = time.match(/^(\d{2}):(\d{2})$/);
+    if (!match || Number(match[1]) > 23 || Number(match[2]) > 59) return fallback;
+    return time;
+}
+
 function sanitizeOptions(value: any = {}) {
     const skontoTage = toNonNegativeNumber(value.skontoTage, DEFAULT_OPTIONS.skontoTage);
     const skontoProzent = toNonNegativeDecimal(value.skontoProzent, DEFAULT_OPTIONS.skontoProzent);
     const angebotGfFreigabeAbweichungProzent = toNonNegativeDecimal(
         value.angebotGfFreigabeAbweichungProzent,
         DEFAULT_OPTIONS.angebotGfFreigabeAbweichungProzent
+    );
+    const angeboteTagesabschlussAktiv = Boolean(
+        value.angeboteTagesabschlussAktiv ?? DEFAULT_OPTIONS.angeboteTagesabschlussAktiv
+    );
+    const angeboteTagesabschlussUhrzeit = toTime(
+        value.angeboteTagesabschlussUhrzeit,
+        DEFAULT_OPTIONS.angeboteTagesabschlussUhrzeit
     );
     const zahlungszielTage = Math.max(
         skontoTage,
@@ -43,6 +57,8 @@ function sanitizeOptions(value: any = {}) {
         skontoTage,
         skontoProzent,
         angebotGfFreigabeAbweichungProzent,
+        angeboteTagesabschlussAktiv,
+        angeboteTagesabschlussUhrzeit,
         zahlungszielTage,
         zahlungserinnerungTage,
         mahnung1AbTage,

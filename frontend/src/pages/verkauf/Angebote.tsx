@@ -181,6 +181,7 @@ function createAngebotDraft(defaultLeistungId, defaultBearbeiter, brauchtFreigab
         angebotsNrDraft: "",
         bearbeiter: defaultBearbeiter,
         selectedTemplateOfferId: "",
+        alsVorbereitetSpeichern: false,
         direktSenden: brauchtFreigabe,
         freigabeDurchGf: false
     };
@@ -401,6 +402,7 @@ export default function Angebote() {
     const [approvalOpen, setApprovalOpen] = useState(false);
     const [approvalOffer, setApprovalOffer] = useState<any>(null);
     const [approvalNote, setApprovalNote] = useState("");
+    const [tagesabschlussBestaetigungOpen, setTagesabschlussBestaetigungOpen] = useState(false);
     const [pendingEditOffer, setPendingEditOffer] = useState<any>(null);
     const [selectedStatuses, setSelectedStatuses] = useState(getDefaultStatusFilter);
 
@@ -523,6 +525,7 @@ export default function Angebote() {
             angebotsNrDraft: `${revisionInfo.angebotsBasisNr}.${revisionInfo.revision}`,
             bearbeiter: defaultBearbeiter,
             selectedTemplateOfferId: String(templateOfferId || ""),
+            alsVorbereitetSpeichern: false,
             direktSenden: brauchtFreigabe,
             freigabeDurchGf: false
         });
@@ -572,6 +575,7 @@ export default function Angebote() {
             angebotsNrDraft: angebot.angebotsNr || "",
             bearbeiter: String(angebot.bearbeiter || defaultBearbeiter),
             selectedTemplateOfferId: "",
+            alsVorbereitetSpeichern: Boolean(angebot.alsVorbereitetGespeichert),
             direktSenden: Boolean(angebot.direktSendenGewuenscht),
             freigabeDurchGf: String(angebot.freigabeStatus || "") === "weitergeleitet"
         });
@@ -604,6 +608,17 @@ export default function Angebote() {
         angebotBearbeiten(pendingEditOffer);
         setPendingEditOffer(null);
     }, [approvalOpen, pendingEditOffer]);
+
+    const schliesseFreigabeDialog = () => {
+        setApprovalOpen(false);
+        setApprovalOffer(null);
+        setApprovalNote("");
+        if (!approveOfferIdFromQuery) return;
+        const nextSearchParams = new URLSearchParams(searchParams);
+        nextSearchParams.delete("approveOfferId");
+        const search = nextSearchParams.toString();
+        navigate({ search: search ? `?${search}` : "" }, { replace: true });
+    };
 
     const angebotColumns = [
         { field: "angebotsNr", title: "Angebotsnummer", render: row => <button type="button" className="thread-inline-link" onClick={event => {
@@ -643,7 +658,7 @@ export default function Angebote() {
                     : angebot.freigabeStatus === "weitergeleitet"
                          ? `Gesperrt: ${angebot.freigabeNotiz || "Grund siehe Notiz"}`
                         : angebot.freigabeStatus === "intern_abgelehnt"
-                             ? "Zur Überarbeitung zurückgegeben"
+                             ? "Überarbeitung erforderlich"
                             : angebot.freigabeStatus === "freigegeben"
                                  ? "Freigegeben"
                                 : "-",
@@ -790,7 +805,7 @@ export default function Angebote() {
         });
     };
 
-    const speichern = () => {
+    const speichern = (aktion: "vorbereiten" | "freigabeBeantragen") => {
         const kunde = kunden.find(item => String(item.id) === String(draft.kundeId));
         const anfrage = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId));
         const vorgangId = getVorgangId(anfrage) || (draft.sourceInquiryId ? `anfrage-${draft.sourceInquiryId}` : `angebot-${Date.now()}`);
@@ -823,8 +838,11 @@ export default function Angebote() {
                 return false;
             }
 
-            const freigabeDirektErteilen = (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (brauchtFreigabe ? false : draft.direktSenden);
-            const freigabeNoetig = !freigabeDirektErteilen;
+            const vorbereitetSpeichern = aktion === "vorbereiten";
+            const freigabeDirektErteilen = vorbereitetSpeichern
+                ? false
+                : (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (!brauchtFreigabe && draft.direktSenden);
+            const freigabeNoetig = !vorbereitetSpeichern && !freigabeDirektErteilen;
             const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
             const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
 
@@ -840,6 +858,8 @@ export default function Angebote() {
                 positionen: draft.positionenDraft,
                 preispositionen: draft.preispositionenDraft,
                 bearbeiter: draft.bearbeiter,
+                alsVorbereitetGespeichert: vorbereitetSpeichern,
+                tagesabschlussZurueckgehalten: false,
                 direktSendenGewuenscht: freigabeDirektErteilen,
                 freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
                 freigabeNotiz: mindestmengenFreigabeNoetig
@@ -865,7 +885,9 @@ export default function Angebote() {
                 betreff: `Angebot ${bestehendesAngebot.angebotsNr} überarbeitet`,
                 nachricht: freigabeDirektErteilen
                      ? "Das Angebot wurde überarbeitet und direkt an den Kunden gesendet."
-                    : "Das Angebot wurde nach der internen Rückmeldung überarbeitet und erneut zur Freigabe vorbereitet.",
+                    : vorbereitetSpeichern
+                         ? "Das Angebot wurde aktualisiert und als vorbereitet gespeichert."
+                        : "Das Angebot wurde nach der internen Rückmeldung überarbeitet und erneut zur Freigabe vorbereitet.",
                 typ: "Interne Freigabe"
             });
 
@@ -878,8 +900,11 @@ export default function Angebote() {
         }
 
         const revisionInfo = naechsteAngebotsrevision(vorgangId);
-        const freigabeDirektErteilen = (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (brauchtFreigabe ? false : draft.direktSenden);
-        const freigabeNoetig = !freigabeDirektErteilen;
+        const vorbereitetSpeichern = aktion === "vorbereiten";
+        const freigabeDirektErteilen = vorbereitetSpeichern
+            ? false
+            : (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (!brauchtFreigabe && draft.direktSenden);
+        const freigabeNoetig = !vorbereitetSpeichern && !freigabeDirektErteilen;
         const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
         const referenzierteAnfrageId = anfrage?.id || "";
         const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
@@ -899,6 +924,8 @@ export default function Angebote() {
             positionen: draft.positionenDraft,
             preispositionen: draft.preispositionenDraft,
             bearbeiter: draft.bearbeiter,
+            alsVorbereitetGespeichert: vorbereitetSpeichern,
+            tagesabschlussZurueckgehalten: false,
             direktSendenGewuenscht: freigabeDirektErteilen,
             freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
             freigabeAngefragtVon: user.username || draft.bearbeiter,
@@ -910,7 +937,7 @@ export default function Angebote() {
                 : ""
         });
 
-        if (mindestmengenFreigabeNoetig || gfFreigabeNoetig) {
+        if (!vorbereitetSpeichern && (mindestmengenFreigabeNoetig || gfFreigabeNoetig)) {
             freigabenService.create({
                 titel: `${mindestmengenFreigabeNoetig ? "Freigabe Eiserner Bestand" : "Preisfreigabe"} ${neuesAngebot.angebotsNr}`,
                 bereich: "verkauf",
@@ -961,7 +988,7 @@ export default function Angebote() {
     const handleClose = () => {
         setOpen(false);
         setEditingOfferId("");
-        setDraft(current => ({ ...current, fehler: "", selectedTemplateOfferId: "", direktSenden: brauchtFreigabe, freigabeDurchGf: false }));
+        setDraft(current => ({ ...current, fehler: "", selectedTemplateOfferId: "", alsVorbereitetSpeichern: false, direktSenden: brauchtFreigabe, freigabeDurchGf: false }));
         if (newMode || editOfferIdFromQuery || approveOfferIdFromQuery) {
             navigate("/angebote", { replace: true });
         }
@@ -975,7 +1002,15 @@ export default function Angebote() {
         ));
     };
 
+    const [wiedervorlageFilter, setWiedervorlageFilter] = useState("faellig");
+
     const laufendeAngebote = neuesteAngebote.filter(item => istOffenesAngebot(item));
+    const vorbereiteteAngebote = neuesteAngebote.filter(item =>
+        Boolean(item.alsVorbereitetGespeichert) && !Boolean(item.tagesabschlussZurueckgehalten)
+    );
+    const gespeicherteAngebote = neuesteAngebote.filter(item =>
+        Boolean(item.alsVorbereitetGespeichert) && Boolean(item.tagesabschlussZurueckgehalten)
+    );
     const freizugebendeAngebote = neuesteAngebote.filter(item =>
         item.statusNormalized === "in vorbereitung"
         || (item.statusNormalized === "wiedervorlage" && String(item.wiedervorlageAm || "") <= heute)
@@ -983,6 +1018,14 @@ export default function Angebote() {
     const ueberarbeitungen = neuesteAngebote.filter(item =>
         item.statusNormalized === "in vorbereitung" && String(item.freigabeStatus || "") === "intern_abgelehnt"
     );
+    const wiedervorlagen = neuesteAngebote.filter(item => item.statusNormalized === "wiedervorlage");
+    const faelligeWiedervorlagen = wiedervorlagen.filter(item => String(item.wiedervorlageAm || "") <= heute);
+    const gefilterteWiedervorlagen = wiedervorlagen.filter(item => {
+        if (wiedervorlageFilter === "heute") return String(item.wiedervorlageAm || "") === heute;
+        if (wiedervorlageFilter === "zukuenftig") return String(item.wiedervorlageAm || "") > heute;
+        if (wiedervorlageFilter === "alle") return true;
+        return String(item.wiedervorlageAm || "") <= heute;
+    });
     const freigabeOffenAngebote = freizugebendeAngebote.filter(item => !["intern_abgelehnt", "freigegeben", "weitergeleitet"].includes(String(item.freigabeStatus || "")));
     const alleAngebote = neuesteAngebote.filter(item => selectedStatuses.includes(item.statusNormalized));
     const zumChatNavigieren = row => {
@@ -1007,9 +1050,67 @@ export default function Angebote() {
             sendeAngebotAnKunden(aktualisiert);
         }
         setRefreshKey(value => value + 1);
-        setApprovalOpen(false);
-        setApprovalOffer(null);
-        setApprovalNote("");
+        schliesseFreigabeDialog();
+    };
+    const brauchtGfFreigabeFuerAngebot = angebot => {
+        const positionen = angebot.positionen || [];
+        const positionssumme = calculatePositionenTotal(positionen);
+        const nettoGesamt = calculateNetto(positionen, angebot.preispositionen || [], angebot.rabattBetrag);
+        const preisabweichung = positionssumme > 0 && Math.abs(nettoGesamt - positionssumme) / positionssumme >= gfFreigabeSchwelle;
+        return getMindestmengenWarnungen(positionen).length > 0 || preisabweichung;
+    };
+    const vorbereitetesAngebotSofortSenden = angebot => {
+        const istBlockiert = ["angefragt", "weitergeleitet", "intern_abgelehnt"].includes(String(angebot.freigabeStatus || ""));
+        if (brauchtFreigabe || istBlockiert || brauchtGfFreigabeFuerAngebot(angebot)) return;
+        const aktualisiert = {
+            ...angebot,
+            status: "wartet auf Antwort",
+            freigabeStatus: "freigegeben",
+            direktSendenGewuenscht: true,
+            alsVorbereitetGespeichert: false,
+            tagesabschlussZurueckgehalten: false,
+            freigegebenVon: user.username || user.name || "verkauf"
+        };
+        angeboteService.update(aktualisiert);
+        sendeAngebotAnKunden(aktualisiert);
+        setRefreshKey(value => value + 1);
+    };
+    const tagesabschlussAngebote = vorbereiteteAngebote.filter(angebot => {
+        const istBlockiert = ["angefragt", "weitergeleitet", "intern_abgelehnt"].includes(String(angebot.freigabeStatus || ""));
+        return !istBlockiert && !brauchtGfFreigabeFuerAngebot(angebot);
+    });
+    const tagesabschlussDurchfuehren = () => {
+        if (brauchtFreigabe || tagesabschlussAngebote.length === 0) return;
+        tagesabschlussAngebote.forEach(angebot => {
+            const aktualisiert = {
+                ...angebot,
+                status: "wartet auf Antwort",
+                freigabeStatus: "freigegeben",
+                direktSendenGewuenscht: true,
+                alsVorbereitetGespeichert: false,
+                tagesabschlussZurueckgehalten: false,
+                freigegebenVon: user.username || user.name || "verkauf"
+            };
+            angeboteService.update(aktualisiert);
+            sendeAngebotAnKunden(aktualisiert);
+        });
+        setRefreshKey(value => value + 1);
+        setTagesabschlussBestaetigungOpen(false);
+    };
+    const angebotZumTagesabschlussZurueckhalten = angebot => {
+        angeboteService.update({
+            ...angebot,
+            tagesabschlussZurueckgehalten: true,
+            direktSendenGewuenscht: false
+        });
+        setRefreshKey(value => value + 1);
+    };
+    const angebotFuerTagesabschlussVormerken = angebot => {
+        angeboteService.update({
+            ...angebot,
+            tagesabschlussZurueckgehalten: false
+        });
+        setRefreshKey(value => value + 1);
     };
     const angebotZurUeberarbeitungZurueckgeben = (angebot, status = "in Vorbereitung", freigabeStatus = "angefragt") => {
         if (!approvalNote.trim()) return;
@@ -1034,9 +1135,7 @@ export default function Angebote() {
             typ: "Interne Freigabe"
         });
         setRefreshKey(value => value + 1);
-        setApprovalOpen(false);
-        setApprovalOffer(null);
-        setApprovalNote("");
+        schliesseFreigabeDialog();
     };
     const angebotInternAblehnen = (angebot) => {
         angebotZurUeberarbeitungZurueckgeben(angebot, "in Vorbereitung", "intern_abgelehnt");
@@ -1066,9 +1165,7 @@ export default function Angebote() {
         });
         setRefreshKey(value => value + 1);
         setPendingEditOffer(aktualisiert);
-        setApprovalOpen(false);
-        setApprovalOffer(null);
-        setApprovalNote("");
+        schliesseFreigabeDialog();
     };
     const angebotAnGfWeiterleiten = (angebot) => {
         if (!approvalNote.trim()) return;
@@ -1097,9 +1194,7 @@ export default function Angebote() {
             status: "in Vorbereitung"
         });
         setRefreshKey(value => value + 1);
-        setApprovalOpen(false);
-        setApprovalOffer(null);
-        setApprovalNote("");
+        schliesseFreigabeDialog();
     };
     const freigabePruefen = (angebot) => {
         setApprovalOffer(angebot);
@@ -1107,22 +1202,37 @@ export default function Angebote() {
         setApprovalOpen(true);
     };
     const dashboardTabs = [
-        { key: "laufend", label: "Laufende Angebote", value: laufendeAngebote.length },
-        { key: "freigabe", label: "Freizugebende Angebote", value: freigabeOffenAngebote.length },
-        { key: "ueberarbeitung", label: "Zur Überarbeitung zurückgegeben", value: ueberarbeitungen.length },
+        { key: "laufend", label: "Beim Kunden", value: laufendeAngebote.length },
+        { key: "freigabe", label: "Freigabe ausstehend", value: freigabeOffenAngebote.length },
+        { key: "gespeichert", label: "Rückgestellt", value: gespeicherteAngebote.length },
+        { key: "vorbereitet", label: "Zum Tagesabschluss", value: vorbereiteteAngebote.length },
+        { key: "ueberarbeitung", label: "Überarbeitung erforderlich", value: ueberarbeitungen.length },
+        { key: "wiedervorlagen", label: "Wiedervorlagen", value: wiedervorlagen.length },
         { key: "alle", label: "Alle Angebote", value: neuesteAngebote.length }
     ];
     const sichtbareAngebote = activeTab === "freigabe"
          ? freigabeOffenAngebote
+        : activeTab === "vorbereitet"
+             ? vorbereiteteAngebote
+        : activeTab === "gespeichert"
+             ? gespeicherteAngebote
         : activeTab === "ueberarbeitung"
              ? ueberarbeitungen
+        : activeTab === "wiedervorlagen"
+             ? gefilterteWiedervorlagen
         : activeTab === "alle"
              ? alleAngebote
             : laufendeAngebote;
     const tableTitle = activeTab === "freigabe"
-         ? "Freizugebende Angebote"
+         ? "Freigabe ausstehend"
+        : activeTab === "vorbereitet"
+             ? "Zum Tagesabschluss vorgemerkte Angebote"
+        : activeTab === "gespeichert"
+             ? "Zurückgestellte Angebote"
         : activeTab === "ueberarbeitung"
-             ? "Zur Überarbeitung zurückgegebene Angebote"
+             ? "Überarbeitung erforderlich"
+        : activeTab === "wiedervorlagen"
+             ? "Wiedervorlagen"
         : activeTab === "alle"
              ? "Alle Angebote"
             : "Laufende Angebote";
@@ -1131,6 +1241,8 @@ export default function Angebote() {
     const preisabweichungFreigabeImDialog = positionsZwischensumme > 0 && abweichungZurZwischensumme >= gfFreigabeSchwelle;
     const automatischeGfFreigabeImDialog = sicherheitsbestandFreigabeImDialog || preisabweichungFreigabeImDialog;
     const gfFreigabeAktivImDialog = draft.freigabeDurchGf || automatischeGfFreigabeImDialog;
+    const kannDirektVersendenImDialog = !brauchtFreigabe && draft.direktSenden && !gfFreigabeAktivImDialog;
+    const versandAktionLabel = kannDirektVersendenImDialog ? "Direkt versenden" : "Freigabe beantragen";
     const sperrgrundText = "";
 
     return <>
@@ -1141,6 +1253,13 @@ export default function Angebote() {
                 <strong>{card.value}</strong>
             </button>)}
         </div>
+        {activeTab === "vorbereitet" && <div className="dashboard-panel">
+            <div className="dashboard-panel-header">
+                <h2>Geplanter Versand</h2>
+                <span>{heute}, {optionen.angeboteTagesabschlussUhrzeit} Uhr</span>
+            </div>
+            <p>Diese Angebote sind für den nächsten Versand zum Tagesabschluss vorgemerkt.</p>
+        </div>}
         {activeTab === "alle" && <div className="dashboard-panel">
             <div className="dashboard-panel-header">
                 <h2>Statushilfe Angebote</h2>
@@ -1149,6 +1268,21 @@ export default function Angebote() {
             <ul className="dashboard-note-list">
                 {STATUS_HELP.map(item => <li key={item.label}><strong>{item.label}:</strong> {item.text}</li>)}
             </ul>
+        </div>}
+        {optionen.angeboteTagesabschlussAktiv && <div className="dashboard-panel">
+            <div className="dashboard-panel-header">
+                <h2>Geplanter Versand</h2>
+                <span>{heute}, {optionen.angeboteTagesabschlussUhrzeit} Uhr</span>
+            </div>
+            <ul className="dashboard-note-list">
+                <li><strong>{vorbereiteteAngebote.length} vorgemerkt:</strong> Diese Angebote werden beim Tagesabschluss versendet.</li>
+                <li><strong>{freigabeOffenAngebote.length} zur Freigabe:</strong> Diese Angebote warten auf eine interne Prüfung.</li>
+                <li><strong>{faelligeWiedervorlagen.length} fällig:</strong> Wiedervorlagen mit Prüfdatum bis heute sollten bearbeitet werden.</li>
+                <li><strong>{laufendeAngebote.length} beim Kunden:</strong> Diese Angebote warten aktuell auf eine Kundenantwort.</li>
+            </ul>
+            <button type="button" onClick={() => setTagesabschlussBestaetigungOpen(true)} disabled={brauchtFreigabe || tagesabschlussAngebote.length === 0}>
+                Geplanten Versand starten ({tagesabschlussAngebote.length})
+            </button>
         </div>}
         <DataTable
             title={tableTitle}
@@ -1159,10 +1293,21 @@ export default function Angebote() {
                 options={STATUS_FILTER_OPTIONS}
                 selectedValues={selectedStatuses}
                 onToggle={toggleStatus}
-            /> : null}
+            /> : activeTab === "wiedervorlagen" ? <label>
+                Filter
+                <select value={wiedervorlageFilter} onChange={event => setWiedervorlageFilter(event.target.value)}>
+                    <option value="faellig">Fällig bis heute</option>
+                    <option value="heute">Heute</option>
+                    <option value="zukuenftig">Zukünftig</option>
+                    <option value="alle">Alle Wiedervorlagen</option>
+                </select>
+            </label> : null}
             toolbarActions={[{ name: "new", label: "Neues Angebot", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: () => initialisiereDialog() }]}
             rowActions={[
-                { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotBearbeiten, variant: "secondary", isVisible: row => activeTab === "ueberarbeitung" && String(row.freigabeStatus || "") === "intern_abgelehnt" },
+                { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotBearbeiten, variant: "secondary", isVisible: row => (activeTab === "ueberarbeitung" && String(row.freigabeStatus || "") === "intern_abgelehnt") || ["vorbereitet", "gespeichert"].includes(activeTab) },
+                { name: "hold", label: "Zurückstellen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotZumTagesabschlussZurueckhalten, variant: "secondary", isVisible: () => activeTab === "vorbereitet" },
+                { name: "release", label: "Für Versand vormerken", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotFuerTagesabschlussVormerken, variant: "secondary", isVisible: () => activeTab === "gespeichert" },
+                { name: "send", label: "Sofort senden", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: vorbereitetesAngebotSofortSenden, variant: "success", isVisible: row => activeTab === "vorbereitet" && !brauchtFreigabe && !["angefragt", "weitergeleitet", "intern_abgelehnt"].includes(String(row.freigabeStatus || "")) && !brauchtGfFreigabeFuerAngebot(row) },
                 { name: "thread", label: "Chat", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: zumChatNavigieren, variant: "secondary", isVisible: row => !!row.anfrageId },
                 { name: "approve", label: "Prüfen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: freigabePruefen, variant: "success", isVisible: row => istErfahrenerVerkaeufer && row.statusNormalized === "in vorbereitung" && !["freigegeben", "intern_abgelehnt"].includes(String(row.freigabeStatus || "")) }
             ]}
@@ -1173,10 +1318,29 @@ export default function Angebote() {
             }}
         />
         <Dialog
+            open={tagesabschlussBestaetigungOpen}
+            title="Geplanten Versand starten"
+            onClose={() => setTagesabschlussBestaetigungOpen(false)}
+            footer={<button type="button" className="button is-primary" onClick={tagesabschlussDurchfuehren}>
+                {tagesabschlussAngebote.length} Angebote versenden
+            </button>}
+        >
+            <p>Die folgenden Angebote werden an die jeweiligen Kunden versendet:</p>
+            <ul className="positionsliste">
+                {tagesabschlussAngebote.map(angebot => <li key={angebot.id} className="position-entry">
+                    <strong>{angebot.angebotsNr}</strong> - {angebot.kunde || getCustomerName(angebot.kundeId, "Kunde")}
+                </li>)}
+            </ul>
+            <p>Zurückgestellte Angebote und Angebote mit offener Freigabe bleiben unverändert.</p>
+        </Dialog>
+        <Dialog
             open={open}
             title={editingOfferId ? "Angebot bearbeiten" : (draft.sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot")}
             onClose={handleClose}
-            footer={<SaveButton onSave={speichern} onSuccess={handleClose}>{editingOfferId ? "Änderungen speichern" : "Angebot speichern"}</SaveButton>}
+            footer={<Fragment>
+                <SaveButton className="button is-light" onSave={() => speichern("vorbereiten")} onSuccess={handleClose}>Für Tagesabschluss vormerken</SaveButton>
+                <SaveButton className="button is-primary" onSave={() => speichern("freigabeBeantragen")} onSuccess={handleClose}>{versandAktionLabel}</SaveButton>
+            </Fragment>}
         >
             {draft.sourceInquiryId && anfrageImDialog && <div className="offer-forward-panel form-row thread-section">
                 <div className="thread-section-header">
@@ -1529,11 +1693,7 @@ export default function Angebote() {
         {approvalOffer && <OfferApprovalDialog
             open={approvalOpen}
             title="Angebot prüfen"
-            onClose={() => {
-                setApprovalOpen(false);
-                setApprovalOffer(null);
-                setApprovalNote("");
-            }}
+            onClose={schliesseFreigabeDialog}
             kunde={getCustomerName(approvalOffer.kundeId, approvalOffer.kunde)}
             vorgangId={approvalOffer.vorgangId || ""}
             status={approvalOffer.freigabeText || approvalOffer.status}

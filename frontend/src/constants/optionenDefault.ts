@@ -4,6 +4,8 @@ const optionenDefault = {
         skontoTage: 7,
         skontoProzent: 2,
         angebotGfFreigabeAbweichungProzent: 10,
+        angeboteTagesabschlussAktiv: false,
+        angeboteTagesabschlussUhrzeit: "16:00",
         zahlungszielTage: 14,
         zahlungserinnerungTage: 3,
         mahnung1AbTage: 1,

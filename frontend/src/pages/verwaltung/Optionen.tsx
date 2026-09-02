@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import Checkbox from "../../components/form/Checkbox";
 import Label from "../../components/form/Label";
 import NumberField from "../../components/form/NumberField";
 import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
@@ -18,6 +19,20 @@ export default function Optionen() {
     ) => {
         const nextValue = fristenOptionenService.update({
             [key]: Number(value || 0)
+        });
+        setOptionen(nextValue);
+    };
+
+    const toggle = (key: "angeboteTagesabschlussAktiv") => {
+        const nextValue = fristenOptionenService.update({
+            [key]: !optionen[key]
+        });
+        setOptionen(nextValue);
+    };
+
+    const updateTagesabschlussUhrzeit = (value: string) => {
+        const nextValue = fristenOptionenService.update({
+            angeboteTagesabschlussUhrzeit: value
         });
         setOptionen(nextValue);
     };
@@ -59,6 +74,20 @@ export default function Optionen() {
                         <td><Label>GF-Freigabe ab Abweichung in Prozent</Label></td>
                         <td><NumberField value={optionen.angebotGfFreigabeAbweichungProzent} min="0" step="0.1" format="percent" onChange={value => update("angebotGfFreigabeAbweichungProzent", value)}/></td>
                         <td>Bei Angeboten wird automatisch eine GF-Freigabe gesetzt, wenn die Abweichung zur Artikelsumme diesen Wert erreicht oder überschreitet.</td>
+                    </tr>
+                    <tr>
+                        <td><Label>Tagesabschluss auf Angebotsseite</Label></td>
+                        <td>
+                            <Checkbox checked={Boolean(optionen.angeboteTagesabschlussAktiv)} onChange={() => toggle("angeboteTagesabschlussAktiv")}>
+                                {optionen.angeboteTagesabschlussAktiv ? "Aktiv" : "Inaktiv"}
+                            </Checkbox>
+                        </td>
+                        <td>Blendet auf der Angebotsseite eine Tagesübersicht mit offenem Prüf- und Versandbedarf ein oder aus.</td>
+                    </tr>
+                    <tr>
+                        <td><Label>Tagesabschluss um</Label></td>
+                        <td><input type="time" value={optionen.angeboteTagesabschlussUhrzeit} onChange={event => updateTagesabschlussUhrzeit(event.target.value)}/></td>
+                        <td>Standardmäßig wird der Tagesabschluss um 16:00 Uhr angezeigt.</td>
                     </tr>
                     <tr>
                         <td><Label>Fälligkeit in Tagen</Label></td>
