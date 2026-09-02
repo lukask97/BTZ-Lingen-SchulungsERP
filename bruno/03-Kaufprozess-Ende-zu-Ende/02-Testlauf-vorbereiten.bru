@@ -1,0 +1,24 @@
+meta {
+  name: Testlauf vorbereiten
+  type: http
+  seq: 3
+}
+
+script:pre-request {
+  const runId = String(Date.now());
+  bru.setVar("kaufprozessRunId", runId);
+  bru.setEnvVar("kaufprozessRunId", runId);
+}
+
+get {
+  url: {{baseUrl}}/api/health
+  body: none
+  auth: none
+}
+
+tests {
+  test("Laufzeit-ID wurde erzeugt", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(bru.getEnvVar("kaufprozessRunId")).to.not.equal("");
+  });
+}

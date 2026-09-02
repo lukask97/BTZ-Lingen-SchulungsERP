@@ -1,0 +1,35 @@
+meta {
+  name: Angebot anlegen
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/angebote
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "angebotsNr": "AN-KP-{{kaufprozessRunId}}",
+    "anfrageId": "{{anfrageId}}",
+    "vorgangId": "{{vorgangId}}",
+    "kundeId": "{{kundeId}}",
+    "datum": "2026-09-02",
+    "gueltigBis": "2026-09-30",
+    "gesamtbetrag": 238,
+    "status": "wartet auf Antwort",
+    "preispositionen": []
+  }
+}
+
+tests {
+  test("Angebot wurde fuer die Anfrage erstellt", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(String(res.getBody().item.anfrageId)).to.equal(bru.getEnvVar("anfrageId"));
+    const angebotId = String(res.getBody().item.id);
+    bru.setVar("angebotId", angebotId);
+    bru.setEnvVar("angebotId", angebotId);
+  });
+}

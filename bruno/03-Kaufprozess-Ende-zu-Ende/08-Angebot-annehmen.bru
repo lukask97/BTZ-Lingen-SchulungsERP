@@ -1,0 +1,24 @@
+meta {
+  name: Angebot annehmen
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{baseUrl}}/api/datenbanken/angebote/{{angebotId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "status": "angenommen"
+  }
+}
+
+tests {
+  test("Das Angebot ist angenommen", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().item.status).to.equal("angenommen");
+  });
+}

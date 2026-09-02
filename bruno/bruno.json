@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "BTZ-Lingen-SchulungsERP API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

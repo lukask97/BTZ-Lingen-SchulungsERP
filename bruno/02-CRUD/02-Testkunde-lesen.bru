@@ -1,0 +1,18 @@
+meta {
+  name: Testkunde lesen
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/datenbanken/kunden/{{crudKundeId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Der angelegte Kunde kann gelesen werden", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(String(res.getBody().item.id)).to.equal(bru.getEnvVar("crudKundeId"));
+  });
+}

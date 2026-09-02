@@ -1,0 +1,35 @@
+meta {
+  name: Kundennachricht speichern
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/nachrichten
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "vorgangId": "{{vorgangId}}",
+    "anfrageId": "{{anfrageId}}",
+    "angebotId": "",
+    "kundeId": "{{kundeId}}",
+    "datum": "2026-09-02",
+    "zeitpunkt": "2026-09-02T09:00:00.000Z",
+    "senderRolle": "Kunde",
+    "senderName": "Bruno Kaufprozess Test {{kaufprozessRunId}}",
+    "kanal": "E-Mail",
+    "betreff": "Angebotsanfrage",
+    "nachricht": "Bitte senden Sie uns ein Angebot.",
+    "typ": "Anfrage"
+  }
+}
+
+tests {
+  test("Die erste Nachricht ist gespeichert", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(String(res.getBody().item.anfrageId)).to.equal(bru.getEnvVar("anfrageId"));
+  });
+}

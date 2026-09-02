@@ -1,0 +1,19 @@
+meta {
+  name: Aktuelle Session pruefen
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/auth/me
+  body: none
+  auth: none
+}
+
+tests {
+  test("Admin ist angemeldet", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().authenticated).to.equal(true);
+    expect(res.getBody().user.username).to.equal(bru.getEnvVar("adminUsername"));
+  });
+}

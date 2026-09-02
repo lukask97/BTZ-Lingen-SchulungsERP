@@ -1,0 +1,35 @@
+meta {
+  name: Auftrag anlegen
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/auftraege
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "auftragNr": "AU-KP-{{kaufprozessRunId}}",
+    "angebotId": "{{angebotId}}",
+    "anfrageId": "{{anfrageId}}",
+    "vorgangId": "{{vorgangId}}",
+    "kundeId": "{{kundeId}}",
+    "datum": "2026-09-02",
+    "faelligAm": "2026-10-02",
+    "gesamtbetrag": 238,
+    "status": "offen"
+  }
+}
+
+tests {
+  test("Auftrag uebernimmt die Angebotsreferenz", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(String(res.getBody().item.angebotId)).to.equal(bru.getEnvVar("angebotId"));
+    const auftragId = String(res.getBody().item.id);
+    bru.setVar("auftragId", auftragId);
+    bru.setEnvVar("auftragId", auftragId);
+  });
+}

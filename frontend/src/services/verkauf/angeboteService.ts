@@ -83,9 +83,9 @@ function hydrateAngebote(items: any[] = []) {
         const normalized = normalizeAngebot(item);
         const positionen = (positionenByAngebotId.get(String(normalized.id || "")) || []).map(position => {
             const istService = String(position.leistungTyp || "").toLowerCase() === "service" || !!position.serviceId;
-            const referenz = istService
+            const referenz = (istService
                  ? servicesById.get(String(position.serviceId || position.artikelId || ""))
-                : artikelById.get(String(position.artikelId || ""));
+                : artikelById.get(String(position.artikelId || ""))) || {};
 
             const hydrated = {
                 ...position,
@@ -111,9 +111,9 @@ function hydrateAngebote(items: any[] = []) {
 
 function hydratePosition(position: any = {}) {
     const istService = String(position.leistungTyp || "").toLowerCase() === "service" || !!position.serviceId;
-    const referenz = istService
+    const referenz = (istService
          ? withPermissionFallback(() => servicesService.getById(position.serviceId || position.artikelId), undefined)
-        : withPermissionFallback(() => artikelService.getById(position.artikelId), undefined);
+        : withPermissionFallback(() => artikelService.getById(position.artikelId), undefined)) || {};
 
     return {
         ...position,

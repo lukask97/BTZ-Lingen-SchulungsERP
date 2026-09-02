@@ -1,0 +1,30 @@
+meta {
+  name: Warenempfang bestaetigen
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/vertriebsdokumente
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "auftragId": "{{auftragId}}",
+    "angebotId": "{{angebotId}}",
+    "vorgangId": "{{vorgangId}}",
+    "dokumentTyp": "Warenempfangsbestaetigung",
+    "status": "bestaetigt",
+    "datum": "2026-09-02",
+    "notiz": "Warenempfang fuer den Bruno-Ende-zu-Ende-Test bestaetigt."
+  }
+}
+
+tests {
+  test("Die Voraussetzung fuer die Ausgangsrechnung ist dokumentiert", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().item.status).to.equal("bestaetigt");
+  });
+}

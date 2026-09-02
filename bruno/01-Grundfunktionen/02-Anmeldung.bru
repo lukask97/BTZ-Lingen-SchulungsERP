@@ -1,0 +1,26 @@
+meta {
+  name: Anmeldung als Admin
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "{{adminUsername}}",
+    "password": "{{adminPassword}}"
+  }
+}
+
+tests {
+  test("Anmeldung liefert eine Session", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().ok).to.equal(true);
+    expect(res.getBody().user.username).to.equal(bru.getEnvVar("adminUsername"));
+  });
+}

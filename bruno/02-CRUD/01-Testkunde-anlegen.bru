@@ -1,0 +1,41 @@
+meta {
+  name: Testkunde anlegen
+  type: http
+  seq: 1
+}
+
+script:pre-request {
+  const runId = String(Date.now());
+  bru.setVar("crudRunId", runId);
+  bru.setEnvVar("crudRunId", runId);
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/kunden
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "kundenNr": "BR-{{crudRunId}}",
+    "firma": "Bruno CRUD Test {{crudRunId}}",
+    "anschrift": "Testweg 1",
+    "plz": "49808",
+    "ort": "Lingen",
+    "segment": "Test",
+    "abc": "C",
+    "ansprechpartner": []
+  }
+}
+
+tests {
+  test("Kunde wurde angelegt", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().ok).to.equal(true);
+    expect(res.getBody().item.firma).to.equal("Bruno CRUD Test " + bru.getEnvVar("crudRunId"));
+    const kundeId = String(res.getBody().item.id);
+    bru.setVar("crudKundeId", kundeId);
+    bru.setEnvVar("crudKundeId", kundeId);
+  });
+}

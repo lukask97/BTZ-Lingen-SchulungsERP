@@ -1,0 +1,41 @@
+meta {
+  name: Kundenanfrage erfassen
+  type: http
+  seq: 5
+}
+
+script:pre-request {
+  const vorgangId = "bruno-kaufprozess-" + bru.getVar("kaufprozessRunId");
+  bru.setVar("vorgangId", vorgangId);
+  bru.setEnvVar("vorgangId", vorgangId);
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/kundenanfragen
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "typ": "Anfrage",
+    "kundeId": "{{kundeId}}",
+    "kanal": "E-Mail",
+    "status": "offen",
+    "datum": "2026-09-02",
+    "anliegen": "Bitte erstellen Sie ein Angebot fuer einen Schulungsartikel.",
+    "vorgangId": "{{vorgangId}}",
+    "ansprechpartnerName": "Max Mustermann",
+    "ansprechpartnerAbteilung": "Einkauf"
+  }
+}
+
+tests {
+  test("Kundenanfrage ist dem Vorgang zugeordnet", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().item.vorgangId).to.equal(bru.getEnvVar("vorgangId"));
+    const anfrageId = String(res.getBody().item.id);
+    bru.setVar("anfrageId", anfrageId);
+    bru.setEnvVar("anfrageId", anfrageId);
+  });
+}

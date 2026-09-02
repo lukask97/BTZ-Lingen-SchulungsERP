@@ -1,0 +1,19 @@
+meta {
+  name: Ausgangsdaten zuruecksetzen
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/reset
+  body: none
+  auth: none
+}
+
+tests {
+  test("Die Seed-Daten wurden wiederhergestellt", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().ok).to.equal(true);
+    expect(res.getBody().tables.length).to.be.above(0);
+  });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Angebotsposition anlegen
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/angebotspositionen
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "angebotId": "{{angebotId}}",
+    "artikel": "Schulungsartikel API-Test",
+    "artikelTyp": "Einzelartikel",
+    "leistungTyp": "Artikel",
+    "menge": 2,
+    "einzelpreis": 119,
+    "rabatt": 0
+  }
+}
+
+tests {
+  test("Angebotsposition gehoert zum Angebot", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(String(res.getBody().item.angebotId)).to.equal(bru.getEnvVar("angebotId"));
+  });
+}

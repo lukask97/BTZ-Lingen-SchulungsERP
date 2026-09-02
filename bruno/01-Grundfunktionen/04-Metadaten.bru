@@ -1,0 +1,23 @@
+meta {
+  name: Tabellenmetadaten abrufen
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/meta
+  body: none
+  auth: none
+}
+
+tests {
+  test("Metadaten enthalten die Vertriebstabellen", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().app).to.equal("BTZ-SchulungsERP API");
+    const tableNames = res.getBody().tables.map(function(table) { return table.name; });
+    expect(tableNames).to.include("kundenanfragen");
+    expect(tableNames).to.include("angebote");
+    expect(tableNames).to.include("auftraege");
+    expect(tableNames).to.include("rechnungen");
+  });
+}

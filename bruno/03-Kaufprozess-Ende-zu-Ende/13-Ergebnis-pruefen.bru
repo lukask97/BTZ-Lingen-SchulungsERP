@@ -1,0 +1,19 @@
+meta {
+  name: Ergebnis des Kaufprozesses pruefen
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/datenbanken/rechnungen/{{rechnungId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Die Rechnung ist als offener Posten vorhanden", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().item.status).to.equal("offen");
+    expect(String(res.getBody().item.kundeId)).to.equal(bru.getEnvVar("kundeId"));
+  });
+}

@@ -1,0 +1,38 @@
+meta {
+  name: Ausgangsrechnung erstellen
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/rechnungen
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "rechnungsnr": "RG-KP-{{kaufprozessRunId}}",
+    "rechnungstyp": "Ausgangsrechnung",
+    "auftragId": "{{auftragId}}",
+    "kundeId": "{{kundeId}}",
+    "datum": "2026-09-02",
+    "faelligAm": "2026-10-02",
+    "betrag": 238,
+    "status": "offen",
+    "mahnstufe": "-",
+    "inkassoStatus": ""
+  }
+}
+
+tests {
+  test("Ausgangsrechnung wurde aus dem Auftrag erzeugt", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().item.rechnungstyp).to.equal("Ausgangsrechnung");
+    expect(String(res.getBody().item.auftragId)).to.equal(bru.getEnvVar("auftragId"));
+    expect(res.getBody().item.betrag).to.equal(238);
+    const rechnungId = String(res.getBody().item.id);
+    bru.setVar("rechnungId", rechnungId);
+    bru.setEnvVar("rechnungId", rechnungId);
+  });
+}

@@ -6,6 +6,8 @@ Diese Uebersicht hilft beim Einstieg in den `docs/`-Ordner.
 
 - [Logins.md](./Logins.md)
   Demo-Zugaenge fuer ERP, Backend, PostgreSQL und pgAdmin
+- [Bruno-API-Tests](../bruno/README.md)
+  einzeln ausfuehrbare API-Checks und ein Ende-zu-Ende-Kaufprozess fuer die Bruno-Erweiterung
 
 ## Architektur und Datenmodell
 

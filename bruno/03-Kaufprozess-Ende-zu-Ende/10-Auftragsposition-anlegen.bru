@@ -1,0 +1,30 @@
+meta {
+  name: Auftragsposition anlegen
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/auftragspositionen
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "auftragId": "{{auftragId}}",
+    "artikel": "Schulungsartikel API-Test",
+    "artikelTyp": "Einzelartikel",
+    "leistungTyp": "Artikel",
+    "menge": 2,
+    "einzelpreis": 119,
+    "rabatt": 0
+  }
+}
+
+tests {
+  test("Auftragsposition gehoert zum Auftrag", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(String(res.getBody().item.auftragId)).to.equal(bru.getEnvVar("auftragId"));
+  });
+}

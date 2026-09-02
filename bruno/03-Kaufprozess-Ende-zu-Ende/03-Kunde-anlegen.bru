@@ -1,0 +1,39 @@
+meta {
+  name: Kunde anlegen
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/kunden
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "kundenNr": "KP-{{kaufprozessRunId}}",
+    "firma": "Bruno Kaufprozess Test {{kaufprozessRunId}}",
+    "anschrift": "Schulungsstrasse 1",
+    "plz": "49808",
+    "ort": "Lingen",
+    "segment": "Schulung",
+    "abc": "C",
+    "ansprechpartner": [
+      {
+        "id": "kp-{{kaufprozessRunId}}",
+        "name": "Max Mustermann",
+        "abteilung": "Einkauf"
+      }
+    ]
+  }
+}
+
+tests {
+  test("Kunde fuer den Kaufprozess wurde angelegt", function() {
+    expect(res.getStatus()).to.equal(201);
+    const kundeId = String(res.getBody().item.id);
+    bru.setVar("kundeId", kundeId);
+    bru.setEnvVar("kundeId", kundeId);
+  });
+}
