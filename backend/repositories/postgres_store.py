@@ -105,6 +105,21 @@ class PostgresStore:
             connection.commit()
             return deleted
 
+    def transaction(self, callback):
+        with self._connect() as connection, connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            result = callback(cursor)
+            connection.commit()
+            return result
+
+    def list_in_transaction(self, cursor, table_name):
+        self._require_table(table_name)
+        cursor.execute(LIST_RECORDS_QUERY, (table_name,))
+        return [row["data"] for row in cursor.fetchall()]
+
+    def save_in_transaction(self, cursor, table_name, entity_id, item):
+        self._require_table(table_name)
+        self._save_record(cursor, table_name, entity_id, item)
+
     def get_meta(self, table_name):
         self._require_table(table_name)
         records = self._list_records(table_name)

@@ -46,6 +46,7 @@ TABLE_ACCESS_MAP = {
     "rollenRechte": "rollen",
     "schulungen": "personalwesen",
     "services": "service",
+    "tagesversandprotokolle": "verkauf",
     "urlaubsantraege": "personalwesen",
     "unternehmen": "benutzer",
     "versandauftraege": "logistik",

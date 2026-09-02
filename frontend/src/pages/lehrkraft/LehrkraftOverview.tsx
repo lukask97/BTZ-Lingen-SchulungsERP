@@ -31,7 +31,7 @@ export default function LehrkraftOverview() {
         && String(item.status || "").toLowerCase() !== "versendet"
     ).length;
     const offeneLieferantenanfragen = getPurchaseOrdersByStatus(bestellungen, "angefragt").length;
-    const bestaetigteBestellungen = getPurchaseOrdersByStatus(bestellungen, "bestaetigt").length;
+    const freigegebeneBestellungen = getPurchaseOrdersByStatus(bestellungen, "bestaetigt").length;
     const versendeteBestellungen = getOpenGoodsReceiptOrders(bestellungen).length;
     const offeneDebitorenzahlungen = zahlungen.filter(item => item.zahlungsart !== "Ausgang" && isPendingPayment(item)).length;
     const offeneRechnungenZurSchuelerfirma = rechnungen.filter(item => item.status !== "bezahlt").length;

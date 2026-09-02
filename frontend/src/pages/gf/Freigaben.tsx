@@ -146,8 +146,13 @@ export default function Freigaben() {
         });
     };
 
-    const freigeben = item => {
-        freigabenService.update({ ...item, status: "freigegeben", notiz: approvalNote.trim() || item.notiz || "" });
+    const freigeben = (item, fuerTagesversand = false) => {
+        freigabenService.update({
+            ...item,
+            status: "freigegeben",
+            notiz: approvalNote.trim() || item.notiz || "",
+            entscheidungsweg: fuerTagesversand ? "tagesversand" : "sofortversand"
+        });
         const angebot = resolveOfferForFreigabe(item, angebote);
         if (angebot) {
             const aktualisiert = {
@@ -155,11 +160,13 @@ export default function Freigaben() {
                 freigabeStatus: "freigegeben",
                 freigabeNotiz: approvalNote.trim() || item.notiz || "",
                 freigegebenVon: "gf",
-                direktSendenGewuenscht: true,
-                status: "wartet auf Antwort"
+                direktSendenGewuenscht: !fuerTagesversand,
+                alsVorbereitetGespeichert: fuerTagesversand,
+                tagesabschlussZurueckgehalten: false,
+                status: fuerTagesversand ? "in Vorbereitung" : "wartet auf Antwort"
             };
             angeboteService.update(aktualisiert);
-            if (aktualisiert.anfrageId) {
+            if (!fuerTagesversand && aktualisiert.anfrageId) {
                 sendeAngebotAnKunden(aktualisiert);
             }
         }
@@ -202,6 +209,8 @@ export default function Freigaben() {
             navigate(`/angebote?editOfferId=${angebot.id}`);
         }
     };
+
+    const ablehnen = item => zurUeberarbeitungZurueckgeben(item);
 
     const freigabePrüfen = item => {
         setSelectedFreigabe(item);
@@ -323,6 +332,7 @@ export default function Freigaben() {
             noteValue={approvalNote}
             onNoteChange={setApprovalNote}
             onApprove={() => freigeben(selectedFreigabe)}
+            onApproveForTagesversand={() => freigeben(selectedFreigabe, true)}
             onRevise={() => zurUeberarbeitungZurueckgeben(selectedFreigabe)}
             onReject={() => ablehnen(selectedFreigabe)}
             notePlaceholder="Begründung für Freigabe oder Ablehnung notieren..."

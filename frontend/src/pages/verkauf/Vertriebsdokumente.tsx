@@ -21,7 +21,7 @@ import { PERMISSIONS } from "../../constants/permissions";
 import { getLieferscheinnummer } from "../../services/core/documentNumbering";
 import kundenService from "../../services/verkauf/customerService";
 
-const dokumentTypen = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier", "Warenempfang"];
+const dokumentTypen = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier", "Lieferbestätigung"];
 const AUFTRAGS_FILTER = [
     { value: "alle", label: "Alle Aufträge" },
     { value: "offen", label: "Nur offene Aufträge" },
@@ -92,7 +92,8 @@ function hatUnvollständigeKundenadresse(kunde) {
 }
 
 function getDokumentStatusByTyp(dokumente = [], dokumentTyp) {
-    const dokument = dokumente.find(item => item.dokumentTyp === dokumentTyp);
+    const dokument = dokumente.find(item => item.dokumentTyp === dokumentTyp
+        || (dokumentTyp === "Lieferbestätigung" && item.dokumentTyp === "Warenempfang"));
     if (!dokument) return "fehlt";
     return dokument.status === "versendet" ? "versendet" : "erstellt";
 }
@@ -146,15 +147,15 @@ function getNaechstenDokumentSchritt(auftrag, dokumente = []) {
     if (!warenempfang) {
         return {
             status: "Warten",
-            schritt: "Warenempfang erfassen",
-            detail: "Die Ware ist unterwegs oder zugestellt. Erst nach bestaetigtem Warenempfang darf die Rechnung erstellt werden.",
+            schritt: "Lieferbestätigung erfassen",
+            detail: "Die Ware ist unterwegs oder zugestellt. Erst nach bestätigter Lieferung darf die Ausgangsrechnung erstellt werden.",
             tone: "good"
         };
     }
     if (!hasAcceptedGoodsReceipt(auftrag?.id, dokumente)) {
         return {
             status: "Warten",
-            schritt: "Warenempfang bestaetigen",
+            schritt: "Lieferbestätigung bestätigen",
             detail: "Die Ware wurde dokumentiert, aber noch nicht als vom Kunden angenommen bestaetigt.",
             tone: "warn"
         };
@@ -163,7 +164,7 @@ function getNaechstenDokumentSchritt(auftrag, dokumente = []) {
         return {
             status: "Warten",
             schritt: "Rechnungsfreigabe offen",
-            detail: "Die Rechnung bleibt gesperrt, bis der Warenempfang als angenommen dokumentiert ist.",
+            detail: "Die Ausgangsrechnung bleibt gesperrt, bis die Lieferung als angenommen dokumentiert ist.",
             tone: "warn"
         };
     }
@@ -291,7 +292,7 @@ export default function Vertriebsdokumente() {
         : null;
     const vorgangsverbindungen = useMemo(() => {
         if (!selectedAuftrag) return [];
-        const dokumentReihenfolge = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier", "Warenempfang"];
+        const dokumentReihenfolge = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier", "Lieferbestätigung"];
         const dokumentEintraege = dokumentReihenfolge.map(typ => {
             const dokument = gefilterteDokumente.find(item => item.dokumentTyp === typ);
             return {
@@ -389,12 +390,12 @@ export default function Vertriebsdokumente() {
             alert("Bitte lege entweder ein Warenbegleitpapier oder ein Transportpapier an, nicht beides.");
             return null;
         }
-        if (current.dokumentTyp === "Warenempfang" && vorhandenerWarenempfang) {
-            alert("Für diesen Auftrag wurde der Warenempfang bereits angelegt.");
+        if (current.dokumentTyp === "Lieferbestätigung" && vorhandenerWarenempfang) {
+            alert("Für diesen Auftrag wurde die Lieferbestätigung bereits angelegt.");
             return null;
         }
-        if (current.dokumentTyp === "Warenempfang" && vorhandeneVersanddokumente.length !== 1) {
-            alert("Bitte zuerst genau ein Versanddokument anlegen, bevor der Warenempfang erfasst wird.");
+        if (current.dokumentTyp === "Lieferbestätigung" && vorhandeneVersanddokumente.length !== 1) {
+            alert("Bitte zuerst genau ein Versanddokument anlegen, bevor die Lieferbestätigung erfasst wird.");
             return null;
         }
 
@@ -405,8 +406,8 @@ export default function Vertriebsdokumente() {
             dokumentNr: current.dokumentTyp === "Lieferschein" ? getLieferscheinnummer(auftrag.auftragNr, auftrag.datum) : (current.dokumentNr || ""),
             titel,
             versendetAm: current.versendetAm || "",
-            status: current.status || (current.dokumentTyp === "Warenempfang" ? "entgegengenommen" : "erstellt"),
-            annahmeAm: current.annahmeAm || (current.dokumentTyp === "Warenempfang" ? current.datum : ""),
+            status: current.status || (current.dokumentTyp === "Lieferbestätigung" ? "entgegengenommen" : "erstellt"),
+            annahmeAm: current.annahmeAm || (current.dokumentTyp === "Lieferbestätigung" ? current.datum : ""),
             notiz: current.notiz.trim()
         };
     };

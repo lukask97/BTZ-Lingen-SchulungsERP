@@ -9,6 +9,8 @@ from routes.auth import auth_bp
 from routes.article_images import article_images_bp
 from routes.meta import meta_bp
 from routes.resources import resources_bp
+from routes.tagesversand import tagesversand_bp
+from tagesversand_scheduler import start_tagesversand_scheduler
 
 
 def parse_cors_origins(value):
@@ -55,6 +57,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(article_images_bp)
     app.register_blueprint(resources_bp)
+    app.register_blueprint(tagesversand_bp)
     app.register_blueprint(events_bp)
 
     @app.before_request
@@ -66,4 +69,5 @@ def create_app():
             session.permanent = True
             session.modified = True
 
+    start_tagesversand_scheduler(app)
     return app

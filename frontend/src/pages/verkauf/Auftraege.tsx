@@ -285,7 +285,7 @@ export default function Auftraege() {
         />
         <Dialog
             open={open}
-            title={draft.sourceInquiryId ? "Direkten Auftrag aus Kundenanfrage anlegen" : "Neuen Auftrag anlegen"}
+            title={draft.sourceInquiryId ? "Direktauftrag aus Kundenanfrage anlegen" : "Neuen Auftrag anlegen"}
             onClose={handleClose}
             footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Auftrag speichern</SaveButton>}
         >

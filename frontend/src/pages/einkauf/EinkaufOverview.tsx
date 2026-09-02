@@ -13,7 +13,7 @@ export default function EinkaufOverview() {
     const artikel = artikelService.list();
 
     const offeneAnfragen = getPurchaseOrdersByStatus(bestellungen, "angefragt").length;
-    const bestaetigteAnfragen = getPurchaseOrdersByStatus(bestellungen, "bestaetigt").length;
+    const freigegebeneBestellungen = getPurchaseOrdersByStatus(bestellungen, "bestaetigt").length;
     const versendeteBestellungen = getOpenGoodsReceiptOrders(bestellungen).length;
     const bewerteteLieferanten = lieferanten.filter(item => Number(item.bewertung || 0) > 0).length;
     const kritischeBestaende = artikel.filter(item => Number(item.bestand) < 10).length;
@@ -25,7 +25,7 @@ export default function EinkaufOverview() {
 
         <div className="kennzahlen">
             <div className="kennzahl"><span>Lieferanten</span><strong>{lieferanten.length}</strong><small>{bewerteteLieferanten} bewertet</small></div>
-            <div className="kennzahl"><span>Anfragen offen</span><strong>{offeneAnfragen}</strong><small>{bestaetigteAnfragen} bestätigt</small></div>
+            <div className="kennzahl"><span>Bestellanforderungen offen</span><strong>{offeneAnfragen}</strong><small>{freigegebeneBestellungen} freigegeben</small></div>
             <div className="kennzahl"><span>Versand / Wareneingang</span><strong>{versendeteBestellungen}</strong><small>{eingegangeneBestellungen} gebucht</small></div>
             <div className="kennzahl"><span>Kritische Bestände</span><strong>{kritischeBestaende}</strong><small>Bedarfsmeldung möglich</small></div>
         </div>
@@ -35,8 +35,8 @@ export default function EinkaufOverview() {
                 <div className="dashboard-panel-header"><h2>Einfache Reihenfolge</h2><span>Ablauf</span></div>
                 <ul className="dashboard-note-list">
                     <li>Artikelbedarf feststellen oder Lieferantenkonditionen auswerten.</li>
-                    <li>Einkaufsanfrage mit Artikelnummer und benötigter Menge anlegen.</li>
-                    <li>Lehrkraft erstellt ein Angebot und bestätigt anschließend die Bestellung.</li>
+                    <li>Bestellanforderung mit Artikelnummer und benötigter Menge anlegen.</li>
+                    <li>Lehrkraft prüft und gibt die Bestellung anschließend frei.</li>
                     <li>Wareneingang buchen und Lager-Bestand automatisch erhöhen.</li>
                     <li>Danach erscheint die Eingangsrechnung in der Buchhaltung.</li>
                 </ul>
@@ -46,8 +46,8 @@ export default function EinkaufOverview() {
                 <div className="dashboard-panel-header"><h2>Lehrkraft im Prozess</h2><span>Externe Seite</span></div>
                 <p>Die Lehrkraft ist der Gegenpart zum Einkauf. Sie sieht die Artikelnummern aus der Anfrage, erstellt darauf ein Angebot und bestätigt die Bestellung erst danach.</p>
                 <ul className="dashboard-note-list">
-                    <li>{offeneAnfragen} Anfragen warten noch auf ein Angebot oder eine Bestätigung.</li>
-                    <li>{bestaetigteAnfragen} bestätigte Bestellungen können versendet werden.</li>
+                    <li>{offeneAnfragen} Bestellanforderungen warten noch auf Prüfung und Freigabe.</li>
+                    <li>{freigegebeneBestellungen} freigegebene Bestellungen können versendet werden.</li>
                     <li>{versendeteBestellungen} versendete Bestellungen warten auf Wareneingang.</li>
                 </ul>
                 <div className="link-list">

@@ -38,7 +38,8 @@ export function isGoodsDispatchDocumentType(value) {
 }
 
 export function isGoodsReceiptDocumentType(value) {
-    return normalizeDocumentType(value) === "warenempfang";
+    const type = normalizeDocumentType(value);
+    return type === "lieferbestätigung" || type === "lieferbestaetigung" || type === "warenempfang";
 }
 
 export function getVorgangId(item) {
@@ -177,7 +178,7 @@ export function getSalesStepLabel(step) {
         case SALES_STEPS.VERSAND_VERSENDET:
             return "7. Versand versendet";
         case SALES_STEPS.WARENEMPFANG_ERFASST:
-            return "8. Warenempfang bestaetigt";
+            return "8. Lieferbestätigung des Kunden";
         case SALES_STEPS.ANGEBOT_ABGELEHNT:
             return "Angebot abgelehnt";
         default:
@@ -238,11 +239,11 @@ export function getPurchaseStep(bestellung) {
 export function getPurchaseStepLabel(step) {
     switch (step) {
         case PURCHASE_STEPS.ANFRAGE_ERFASST:
-            return "1. Anfrage erfasst";
+            return "1. Bestellanforderung erfasst";
         case PURCHASE_STEPS.DURCH_LEHRKRAFT_BESTAETIGT:
-            return "2. Bestellung bestaetigt";
+            return "2. Bestellung freigegeben";
         case PURCHASE_STEPS.AN_LIEFERANTEN_VERSENDET:
-            return "3. Bestellung versendet";
+            return "3. Bestellung an Lieferanten gesendet";
         case PURCHASE_STEPS.WARENEINGANG_GEBUCHT:
             return "4. Wareneingang gebucht";
         default:

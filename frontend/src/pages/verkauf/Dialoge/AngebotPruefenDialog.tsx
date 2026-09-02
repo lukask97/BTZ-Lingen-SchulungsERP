@@ -15,6 +15,7 @@ type AngebotPruefenDialogProps = {
     listNachrichtenZuVorgang: (vorgangId: string) => any[];
     getOffersForVorgang: (vorgangId: string, angebote: any[]) => any[];
     angebotFreigeben: (angebot: any) => void;
+    angebotFreigebenFuerTagesversand?: (angebot: any) => void;
     angebotZurUeberarbeitungBearbeiten: (angebot: any) => void;
     angebotInternAblehnen: (angebot: any) => void;
     angebotAnGfWeiterleiten: (angebot: any) => void;
@@ -33,6 +34,7 @@ export default function AngebotPruefenDialog({
     listNachrichtenZuVorgang,
     getOffersForVorgang,
     angebotFreigeben,
+    angebotFreigebenFuerTagesversand,
     angebotZurUeberarbeitungBearbeiten,
     angebotInternAblehnen,
     angebotAnGfWeiterleiten
@@ -79,6 +81,7 @@ export default function AngebotPruefenDialog({
         noteValue={approvalNote}
         onNoteChange={setApprovalNote}
         onApprove={() => angebotFreigeben(approvalOffer)}
+        onApproveForTagesversand={angebotFreigebenFuerTagesversand ? () => angebotFreigebenFuerTagesversand(approvalOffer) : undefined}
         onRevise={() => angebotZurUeberarbeitungBearbeiten(approvalOffer)}
         onReject={() => angebotInternAblehnen(approvalOffer)}
         onForward={() => angebotAnGfWeiterleiten(approvalOffer)}

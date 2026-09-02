@@ -130,9 +130,10 @@ type OfferApprovalDialogProps = {
     noteValue: string;
     onNoteChange: (value: string) => void;
     onApprove: () => void;
-    onReject: () => void;
-    onRevise: () => void;
-    onForward: () => void;
+    onApproveForTagesversand?: () => void;
+    onReject?: () => void;
+    onRevise?: () => void;
+    onForward?: () => void;
     notePlaceholder?: string;
     approveLabel?: string;
     rejectLabel?: string;
@@ -158,11 +159,12 @@ export default function OfferApprovalDialog({
     noteValue,
     onNoteChange,
     onApprove,
+    onApproveForTagesversand,
     onReject,
     onRevise,
     onForward,
     notePlaceholder = "Interne Begründung oder Rückfrage notieren...",
-    approveLabel = "Freigeben",
+    approveLabel = "Freigeben und sofort senden",
     rejectLabel = "Ablehnen",
     forwardLabel = "Zur Geschäftsführung weiterleiten"
 }: OfferApprovalDialogProps) {
@@ -301,8 +303,11 @@ export default function OfferApprovalDialog({
             </div>
             <div className="thread-document-links">
                 <button type="button" onClick={onApprove}>{approveLabel}</button>
+                {onApproveForTagesversand && <button type="button" className="button-secondary" onClick={onApproveForTagesversand}>
+                    Freigeben und für Tagesversand vormerken
+                </button>}
                 {onRevise && <button type="button" className="button-secondary" onClick={onRevise} disabled={noteMissing}>Überarbeiten</button>}
-                <button type="button" className="button-danger" onClick={onReject} disabled={noteMissing}>{rejectLabel}</button>
+                {onReject && <button type="button" className="button-danger" onClick={onReject} disabled={noteMissing}>{rejectLabel}</button>}
                 {onForward && <button type="button" className="button-secondary" onClick={onForward} disabled={noteMissing}>{forwardLabel}</button>}
             </div>
             <p>Für Überarbeiten, Ablehnen oder Weiterleiten bitte eine Notiz eintragen.</p>

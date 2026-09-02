@@ -33,6 +33,7 @@ import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 import freigabenService from "../../services/gf/freigabenService";
 import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
+import tagesversandService from "../../services/verkauf/tagesversandService";
 import { getUserDisplayNameWithRole } from "../../utils/userDisplay";
 import { getKategoriePfad } from "../../services/logistik/kategorienService";
 import {
@@ -390,7 +391,7 @@ function syncOptionRows(positionen, parentPosition, leistung, artikel) {
 export default function Angebote() {
     const syncTick = useDataSyncRefresh([
         "angebote", "auftraege", "vertriebsdokumente", "versandauftraege",
-        "kundenanfragen", "kunden", "benutzer", "artikel", "services", "nachrichten", "bestellungen", "bestellpositionen"
+        "kundenanfragen", "kunden", "benutzer", "artikel", "services", "nachrichten", "bestellungen", "bestellpositionen", "tagesversandprotokolle"
     ]);
     const { user, hasAccess, hasFullAccess } = useAuth();
     const navigate = useNavigate();
@@ -403,6 +404,8 @@ export default function Angebote() {
     const [approvalOffer, setApprovalOffer] = useState<any>(null);
     const [approvalNote, setApprovalNote] = useState("");
     const [tagesabschlussBestaetigungOpen, setTagesabschlussBestaetigungOpen] = useState(false);
+    const [tagesversandProtokolle, setTagesversandProtokolle] = useState<any[]>([]);
+    const [tagesversandFehler, setTagesversandFehler] = useState("");
     const [pendingEditOffer, setPendingEditOffer] = useState<any>(null);
     const [selectedStatuses, setSelectedStatuses] = useState(getDefaultStatusFilter);
 
@@ -472,6 +475,20 @@ export default function Angebote() {
              ? Math.abs(nettoGesamtImDialog - positionsZwischensumme) / positionsZwischensumme
             : 0;
     const gfFreigabeSchwelle = Number(optionen.angebotGfFreigabeAbweichungProzent || 10) / 100;
+
+    useEffect(() => {
+        let active = true;
+        tagesversandService.list()
+            .then(items => {
+                if (active) setTagesversandProtokolle(items);
+            })
+            .catch(() => {
+                if (active) setTagesversandProtokolle([]);
+            });
+        return () => {
+            active = false;
+        };
+    }, [refreshKey, syncTick]);
 
     const sendeAngebotAnKunden = (angebot) => {
         if (!angebot.anfrageId) return;
@@ -657,8 +674,10 @@ export default function Angebote() {
                      ? "Freigabe offen"
                     : angebot.freigabeStatus === "weitergeleitet"
                          ? `Gesperrt: ${angebot.freigabeNotiz || "Grund siehe Notiz"}`
-                        : angebot.freigabeStatus === "intern_abgelehnt"
+                    : angebot.freigabeStatus === "intern_abgelehnt"
                              ? "Überarbeitung erforderlich"
+                            : angebot.freigabeStatus === "rueckgestellt"
+                                 ? "Rückgestellt"
                             : angebot.freigabeStatus === "freigegeben"
                                  ? "Freigegeben"
                                 : "-",
@@ -805,7 +824,7 @@ export default function Angebote() {
         });
     };
 
-    const speichern = (aktion: "vorbereiten" | "freigabeBeantragen") => {
+    const speichern = (aktion: "vorbereiten" | "zurueckstellen" | "freigabeBeantragen") => {
         const kunde = kunden.find(item => String(item.id) === String(draft.kundeId));
         const anfrage = anfragen.find(item => String(item.id) === String(draft.sourceInquiryId));
         const vorgangId = getVorgangId(anfrage) || (draft.sourceInquiryId ? `anfrage-${draft.sourceInquiryId}` : `angebot-${Date.now()}`);
@@ -839,10 +858,23 @@ export default function Angebote() {
             }
 
             const vorbereitetSpeichern = aktion === "vorbereiten";
-            const freigabeDirektErteilen = vorbereitetSpeichern
+            const zurueckgestelltSpeichern = aktion === "zurueckstellen";
+            const kommtAusRueckstellung = Boolean(bestehendesAngebot.tagesabschlussZurueckgehalten)
+                || String(bestehendesAngebot.freigabeStatus || "") === "rueckgestellt";
+            const freigabeFuerTagesversandErteilt = vorbereitetSpeichern
+                && !brauchtFreigabe
+                && draft.direktSenden
+                && !kommtAusRueckstellung
+                && !mindestmengenFreigabeNoetig
+                && !gfFreigabeNoetig;
+            const freigabeDirektErteilen = (vorbereitetSpeichern || zurueckgestelltSpeichern)
                 ? false
-                : (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (!brauchtFreigabe && draft.direktSenden);
-            const freigabeNoetig = !vorbereitetSpeichern && !freigabeDirektErteilen;
+                : (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (!kommtAusRueckstellung && !brauchtFreigabe && draft.direktSenden);
+            const freigabeNoetig = zurueckgestelltSpeichern
+                ? false
+                : vorbereitetSpeichern
+                ? !freigabeFuerTagesversandErteilt
+                : !freigabeDirektErteilen;
             const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
             const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
 
@@ -858,16 +890,20 @@ export default function Angebote() {
                 positionen: draft.positionenDraft,
                 preispositionen: draft.preispositionenDraft,
                 bearbeiter: draft.bearbeiter,
-                alsVorbereitetGespeichert: vorbereitetSpeichern,
-                tagesabschlussZurueckgehalten: false,
+                alsVorbereitetGespeichert: vorbereitetSpeichern || zurueckgestelltSpeichern,
+                tagesabschlussZurueckgehalten: zurueckgestelltSpeichern,
                 direktSendenGewuenscht: freigabeDirektErteilen,
-                freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
-                freigabeNotiz: mindestmengenFreigabeNoetig
+                freigabeStatus: zurueckgestelltSpeichern ? "rueckgestellt" : freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
+                freigabeNotiz: zurueckgestelltSpeichern
+                     ? ""
+                    : mindestmengenFreigabeNoetig
                      ? `Eiserner Bestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
                     : gfFreigabeNoetig
                          ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
                     : "",
-                freigegebenVon: freigabeDirektErteilen ? (user.username || "") : String(bestehendesAngebot.freigegebenVon || ""),
+                freigegebenVon: freigabeDirektErteilen || freigabeFuerTagesversandErteilt
+                    ? (user.username || "")
+                    : "",
                 anfrageId: bestehendesAngebot.anfrageId || referenzierteAnfrageId
             };
 
@@ -885,7 +921,9 @@ export default function Angebote() {
                 betreff: `Angebot ${bestehendesAngebot.angebotsNr} überarbeitet`,
                 nachricht: freigabeDirektErteilen
                      ? "Das Angebot wurde überarbeitet und direkt an den Kunden gesendet."
-                    : vorbereitetSpeichern
+                    : zurueckgestelltSpeichern
+                         ? "Das Angebot wurde zurückgestellt und nicht zum Tagesversand vorgemerkt."
+                        : vorbereitetSpeichern
                          ? "Das Angebot wurde aktualisiert und als vorbereitet gespeichert."
                         : "Das Angebot wurde nach der internen Rückmeldung überarbeitet und erneut zur Freigabe vorbereitet.",
                 typ: "Interne Freigabe"
@@ -901,10 +939,20 @@ export default function Angebote() {
 
         const revisionInfo = naechsteAngebotsrevision(vorgangId);
         const vorbereitetSpeichern = aktion === "vorbereiten";
-        const freigabeDirektErteilen = vorbereitetSpeichern
+        const zurueckgestelltSpeichern = aktion === "zurueckstellen";
+        const freigabeFuerTagesversandErteilt = vorbereitetSpeichern
+            && !brauchtFreigabe
+            && draft.direktSenden
+            && !mindestmengenFreigabeNoetig
+            && !gfFreigabeNoetig;
+        const freigabeDirektErteilen = (vorbereitetSpeichern || zurueckgestelltSpeichern)
             ? false
             : (mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? false : (!brauchtFreigabe && draft.direktSenden);
-        const freigabeNoetig = !vorbereitetSpeichern && !freigabeDirektErteilen;
+        const freigabeNoetig = zurueckgestelltSpeichern
+            ? false
+            : vorbereitetSpeichern
+            ? !freigabeFuerTagesversandErteilt
+            : !freigabeDirektErteilen;
         const status = freigabeDirektErteilen ? "wartet auf Antwort" : "in Vorbereitung";
         const referenzierteAnfrageId = anfrage?.id || "";
         const verkaufAbsenderName = getUserDisplayNameWithRole(user, String(user.username || "Schülerfirma Verkauf"));
@@ -924,20 +972,22 @@ export default function Angebote() {
             positionen: draft.positionenDraft,
             preispositionen: draft.preispositionenDraft,
             bearbeiter: draft.bearbeiter,
-            alsVorbereitetGespeichert: vorbereitetSpeichern,
-            tagesabschlussZurueckgehalten: false,
+            alsVorbereitetGespeichert: vorbereitetSpeichern || zurueckgestelltSpeichern,
+            tagesabschlussZurueckgehalten: zurueckgestelltSpeichern,
             direktSendenGewuenscht: freigabeDirektErteilen,
-            freigabeStatus: freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
+            freigabeStatus: zurueckgestelltSpeichern ? "rueckgestellt" : freigabeNoetig ? ((mindestmengenFreigabeNoetig || gfFreigabeNoetig) ? "weitergeleitet" : "angefragt") : "freigegeben",
             freigabeAngefragtVon: user.username || draft.bearbeiter,
-            freigegebenVon: freigabeDirektErteilen ? (user.username || "") : "",
-            freigabeNotiz: mindestmengenFreigabeNoetig
+            freigegebenVon: freigabeDirektErteilen || freigabeFuerTagesversandErteilt ? (user.username || "") : "",
+            freigabeNotiz: zurueckgestelltSpeichern
+                 ? ""
+                : mindestmengenFreigabeNoetig
                  ? `Eiserner Bestand unterschritten: ${mindestmengenWarnungen.map(item => `${item.artikel} (${item.projected}/${item.sicherheitsbestand})`).join(", ")}`
                 : gfFreigabeNoetig
                      ? `Freigabe durch GF erforderlich: Gesamtpreis weicht um ${(abweichungZurZwischensumme * 100).toFixed(1)} % von der Artikelsumme ab.`
                 : ""
         });
 
-        if (!vorbereitetSpeichern && (mindestmengenFreigabeNoetig || gfFreigabeNoetig)) {
+        if (!zurueckgestelltSpeichern && (mindestmengenFreigabeNoetig || gfFreigabeNoetig)) {
             freigabenService.create({
                 titel: `${mindestmengenFreigabeNoetig ? "Freigabe Eiserner Bestand" : "Preisfreigabe"} ${neuesAngebot.angebotsNr}`,
                 bereich: "verkauf",
@@ -965,7 +1015,7 @@ export default function Angebote() {
             sendeAngebotAnKunden(neuesAngebot);
         }
 
-        if (draft.sourceInquiryId && anfrage.vorgangId && !freigabeDirektErteilen) {
+        if (draft.sourceInquiryId && anfrage.vorgangId && !freigabeDirektErteilen && !zurueckgestelltSpeichern) {
             nachrichtenService.create({
                 vorgangId: anfrage.vorgangId,
                 anfrageId: anfrage.id,
@@ -1006,7 +1056,9 @@ export default function Angebote() {
 
     const laufendeAngebote = neuesteAngebote.filter(item => istOffenesAngebot(item));
     const vorbereiteteAngebote = neuesteAngebote.filter(item =>
-        Boolean(item.alsVorbereitetGespeichert) && !Boolean(item.tagesabschlussZurueckgehalten)
+        Boolean(item.alsVorbereitetGespeichert)
+        && !Boolean(item.tagesabschlussZurueckgehalten)
+        && String(item.freigabeStatus || "") === "freigegeben"
     );
     const gespeicherteAngebote = neuesteAngebote.filter(item =>
         Boolean(item.alsVorbereitetGespeichert) && Boolean(item.tagesabschlussZurueckgehalten)
@@ -1026,7 +1078,7 @@ export default function Angebote() {
         if (wiedervorlageFilter === "alle") return true;
         return String(item.wiedervorlageAm || "") <= heute;
     });
-    const freigabeOffenAngebote = freizugebendeAngebote.filter(item => !["intern_abgelehnt", "freigegeben", "weitergeleitet"].includes(String(item.freigabeStatus || "")));
+    const freigabeOffenAngebote = freizugebendeAngebote.filter(item => !["intern_abgelehnt", "freigegeben", "weitergeleitet", "rueckgestellt"].includes(String(item.freigabeStatus || "")));
     const alleAngebote = neuesteAngebote.filter(item => selectedStatuses.includes(item.statusNormalized));
     const zumChatNavigieren = row => {
         const anfrage = getInquiryForOffer(row, anfragen);
@@ -1036,17 +1088,19 @@ export default function Angebote() {
         }
         navigate(`/kundenanfragen?focus=${anfrage.id}`);
     };
-    const angebotFreigeben = (angebot) => {
+    const angebotFreigeben = (angebot, fuerTagesversand = false) => {
         const aktualisiert = {
             ...angebot,
             freigabeStatus: "freigegeben",
             freigabeNotiz: approvalNote.trim() || angebot.freigabeNotiz || "",
             freigegebenVon: user.username || user.name || "verkauf",
-            direktSendenGewuenscht: true,
-            status: "wartet auf Antwort"
+            direktSendenGewuenscht: !fuerTagesversand,
+            alsVorbereitetGespeichert: fuerTagesversand,
+            tagesabschlussZurueckgehalten: false,
+            status: fuerTagesversand ? "in Vorbereitung" : "wartet auf Antwort"
         };
         angeboteService.update(aktualisiert);
-        if (aktualisiert.anfrageId) {
+        if (!fuerTagesversand && aktualisiert.anfrageId) {
             sendeAngebotAnKunden(aktualisiert);
         }
         setRefreshKey(value => value + 1);
@@ -1077,38 +1131,27 @@ export default function Angebote() {
     };
     const tagesabschlussAngebote = vorbereiteteAngebote.filter(angebot => {
         const istBlockiert = ["angefragt", "weitergeleitet", "intern_abgelehnt"].includes(String(angebot.freigabeStatus || ""));
-        return !istBlockiert && !brauchtGfFreigabeFuerAngebot(angebot);
+        return !istBlockiert && String(angebot.gueltigBis || "") >= heute && !brauchtGfFreigabeFuerAngebot(angebot);
     });
-    const tagesabschlussDurchfuehren = () => {
-        if (brauchtFreigabe || tagesabschlussAngebote.length === 0) return;
-        tagesabschlussAngebote.forEach(angebot => {
-            const aktualisiert = {
-                ...angebot,
-                status: "wartet auf Antwort",
-                freigabeStatus: "freigegeben",
-                direktSendenGewuenscht: true,
-                alsVorbereitetGespeichert: false,
-                tagesabschlussZurueckgehalten: false,
-                freigegebenVon: user.username || user.name || "verkauf"
-            };
-            angeboteService.update(aktualisiert);
-            sendeAngebotAnKunden(aktualisiert);
-        });
-        setRefreshKey(value => value + 1);
-        setTagesabschlussBestaetigungOpen(false);
+    const tagesabschlussDurchfuehren = async () => {
+        if (brauchtFreigabe) return;
+        try {
+            const result = await tagesversandService.ausfuehren();
+            if (result.protocol) {
+                setTagesversandProtokolle(current => [result.protocol, ...current.filter(item => item.id !== result.protocol.id)]);
+            }
+            setRefreshKey(value => value + 1);
+            setTagesabschlussBestaetigungOpen(false);
+            setTagesversandFehler("");
+        } catch (error) {
+            setTagesversandFehler(error instanceof Error ? error.message : "Der Testlauf konnte nicht ausgeführt werden.");
+        }
     };
     const angebotZumTagesabschlussZurueckhalten = angebot => {
         angeboteService.update({
             ...angebot,
             tagesabschlussZurueckgehalten: true,
             direktSendenGewuenscht: false
-        });
-        setRefreshKey(value => value + 1);
-    };
-    const angebotFuerTagesabschlussVormerken = angebot => {
-        angeboteService.update({
-            ...angebot,
-            tagesabschlussZurueckgehalten: false
         });
         setRefreshKey(value => value + 1);
     };
@@ -1241,8 +1284,15 @@ export default function Angebote() {
     const preisabweichungFreigabeImDialog = positionsZwischensumme > 0 && abweichungZurZwischensumme >= gfFreigabeSchwelle;
     const automatischeGfFreigabeImDialog = sicherheitsbestandFreigabeImDialog || preisabweichungFreigabeImDialog;
     const gfFreigabeAktivImDialog = draft.freigabeDurchGf || automatischeGfFreigabeImDialog;
-    const kannDirektVersendenImDialog = !brauchtFreigabe && draft.direktSenden && !gfFreigabeAktivImDialog;
+    const bearbeitetRueckgestelltesAngebot = Boolean(editingOfferId) && Boolean(
+        angebote.find(item => String(item.id) === String(editingOfferId))?.tagesabschlussZurueckgehalten
+        || String(angebote.find(item => String(item.id) === String(editingOfferId))?.freigabeStatus || "") === "rueckgestellt"
+    );
+    const kannDirektVersendenImDialog = !brauchtFreigabe && draft.direktSenden && !gfFreigabeAktivImDialog && !bearbeitetRueckgestelltesAngebot;
     const versandAktionLabel = kannDirektVersendenImDialog ? "Direkt versenden" : "Freigabe beantragen";
+    const tagesversandAktionLabel = kannDirektVersendenImDialog
+        ? "Freigegeben für Tagesabschluss vormerken"
+        : "Für Freigabe und Tagesversand vorbereiten";
     const sperrgrundText = "";
 
     return <>
@@ -1255,7 +1305,7 @@ export default function Angebote() {
         </div>
         {activeTab === "vorbereitet" && <div className="dashboard-panel">
             <div className="dashboard-panel-header">
-                <h2>Geplanter Versand</h2>
+                <h2>Automatischer Tagesversand</h2>
                 <span>{heute}, {optionen.angeboteTagesabschlussUhrzeit} Uhr</span>
             </div>
             <p>Diese Angebote sind für den nächsten Versand zum Tagesabschluss vorgemerkt.</p>
@@ -1271,7 +1321,7 @@ export default function Angebote() {
         </div>}
         {optionen.angeboteTagesabschlussAktiv && <div className="dashboard-panel">
             <div className="dashboard-panel-header">
-                <h2>Geplanter Versand</h2>
+                <h2>Automatischer Tagesversand</h2>
                 <span>{heute}, {optionen.angeboteTagesabschlussUhrzeit} Uhr</span>
             </div>
             <ul className="dashboard-note-list">
@@ -1280,9 +1330,20 @@ export default function Angebote() {
                 <li><strong>{faelligeWiedervorlagen.length} fällig:</strong> Wiedervorlagen mit Prüfdatum bis heute sollten bearbeitet werden.</li>
                 <li><strong>{laufendeAngebote.length} beim Kunden:</strong> Diese Angebote warten aktuell auf eine Kundenantwort.</li>
             </ul>
-            <button type="button" onClick={() => setTagesabschlussBestaetigungOpen(true)} disabled={brauchtFreigabe || tagesabschlussAngebote.length === 0}>
-                Geplanten Versand starten ({tagesabschlussAngebote.length})
+            <button type="button" onClick={() => {
+                setTagesversandFehler("");
+                setTagesabschlussBestaetigungOpen(true);
+            }} disabled={brauchtFreigabe || tagesabschlussAngebote.length === 0}>
+                Testlauf jetzt ausführen ({tagesabschlussAngebote.length})
             </button>
+            {tagesversandProtokolle.length > 0 && <p>
+                Letzter Lauf: {String(tagesversandProtokolle[0].ausgefuehrtAm || "-").replace("T", " ").slice(0, 16)} Uhr, {tagesversandProtokolle[0].versendet?.length || 0} versendet, {tagesversandProtokolle[0].uebersprungen?.length || 0} übersprungen.
+            </p>}
+            {tagesversandProtokolle.length > 0 && <ul className="dashboard-note-list">
+                {tagesversandProtokolle.slice(0, 5).map(protokoll => <li key={protokoll.id}>
+                    <strong>{protokoll.versandDatum}:</strong> {protokoll.versendet?.length || 0} versendet, {protokoll.uebersprungen?.length || 0} übersprungen.
+                </li>)}
+            </ul>}
         </div>}
         <DataTable
             title={tableTitle}
@@ -1306,10 +1367,9 @@ export default function Angebote() {
             rowActions={[
                 { name: "edit", label: "Bearbeiten", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotBearbeiten, variant: "secondary", isVisible: row => (activeTab === "ueberarbeitung" && String(row.freigabeStatus || "") === "intern_abgelehnt") || ["vorbereitet", "gespeichert"].includes(activeTab) },
                 { name: "hold", label: "Zurückstellen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotZumTagesabschlussZurueckhalten, variant: "secondary", isVisible: () => activeTab === "vorbereitet" },
-                { name: "release", label: "Für Versand vormerken", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: angebotFuerTagesabschlussVormerken, variant: "secondary", isVisible: () => activeTab === "gespeichert" },
                 { name: "send", label: "Sofort senden", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: vorbereitetesAngebotSofortSenden, variant: "success", isVisible: row => activeTab === "vorbereitet" && !brauchtFreigabe && !["angefragt", "weitergeleitet", "intern_abgelehnt"].includes(String(row.freigabeStatus || "")) && !brauchtGfFreigabeFuerAngebot(row) },
                 { name: "thread", label: "Chat", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: zumChatNavigieren, variant: "secondary", isVisible: row => !!row.anfrageId },
-                { name: "approve", label: "Prüfen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: freigabePruefen, variant: "success", isVisible: row => istErfahrenerVerkaeufer && row.statusNormalized === "in vorbereitung" && !["freigegeben", "intern_abgelehnt"].includes(String(row.freigabeStatus || "")) }
+                { name: "approve", label: "Prüfen", permission: PERMISSIONS.VERKAUF_BEARBEITEN, onClick: freigabePruefen, variant: "success", isVisible: row => activeTab === "freigabe" && istErfahrenerVerkaeufer && row.statusNormalized === "in vorbereitung" && String(row.freigabeStatus || "") === "angefragt" }
             ]}
             detailLinkResolver={({ field, row, value }) => {
                 if (field === "kunde" && row.kundeId) return `/kunden?focus=${row.kundeId}`;
@@ -1319,10 +1379,10 @@ export default function Angebote() {
         />
         <Dialog
             open={tagesabschlussBestaetigungOpen}
-            title="Geplanten Versand starten"
+            title="Testlauf für automatischen Tagesversand"
             onClose={() => setTagesabschlussBestaetigungOpen(false)}
             footer={<button type="button" className="button is-primary" onClick={tagesabschlussDurchfuehren}>
-                {tagesabschlussAngebote.length} Angebote versenden
+                Testlauf ausführen
             </button>}
         >
             <p>Die folgenden Angebote werden an die jeweiligen Kunden versendet:</p>
@@ -1332,13 +1392,15 @@ export default function Angebote() {
                 </li>)}
             </ul>
             <p>Zurückgestellte Angebote und Angebote mit offener Freigabe bleiben unverändert.</p>
+            {tagesversandFehler && <p className="form-error">{tagesversandFehler}</p>}
         </Dialog>
         <Dialog
             open={open}
             title={editingOfferId ? "Angebot bearbeiten" : (draft.sourceInquiryId ? "Angebot aus Kundenanfrage erstellen" : "Neues Angebot")}
             onClose={handleClose}
             footer={<Fragment>
-                <SaveButton className="button is-light" onSave={() => speichern("vorbereiten")} onSuccess={handleClose}>Für Tagesabschluss vormerken</SaveButton>
+                <SaveButton className="button is-light" onSave={() => speichern("zurueckstellen")} onSuccess={handleClose}>Rückgestellt speichern</SaveButton>
+                <SaveButton className="button is-light" onSave={() => speichern("vorbereiten")} onSuccess={handleClose}>{tagesversandAktionLabel}</SaveButton>
                 <SaveButton className="button is-primary" onSave={() => speichern("freigabeBeantragen")} onSuccess={handleClose}>{versandAktionLabel}</SaveButton>
             </Fragment>}
         >
@@ -1671,7 +1733,7 @@ export default function Angebote() {
                     Beim Kunden fehlen Adressdaten. Bitte vor dem Versenden des Angebots Anschrift, PLZ und Ort beim Kunden nachfragen.
                 </p>}
                 <div className="offer-send-checkbox-row">
-                    <Checkbox checked={!brauchtFreigabe && draft.direktSenden} onChange={value => setDraft(item => ({ ...item, direktSenden: value, freigabeDurchGf: value ? false : item.freigabeDurchGf }))} disabled={brauchtFreigabe || gfFreigabeAktivImDialog}>
+                    <Checkbox checked={!brauchtFreigabe && draft.direktSenden} onChange={value => setDraft(item => ({ ...item, direktSenden: value, freigabeDurchGf: value ? false : item.freigabeDurchGf }))} disabled={brauchtFreigabe || gfFreigabeAktivImDialog || bearbeitetRueckgestelltesAngebot}>
                         Freigabe direkt erteilen
                     </Checkbox>
                     <Checkbox checked={gfFreigabeAktivImDialog} onChange={value => setDraft(item => ({ ...item, freigabeDurchGf: value, direktSenden: value ? false : item.direktSenden }))} disabled={automatischeGfFreigabeImDialog || draft.direktSenden}>
@@ -1681,6 +1743,7 @@ export default function Angebote() {
                 {brauchtFreigabe && <div className="form-error">
                     {brauchtFreigabe && <p>Du hast keine Berechtigung zur eigenständigen Freigabe.</p>}
                 </div>}
+                {bearbeitetRueckgestelltesAngebot && <p>Ein zurückgestelltes Angebot wird nach der Bearbeitung immer zuerst zur Freigabe vorgelegt.</p>}
                 {sicherheitsbestandFreigabeImDialog && <p className="form-error">
                     Die GF-Freigabe wurde automatisch gesetzt, da ein Artikel unter den Eisernen Bestand gerät.
                 </p>}
@@ -1726,6 +1789,7 @@ export default function Angebote() {
             noteValue={approvalNote}
             onNoteChange={setApprovalNote}
             onApprove={() => angebotFreigeben(approvalOffer)}
+            onApproveForTagesversand={() => angebotFreigeben(approvalOffer, true)}
             onRevise={() => angebotZurUeberarbeitungBearbeiten(approvalOffer)}
             onReject={() => angebotInternAblehnen(approvalOffer)}
             onForward={() => angebotAnGfWeiterleiten(approvalOffer)}

@@ -70,7 +70,7 @@ export default function LehrkraftLieferantenkorrespondenz() {
     const dashboardTabs = [
         { key: "anfragen", label: "Anfragen offen", value: getPurchaseOrdersByStatus(bestellungen, "angefragt").length },
         { key: "rechnungen", label: "Offene Rechnungen", value: offeneRechnungen.length },
-        { key: "bestaetigt", label: "Bestätigt", value: getPurchaseOrdersByStatus(bestellungen, "bestaetigt").length },
+        { key: "bestaetigt", label: "Freigegeben", value: getPurchaseOrdersByStatus(bestellungen, "bestaetigt").length },
         { key: "versendet", label: "Versendet", value: getOpenGoodsReceiptOrders(bestellungen).length }
     ];
 

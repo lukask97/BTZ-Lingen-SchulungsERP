@@ -15,6 +15,8 @@ Diese Uebersicht hilft beim Einstieg in den `docs/`-Ordner.
   kompakte Analyse der Seed-Dateien, ihrer Reifegrade und aktuellen Befunde
 - [Auftragsmodell-Verkaufsprozess.md](./Auftragsmodell-Verkaufsprozess.md)
   Ablauf und Struktur rund um Angebot, Auftrag und Folgeobjekte
+- [Kaufprozess-Lehrkraft-bis-Rechnung.md](./Kaufprozess-Lehrkraft-bis-Rechnung.md)
+  durchgehender Ablauf von der Kundennachricht durch die Lehrkraft bis zur Ausgangsrechnung
 - [Lieferantenstaffelpreise-Konzept.md](./Lieferantenstaffelpreise-Konzept.md)
   Konzept fuer Lieferantenstaffeln und Preislogik
 
