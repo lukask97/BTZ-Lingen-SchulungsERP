@@ -909,6 +909,18 @@ export default function Angebote() {
 
             angeboteService.update(aktualisiert);
 
+            if (zurueckgestelltSpeichern) {
+                const verknuepfteAnfrage = anfrage || getInquiryForOffer(bestehendesAngebot, anfragen);
+                if (verknuepfteAnfrage) {
+                    customerInquiryService.update({
+                        ...verknuepfteAnfrage,
+                        status: "offen",
+                        angebotId: bestehendesAngebot.id,
+                        vorgangId: bestehendesAngebot.vorgangId || vorgangId
+                    });
+                }
+            }
+
             nachrichtenService.create({
                 vorgangId: bestehendesAngebot.vorgangId || vorgangId,
                 anfrageId: bestehendesAngebot.anfrageId || referenzierteAnfrageId,
@@ -1007,7 +1019,11 @@ export default function Angebote() {
             customerInquiryService.update({
                 ...anfrage,
                 kundeId: kunde.id,
-                vorgangId
+                vorgangId,
+                ...(zurueckgestelltSpeichern ? {
+                    status: "offen",
+                    angebotId: neuesAngebot.id
+                } : {})
             });
         }
 

@@ -342,15 +342,36 @@ export default function Kundenanfragen() {
     const kannAngebotErstellen = !!threadItem?.kundeId && (vorgangAngebote.length === 0 || aktuellesAngebot?.status === "abgelehnt");
     const kannAngebotSenden = !!aktuellesAngebot && !angebotWurdeBereitsGesendet(aktuellesAngebot);
     const angebotIstInternVorbereitet = String(aktuellesAngebot?.status || "").toLowerCase() === "in vorbereitung";
+    const angebotIstRueckgestellt = String(aktuellesAngebot?.freigabeStatus || "").toLowerCase() === "rueckgestellt"
+        || Boolean(aktuellesAngebot?.tagesabschlussZurueckgehalten);
+    const angebotBrauchtFreigabe = ["angefragt", "weitergeleitet"].includes(String(aktuellesAngebot?.freigabeStatus || "").toLowerCase());
+    const angebotIstFuerTagesabschlussVorgemerkt = Boolean(aktuellesAngebot?.alsVorbereitetGespeichert)
+        && String(aktuellesAngebot?.freigabeStatus || "").toLowerCase() === "freigegeben"
+        && !angebotIstRueckgestellt;
     const threadActionLinks = [
         ...(kannAngebotErstellen ? [{
             id: "prepare-offer",
             label: aktuellesAngebot?.status === "abgelehnt" ? "Neues Angebot vorbereiten" : "Angebot erstellen",
             onClick: () => navigate(`/angebote?new=fromInquiry&kundeId=${threadItem?.kundeId || ""}&anfrageId=${threadItem?.id || ""}`)
         }] : []),
-        ...(kannAngebotSenden ? [{
+        ...(!kannAngebotErstellen && angebotIstRueckgestellt ? [{
+            id: "edit-deferred-offer",
+            label: "Rückgestelltes Angebot bearbeiten",
+            onClick: () => navigate(`/angebote?editOfferId=${aktuellesAngebot?.id || ""}`)
+        }] : []),
+        ...(!kannAngebotErstellen && angebotBrauchtFreigabe ? [{
+            id: "review-offer-approval",
+            label: "Freigabe prüfen",
+            onClick: () => navigate(`/angebote?approveOfferId=${aktuellesAngebot?.id || ""}`)
+        }] : []),
+        ...(!kannAngebotErstellen && angebotIstFuerTagesabschlussVorgemerkt ? [{
+            id: "edit-daily-closing-offer",
+            label: "Für Tagesabschluss vorgemerkt",
+            onClick: () => navigate(`/angebote?editOfferId=${aktuellesAngebot?.id || ""}`)
+        }] : []),
+        ...(!kannAngebotErstellen && !angebotIstRueckgestellt && !angebotBrauchtFreigabe && !angebotIstFuerTagesabschlussVorgemerkt && kannAngebotSenden ? [{
             id: "send-offer",
-            label: angebotIstInternVorbereitet ? "Angebot pruefen" : "Angebot senden",
+            label: angebotIstInternVorbereitet ? "Angebot prüfen" : "Angebot senden",
             onClick: angebotIstInternVorbereitet
                 ? () => navigate(`/angebote?approveOfferId=${aktuellesAngebot?.id || ""}`)
                 : angebotSenden

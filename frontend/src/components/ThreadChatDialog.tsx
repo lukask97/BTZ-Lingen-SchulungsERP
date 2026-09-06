@@ -24,6 +24,9 @@ type ThreadOffer = {
     id: string | number;
     angebotsNr: string;
     status: string;
+    freigabeStatus?: string;
+    alsVorbereitetGespeichert?: boolean;
+    tagesabschlussZurueckgehalten?: boolean;
 };
 
 type ThreadDocumentLink = {
@@ -44,6 +47,24 @@ function toSafeArray<T>(value: T[] | undefined) {
 
 function getHeaderText(value: string | undefined, fallback = "-") {
     return String(value || fallback);
+}
+
+function getOfferProcessStatus(offer: ThreadOffer) {
+    const freigabeStatus = String(offer.freigabeStatus || "").toLowerCase();
+
+    if (freigabeStatus === "rueckgestellt" || offer.tagesabschlussZurueckgehalten) {
+        return "Rückgestellt";
+    }
+
+    if (["angefragt", "weitergeleitet"].includes(freigabeStatus)) {
+        return "Benötigt Freigabe";
+    }
+
+    if (offer.alsVorbereitetGespeichert && freigabeStatus === "freigegeben") {
+        return "Tagesabschluss";
+    }
+
+    return String(offer.status || "-");
 }
 
 function renderActionButton(item: ThreadActionLink | ThreadDocumentLink) {
@@ -286,24 +307,37 @@ export default function ThreadChatDialog({
                     {sichereNachrichten.map(renderMessage)}
                 </div>
             </div>}
-        </div>
-        {showReplyBox && onReplyChange && onReplySend && <div className="form-row thread-section thread-reply-box">
-            <div className="thread-section-header">
-                <Label>{replyLabel || "Nachricht"}</Label>
-            </div>
-            <TextArea rows={3} value={replyValue} onChange={onReplyChange} placeholder={replyPlaceholder} onKeyDown={handleReplyKeyDown}/>
-            <div className="thread-reply-toolbar">
-                <div className="thread-reply-actions">
-                    <button type="button" onClick={onReplySend}>Nachricht senden</button>
+            {showReplyBox && onReplyChange && onReplySend && <div className="thread-reply-box">
+                <div className="thread-section-header">
+                    <Label>{replyLabel || "Nachricht"}</Label>
                 </div>
-                {sichereAktionslinks.length > 0 && <div className="thread-dialog-footer">
-                    <div className="thread-reply-template-row">
-                        <span className="thread-reply-template-label">{actionSectionLabel}:</span>
-                        <div className="thread-document-links thread-reply-template-links">
-                            {sichereAktionslinks.map(renderActionButton)}
-                        </div>
-                    </div>
-                </div>}
+                <div className="thread-reply-compose">
+                    <TextArea rows={3} value={replyValue} onChange={onReplyChange} placeholder={replyPlaceholder} onKeyDown={handleReplyKeyDown}/>
+                    <button
+                        type="button"
+                        className="thread-send-button"
+                        onClick={onReplySend}
+                        disabled={!replyValue.trim()}
+                        aria-label="Nachricht senden"
+                        title="Nachricht senden"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M21 3 10.5 13.5" />
+                            <path d="m21 3-6.7 18-3.8-7.5L3 9.7 21 3Z" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="thread-reply-toolbar">
+                    <span className="thread-reply-hint">Mit Strg + Enter senden</span>
+                </div>
+            </div>}
+        </div>
+        {sichereAktionslinks.length > 0 && <div className="form-row thread-section thread-actions-section">
+            <div className="thread-section-header">
+                <Label>{actionSectionLabel}</Label>
+            </div>
+            <div className="thread-document-links">
+                {sichereAktionslinks.map(renderActionButton)}
             </div>
         </div>}
         {customActionSection && <div className="form-row thread-section">
@@ -318,7 +352,7 @@ export default function ThreadChatDialog({
                 {sichereAngebote.map(item => <li key={item.id} className="thread-offer-item">
                     <div className="thread-offer-row">
                         <span>
-                            {renderOfferLink(item)} - {String(item.status || "")}
+                            {renderOfferLink(item)} - {getOfferProcessStatus(item)}
                         </span>
                     </div>
                 </li>)}
