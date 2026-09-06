@@ -445,16 +445,11 @@ export default function DataTable({
 
     return filters.map((filter) => (
       <select
+        className="toolbar-select"
         key={filter.name}
         name={`filter-${filter.name}`}
         value={activeFilters[filter.name] || ""}
         onChange={(e) => handleFilterChange(filter.name, e.target.value)}
-        style={{
-          padding: "6px 10px",
-          borderRadius: "4px",
-          border: "1px solid #ddd",
-          fontSize: "14px",
-        }}
       >
         <option value="">{filter.label}</option>
         {filter.options.map((opt) => (

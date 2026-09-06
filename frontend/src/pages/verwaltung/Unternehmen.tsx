@@ -264,21 +264,32 @@ export default function Unternehmen() {
         popup.focus();
     };
 
-    return <>
-        <h1>Unternehmen</h1>
-        <p>Hier werden die zentralen Unternehmens- und Rechnungsangaben gepflegt. Die Bereiche sind kompakt getrennt, damit weniger gescrollt werden muss.</p>
+    return <div className="unternehmen-page erp-page-stack">
+        <header className="unternehmen-page-header">
+            <div>
+                <p className="header-kicker">Verwaltung</p>
+                <h1>Unternehmen</h1>
+                <p>Pflegen Sie zentrale Unternehmens-, Rechnungs- und Kontodaten an einem Ort.</p>
+            </div>
+            <div className="unternehmen-page-badge">
+                <span>Aktuelles Unternehmen</span>
+                <strong>{String(current.firmenname || "Noch nicht benannt")}</strong>
+            </div>
+        </header>
 
-        <section className="module-panel">
+        <section className="module-panel unternehmen-overview">
             <div className="dashboard-panel-header">
                 <h2>Schnellauswahl</h2>
                 <span>Bereiche</span>
             </div>
-            <div className="unternehmen-tab-grid">
+            <div className="unternehmen-tab-grid" role="tablist" aria-label="Unternehmensbereiche">
                 {SECTION_TABS.map(tab => <button
                     key={tab.key}
                     type="button"
                     className={`unternehmen-tab${activeSection === tab.key ? " is-active" : ""}`}
                     onClick={() => setActiveSection(tab.key)}
+                    role="tab"
+                    aria-selected={activeSection === tab.key}
                 >
                     <strong>{tab.label}</strong>
                     <span>{tab.hint}</span>
@@ -308,7 +319,7 @@ export default function Unternehmen() {
             {visibleGroups.map(group => <section key={group.title} className="module-panel unternehmen-section-panel">
                 <div className="dashboard-panel-header">
                     <h2>{group.title}</h2>
-                    <span>Pflichtangaben</span>
+                    <span>{group.fields.length} Felder</span>
                 </div>
                 <div className="form-grid two-columns unternehmen-form-grid">
                     {group.fields.map(([field, label]) => <div
@@ -323,10 +334,11 @@ export default function Unternehmen() {
         </div>
 
         <section className="module-panel unternehmen-actions">
+            <p>Änderungen gelten für zukünftige Dokumente und Vorgänge.</p>
             <div className="table-actions">
                 <button type="button" className="button-secondary" onClick={alsPdfAnzeigen}>Als PDF anzeigen</button>
                 <SaveButton onSave={speichern} onSuccess={() => undefined}>Speichern</SaveButton>
             </div>
         </section>
-    </>;
+    </div>;
 }

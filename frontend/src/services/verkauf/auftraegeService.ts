@@ -158,7 +158,10 @@ function splitPayload(payload = {}) {
                 mietArtikelId: hydrated.mietArtikelId || "",
                 mietArtikelName: hydrated.mietArtikelName || "",
                 istMietBaugruppe: Boolean(hydrated.istMietBaugruppe),
-                mietvertragServiceRowId: hydrated.mietvertragServiceRowId || ""
+                mietvertragServiceRowId: hydrated.mietvertragServiceRowId || "",
+                selectedOptionen: hydrated.selectedOptionen || {},
+                isOptionForId: hydrated.isOptionForId || "",
+                optionKategorieId: hydrated.optionKategorieId || ""
             };
         })
     };

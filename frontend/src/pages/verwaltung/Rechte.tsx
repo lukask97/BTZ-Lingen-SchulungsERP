@@ -1,108 +1,76 @@
+import { useMemo, useState } from "react";
 import DataTable from "../../components/DataTable";
-import Dialog from "../../components/Dialog";
-import TextField from "../../components/form/TextField";
-import TextArea from "../../components/form/TextArea";
-import Label from "../../components/form/Label";
-import SaveButton from "../../components/SaveButton";
-
 import useAuth from "../../auth/useAuth";
-import { useCRUDPage } from "../../hooks/useCRUDPage";
+import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import rechteService from "../../services/verwaltung/rechteService";
-import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
-import { useMemo } from "react";
+import rollenService from "../../services/verwaltung/rollenService";
+
+const columns = [
+    { field: "name", title: "Recht" },
+    { field: "beschreibung", title: "Beschreibung" },
+    { field: "rollenText", title: "Zugeordnete Rollen" }
+];
 
 export default function Rechte() {
     const { user } = useAuth();
-    const config = PAGE_CONFIG.rechte;
-    
-    const {
-        allData,
-        open,
-        editMode,
-        pageSize,
-        search,
-        currentItem,
-        setPageSize,
-        setSearch,
-        setCurrentItem,
-        neu,
-        bearbeiten,
-        loeschen,
-        speichern,
-        handleClose,
-        error
-    } = useCRUDPage(config.tableName, INITIAL_DATA.rechte, rechteService, {
-        requiredFields: [
-            { field: "name", label: "Name" }
-        ]
-    });
+    const refreshTick = useDataSyncRefresh(["rechte", "rollen", "rollenRechte"]);
+    const [search, setSearch] = useState("");
 
-    const columns = getVisibleTableColumns(config.tableName);
-    const allColumns = getAllTableColumns(config.tableName);
+    const rechteMitRollen = useMemo(() => {
+        const rollen = rollenService.getAll();
+        return rechteService.getAll().map(recht => {
+            const zugeordneteRollen = rollen
+                .filter(rolle => (rolle.permissions || []).includes(recht.name))
+                .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "de"));
 
-    const handleFieldChange = (field, value) => {
-        setCurrentItem({ ...currentItem, [field]: value });
-    };
+            return {
+                ...recht,
+                rollenText: zugeordneteRollen.length > 0
+                    ? zugeordneteRollen.map(rolle => rolle.name).join(", ")
+                    : "Keiner Rolle zugeordnet",
+                rollen: zugeordneteRollen.map(rolle => ({
+                    label: rolle.name,
+                    to: `/rollen?focus=${rolle.id}`
+                }))
+            };
+        });
+    }, [refreshTick]);
 
-    const filteredDisplayData = useMemo(() => {
-        // Filter auf ungefilterte Daten anwenden
-        let filtered = allData;
-        // Dann Suche anwenden
-        if (search) {
-            filtered = filtered.filter(item =>
-                Object.values(item)
-                    .join(" ")
-                    .toLowerCase()
-                    .includes(search.toLowerCase())
-            );
-        }
-        return filtered;
-    }, [allData, search]);
+    const sichtbareRechte = useMemo(() => {
+        const suchbegriff = search.trim().toLowerCase();
+        if (!suchbegriff) return rechteMitRollen;
+        return rechteMitRollen.filter(recht =>
+            [recht.name, recht.beschreibung, recht.rollenText].join(" ").toLowerCase().includes(suchbegriff)
+        );
+    }, [rechteMitRollen, search]);
 
-    return (
-        <>
-            <DataTable
-                title={config.title}
-                tableName={config.tableName}
-                username={user.username}
-                columns={columns}
-                allColumns={allColumns}
-                data={filteredDisplayData}
-                searchable={true}
-                pageSize={pageSize}
-                onSearch={setSearch}
-                onPageSizeChange={setPageSize}
-                toolbarActions={[
-                    { name: "new", label: "Neues Recht", permission: config.permissionCreate, onClick: neu }
-                ]}
-                rowActions={[
-                    { name: "edit", label: "Bearbeiten", permission: config.permissionEdit, onClick: bearbeiten },
-                    { name: "delete", label: "Löschen", permission: config.permissionEdit, onClick: loeschen }
-                ]}
-                page={1}
-            />
+    return <div className="rechte-page erp-page-stack">
+        <section className="module-panel rechte-overview">
+            <div>
+                <p className="header-kicker">Verwaltung</p>
+                <h1>Rechteübersicht</h1>
+                <p>Alle im System vorhandenen Rechte und die damit ausgestatteten Rollen. Rechte werden hier ausschließlich angezeigt.</p>
+            </div>
+            <div className="rechte-count" aria-label={`${rechteMitRollen.length} Rechte vorhanden`}>
+                <strong>{rechteMitRollen.length}</strong>
+                <span>vorhandene Rechte</span>
+            </div>
+        </section>
 
-            <Dialog
-                open={open}
-                title={editMode ? "Recht bearbeiten" : "Neues Recht"}
-                onClose={handleClose}
-                footer={<SaveButton onSave={speichern} onSuccess={handleClose}>Speichern</SaveButton>}
-            >
-                <Label required>Name</Label>
-                <TextField value={currentItem.name} onChange={v => handleFieldChange("name", v)} />
-
-                <div className="form-row">
-                    <Label>Beschreibung</Label>
-                    <TextArea
-                        rows={2}
-                        placeholder="Beschreibung des Rechts..."
-                        value={currentItem.beschreibung}
-                        onChange={v => handleFieldChange("beschreibung", v)}
-                    />
-                </div>
-
-                <div className="form-row">{error && <p className="form-error">{error}</p>}</div>
-            </Dialog>
-        </>
-    );
+        <DataTable
+            title="Vorhandene Rechte"
+            tableName="rechte"
+            username={user.username}
+            columns={columns}
+            allColumns={columns}
+            data={sichtbareRechte}
+            searchable={true}
+            pageSize={Math.max(10, sichtbareRechte.length)}
+            onSearch={setSearch}
+            selectableColumns={false}
+            toolbarActions={[]}
+            rowActions={[]}
+            page={1}
+        />
+    </div>;
 }

@@ -21,35 +21,35 @@ export default function SalesFlowBar({ currentStep }: SalesFlowBarProps) {
     const previousTarget = previousStep?.to || "#";
     const nextTarget = nextStep?.to || "#";
 
-    return <section className="sales-flow-bar">
+    return <section className="sales-flow-bar" aria-labelledby="sales-flow-title">
         <div className="sales-flow-header">
-            <div>
-                <strong>Verkaufsfluss</strong>
+            <div className="sales-flow-copy">
+                <strong id="sales-flow-title">Verkaufsfluss</strong>
                 <p className="module-hint">Führt Schritt für Schritt von der Kundenanfrage bis zur Rechnung.</p>
             </div>
             <div className="sales-flow-actions">
                 <Link className={`button-secondary sales-flow-button${!previousStep ? " is-disabled" : ""}`} to={previousTarget} onClick={event => {
                     if (!previousStep) event.preventDefault();
                 }}>
-                    Zurück
+                    <span aria-hidden="true">←</span> Zurück
                 </Link>
-                <Link className={`sales-flow-button${!nextStep ? " is-disabled" : ""}`} to={nextTarget} onClick={event => {
+                <Link className={`button-primary sales-flow-button${!nextStep ? " is-disabled" : ""}`} to={nextTarget} onClick={event => {
                     if (!nextStep) event.preventDefault();
                 }}>
-                    Weiter
+                    Weiter <span aria-hidden="true">→</span>
                 </Link>
             </div>
         </div>
-        <div className="sales-flow-track">
+        <nav className="sales-flow-track" aria-label="Schritte im Verkaufsfluss">
             {SALES_FLOW_STEPS.map((step, index) => {
                 const isActive = step.key === currentStep;
                 const isCompleted = currentIndex > index;
 
-                return <Link key={step.key} className={`sales-flow-step${isActive ? " is-active" : ""}${isCompleted ? " is-completed" : ""}`} to={step.to}>
+                return <Link key={step.key} className={`sales-flow-step${isActive ? " is-active" : ""}${isCompleted ? " is-completed" : ""}`} to={step.to} aria-current={isActive ? "step" : undefined}>
                     <span className="sales-flow-index">{index + 1}</span>
                     <span className="sales-flow-label">{step.label}</span>
                 </Link>;
             })}
-        </div>
+        </nav>
     </section>;
 }

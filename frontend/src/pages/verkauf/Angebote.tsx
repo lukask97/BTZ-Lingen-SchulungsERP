@@ -211,7 +211,8 @@ function createAngebotPositionDraft(auswahl, menge) {
         einzelpreis: auswahl.preis,
         berechnungstyp: auswahl.berechnungstyp || "",
         zeEinheit: auswahl.zeEinheit || "",
-        selectedOptionen: initialOptions
+        selectedOptionen: initialOptions,
+        pendingOptionen: { ...initialOptions }
     };
 }
 
@@ -253,6 +254,7 @@ function normalizeVorlagenPosition(position, leistungen = []) {
             ...draft,
             rowId: position.rowId || draft.rowId,
             selectedOptionen: position.selectedOptionen || draft.selectedOptionen,
+            pendingOptionen: position.selectedOptionen || draft.selectedOptionen,
             isOptionForId: position.isOptionForId,
             optionKategorieId: position.optionKategorieId,
             einzelpreis: Number(position.einzelpreis || auswahl.preis || 0),
@@ -277,6 +279,7 @@ function normalizeVorlagenPosition(position, leistungen = []) {
         berechnungstyp: position.berechnungstyp || "",
         zeEinheit: position.zeEinheit || "",
         selectedOptionen: position.selectedOptionen || {},
+        pendingOptionen: position.selectedOptionen || {},
         isOptionForId: position.isOptionForId,
         optionKategorieId: position.optionKategorieId,
         vertragsStart: position.vertragsStart || "",
@@ -334,7 +337,7 @@ function getAktuellenAngebotsbedarf(positionen = [], leistungen = []) {
             const defaultOpt = gruppenOptionen.find(item => item.standard) || gruppenOptionen[0];
             const aktuelleOptionId = Number(position.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || 0);
             const individuelleAuswahl = gruppenOptionen.find(item => Number(item.individualArtikelId) === aktuelleOptionId);
-            if (!individuelleAuswahl?.individualArtikelId) {
+            if (!individuelleAuswahl?.individualArtikelId || individuelleAuswahl.standard) {
                 return;
             }
 
@@ -795,13 +798,30 @@ export default function Angebote() {
 
     const handleOptionChange = (positionRowId, kategorieId, newOptionId) => {
         setDraft(current => {
+            return {
+                ...current,
+                positionenDraft: current.positionenDraft.map(position => position.rowId === positionRowId
+                    ? {
+                        ...position,
+                        pendingOptionen: { ...(position.pendingOptionen || position.selectedOptionen || {}), [kategorieId]: Number(newOptionId) }
+                    }
+                    : position)
+            };
+        });
+    };
+
+    const optionenUebernehmen = positionRowId => {
+        setDraft(current => {
             const posList = [...current.positionenDraft];
-            const parentIndex = posList.findIndex(p => p.rowId === positionRowId);
+            const parentIndex = posList.findIndex(position => position.rowId === positionRowId);
             if (parentIndex === -1) return current;
 
-            const parentPos = { ...posList[parentIndex] };
-            const leistung = leistungen.find(l => l.id === parentPos.artikelId && l.leistungTyp === parentPos.leistungTyp);
-            parentPos.selectedOptionen = { ...(parentPos.selectedOptionen || {}), [kategorieId]: Number(newOptionId) };
+            const parentPos = {
+                ...posList[parentIndex],
+                selectedOptionen: { ...(posList[parentIndex].pendingOptionen || posList[parentIndex].selectedOptionen || {}) }
+            };
+            parentPos.pendingOptionen = { ...parentPos.selectedOptionen };
+            const leistung = leistungen.find(item => item.id === parentPos.artikelId && item.leistungTyp === parentPos.leistungTyp);
             posList[parentIndex] = parentPos;
             return { ...current, positionenDraft: syncOptionRows(posList, parentPos, leistung, artikel) };
         });
@@ -1532,6 +1552,10 @@ export default function Angebote() {
                                     ? getOptionGroups(leistung.individualisierungen)
                                     : [];
                                 const optionAufpreisProEinheit = positionMitIndividualisierung ? calculateOptionAufpreisProEinheit(position, leistung) : 0;
+                                const vorgemerkterOptionAufpreis = positionMitIndividualisierung
+                                    ? calculateOptionAufpreisProEinheit({ ...position, selectedOptionen: position.pendingOptionen || position.selectedOptionen }, leistung)
+                                    : 0;
+                                const optionenWurdenGeaendert = JSON.stringify(position.pendingOptionen || position.selectedOptionen || {}) !== JSON.stringify(position.selectedOptionen || {});
                                 const endpreisProEinheit = Number(position.einzelpreis || 0) + optionAufpreisProEinheit;
                                 const endpreisGesamt = endpreisProEinheit * Number(position.menge || 0);
 
@@ -1593,17 +1617,21 @@ export default function Angebote() {
                                                     </div>
                                                 )}
                                                 {optionGroups.length > 0 && (
-                                                    <div style={{ padding: "0.75rem", background: "var(--background-alt)", borderRadius: "var(--radius-sm)", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                                                        <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+                                                    <div className="offer-configuration">
+                                                        <div className="offer-configuration-header">
                                                             <strong>Konfiguration</strong>
-                                                            <span>Änderung: {optionAufpreisProEinheit > 0 ? "+" : ""}{optionAufpreisProEinheit.toFixed(2)} EUR</span>
+                                                            <div className="offer-configuration-apply">
+                                                                <span>Änderung: {vorgemerkterOptionAufpreis > 0 ? "+" : ""}{vorgemerkterOptionAufpreis.toFixed(2)} EUR</span>
+                                                                <button type="button" className="button-secondary offer-configuration-button" onClick={() => optionenUebernehmen(position.rowId)} disabled={!optionenWurdenGeaendert}>Übernehmen</button>
+                                                            </div>
                                                         </div>
-                                                        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                                                        <div className="offer-configuration-options">
                                                         {optionGroups.map(groupId => {
                                                             const gruppenOptionen = leistung.individualisierungen.filter(i => String(i.kategorieId) === String(groupId));
                                                             const defaultOpt = gruppenOptionen.find(i => i.standard) || gruppenOptionen[0];
-                                                            const currentVal = position.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || "";
+                                                            const currentVal = position.pendingOptionen?.[groupId] || position.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || "";
                                                             const aktuelleOption = gruppenOptionen.find(opt => String(opt.individualArtikelId) === String(currentVal)) || defaultOpt;
+                                                            const istStandardausfuehrung = Boolean(aktuelleOption?.standard);
                                                             const optionsArtikel: any = artikel.find((item: any) => String(item.id) === String(aktuelleOption?.individualArtikelId));
                                                             const optionsBestand = Number(optionsArtikel?.bestand || 0);
                                                             const optionsVerplant = Number(verplanteMengen[String(aktuelleOption?.individualArtikelId || "")] || 0);
@@ -1611,9 +1639,9 @@ export default function Angebote() {
                                                             const optionsVerfuegbar = optionsBestand - optionsVerplant;
                                                             const optionsMindestbestand = Number(optionsArtikel?.mindestmenge || 0);
                                                             const optionsProjected = optionsVerfuegbar - optionsAngebotsbedarf;
-                                                            const optionsKritisch = optionsAngebotsbedarf > optionsVerfuegbar || optionsProjected < optionsMindestbestand;
+                                                            const optionsKritisch = !istStandardausfuehrung && (optionsAngebotsbedarf > optionsVerfuegbar || optionsProjected < optionsMindestbestand);
                                                             return (
-                                                                <div key={groupId} style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: "150px" }}>
+                                                                <div key={groupId} className="offer-configuration-option">
                                                                     <label style={{ fontSize: "0.75rem", fontWeight: "bold", color: "var(--text-secondary)", minHeight: "1.2rem", display: "block" }}>Individualisierung ({getIndividualisierungsLabel(groupId)})</label>
                                                                     <select
                                                                         value={currentVal}
@@ -1625,12 +1653,12 @@ export default function Angebote() {
                                                                             </option>
                                                                         ))}
                                                                     </select>
-                                                                    <small
+                                                                    {istStandardausfuehrung ? <small className="offer-configuration-stock-note">Standardausführung · nicht bestandsgeführt</small> : <small
                                                                         className={optionsKritisch ? "form-error" : undefined}
                                                                         title={`Im Angebot: ${optionsAngebotsbedarf} | Nachbestellt: ${Number(offeneBestellmengen[String(aktuelleOption?.individualArtikelId || "")] || 0)}${optionsProjected < optionsMindestbestand ? ` | Eiserner Bestand von ${optionsMindestbestand} wird unterschritten` : ""}`}
                                                                     >
                                                                         Lager-Bestand: {optionsBestand} | Bestand: {optionsVerfuegbar}
-                                                                    </small>
+                                                                    </small>}
                                                                 </div>
                                                             );
                                                         })}

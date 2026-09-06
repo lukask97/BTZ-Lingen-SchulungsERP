@@ -33,7 +33,7 @@ export function getOfferDemandByArtikel(
                     const defaultOpt = gruppenOptionen.find((item: any) => item.standard) || gruppenOptionen[0];
                     const aktuelleOptionId = Number(position.selectedOptionen?.[String(groupId)] || defaultOpt?.individualArtikelId || 0);
                     const individuelleAuswahl = gruppenOptionen.find((item: any) => Number(item.individualArtikelId) === aktuelleOptionId);
-                    if (!individuelleAuswahl?.individualArtikelId) {
+                    if (!individuelleAuswahl?.individualArtikelId || individuelleAuswahl.standard) {
                         return;
                     }
 

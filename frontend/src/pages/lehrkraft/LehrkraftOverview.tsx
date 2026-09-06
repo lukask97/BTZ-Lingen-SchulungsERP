@@ -75,7 +75,7 @@ export default function LehrkraftOverview() {
                 <p>Hier bestätigt die Lehrkraft Einkaufsanfragen der Schülerfirma und markiert die Bestellung anschließend als versendet. Eine zusätzliche Dokumentkette ist dafür nicht nötig.</p>
                 <ul className="dashboard-note-list">
                     <li>{offeneLieferantenanfragen} Anfragen warten auf Bestätigung.</li>
-                    <li>{bestaetigteBestellungen} bestätigte Bestellungen können versendet werden.</li>
+                    <li>{freigegebeneBestellungen} bestätigte Bestellungen können versendet werden.</li>
                     <li>{versendeteBestellungen} Bestellungen warten auf Wareneingang in der Schülerfirma.</li>
                 </ul>
                 <div className="dashboard-mini-links">
