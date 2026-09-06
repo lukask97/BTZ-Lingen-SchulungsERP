@@ -1,0 +1,26 @@
+meta {
+  name: Anmeldung fuer CRUD-Tests
+  type: http
+  seq: 0
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "{{adminUsername}}",
+    "password": "{{adminPassword}}"
+  }
+}
+
+tests {
+  test("Admin ist fuer CRUD-Tests angemeldet", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().ok).to.equal(true);
+    expect(res.getBody().user.username).to.equal(bru.getEnvVar("adminUsername"));
+  });
+}

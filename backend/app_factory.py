@@ -10,6 +10,7 @@ from routes.article_images import article_images_bp
 from routes.meta import meta_bp
 from routes.resources import resources_bp
 from routes.tagesversand import tagesversand_bp
+from schema_migrations import run_pending_migrations
 from tagesversand_scheduler import start_tagesversand_scheduler
 
 
@@ -25,6 +26,7 @@ def parse_cors_origins(value):
     ] or ["http://localhost:5173", "http://localhost:5174"]
 
 def create_store(app):
+    run_pending_migrations(app.config["DATABASE_DSN"])
     return PostgresStore(app.config["DATABASE_DSN"])
 
 

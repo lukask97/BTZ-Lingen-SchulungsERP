@@ -4,6 +4,12 @@ meta {
   seq: 9
 }
 
+script:pre-request {
+  if (!bru.hasVar("angebotId") && !bru.getEnvVar("angebotId")) {
+    bru.runner.skipRequest();
+  }
+}
+
 patch {
   url: {{baseUrl}}/api/datenbanken/angebote/{{angebotId}}
   body: json

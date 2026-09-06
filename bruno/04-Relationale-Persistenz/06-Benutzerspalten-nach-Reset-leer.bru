@@ -1,0 +1,24 @@
+meta {
+  name: Benutzerspalten Testdatensatz loeschen
+  type: http
+  seq: 6
+}
+
+script:pre-request {
+  if (!bru.hasVar("benutzerSpaltenId") && !bru.getEnvVar("benutzerSpaltenId")) {
+    bru.runner.skipRequest();
+  }
+}
+
+delete {
+  url: {{baseUrl}}/api/datenbanken/benutzerSpalten/{{benutzerSpaltenId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Dynamischer Benutzerspalten-Datensatz wurde geloescht", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().ok).to.equal(true);
+  });
+}

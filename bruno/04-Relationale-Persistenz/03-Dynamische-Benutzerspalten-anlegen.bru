@@ -1,0 +1,40 @@
+meta {
+  name: Dynamische Benutzerspalten anlegen
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/datenbanken/benutzerSpalten
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userId": 1,
+    "tableName": "kunden",
+    "columns": [
+      {
+        "id": "firma",
+        "visible": true
+      },
+      {
+        "id": "segment",
+        "visible": false
+      }
+    ]
+  }
+}
+
+tests {
+  test("Leere Tabelle akzeptiert neue relationale Felder und Kindobjekte", function() {
+    expect(res.getStatus()).to.equal(201);
+    const item = res.getBody().item;
+    expect(item.userId).to.equal(1);
+    expect(item.tableName).to.equal("kunden");
+    expect(item.columns).to.be.an("array").with.length(2);
+    bru.setVar("benutzerSpaltenId", String(item.id));
+    bru.setEnvVar("benutzerSpaltenId", String(item.id));
+  });
+}

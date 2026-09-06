@@ -4,6 +4,12 @@ meta {
   seq: 14
 }
 
+script:pre-request {
+  if (!bru.hasVar("rechnungId") && !bru.getEnvVar("rechnungId")) {
+    bru.runner.skipRequest();
+  }
+}
+
 get {
   url: {{baseUrl}}/api/datenbanken/rechnungen/{{rechnungId}}
   body: none

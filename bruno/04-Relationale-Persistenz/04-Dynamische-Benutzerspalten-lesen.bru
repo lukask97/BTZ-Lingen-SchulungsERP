@@ -1,0 +1,29 @@
+meta {
+  name: Dynamische Benutzerspalten lesen
+  type: http
+  seq: 4
+}
+
+script:pre-request {
+  if (!bru.hasVar("benutzerSpaltenId") && !bru.getEnvVar("benutzerSpaltenId")) {
+    bru.runner.skipRequest();
+  }
+}
+
+get {
+  url: {{baseUrl}}/api/datenbanken/benutzerSpalten/{{benutzerSpaltenId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Dynamische Kindobjekte werden unveraendert zurueckgegeben", function() {
+    expect(res.getStatus()).to.equal(200);
+    const item = res.getBody().item;
+    expect(String(item.id)).to.equal(bru.getEnvVar("benutzerSpaltenId"));
+    expect(item.columns).to.deep.equal([
+      { id: "firma", visible: true },
+      { id: "segment", visible: false }
+    ]);
+  });
+}

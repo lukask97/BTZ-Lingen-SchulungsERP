@@ -1,0 +1,27 @@
+meta {
+  name: Lehrkraftoptionen mit Regeln pruefen
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/datenbanken/lehrkraftOptionen/1
+  body: none
+  auth: none
+}
+
+tests {
+  test("Lehrkraftoptionen enthalten relationale Zahlungsregeln", function() {
+    expect(res.getStatus()).to.equal(200);
+    const item = res.getBody().item;
+    expect(item.autoLieferannahmeNach1Tag).to.equal(false);
+    expect(item.autoDebitorenzahlungNach1Tag).to.equal(false);
+    expect(item.debitorenzahlungRegeln).to.be.an("array").with.length(5);
+    expect(item.debitorenzahlungRegeln[0]).to.deep.include({
+      id: "regel-1",
+      startTag: 0,
+      endTag: 0,
+      gewichtung: 1
+    });
+  });
+}

@@ -2,15 +2,16 @@
 
 ## Zielbild
 
-Das Projekt nutzt kein starres SQL-Fachschema pro Modul, sondern eine generische JSONB-Ablage in `app_records`.
-Das fachliche Schema ergibt sich deshalb aus den Seed-Tabellen und ihren Beziehungen.
+Das Projekt nutzt relationale PostgreSQL-Fachtabellen, die nach Fachbereichen in Schemas gruppiert sind.
+Die bestehende generische API bleibt kompatibel und setzt camelCase-Payloads auf snake_case-SQL-Spalten um.
 
 ## Technische Persistenz
 
-- Physische Tabelle: `app_records`
-- Schluessel: `table_name` + `entity_id`
-- Nutzdaten: `data` als JSONB
+- Physische Tabellen: fachliche Tabellen in Schemas wie `verkauf`, `einkauf`, `buchhaltung`, `verwaltung`, `personal`, `waren`, `kunden`, `lieferanten` und `organisation`
+- Schluessel: `entity_id` pro API-Tabelle, damit numerische und fachliche Demo-IDs kompatibel bleiben
+- Nutzdaten: skalare Felder als SQL-Spalten; Listen und Unterobjekte in relationalen Kindtabellen
 - Sortierung: `sort_id`
+- Seed/Reset: JSON-Seed-Dateien bleiben die fuehrende Quelle und werden beim Reset relational importiert
 
 ## Fachliche Kernbereiche
 

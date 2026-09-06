@@ -1,0 +1,23 @@
+meta {
+  name: Kunden mit relationalen Kindtabellen pruefen
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/datenbanken/kunden/1
+  body: none
+  auth: none
+}
+
+tests {
+  test("Kunde wird mit Ansprechpartnern und Optionen hydratisiert", function() {
+    expect(res.getStatus()).to.equal(200);
+    const item = res.getBody().item;
+    expect(item).to.not.have.property("data");
+    expect(item.kundenNr).to.equal("DB10001");
+    expect(item.ansprechpartner).to.be.an("array").that.has.length.above(0);
+    expect(item.ansprechpartner[0]).to.include.keys(["id", "name", "abteilung"]);
+    expect(item.optionen).to.be.an("array").that.includes("Fahrradbekleidung");
+  });
+}

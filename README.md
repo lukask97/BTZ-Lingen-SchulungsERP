@@ -13,7 +13,7 @@ Dieses Repository ist ein Schulungs-ERP mit einer vereinfachten und klaren Laufz
 Es gibt nur noch einen technischen Betriebsweg:
 
 - Backend auf Flask
-- Persistenz in PostgreSQL mit JSONB
+- Persistenz in PostgreSQL mit relationalen Fachtabellen
 - Seed-Daten aus `backend/seed/sources/json/`
 - Reset ueber das Backend
 - keine lokalen Mock- oder Memory-Modi mehr
@@ -25,7 +25,7 @@ Wichtige Einstiegspunkte:
 - `docker-compose.yml`: lokale Infrastruktur
 - `backend/app.py`: Backend-Start
 - `backend/app_factory.py`: App-Erzeugung, Blueprints, CORS, Store
-- `backend/repositories/postgres_store.py`: zentrale JSONB-Persistenz
+- `backend/repositories/postgres_store.py`: relationale PostgreSQL-Persistenz mit kompatibler CRUD-API
 - `backend/routes/`: API-Module
 - `backend/seed/sources/json/`: zentrale, fachlich getrennte Demo- und Reset-Daten
 - `backend/seed/optionenDefault.json`: Standardwerte fuer gezielte Resets
@@ -38,7 +38,7 @@ Wichtige Einstiegspunkte:
 
 Das Projekt wurde bereits auf eine klarere Grundlinie reduziert:
 
-- nur noch PostgreSQL mit JSONB als Persistenz
+- nur noch PostgreSQL mit relationalen Fachtabellen als Persistenz
 - kein Memory-Store, kein Frontend-Mocklaufzeitpfad, kein Preview-Backend-Modus
 - Reset und Demo-Daten zentral ueber `backend/seed/`
 - Frontend-Synchronisation nur noch ueber Backend-API, Cache und Server-Events
@@ -99,11 +99,11 @@ Alle fachlichen Daten laufen ueber das Backend:
 - CRUD-Endpunkte unter `/api/datenbanken/*`
 - Login und Session im Backend
 - Server-Events fuer Tabellen-Updates und Resets
-- zentrale Seed-Daten in `backend/seed/sources/json/`
+- zentrale Seed-Daten in `backend/seed/sources/json/`, die beim Reset relational importiert werden
 
 Resets funktionieren in zwei klaren Formen:
 
-- globaler Reset: laedt die Seed-Daten neu in PostgreSQL
+- globaler Reset: baut die relationalen Fachtabellen neu auf und laedt die Seed-Daten in PostgreSQL
 - gezielte Options-Resets: laden Standardwerte aus `backend/seed/optionenDefault.json`
 
 ## Seed-Daten pflegen

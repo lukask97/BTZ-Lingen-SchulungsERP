@@ -4,6 +4,12 @@ meta {
   seq: 11
 }
 
+script:pre-request {
+  if (!bru.hasVar("auftragId") && !bru.getEnvVar("auftragId")) {
+    bru.runner.skipRequest();
+  }
+}
+
 post {
   url: {{baseUrl}}/api/datenbanken/auftragspositionen
   body: json

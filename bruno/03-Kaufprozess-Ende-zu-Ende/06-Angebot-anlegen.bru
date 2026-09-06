@@ -4,6 +4,12 @@ meta {
   seq: 7
 }
 
+script:pre-request {
+  if (!bru.hasVar("anfrageId") && !bru.getEnvVar("anfrageId")) {
+    bru.runner.skipRequest();
+  }
+}
+
 post {
   url: {{baseUrl}}/api/datenbanken/angebote
   body: json

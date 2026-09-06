@@ -4,6 +4,12 @@ meta {
   seq: 3
 }
 
+script:pre-request {
+  if (!bru.hasVar("crudKundeId") && !bru.getEnvVar("crudKundeId")) {
+    bru.runner.skipRequest();
+  }
+}
+
 patch {
   url: {{baseUrl}}/api/datenbanken/kunden/{{crudKundeId}}
   body: json

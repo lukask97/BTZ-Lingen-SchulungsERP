@@ -1,0 +1,28 @@
+meta {
+  name: Benutzerspalten-Metadaten pruefen
+  type: http
+  seq: 5
+}
+
+script:pre-request {
+  if (!bru.hasVar("benutzerSpaltenId") && !bru.getEnvVar("benutzerSpaltenId")) {
+    bru.runner.skipRequest();
+  }
+}
+
+get {
+  url: {{baseUrl}}/api/datenbanken/benutzerSpalten
+  body: none
+  auth: none
+}
+
+tests {
+  test("Benutzerspalten-Metadaten enthalten dynamische Felder", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().ok).to.equal(true);
+    const fields = res.getBody().meta.fields.map(field => field.name);
+    expect(fields).to.include("columns");
+    expect(fields).to.include("tableName");
+    expect(fields).to.include("userId");
+  });
+}

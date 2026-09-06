@@ -4,6 +4,12 @@ meta {
   seq: 4
 }
 
+script:pre-request {
+  if (!bru.hasVar("crudKundeId") && !bru.getEnvVar("crudKundeId")) {
+    bru.runner.skipRequest();
+  }
+}
+
 delete {
   url: {{baseUrl}}/api/datenbanken/kunden/{{crudKundeId}}
   body: none

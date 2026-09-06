@@ -1,0 +1,18 @@
+meta {
+  name: Geschuetzter Zugriff ohne Session
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/datenbanken/__nicht_vorbereitet__
+  body: none
+  auth: none
+}
+
+tests {
+  test("Unbekannte Tabelle wird ohne Schreibzugriff nicht angelegt", function() {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().ok).to.equal(false);
+  });
+}
