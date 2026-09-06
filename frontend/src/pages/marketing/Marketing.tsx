@@ -6,9 +6,8 @@ import Label from "../../components/form/Label";
 import SaveButton from "../../components/SaveButton";
 import TextField from "../../components/form/TextField";
 import TextArea from "../../components/form/TextArea";
-import OverviewCards from "../../components/OverviewCards";
+import ModuleOverview from "../../components/ModuleOverview";
 import marketingService from "../../services/marketing/marketingService";
-import { Link } from "react-router-dom";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 import useAuth from "../../auth/useAuth";
 
@@ -59,40 +58,40 @@ export default function Marketing() {
         { field: "beschreibung", title: "Beschreibung", visible: false }
     ];
 
-    return <>
-        <h1>Marketing</h1>
-        <p>Modul für Kampagnen, Kundenaktionen, Newsletter, Events und Feedback. Die Seite soll zeigen, wie Marketingmaßnahmen geplant, dokumentiert und mit Vertrieb oder Kooperationen verknüpft werden.</p>
-        <OverviewCards cards={[{ label: "Marketingaktionen", value: aktionen.length }, { label: "Geplant", value: geplant }, { label: "Kundenfeedback", value: feedback }]}/>
-        <section className="dashboard-two-column">
-            <article className="dashboard-panel">
-                <div className="dashboard-panel-header">
-                    <h2>Marketingaufgaben</h2>
-                    <span>Lernkette</span>
-                </div>
-                <ul className="dashboard-note-list">
-                    <li>Kampagnen und Kundenaktionen zeitlich planen.</li>
-                    <li>Newsletter oder Events als Maßnahmen dokumentieren.</li>
-                    <li>Kundenfeedback erfassen und für den Vertrieb nutzbar machen.</li>
-                    <li>Kooperationen als gemeinsame Aktion vorbereiten.</li>
-                </ul>
-            </article>
-
-            <article className="dashboard-panel">
-                <div className="dashboard-panel-header">
-                    <h2>Einstiege und Verknüpfungen</h2>
-                    <span>Präsentationssicht</span>
-                </div>
-                <ul className="dashboard-note-list">
-                    <li>Marketing wirkt auf Kundenkommunikation und Angebotsprozesse.</li>
-                    <li>Events und Aktionen können mit Szenarien oder Kooperationen verbunden werden.</li>
-                </ul>
-                <div className="link-list">
-                    <Link className="button-link" to="/kunden">Kunden öffnen</Link>
-                    <Link className="button-link" to="/kundenanfragen">Kundenanfragen öffnen</Link>
-                    <Link className="button-link" to="/szenarien/kooperation">Kooperation öffnen</Link>
-                </div>
-            </article>
-        </section>
+    return <ModuleOverview
+        title="Marketing"
+        intro="Modul für Kampagnen, Kundenaktionen, Newsletter, Events und Feedback. Die Seite soll zeigen, wie Marketingmaßnahmen geplant, dokumentiert und mit Vertrieb oder Kooperationen verknüpft werden."
+        cards={[
+            { label: "Marketingaktionen", value: aktionen.length },
+            { label: "Geplant", value: geplant },
+            { label: "Kundenfeedback", value: feedback },
+        ]}
+        panels={[
+            {
+                title: "Marketingaufgaben",
+                badge: "Lernkette",
+                items: [
+                    "Kampagnen und Kundenaktionen zeitlich planen.",
+                    "Newsletter oder Events als Maßnahmen dokumentieren.",
+                    "Kundenfeedback erfassen und für den Vertrieb nutzbar machen.",
+                    "Kooperationen als gemeinsame Aktion vorbereiten.",
+                ],
+            },
+            {
+                title: "Einstiege und Verknüpfungen",
+                badge: "Präsentationssicht",
+                items: [
+                    "Marketing wirkt auf Kundenkommunikation und Angebotsprozesse.",
+                    "Events und Aktionen können mit Szenarien oder Kooperationen verbunden werden.",
+                ],
+                links: [
+                    { to: "/kunden", label: "Kunden öffnen" },
+                    { to: "/kundenanfragen", label: "Kundenanfragen öffnen" },
+                    { to: "/szenarien/kooperation", label: "Kooperation öffnen" },
+                ],
+            },
+        ]}
+    >
         <DataTable title="Marketing"
             tableName="marketingaktionen"
             username={user.username}
@@ -124,5 +123,5 @@ export default function Marketing() {
                 {fehler && <p className="form-error">{fehler}</p>}
             </div>
         </Dialog>
-    </>;
+    </ModuleOverview>;
 }

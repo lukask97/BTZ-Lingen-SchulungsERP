@@ -110,6 +110,24 @@ select optgroup {
     border-color: #9bc5e8;
 }
 
+[data-theme=dark] .button.is-link.is-light,
+[data-theme=dark] .button-secondary,
+.theme-dark .button.is-link.is-light,
+.theme-dark .button-secondary {
+    background: #26374a;
+    border-color: #40566d;
+    color: #d8ebfb;
+}
+
+[data-theme=dark] .button.is-link.is-light:hover:not(:disabled),
+[data-theme=dark] .button-secondary:hover:not(:disabled),
+.theme-dark .button.is-link.is-light:hover:not(:disabled),
+.theme-dark .button-secondary:hover:not(:disabled) {
+    background: #31475e;
+    border-color: #5f83a8;
+    color: #ffffff;
+}
+
 .button-success {
     background: #1f8f5f;
     border-color: #1f8f5f;
@@ -258,11 +276,23 @@ select optgroup {
 .datatable {
     margin-bottom: 0 !important;
     min-width: max-content;
+    background: var(--erp-surface);
+    color: var(--erp-text);
 }
 
 .datatable th,
 .datatable td {
     vertical-align: middle;
+    border-color: var(--erp-border);
+}
+
+.datatable tbody td {
+    background: var(--erp-surface);
+    color: var(--erp-text);
+}
+
+.datatable tbody tr:nth-child(odd) td {
+    background: #f8fbff;
 }
 
 .datatable th {
@@ -276,6 +306,28 @@ select optgroup {
 .theme-dark .datatable th {
     background: #24394c;
     color: #d8ebfb;
+}
+
+[data-theme=dark] .datatable,
+.theme-dark .datatable {
+    background: var(--erp-surface);
+    color: var(--erp-text);
+}
+
+[data-theme=dark] .datatable tbody td,
+.theme-dark .datatable tbody td {
+    background: var(--erp-surface);
+    color: var(--erp-text);
+}
+
+[data-theme=dark] .datatable tbody tr:nth-child(odd) td,
+.theme-dark .datatable tbody tr:nth-child(odd) td {
+    background: #1b2a38;
+}
+
+[data-theme=dark] .datatable tbody tr:hover td,
+.theme-dark .datatable tbody tr:hover td {
+    background: #213447;
 }
 
 .datatable-header {
@@ -333,6 +385,16 @@ select optgroup {
 [data-theme=dark] .datatable tbody .datatable-actions-column,
 .theme-dark .datatable tbody .datatable-actions-column {
     background: var(--erp-surface);
+}
+
+[data-theme=dark] .datatable tbody tr:nth-child(odd) .datatable-actions-column,
+.theme-dark .datatable tbody tr:nth-child(odd) .datatable-actions-column {
+    background: #1b2a38;
+}
+
+[data-theme=dark] .datatable tbody tr:hover .datatable-actions-column,
+.theme-dark .datatable tbody tr:hover .datatable-actions-column {
+    background: #213447;
 }
 
 [data-theme=dark] .datatable tbody tr.datatable-row-critical-light .datatable-actions-column,

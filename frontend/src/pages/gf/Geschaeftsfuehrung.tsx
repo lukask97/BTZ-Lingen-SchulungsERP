@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import ModuleOverview from "../../components/ModuleOverview";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import berichteService from "../../services/gf/berichteService";
 import bestellungenService from "../../services/einkauf/bestellungenService";
@@ -21,59 +21,48 @@ export default function Geschaeftsfuehrung() {
     const offeneBestellungen = bestellungen.filter(item => item.status !== "eingegangen").length;
     const offeneRechnungen = rechnungen.filter(item => item.status === "offen").length;
 
-    return <>
-        <h1>Geschäftsführung</h1>
-        <p>Modul für Freigaben, Berichte und Unternehmenskennzahlen. Die Seite soll Lehrkräften und Schülern zeigen, wie bereichsübergreifende Entscheidungen auf vorhandenen Vorgängen beruhen.</p>
-
-        <div className="kennzahlen">
-            <div className="kennzahl"><span>Offene Freigaben</span><strong>{offeneFreigaben}</strong><small>Entscheidungen</small></div>
-            <div className="kennzahl"><span>Berichte</span><strong>{berichte.length}</strong><small>{fertigeBerichte} fertig</small></div>
-            <div className="kennzahl"><span>Offene Aufträge</span><strong>{offeneAuftraege}</strong><small>Vertrieb</small></div>
-            <div className="kennzahl"><span>Offene Bestellungen</span><strong>{offeneBestellungen}</strong><small>Einkauf</small></div>
-            <div className="kennzahl"><span>Offene Rechnungen</span><strong>{offeneRechnungen}</strong><small>Buchhaltung</small></div>
-        </div>
-
-        <section className="dashboard-two-column">
-            <article className="dashboard-panel">
-                <div className="dashboard-panel-header">
-                    <h2>Führungsaufgaben</h2>
-                    <span>Didaktischer Fokus</span>
-                </div>
-                <ul className="dashboard-note-list">
-                    <li>Offene Freigaben prüfen und Entscheidungen begründen.</li>
-                    <li>Berichte aus den Fachbereichen lesen und einordnen.</li>
-                    <li>Kennzahlen aus Einkauf, Vertrieb und Buchhaltung gemeinsam betrachten.</li>
-                    <li>Unterrichtsgespräche mit nachvollziehbaren Daten vorbereiten.</li>
-                </ul>
-            </article>
-
-            <article className="dashboard-panel">
-                <div className="dashboard-panel-header">
-                    <h2>Bereichsübergreifender Blick</h2>
-                    <span>Mockup-Zusammenhang</span>
-                </div>
-                <ul className="dashboard-note-list">
-                    <li>Viele offene Aufträge beeinflussen Versand, Rechnungen und Freigaben.</li>
-                    <li>Aktive Bestellungen oder Engpässe wirken auf Lager und Lieferfähigkeit.</li>
-                    <li>Offene Rechnungen und Mahnungen sind Hinweise auf Zahlungs- oder Prozessprobleme.</li>
-                </ul>
-                <div className="link-list">
-                    <Link className="button-link" to="/freigaben">Freigaben öffnen</Link>
-                    <Link className="button-link" to="/berichte">Berichte öffnen</Link>
-                    <Link className="button-link" to="/">Zum Dashboard</Link>
-                </div>
-            </article>
-        </section>
-
-        <section className="module-panel">
-            <h2>Direkte Einstiege</h2>
-            <div className="link-list">
-                <Link className="button-link" to="/freigaben">Freigaben</Link>
-                <Link className="button-link" to="/berichte">Berichte</Link>
-                <Link className="button-link" to="/buchhaltung">Buchhaltung</Link>
-                <Link className="button-link" to="/themen/verkauf">Verkauf</Link>
-                <Link className="button-link" to="/themen/einkauf">Einkauf</Link>
-            </div>
-        </section>
-    </>;
+    return <ModuleOverview
+        title="Geschäftsführung"
+        intro="Modul für Freigaben, Berichte und Unternehmenskennzahlen. Die Seite soll Lehrkräften und Schülern zeigen, wie bereichsübergreifende Entscheidungen auf vorhandenen Vorgängen beruhen."
+        cards={[
+            { label: "Offene Freigaben", value: offeneFreigaben, note: "Entscheidungen" },
+            { label: "Berichte", value: berichte.length, note: `${fertigeBerichte} fertig` },
+            { label: "Offene Aufträge", value: offeneAuftraege, note: "Vertrieb" },
+            { label: "Offene Bestellungen", value: offeneBestellungen, note: "Einkauf" },
+            { label: "Offene Rechnungen", value: offeneRechnungen, note: "Buchhaltung" },
+        ]}
+        panels={[
+            {
+                title: "Führungsaufgaben",
+                badge: "Didaktischer Fokus",
+                items: [
+                    "Offene Freigaben prüfen und Entscheidungen begründen.",
+                    "Berichte aus den Fachbereichen lesen und einordnen.",
+                    "Kennzahlen aus Einkauf, Vertrieb und Buchhaltung gemeinsam betrachten.",
+                    "Unterrichtsgespräche mit nachvollziehbaren Daten vorbereiten.",
+                ],
+            },
+            {
+                title: "Bereichsübergreifender Blick",
+                badge: "Mockup-Zusammenhang",
+                items: [
+                    "Viele offene Aufträge beeinflussen Versand, Rechnungen und Freigaben.",
+                    "Aktive Bestellungen oder Engpässe wirken auf Lager und Lieferfähigkeit.",
+                    "Offene Rechnungen und Mahnungen sind Hinweise auf Zahlungs- oder Prozessprobleme.",
+                ],
+                links: [
+                    { to: "/freigaben", label: "Freigaben öffnen" },
+                    { to: "/berichte", label: "Berichte öffnen" },
+                    { to: "/", label: "Zum Dashboard" },
+                ],
+            },
+        ]}
+        links={[
+            { to: "/freigaben", label: "Freigaben" },
+            { to: "/berichte", label: "Berichte" },
+            { to: "/buchhaltung", label: "Buchhaltung" },
+            { to: "/themen/verkauf", label: "Verkauf" },
+            { to: "/themen/einkauf", label: "Einkauf" },
+        ]}
+    />;
 }
