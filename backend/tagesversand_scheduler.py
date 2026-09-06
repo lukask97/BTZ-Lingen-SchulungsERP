@@ -14,10 +14,16 @@ def start_tagesversand_scheduler(app):
         while not stop_event.is_set():
             try:
                 with app.app_context():
-                    result = run_tagesversand(app.extensions["store"])
-                    if result.get("protocol") and not result.get("alreadyRun"):
-                        for table_name in ("angebote", "nachrichten", "tagesversandprotokolle"):
-                            publish_event("table-changed", {"table": table_name, "action": "tagesversand"})
+                    store_manager = app.extensions["store_manager"]
+                    for class_item in store_manager.list_classes():
+                        result = run_tagesversand(store_manager.get_class_store(class_item.get("datenbankName")))
+                        if result.get("protocol") and not result.get("alreadyRun"):
+                            for table_name in ("angebote", "nachrichten", "tagesversandprotokolle"):
+                                publish_event("table-changed", {
+                                    "table": table_name,
+                                    "action": "tagesversand",
+                                    "klasseId": class_item.get("id")
+                                })
             except Exception:
                 app.logger.exception("Automatischer Tagesversand konnte nicht ausgeführt werden.")
 

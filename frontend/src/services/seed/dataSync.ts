@@ -4,6 +4,7 @@ import { subscribeToServerResetEvents, subscribeToServerTableEvents } from "../c
 
 export const SYNC_DATA_KEYS = [
     "kunden", "artikel", "artikelStueckliste", "benutzer", "rollen", "rechte", "lager",
+    "klassen",
     "rollenRechte",
     "services",
     "lieferanten", "lieferantenArtikelStaffeln", "bestellungen", "angebote", "auftraege", "reklamationen",
@@ -19,10 +20,11 @@ export const SYNC_DATA_KEYS = [
     "fristenOptionen"
 ];
 
-export function resetSeedData() {
+export function resetSeedData(klasseIds: Array<number | string> = []) {
     clearTableCache();
     syncApiRequest("/reset", {
-        method: "POST"
+        method: "POST",
+        body: { klasseIds }
     });
 }
 

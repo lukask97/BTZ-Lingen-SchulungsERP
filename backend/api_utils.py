@@ -1,8 +1,16 @@
-from flask import current_app, jsonify
+from flask import current_app, jsonify, session
 
 
-def get_store():
-    return current_app.extensions["store"]
+def get_store(table_name=None):
+    return current_app.extensions["store_manager"].get_store(table_name, session.get("active_class_db"))
+
+
+def get_common_store():
+    return current_app.extensions["store_manager"].get_common_store()
+
+
+def get_store_manager():
+    return current_app.extensions["store_manager"]
 
 
 def get_article_image_store():

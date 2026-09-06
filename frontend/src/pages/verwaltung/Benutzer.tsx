@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useAuth from "../../auth/useAuth";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
@@ -7,6 +7,7 @@ import TextField from "../../components/form/TextField";
 import SaveButton from "../../components/SaveButton";
 import { getAllTableColumns, getVisibleTableColumns, INITIAL_DATA, PAGE_CONFIG } from "../../constants/schemas";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
+import { listKlassen } from "../../services/admin/klassenService";
 import benutzerService from "../../services/verwaltung/benutzerService";
 import rollenService from "../../services/verwaltung/rollenService";
 import {
@@ -21,6 +22,7 @@ import { getUserDisplayNameWithRole } from "../../utils/userDisplay";
 export default function Benutzer() {
     const { user } = useAuth();
     const config = PAGE_CONFIG.benutzer;
+    const activeClassId = String((user.activeClass as any)?.id ?? "");
 
     const {
         allData,
@@ -55,6 +57,9 @@ export default function Benutzer() {
 
     const [roleFilter, setRoleFilter] = useState("");
     const [importRole, setImportRole] = useState("Verkauf Azubi");
+    const [klassen, setKlassen] = useState<any[]>([]);
+    const [classFilter, setClassFilter] = useState(activeClassId);
+    const [importClassId, setImportClassId] = useState("0");
     const [importError, setImportError] = useState("");
     const [importSummary, setImportSummary] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -63,13 +68,47 @@ export default function Benutzer() {
         setCurrentItem({ ...currentItem, [field]: value });
     };
 
+    useEffect(() => {
+        void listKlassen().then(items => {
+            setKlassen(items);
+            if (items.length > 0 && !items.some(item => String(item.id) === String(importClassId))) {
+                setImportClassId(String(items[0].id));
+            }
+        }).catch(() => setKlassen([]));
+    }, []);
+
+    useEffect(() => {
+        setClassFilter(activeClassId);
+    }, [activeClassId]);
+
+    const getClassName = (classId) => {
+        const klasse = klassen.find(item => String(item.id) === String(classId));
+        return klasse?.name || (classId !== undefined && classId !== null && classId !== "" ? `Klasse ${classId}` : "-");
+    };
+
+    const getUserClassIds = (item) => {
+        if (Array.isArray(item.klasseIds)) return item.klasseIds.map(String);
+        if (item.klasseId !== undefined && item.klasseId !== null && item.klasseId !== "") return [String(item.klasseId)];
+        return [];
+    };
+
+    const setUserClassIds = (values: string[]) => {
+        setCurrentItem({
+            ...currentItem,
+            klasseIds: values,
+            klasseId: values[0] || ""
+        });
+    };
+
     const handleFilterChange = (filters) => {
         setRoleFilter(filters.rolle || "");
+        setClassFilter(filters.klasse || "");
     };
 
     const filteredDisplayData = useMemo(() => {
         let filtered = allData;
         if (roleFilter) filtered = filtered.filter(item => item.rolle === roleFilter);
+        if (classFilter) filtered = filtered.filter(item => getUserClassIds(item).includes(String(classFilter)));
         if (search) {
             filtered = filtered.filter(item =>
                 Object.values(item)
@@ -79,15 +118,25 @@ export default function Benutzer() {
             );
         }
         return filtered;
-    }, [allData, roleFilter, search]);
+    }, [allData, roleFilter, classFilter, search]);
 
     const benutzerFilters = useMemo(() => [
         {
             name: "rolle",
             label: "Rolle",
             options: roleOptions.map(role => ({ value: role, label: role }))
+        },
+        {
+            name: "klasse",
+            label: "Klasse",
+            options: klassen.map(klasse => ({ value: String(klasse.id), label: klasse.name }))
         }
-    ], [roleOptions]);
+    ], [roleOptions, klassen]);
+
+    const displayData = useMemo(() => filteredDisplayData.map(item => ({
+        ...item,
+        klasse: getUserClassIds(item).map(getClassName).join(", ")
+    })), [filteredDisplayData, klassen]);
 
     const exportiereBenutzer = () => {
         exportUsersToExcel(
@@ -97,6 +146,7 @@ export default function Benutzer() {
                 Benutzername: item.username || "",
                 Passwort: item.password || "",
                 Rolle: item.rolle || "",
+                Klasse: getUserClassIds(item).map(getClassName).join(", "),
                 "E-Mail": item.email || ""
             })),
             "Benutzer_Export"
@@ -135,7 +185,9 @@ export default function Benutzer() {
                     username,
                     email: `${username}@schulung.local`,
                     password: generateSimplePassword(),
-                    rolle: importRole
+                    rolle: importRole,
+                    klasseId: importClassId,
+                    klasseIds: [importClassId]
                 });
             });
 
@@ -148,6 +200,7 @@ export default function Benutzer() {
                     Benutzername: item.username || "",
                     Passwort: item.password || "",
                     Rolle: item.rolle || "",
+                    Klasse: getUserClassIds(item).map(getClassName).join(", "),
                     "E-Mail": item.email || ""
                 })),
                 "Benutzer_Import_Ergebnis"
@@ -169,8 +222,9 @@ export default function Benutzer() {
                 username={user.username}
                 columns={columns}
                 allColumns={allColumns}
-                data={filteredDisplayData}
+                data={displayData}
                 filters={benutzerFilters}
+                initialFilters={{ klasse: classFilter }}
                 onFilter={handleFilterChange}
                 searchable={true}
                 pageSize={pageSize}
@@ -196,6 +250,12 @@ export default function Benutzer() {
                         <Label>Rolle für importierte Nutzer</Label>
                         <select name="import-role" value={importRole} onChange={event => setImportRole(event.target.value)}>
                             {roleOptions.map(role => <option key={role} value={role}>{role}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <Label>Klasse fuer importierte Nutzer</Label>
+                        <select name="import-class" value={importClassId} onChange={event => setImportClassId(event.target.value)}>
+                            {klassen.map(klasse => <option key={klasse.id} value={klasse.id}>{klasse.name}</option>)}
                         </select>
                     </div>
                 </div>
@@ -238,6 +298,16 @@ export default function Benutzer() {
 
                 <Label required>Rolle</Label>
                 <TextField value={currentItem.rolle} onChange={v => handleFieldChange("rolle", v)} />
+
+                <Label>Klassen</Label>
+                <select
+                    name="klasseIds"
+                    multiple
+                    value={getUserClassIds(currentItem)}
+                    onChange={event => setUserClassIds(Array.from(event.target.selectedOptions).map(option => option.value))}
+                >
+                    {klassen.map(klasse => <option key={klasse.id} value={String(klasse.id)}>{klasse.name}</option>)}
+                </select>
 
                 <Label>Anzeigename</Label>
                 <TextField value={getUserDisplayNameWithRole(currentItem, "")} onChange={() => {}} disabled />

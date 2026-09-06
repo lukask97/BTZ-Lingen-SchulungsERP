@@ -1,8 +1,8 @@
-from flask import Blueprint, Response
+from flask import Blueprint, Response, request
 
-from api_utils import get_store, json_response
+from api_utils import get_store, get_store_manager, json_response
 from events import publish_event
-from security import require_explicit_permission
+from security import get_current_user, get_user_permissions, require_explicit_permission
 
 meta_bp = Blueprint("meta", __name__, url_prefix="/api")
 
@@ -178,11 +178,22 @@ def reset():
     if permission_error:
         return permission_error
 
-    store = get_store()
-    store.reset()
+    payload = request.get_json(silent=True) or {}
+    class_ids = payload.get("klasseIds") or payload.get("classIds") or []
+    if not isinstance(class_ids, list):
+        class_ids = [class_ids]
+    store_manager = get_store_manager()
+    user = get_current_user()
+    permissions = get_user_permissions(user)
+    allowed_ids = {str(item.get("id")) for item in store_manager.get_accessible_classes({**user, "permissions": permissions})}
+    requested_ids = [class_id for class_id in (class_ids or [0]) if str(class_id) in allowed_ids]
+    if not requested_ids:
+        return json_response({"ok": False, "message": "Keine berechtigte Klasse fuer den Reset ausgewaehlt."}, 403)
+    reset_tables = store_manager.reset_classes(requested_ids)
     publish_event("data-reset", {
-        "tables": [table_name for table_name in store.list_tables()]
+        "tables": reset_tables
     })
+    store = get_store()
     return json_response({
         "ok": True,
         "tables": build_tables_payload(store)

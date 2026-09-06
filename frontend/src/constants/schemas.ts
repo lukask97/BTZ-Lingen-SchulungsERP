@@ -89,7 +89,9 @@ export const INITIAL_DATA = {
         username: "",
         email: "",
         password: "",
-        rolle: ""
+        rolle: "",
+        klasseId: 0,
+        klasseIds: [0]
     },
     rollen: {
         id: null,
@@ -266,6 +268,7 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "nachname", title: "Nachname" },
         { field: "username", title: "Benutzername" },
         { field: "email", title: "E-Mail" },
+        { field: "klasse", title: "Klasse" },
         { field: "rolle", title: "Rolle" },
         { field: "password", title: "Passwort", visible: false }
     ],

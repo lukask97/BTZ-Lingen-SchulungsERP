@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./authStore";
 import type { AuthProviderProps, AuthUser } from "../types/auth";
-import { getCurrentBackendUser, logoutSession } from "../services/auth/authService";
+import { getCurrentBackendUser, logoutSession, setActiveClass } from "../services/auth/authService";
+import { clearTableCache } from "../services/core/dataCache";
 import { userHasAccess, userHasFullAccess, userHasPermission } from "./permissions";
 
 const AUTH_STORAGE_KEY = "session-user";
@@ -92,6 +93,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
 
+    async function switchActiveClass(classId: number | string) {
+
+        const updatedUser = await setActiveClass(classId);
+        clearTableCache();
+        setUser(updatedUser);
+        if (updatedUser) {
+            sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
+        }
+        window.location.reload();
+
+    }
+
+
     function hasPermission(permission: string) {
         return userHasPermission(user, permission);
     }
@@ -109,7 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return (<AuthContext.Provider
         value={{
-            user, isAuthReady, authError, login, logout, hasFullAccess, hasPermission, hasAccess
+            user, isAuthReady, authError, login, logout, switchActiveClass, hasFullAccess, hasPermission, hasAccess
         }}
     >
         {children}

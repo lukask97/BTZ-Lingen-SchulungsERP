@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { listKlassen } from "../../services/admin/klassenService";
 import lehrkraftOptionenService from "../../services/lehrkraft/lehrkraftOptionenService";
 import { resetSeedData } from "../../services/seed/dataSync";
 import fristenOptionenService from "../../services/verwaltung/fristenOptionenService";
@@ -5,9 +7,25 @@ import nummernkreiseService from "../../services/verwaltung/nummernkreiseService
 import unternehmenService from "../../services/verwaltung/unternehmenService";
 
 export default function Backup() {
+    const [klassen, setKlassen] = useState<any[]>([]);
+    const [resetClassIds, setResetClassIds] = useState<Array<string>>(["0"]);
+
+    useEffect(() => {
+        void listKlassen().then(items => {
+            setKlassen(items);
+            if (items.length > 0) {
+                setResetClassIds([String(items[0].id)]);
+            }
+        }).catch(() => setKlassen([]));
+    }, []);
+
     const testdatenZuruecksetzen = () => {
+        if (resetClassIds.length === 0) {
+            alert("Bitte mindestens eine Klasse auswaehlen.");
+            return;
+        }
         if (!confirm("Alle Demo- und Seed-Daten werden auf den hinterlegten Stand zurueckgesetzt. Fortfahren?")) return;
-        resetSeedData();
+        resetSeedData(resetClassIds);
         window.location.reload();
     };
 
@@ -28,8 +46,22 @@ export default function Backup() {
             </div>
             <p>
                 Der Reset der Testdaten wurde aus dem Dashboard hierher verschoben.
-                Er laedt die zentralen Seed-Daten aus dem Backend erneut in die Datenbank.
+                Er laedt die zentralen Seed-Daten aus dem Backend erneut in die ausgewaehlten Klassendatenbanken.
             </p>
+            <div className="form-row">
+                <div>
+                    <label>
+                        Klassen fuer Reset
+                        <select
+                            multiple
+                            value={resetClassIds}
+                            onChange={event => setResetClassIds(Array.from(event.target.selectedOptions).map(option => option.value))}
+                        >
+                            {klassen.map(klasse => <option key={klasse.id} value={String(klasse.id)}>{klasse.name}</option>)}
+                        </select>
+                    </label>
+                </div>
+            </div>
             <div className="thread-document-links">
                 <button type="button" className="button-secondary" onClick={testdatenZuruecksetzen}>Testdaten zuruecksetzen</button>
             </div>

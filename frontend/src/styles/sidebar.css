@@ -54,3 +54,38 @@
     color:#222;
     margin-top:5px;
 }
+
+.class-switch-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.38);
+}
+
+.class-switch-dialog {
+    min-width: 260px;
+    padding: 24px 28px;
+    border: 1px solid #d7deea;
+    border-radius: 8px;
+    background: #fff;
+    color: #172033;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.18);
+    text-align: center;
+}
+
+.class-switch-dialog strong,
+.class-switch-dialog span {
+    display: block;
+}
+
+.class-switch-dialog strong {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.class-switch-dialog span {
+    color: #536176;
+}

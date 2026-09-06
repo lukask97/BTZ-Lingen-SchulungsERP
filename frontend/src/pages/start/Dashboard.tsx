@@ -16,6 +16,7 @@ import urlaubsantraegeService from "../../services/personalwesen/urlaubsantraege
 import versandService from "../../services/logistik/versandService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
+import benutzerService from "../../services/verwaltung/benutzerService";
 import { ACCESS } from "../../constants/permissions";
 import useAuth from "../../auth/useAuth";
 import { getBerlinDate } from "../../utils/dateTime";
@@ -146,6 +147,7 @@ function Dashboard() {
     const bewerber = loadIf(canReadPersonal, () => bewerberService.list(), []);
     const mahnungen = loadIf(canReadBuchhaltung, () => mahnungenService.list(), []);
     const mitarbeiter = loadIf(canReadPersonal, () => mitarbeiterService.list(), []);
+    const benutzer = loadIf(isTeacherView, () => benutzerService.getAll(), []);
 
     const offeneAuftraege = auftraege.filter(auftrag => auftrag.status === "offen").length;
     const offenePosten = getUnifiedOpenItems(rechnungen, zahlungen).length;
@@ -216,11 +218,24 @@ function Dashboard() {
         buildStatusItem("Personal", offeneZeitbuchungen, "aktuell", "zu prüfen")
     ];
 
-    const lehrkraftKlassen = [
-        { klasse: "BKF-11A", fortschritt: 72, offeneAufgaben: schuelerAufgaben.length + offenePosten, bewertung: "solide" },
-        { klasse: "BKF-11B", fortschritt: 58, offeneAufgaben: offeneBestellungen + offeneAnfragen, bewertung: "im Aufbau" },
-        { klasse: "HBF-12", fortschritt: 81, offeneAufgaben: offeneFreigaben + offeneUrlaubsantraege, bewertung: "stark" }
-    ];
+    const authKlassen = Array.isArray(user.assignedClasses) ? user.assignedClasses : [];
+    const lehrkraftKlassen = authKlassen.map((klasse: any) => {
+        const classUsers = benutzer.filter(item => {
+            const ids = Array.isArray(item.klasseIds)
+                ? item.klasseIds
+                : item.klasseId !== undefined && item.klasseId !== null && item.klasseId !== ""
+                    ? [item.klasseId]
+                    : [];
+            return ids.some(id => String(id) === String(klasse.id));
+        });
+        const fortschritt = Math.max(40, Math.min(95, 65 + classUsers.length * 3 - offenePosten));
+        return {
+            klasse: klasse.name,
+            fortschritt,
+            offeneAufgaben: schuelerAufgaben.length + offenePosten,
+            bewertung: fortschritt >= 80 ? "stark" : fortschritt >= 65 ? "solide" : "im Aufbau"
+        };
+    });
 
     const lehrkraftAufgaben = [
         buildTask("Kundenanfragen beantworten", offeneLehrkraftAnfragen, `${offeneLehrkraftAnfragen} externe Anfragen oder Rückmeldungen warten auf Antwort oder Einordnung.`, "/lehrkraft/kundenkorrespondenz", "Kundenkorrespondenz öffnen"),
@@ -366,7 +381,7 @@ function Dashboard() {
                 <article className="dashboard-panel">
                     <div className="dashboard-panel-header">
                         <h2>Klassenübersicht</h2>
-                        <span>Mockup</span>
+                        <span>{lehrkraftKlassen.length} Klassen</span>
                     </div>
                     <div className="teacher-class-list">
                         {lehrkraftKlassen.map(item => <div key={item.klasse} className="teacher-class-card">
@@ -407,7 +422,7 @@ function Dashboard() {
                 <article className="dashboard-panel">
                     <div className="dashboard-panel-header">
                         <h2>Bewertungsstand</h2>
-                        <span>Mockup-Auswertung</span>
+                        <span>Auswertung</span>
                     </div>
                     <div className="status-grid">
                         {bewertungsstand.map(item => <div key={item.label} className="status-card tone-good">
@@ -453,5 +468,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
 

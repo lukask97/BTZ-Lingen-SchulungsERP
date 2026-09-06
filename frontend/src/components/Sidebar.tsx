@@ -12,7 +12,7 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onToggleDarkMode }: SidebarProps) {
-    const { user, logout, hasFullAccess, hasAccess } = useAuth();
+    const { user, logout, switchActiveClass, hasFullAccess, hasAccess } = useAuth();
     const isAdmin = hasFullAccess();
     const isVerkaufSenior = String(user.rolle || "").toLowerCase().includes("verkauf senior");
     const location = useLocation();
@@ -43,12 +43,32 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
         })
     ));
     const [scenariosCollapsed, setScenariosCollapsed] = useState(() => !location.pathname.startsWith("/szenarien") && location.pathname !== SCENARIO_OVERVIEW.path);
+    const [isSwitchingClass, setIsSwitchingClass] = useState(false);
+    const assignedClasses = Array.isArray(user.assignedClasses) ? user.assignedClasses : [];
+    const activeClass = user.activeClass && typeof user.activeClass === "object" ? user.activeClass : null;
 
     const toggleGroup = (key) => {
         setCollapsedGroups(current => ({ ...current, [key]: !current[key] }));
     };
 
+    const handleClassChange = (classId: string) => {
+        if (classId === String((activeClass as any)?.id ?? "")) return;
+        setIsSwitchingClass(true);
+        void switchActiveClass(classId).catch(() => {
+            setIsSwitchingClass(false);
+        });
+    };
+
     return (
+        <>
+        {isSwitchingClass && (
+            <div className="class-switch-overlay" role="alert" aria-live="assertive">
+                <div className="class-switch-dialog">
+                    <strong>Bitte warten</strong>
+                    <span>Klasse wird gewechselt</span>
+                </div>
+            </div>
+        )}
         <nav className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`}>
             <div className="sidebar-topbar">
                 <Link className="sidebar-brand" to="/">ERP</Link>
@@ -109,6 +129,23 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                     <strong>{getUserFullName(user)}</strong>
                 </div>
                 <div className="sidebar-user">
+                    Klasse:
+                    {assignedClasses.length > 1 ? (
+                        <select
+                            name="active-class"
+                            value={String((activeClass as any)?.id ?? "")}
+                            disabled={isSwitchingClass}
+                            onChange={event => handleClassChange(event.target.value)}
+                        >
+                            {assignedClasses.map((item: any) => (
+                                <option key={item.id} value={item.id}>{item.name}</option>
+                            ))}
+                        </select>
+                    ) : (
+                        <strong>{(activeClass as any)?.name || "-"}</strong>
+                    )}
+                </div>
+                <div className="sidebar-user">
                     Rolle:
                     <strong>{user.rolle || "-"}</strong>
                 </div>
@@ -117,5 +154,6 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
                 </button>
             </div>
         </nav>
+        </>
     );
 }

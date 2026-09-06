@@ -12,7 +12,7 @@ def get_artikel_or_error(artikel_id):
     if permission_error:
         return None, None, permission_error
 
-    store = get_store()
+    store = get_store("artikel")
     artikel = store.get("artikel", artikel_id)
     if not artikel:
         return None, None, build_error_response(404, f"Artikel {artikel_id} wurde nicht gefunden.")

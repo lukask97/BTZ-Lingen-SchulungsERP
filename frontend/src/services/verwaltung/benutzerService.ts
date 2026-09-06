@@ -12,6 +12,11 @@ function normalizeUser(item) {
         ...item,
         vorname,
         nachname,
+        klasseIds: Array.isArray(item.klasseIds)
+            ? item.klasseIds
+            : item.klasseId !== undefined && item.klasseId !== null && item.klasseId !== ""
+                ? [item.klasseId]
+                : [],
         name: getUserFullName({ ...item, vorname, nachname })
     };
 }

@@ -166,6 +166,7 @@ export default function DataTable({
   tableName,
 
   filters = [],
+  initialFilters = {},
   focusRowId = "",
   focusField = "id",
   detailLinkResolver,
@@ -179,7 +180,7 @@ export default function DataTable({
 
   const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [activeFilters, setActiveFilters] = useState({});
+  const [activeFilters, setActiveFilters] = useState(initialFilters);
 
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<DataTableColumn[]>([]);
@@ -246,6 +247,10 @@ export default function DataTable({
     setActiveFilters(newFilters);
     if (onFilter) onFilter(newFilters);
   }
+
+  useEffect(() => {
+    setActiveFilters(initialFilters);
+  }, [JSON.stringify(initialFilters)]);
 
   function sort(field) {
     let order = "asc";

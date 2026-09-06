@@ -1,6 +1,6 @@
 from flask import session
 
-from api_utils import build_error_response, get_store
+from api_utils import build_error_response, get_common_store, get_store
 
 
 TABLE_ACCESS_MAP = {
@@ -24,6 +24,7 @@ TABLE_ACCESS_MAP = {
     "firmenkonto": "buchhaltung",
     "freigaben": "gf",
     "kategorien": "artikel",
+    "klassen": "benutzer",
     "krankmeldungen": "personalwesen",
     "kunden": "kunde",
     "kundenanfragen": "verkauf",
@@ -78,12 +79,12 @@ def get_current_user():
     user_id = session.get("user_id")
     if not user_id:
         return None
-    return get_store().get("benutzer", user_id)
+    return get_common_store().get("benutzer", user_id)
 
 
 def get_user_permissions(user):
     permissions = list(user.get("permissions") or [])
-    store = get_store()
+    store = get_common_store()
 
     try:
         roles = store.list("rollen") if store.table_exists("rollen") else []

@@ -4,13 +4,13 @@ from flask_cors import CORS
 from article_images import ArticleImageStore
 from config import AppConfig
 from events import events_bp
-from repositories.postgres_store import PostgresStore
 from routes.auth import auth_bp
+from routes.admin_classes import admin_classes_bp
 from routes.article_images import article_images_bp
 from routes.meta import meta_bp
 from routes.resources import resources_bp
 from routes.tagesversand import tagesversand_bp
-from schema_migrations import run_pending_migrations
+from store_manager import StoreManager
 from tagesversand_scheduler import start_tagesversand_scheduler
 
 
@@ -26,8 +26,7 @@ def parse_cors_origins(value):
     ] or ["http://localhost:5173", "http://localhost:5174"]
 
 def create_store(app):
-    run_pending_migrations(app.config["DATABASE_DSN"])
-    return PostgresStore(app.config["DATABASE_DSN"])
+    return StoreManager(app.config["DATABASE_DSN"])
 
 
 def create_app():
@@ -49,7 +48,7 @@ def create_app():
         supports_credentials=True
     )
 
-    app.extensions["store"] = create_store(app)
+    app.extensions["store_manager"] = create_store(app)
     app.extensions["article_image_store"] = ArticleImageStore(
         app.config["ARTICLE_IMAGE_STORAGE_PATH"],
         app.config["ARTICLE_IMAGE_MAX_COUNT"]
@@ -57,6 +56,7 @@ def create_app():
 
     app.register_blueprint(meta_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_classes_bp)
     app.register_blueprint(article_images_bp)
     app.register_blueprint(resources_bp)
     app.register_blueprint(tagesversand_bp)

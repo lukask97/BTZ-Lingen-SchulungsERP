@@ -31,7 +31,7 @@ def build_missing_table_response(table_name):
 
 def get_validated_store(table_name, permission_action):
     resolved_table_name = resolve_table_name(table_name)
-    store = get_store()
+    store = get_store(resolved_table_name)
     if not store.table_exists(resolved_table_name):
         return None, None, build_missing_table_response(table_name)
 

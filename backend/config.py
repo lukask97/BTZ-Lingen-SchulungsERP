@@ -16,7 +16,7 @@ class AppConfig:
     SERVER_CONFIG_PATH = os.environ.get("ERP_SERVER_CONFIG_PATH", "/tmp/erp-server-config.json")
     DATABASE_DSN = os.environ.get(
         "DATABASE_DSN",
-        "dbname=erp user=erp password=geheim host=postgres port=5432"
+        "dbname=erp_common user=erp password=geheim host=postgres port=5432"
     )
     ARTICLE_IMAGE_STORAGE_PATH = os.environ.get(
         "ERP_ARTICLE_IMAGE_STORAGE_PATH",

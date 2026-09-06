@@ -34,3 +34,11 @@ export async function login(username,password){
 export async function logoutSession() {
     await apiRequest("/auth/logout", { method: "POST" });
 }
+
+export async function setActiveClass(klasseId) {
+    const result = await apiRequest("/auth/active-class", {
+        method: "POST",
+        body: JSON.stringify({ klasseId })
+    });
+    return result.user || null;
+}

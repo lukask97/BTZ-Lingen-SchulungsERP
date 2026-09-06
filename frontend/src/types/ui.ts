@@ -119,6 +119,7 @@ export interface DataTableProps {
     username: string;
     tableName: string;
     filters: DataTableFilter[];
+    initialFilters?: Record<string, string>;
     focusRowId: string | number;
     focusField: string;
     detailLinkResolver: (args: { field: string; row: any; value: any }) => string | null;

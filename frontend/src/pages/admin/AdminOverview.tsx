@@ -17,6 +17,7 @@ export default function AdminOverview() {
         ]}
         nextSteps={["Benutzer pflegen", "Rollen prüfen", "Rechte zuordnen"]}
         links={[
+            { to: "/admin/klassen", label: "Klassen" },
             { to: "/benutzer", label: "Benutzer" },
             { to: "/rollen", label: "Rollen" },
             { to: "/rechte", label: "Rechte" },

@@ -172,10 +172,24 @@ def merge_sql_type(current, next_type):
 
 
 class PostgresStore:
-    def __init__(self, dsn):
+    def __init__(self, dsn, table_names=None, extra_seed_data=None, insert_seed_on_empty=True):
         self.dsn = dsn
         self.seed_dir = Path(__file__).resolve().parent.parent / "seed" / "sources" / "json"
+        self.table_names = set(table_names or [])
+        self.extra_seed_data = extra_seed_data or {}
+        self.insert_seed_on_empty = insert_seed_on_empty
         self.seed_data = self._load_seed_data()
+        if self.extra_seed_data:
+            self.seed_data.update({
+                table_name: self._normalize_seed_items(items)
+                for table_name, items in self.extra_seed_data.items()
+            })
+        if self.table_names:
+            self.seed_data = {
+                table_name: items
+                for table_name, items in self.seed_data.items()
+                if table_name in self.table_names
+            }
         self.mappings = self._build_mappings(self.seed_data)
         self._bootstrap()
 
@@ -267,6 +281,17 @@ class PostgresStore:
 
     def reset(self):
         self.seed_data = self._load_seed_data()
+        if self.extra_seed_data:
+            self.seed_data.update({
+                table_name: self._normalize_seed_items(items)
+                for table_name, items in self.extra_seed_data.items()
+            })
+        if self.table_names:
+            self.seed_data = {
+                table_name: items
+                for table_name, items in self.seed_data.items()
+                if table_name in self.table_names
+            }
         self.mappings = self._build_mappings(self.seed_data)
 
         with self._connect() as connection, connection.cursor() as cursor:
@@ -277,7 +302,7 @@ class PostgresStore:
     def _bootstrap(self):
         with self._connect() as connection, connection.cursor() as cursor:
             self._ensure_schema(cursor)
-            if not self._has_relational_data(cursor):
+            if self.insert_seed_on_empty and not self._has_relational_data(cursor):
                 self._insert_seed_records(cursor)
             connection.commit()
 
@@ -530,6 +555,8 @@ class PostgresStore:
                 for field_name, value in item.items():
                     if field_name == "id":
                         continue
+                    if to_snake_case(field_name) in META_COLUMNS:
+                        continue
                     if is_scalar(value):
                         scalar_types[field_name] = merge_sql_type(
                             scalar_types.get(field_name),
@@ -592,6 +619,10 @@ class PostgresStore:
     def _row_to_item(self, cursor, table_name, row):
         mapping = self.mappings[table_name]
         item = {"id": self._restore_id(row["entity_id"])}
+        if row.get("created_at"):
+            item["createdAt"] = row.get("created_at").isoformat()
+        if row.get("updated_at"):
+            item["updatedAt"] = row.get("updated_at").isoformat()
 
         for api_field in mapping.scalar_fields.keys():
             item[api_field] = self._normalize_db_value(row.get(to_snake_case(api_field)))
@@ -741,6 +772,8 @@ class PostgresStore:
         changed = False
         for field_name, value in item.items():
             if field_name == "id":
+                continue
+            if to_snake_case(field_name) in META_COLUMNS:
                 continue
             if is_scalar(value):
                 column_type = infer_sql_type(value)

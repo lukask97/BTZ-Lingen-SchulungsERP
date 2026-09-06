@@ -12,12 +12,21 @@ export interface AuthUser {
     [key: string]: unknown;
 }
 
+export interface AuthClass {
+    id: number | string;
+    name: string;
+    datenbankName: string;
+    status?: string;
+    beschreibung?: string;
+}
+
 export interface AuthContextValue {
     user: AuthUser | null;
     isAuthReady: boolean;
     authError: string;
     login: (userData: AuthUser) => void;
     logout: () => Promise<void>;
+    switchActiveClass: (classId: number | string) => Promise<void>;
     hasFullAccess: () => boolean;
     hasPermission: (permission: PermissionKey) => boolean;
     hasAccess: (access: AccessKey) => boolean;
