@@ -300,6 +300,42 @@ a {
     color: var(--erp-text);
 }
 
+.class-switch-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.class-switch-dialog {
+    width: min(340px, calc(100vw - 48px));
+    padding: 24px 28px;
+    border: 1px solid var(--erp-border);
+    border-radius: 8px;
+    background: var(--erp-surface);
+    color: var(--erp-text);
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.28);
+    text-align: center;
+}
+
+.class-switch-dialog strong,
+.class-switch-dialog span {
+    display: block;
+}
+
+.class-switch-dialog strong {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.class-switch-dialog span {
+    color: var(--erp-text-soft);
+}
+
 .footer {
     margin-top: 24px;
     padding: 20px 24px;
@@ -419,6 +455,156 @@ a {
     outline-offset: 1px;
 }
 
+.backup-page {
+    display: grid;
+    gap: 18px;
+}
+
+.backup-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 22px;
+    border: 1px solid var(--erp-border);
+    border-radius: var(--erp-radius);
+    background: var(--erp-surface);
+    box-shadow: var(--erp-shadow);
+}
+
+.backup-header h1 {
+    margin: 0;
+}
+
+.backup-header p:last-child {
+    margin: 0.35rem 0 0;
+    color: var(--erp-text-soft);
+}
+
+.backup-header-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(96px, 1fr));
+    gap: 10px;
+    min-width: min(420px, 100%);
+}
+
+.backup-header-stats span,
+.backup-summary-strip span {
+    display: grid;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--erp-border);
+    border-radius: 8px;
+    background: var(--erp-surface-soft);
+    color: var(--erp-text-soft);
+    font-size: 0.82rem;
+}
+
+.backup-header-stats strong {
+    color: var(--erp-text);
+    font-size: 1.22rem;
+}
+
+.backup-message {
+    margin: 0;
+}
+
+.backup-action-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 18px;
+}
+
+.backup-action-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 210px;
+}
+
+.backup-action-panel-primary {
+    border-color: rgba(15, 108, 189, 0.32);
+}
+
+.backup-summary-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.backup-restore-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.backup-restore-item {
+    padding: 16px;
+    border: 1px solid var(--erp-border);
+    border-radius: 8px;
+    background: var(--erp-surface-soft);
+}
+
+.backup-restore-item h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.backup-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.backup-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--erp-border);
+    border-radius: 999px;
+    background: var(--erp-surface);
+    color: var(--erp-text);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.backup-chip.is-selected {
+    border-color: var(--erp-primary);
+    background: var(--erp-accent);
+    color: var(--erp-primary-strong);
+}
+
+.backup-chip input {
+    margin: 0;
+}
+
+.backup-reset-panel {
+    border-color: rgba(232, 163, 23, 0.36);
+}
+
+.backup-danger-panel {
+    border-color: rgba(196, 69, 69, 0.42);
+    background: linear-gradient(180deg, rgba(255, 251, 251, 0.98) 0%, rgba(255, 246, 246, 0.95) 100%);
+}
+
+[data-theme=dark] .backup-danger-panel,
+.theme-dark .backup-danger-panel {
+    background: linear-gradient(180deg, rgba(48, 28, 31, 0.98) 0%, rgba(40, 25, 28, 0.96) 100%);
+}
+
+.backup-standards-panel .thread-document-links {
+    gap: 10px;
+}
+
+.backup-status-panel .data-table-wrapper {
+    margin-top: 10px;
+}
+
 .login-layout,
 .login {
     min-height: 100vh;
@@ -494,6 +680,15 @@ a {
         grid-template-columns: 1fr;
     }
 
+    .backup-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .backup-action-grid {
+        grid-template-columns: 1fr;
+    }
+
     .teacher-notes-card {
         position: static;
         min-height: 320px;
@@ -518,6 +713,15 @@ a {
         position: sticky;
         top: 0;
         z-index: 20;
+    }
+
+    .backup-header-stats,
+    .backup-summary-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .backup-restore-item {
+        padding: 12px;
     }
 
     .mobile-sidebar-button {

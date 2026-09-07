@@ -6,6 +6,7 @@ from config import AppConfig
 from events import events_bp
 from routes.auth import auth_bp
 from routes.admin_classes import admin_classes_bp
+from routes.admin_backup import admin_backup_bp
 from routes.article_images import article_images_bp
 from routes.meta import meta_bp
 from routes.resources import resources_bp
@@ -57,6 +58,7 @@ def create_app():
     app.register_blueprint(meta_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_classes_bp)
+    app.register_blueprint(admin_backup_bp)
     app.register_blueprint(article_images_bp)
     app.register_blueprint(resources_bp)
     app.register_blueprint(tagesversand_bp)

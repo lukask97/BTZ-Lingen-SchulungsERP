@@ -299,6 +299,24 @@ class PostgresStore:
             self._insert_seed_records(cursor)
             connection.commit()
 
+    def replace_records(self, records_by_table):
+        records_by_table = self._filter_records_by_table(records_by_table)
+        self._merge_mappings_for_records(records_by_table)
+        with self._connect() as connection, connection.cursor() as cursor:
+            self._ensure_schema(cursor)
+            for table_name in records_by_table.keys():
+                self._clear_table(cursor, table_name)
+            self._insert_records(cursor, records_by_table)
+            connection.commit()
+
+    def append_records(self, records_by_table):
+        records_by_table = self._filter_records_by_table(records_by_table)
+        self._merge_mappings_for_records(records_by_table)
+        with self._connect() as connection, connection.cursor() as cursor:
+            self._ensure_schema(cursor)
+            self._insert_records(cursor, records_by_table)
+            connection.commit()
+
     def _bootstrap(self):
         with self._connect() as connection, connection.cursor() as cursor:
             self._ensure_schema(cursor)
@@ -586,6 +604,43 @@ class PostgresStore:
             for item in self.seed_data.get(table_name, []):
                 if isinstance(item, dict):
                     self._insert_record(cursor, table_name, item.get("id"), item)
+
+    def _insert_records(self, cursor, records_by_table):
+        for table_name, records in records_by_table.items():
+            for item in records:
+                if isinstance(item, dict):
+                    self._ensure_mapping_for_item(cursor, table_name, item)
+                    self._insert_record(cursor, table_name, item.get("id"), item)
+
+    def _clear_table(self, cursor, table_name):
+        self._require_table(table_name)
+        mapping = self.mappings[table_name]
+        cursor.execute(sql.SQL("delete from {}").format(mapping.qualified_name))
+
+    def _filter_records_by_table(self, records_by_table):
+        return {
+            table_name: self._normalize_seed_items(records)
+            for table_name, records in (records_by_table or {}).items()
+            if self.table_exists(table_name)
+        }
+
+    def _merge_mappings_for_records(self, records_by_table):
+        if not records_by_table:
+            return
+        merged_seed_data = {
+            table_name: [*self.seed_data.get(table_name, []), *records]
+            for table_name, records in records_by_table.items()
+        }
+        imported_mappings = self._build_mappings(merged_seed_data)
+        for table_name, imported_mapping in imported_mappings.items():
+            mapping = self.mappings.setdefault(table_name, TableMapping(table_name))
+            mapping.scalar_fields.update(imported_mapping.scalar_fields)
+            for field_name, imported_relation in imported_mapping.relations.items():
+                relation = mapping.relations.get(field_name)
+                if relation is None:
+                    mapping.relations[field_name] = imported_relation
+                else:
+                    relation.scalar_fields.update(imported_relation.scalar_fields)
 
     def _list_records(self, table_name, cursor=None):
         owns_cursor = cursor is None

@@ -241,6 +241,17 @@ class StoreManager:
             reset_tables.update(store.list_tables())
         return sorted(reset_tables)
 
+    def clear_classes(self, class_ids):
+        cleared_tables = set()
+        for class_id in class_ids:
+            class_item = self.common_store.get("klassen", class_id)
+            if not class_item:
+                continue
+            store = self.get_class_store(class_item.get("datenbankName"))
+            store.replace_records({table_name: [] for table_name in CLASS_TABLES})
+            cleared_tables.update(store.list_tables())
+        return sorted(cleared_tables)
+
     def get_accessible_classes(self, user, include_inactive=False):
         classes = self.list_classes(include_inactive=include_inactive)
         if _is_admin(user):

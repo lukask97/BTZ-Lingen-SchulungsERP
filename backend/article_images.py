@@ -51,6 +51,22 @@ class ArticleImageStore:
     def count_images(self, artikel_nr):
         return len(self.list_images(artikel_nr))
 
+    def list_all_files(self):
+        files = []
+        for path in sorted(self.base_path.iterdir()):
+            if path.is_file() and path.suffix.lower() in ALLOWED_EXTENSIONS:
+                files.append(path)
+        return files
+
+    def restore_file(self, filename, content):
+        safe_name = Path(filename).name
+        suffix = Path(safe_name).suffix.lower()
+        if suffix not in ALLOWED_EXTENSIONS:
+            raise ValueError("Es sind nur JPG- und PNG-Bilder erlaubt.")
+        target_path = self.base_path / safe_name
+        target_path.write_bytes(content)
+        return target_path
+
     def _find_slot_file(self, artikel_nr, slot):
         for extension in ALLOWED_EXTENSIONS:
             path = self.base_path / f"{artikel_nr}_{slot}{extension}"

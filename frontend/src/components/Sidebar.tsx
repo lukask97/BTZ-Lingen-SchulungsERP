@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "../auth/useAuth";
 import { NAVIGATION_GROUPS, SCENARIO_MENU, SCENARIO_OVERVIEW } from "../constants/navigation";
@@ -10,6 +11,38 @@ type SidebarProps = {
     isDarkMode: boolean;
     onToggleDarkMode: () => void;
 };
+
+function waitForSwitchDialogPaint() {
+    return new Promise<void>(resolve => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                window.setTimeout(resolve, 650);
+            });
+        });
+    });
+}
+
+function showImmediateSwitchDialog() {
+    if (typeof document === "undefined" || document.getElementById("class-switch-immediate-overlay")) {
+        return;
+    }
+    const overlay = document.createElement("div");
+    overlay.id = "class-switch-immediate-overlay";
+    overlay.className = "class-switch-overlay";
+    overlay.setAttribute("role", "alert");
+    overlay.setAttribute("aria-live", "assertive");
+    overlay.innerHTML = `
+        <div class="class-switch-dialog">
+            <strong>Bitte warten</strong>
+            <span>Klasse wird gewechselt</span>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function hideImmediateSwitchDialog() {
+    document.getElementById("class-switch-immediate-overlay")?.remove();
+}
 
 export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onToggleDarkMode }: SidebarProps) {
     const { user, logout, switchActiveClass, hasFullAccess, hasAccess } = useAuth();
@@ -53,22 +86,32 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
 
     const handleClassChange = (classId: string) => {
         if (classId === String((activeClass as any)?.id ?? "")) return;
+        showImmediateSwitchDialog();
         setIsSwitchingClass(true);
-        void switchActiveClass(classId).catch(() => {
-            setIsSwitchingClass(false);
-        });
+        void (async () => {
+            await waitForSwitchDialogPaint();
+            await switchActiveClass(classId);
+        })().catch(() => {
+                hideImmediateSwitchDialog();
+                setIsSwitchingClass(false);
+            });
     };
 
-    return (
-        <>
-        {isSwitchingClass && (
+    const switchDialog = isSwitchingClass && typeof document !== "undefined"
+        ? createPortal(
             <div className="class-switch-overlay" role="alert" aria-live="assertive">
                 <div className="class-switch-dialog">
                     <strong>Bitte warten</strong>
                     <span>Klasse wird gewechselt</span>
                 </div>
-            </div>
-        )}
+            </div>,
+            document.body
+        )
+        : null;
+
+    return (
+        <>
+        {switchDialog}
         <nav className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`}>
             <div className="sidebar-topbar">
                 <Link className="sidebar-brand" to="/">ERP</Link>
