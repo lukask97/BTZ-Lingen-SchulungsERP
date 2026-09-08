@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 
 export type RollenRecht = {
     id: number | string | null;
@@ -6,6 +6,7 @@ export type RollenRecht = {
     rolleName: string;
     rechtName: string;
 };
+type RollenRechtPayload = Partial<RollenRecht> & Omit<RollenRecht, "id">;
 
 const baseService = createCRUDService<RollenRecht>("rollenRechte", []);
 
@@ -24,9 +25,9 @@ const rollenRechteService = {
         const item = baseService.getById(id);
         return item ? normalizeAssignment(item) : undefined;
     },
-    create: (payload: RollenRecht) => baseService.create(normalizeAssignment(payload)),
-    add: (payload: RollenRecht) => baseService.create(normalizeAssignment(payload)),
-    update: (idOrItem: number | string | RollenRecht, payload: Partial<RollenRecht>) => {
+    create: (payload: RollenRechtPayload) => baseService.create(normalizeAssignment({ id: null, ...payload })),
+    add: (payload: RollenRechtPayload) => baseService.create(normalizeAssignment({ id: null, ...payload })),
+    update: (idOrItem: number | string | RollenRecht, payload?: Partial<RollenRecht>) => {
         if (typeof idOrItem === "object") {
             return baseService.update(normalizeAssignment(idOrItem));
         }

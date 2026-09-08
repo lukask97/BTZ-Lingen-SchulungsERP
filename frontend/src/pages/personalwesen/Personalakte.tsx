@@ -32,6 +32,7 @@ const schnellvorlagen = [
 
 function createPersonalakteEintrag(mitarbeiterId: string, today: string) {
     return {
+        id: "",
         mitarbeiterId,
         dokumentTyp: "Vertragsunterlage",
         titel: "",
@@ -49,6 +50,7 @@ function createVorlagenEintrag(
     today: string
 ) {
     return {
+        id: "",
         mitarbeiterId,
         dokumentTyp,
         titel: mitarbeiterName ? `${titel} ${mitarbeiterName}` : titel,

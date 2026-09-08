@@ -21,7 +21,6 @@ import { getBerlinDate } from "../../utils/dateTime";
 import { canBookGoodsReceipt, getPurchaseStep, getPurchaseStepLabel } from "../../utils/processFlow";
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 import { getOfferDemandByArtikel } from "../../utils/offerDemand";
-import { exportPurchaseDemandWorkbook } from "../../utils/purchaseDemandWorkbook";
 
 function createBestellungDialogState(lieferanten: any[], artikel: any[]) {
     const ersterLieferant = lieferanten[0];
@@ -197,7 +196,7 @@ export default function Bestellungen() {
         .filter(item => verfuegbareLieferantIdsImDialog.size === 0 || verfuegbareLieferantIdsImDialog.has(String(item.id)))
         .map(item => ({ value: String(item.id), label: `${item.lieferantenNr} - ${item.firma}` }));
 
-    const wendeLieferantenVorschlagAn = (positionen: any[] = [], strategie = "schnell") => {
+    const _wendeLieferantenVorschlagAn = (positionen: any[] = [], strategie = "schnell") => {
         const erstePosition = positionen[0];
         if (!erstePosition?.artikelId) {
             return { lieferantId: "", positionen, notizZusatz: "" };
@@ -256,7 +255,7 @@ export default function Bestellungen() {
         }));
     };
 
-    const neu = (vorgaben: any) => {
+    const neu = (vorgaben: any = {}) => {
         const basis = createBestellungDialogState(lieferanten, artikel);
         const naechsterDialog = {
             ...basis,
@@ -400,6 +399,7 @@ export default function Bestellungen() {
         }, {});
 
         try {
+            const { exportPurchaseDemandWorkbook } = await import("../../utils/purchaseDemandWorkbook");
             await exportPurchaseDemandWorkbook({
                 fileName: `Bestellung_offene_Bedarfsmeldungen_${today}`,
                 bedarfe: automatischeBedarfsmeldungen.map((row: any) => ({
@@ -464,7 +464,7 @@ export default function Bestellungen() {
         });
     const gemeldeteBedarfe = bestellungen.filter(item => item.status === "bedarf gemeldet").length;
     const angefragteBestellungen = bestellungen.filter(item => item.status === "angefragt").length;
-    const versendeteBestellungen = bestellungen.filter(item => item.status === "versendet").length;
+    const _versendeteBestellungen = bestellungen.filter(item => item.status === "versendet").length;
     const eingegangeneBestellungen = bestellungen.filter(item => item.status === "eingegangen").length;
     const offeneAutomatischeBedarfe = automatischeBedarfsmeldungen.length;
 

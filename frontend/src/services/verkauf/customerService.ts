@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 
 const kundenService = createCRUDService("kunden", []);
 

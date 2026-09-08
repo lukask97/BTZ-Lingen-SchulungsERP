@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import { resolveRolePermissions } from "../../auth/permissionResolver";
 import rollenRechteService from "./rollenRechteService";
 

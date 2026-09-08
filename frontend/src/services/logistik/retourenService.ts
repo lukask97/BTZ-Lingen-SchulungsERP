@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import artikelService from "./artikelService";
 import { getCustomerName } from "../../utils/customerReferences";
 
@@ -28,7 +28,7 @@ function normalizeReturn(item: any = {}) {
 
 function splitPayload(payload: any = {}) {
     const normalized = normalizeReturn(payload);
-    const { kunde, artikel, ...basePayload } = normalized;
+    const { kunde: _kunde, artikel: _artikel, ...basePayload } = normalized;
     return basePayload;
 }
 
@@ -42,7 +42,7 @@ const retourenService = {
     },
     create: (payload: any) => normalizeReturn(baseService.create(splitPayload(payload))),
     add: (payload: any) => normalizeReturn(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             return normalizeReturn(baseService.update(splitPayload(idOrItem)));
         }

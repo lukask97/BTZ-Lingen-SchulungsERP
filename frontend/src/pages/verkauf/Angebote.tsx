@@ -3,15 +3,12 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import useAuth from "../../auth/useAuth";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
-import HelpHint from "../../components/HelpHint";
 import OfferApprovalDialog from "../../components/OfferApprovalDialog";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
 import SaveButton from "../../components/SaveButton";
-import TextArea from "../../components/form/TextArea";
 import Checkbox from "../../components/form/Checkbox";
-import OverviewCards from "../../components/OverviewCards";
 import SalesFlowBar from "../../components/SalesFlowBar";
 import MultiStatusFilter from "./MultiStatusFilter";
 import angeboteService, { naechsteAngebotsrevision } from "../../services/verkauf/angeboteService";
@@ -23,7 +20,7 @@ import servicesService from "../../services/verkauf/servicesService";
 import auftraegeService from "../../services/verkauf/auftraegeService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
 import versandService from "../../services/logistik/versandService";
-import bestellungenService, { getOffeneBestellmengenProArtikel } from "../../services/einkauf/bestellungenService";
+import { getOffeneBestellmengenProArtikel } from "../../services/einkauf/bestellungenService";
 import { getCustomerName } from "../../utils/customerReferences";
 import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
 import { formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
@@ -139,28 +136,6 @@ function getVerplanteMengen(auftraege) {
                 });
             return map;
         }, {});
-}
-
-function getAndereOffeneAngeboteMitArtikel(angebote, artikelId, currentPositionen = []) {
-    const currentArtikelIds = new Set(
-        currentPositionen
-            .filter(position => String(position.leistungTyp || "").toLowerCase() !== "service")
-            .map(position => String(position.artikelId || ""))
-    );
-    const targetArtikelId = String(artikelId || "");
-
-    if (!targetArtikelId || !currentArtikelIds.has(targetArtikelId)) {
-        return [];
-    }
-
-    return angebote
-        .filter(angebot => istOffenesAngebot(angebot))
-        .filter(angebot => (angebot.positionen || []).some(position =>
-            String(position.leistungTyp || "").toLowerCase() !== "service"
-            && String(position.artikelId || "") === targetArtikelId
-        ))
-        .map(angebot => angebot.angebotsNr)
-        .filter(Boolean);
 }
 
 function getDefaultStatusFilter() {
@@ -416,25 +391,27 @@ export default function Angebote() {
     const canReadBenutzer = hasAccess(ACCESS.BENUTZER);
 
     const angebote = useMemo(() => withPermissionFallback(() => angeboteService.getAll(), []), [refreshKey, syncTick]);
-    const auftraege = withPermissionFallback(() => auftraegeService.getAll(), []);
-    const vertriebsdokumente = vertriebsdokumenteService.list();
-    const versandauftraege = canReadLogistik ? versandService.list() : [];
-    const anfragen = withPermissionFallback(() => customerInquiryService.list(), []);
-    const kunden = withPermissionFallback(() => kundenService.list(), []);
-    const benutzer = canReadBenutzer ? withPermissionFallback(() => benutzerService.list(), []) : [];
-    const artikel = withPermissionFallback(() => artikelService.getAll(), []).filter(item => item.istVerkaeuflich);
-    const services = withPermissionFallback(() => servicesService.getAll(), []);
+    const auftraege = useMemo(() => withPermissionFallback(() => auftraegeService.getAll(), []), [refreshKey, syncTick]);
+    const vertriebsdokumente = useMemo(() => vertriebsdokumenteService.list(), [refreshKey, syncTick]);
+    const versandauftraege = useMemo(() => canReadLogistik ? versandService.list() : [], [canReadLogistik, refreshKey, syncTick]);
+    const anfragen = useMemo(() => withPermissionFallback(() => customerInquiryService.list(), []), [refreshKey, syncTick]);
+    const kunden = useMemo(() => withPermissionFallback(() => kundenService.list(), []), [refreshKey, syncTick]);
+    const benutzer = useMemo(() => canReadBenutzer ? withPermissionFallback(() => benutzerService.list(), []) : [], [canReadBenutzer, refreshKey, syncTick]);
+    const artikel = useMemo(
+        () => withPermissionFallback(() => artikelService.getAll(), []).filter(item => item.istVerkaeuflich),
+        [refreshKey, syncTick]
+    );
+    const services = useMemo(() => withPermissionFallback(() => servicesService.getAll(), []), [refreshKey, syncTick]);
     const offeneBestellmengen = useMemo(() => getOffeneBestellmengenProArtikel(), [syncTick]);
     const verplanteMengen = useMemo(() => getVerplanteMengen(auftraege), [auftraege]);
-    const leistungen = [
+    const leistungen = useMemo(() => [
         ...artikel.map(item => toLeistung(item, "Artikel")),
         ...services.map(item => toLeistung(item, "Service"))
-    ];
+    ], [artikel, services]);
     const offeneAngeboteJeArtikel = useMemo(
         () => getOpenOfferCountByArtikelForArtikel(angebote, artikelService.getAll()),
         [angebote]
     );
-    const kundenOptionen = kunden.map(item => ({ value: String(item.id), label: `${item.kundenNr} - ${item.firma}` }));
     const bearbeiterOptionen = benutzer.map(item => ({ value: String(item.username || item.id), label: getUserDisplayNameWithRole(item, String(item.username || "Team")) }));
     const leistungsOptionen = [...leistungen]
         .sort((a, b) => {
@@ -1093,7 +1070,7 @@ export default function Angebote() {
     const laufendeAngebote = neuesteAngebote.filter(item => istOffenesAngebot(item));
     const vorbereiteteAngebote = neuesteAngebote.filter(item =>
         Boolean(item.alsVorbereitetGespeichert)
-        && !Boolean(item.tagesabschlussZurueckgehalten)
+        && !item.tagesabschlussZurueckgehalten
         && String(item.freigabeStatus || "") === "freigegeben"
     );
     const gespeicherteAngebote = neuesteAngebote.filter(item =>
@@ -1329,8 +1306,6 @@ export default function Angebote() {
     const tagesversandAktionLabel = kannDirektVersendenImDialog
         ? "Freigegeben für Tagesabschluss vormerken"
         : "Für Freigabe und Tagesversand vorbereiten";
-    const sperrgrundText = "";
-
     return <>
         <SalesFlowBar currentStep="angebote"/>
         <div className="kennzahlen">

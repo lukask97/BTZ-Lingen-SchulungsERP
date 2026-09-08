@@ -77,11 +77,11 @@ function normalizeInvoice(item: any = {}) {
 
 function splitPayload(payload: any = {}) {
     const {
-        kunde,
-        iban,
-        auftragNr,
-        bestellNr,
-        mahnstufe,
+        kunde: _kunde,
+        iban: _iban,
+        auftragNr: _auftragNr,
+        bestellNr: _bestellNr,
+        mahnstufe: _mahnstufe,
         ...basePayload
     } = payload;
 
@@ -138,7 +138,7 @@ const rechnungenService = {
     add(payload: any) {
         return this.create(payload);
     },
-    update(idOrItem: any, payload: any) {
+    update(idOrItem: any, payload?: any) {
         const updated = typeof idOrItem === "object"
              ? baseService.update(splitPayload(idOrItem))
             : baseService.update(idOrItem, splitPayload(payload));

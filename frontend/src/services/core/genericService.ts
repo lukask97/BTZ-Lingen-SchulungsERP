@@ -27,11 +27,6 @@ export function createCRUDService<T extends EntityWithId>(tableName: string, ini
         return tableData;
     };
 
-    const persist = (nextData: T[]) => {
-        tableData = nextData;
-        return tableData;
-    };
-
     const api = {
         list: () => reload(),
         getById: (id: number | string) => {

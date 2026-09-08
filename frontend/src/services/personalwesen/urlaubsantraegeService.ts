@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import mitarbeiterService from "./mitarbeiterService";
 
 const baseService = createCRUDService("urlaubsantraege", []);
@@ -12,7 +12,7 @@ function hydrateEntry(item: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { mitarbeiter, ...basePayload } = payload;
+    const { mitarbeiter: _mitarbeiter, ...basePayload } = payload;
     return basePayload;
 }
 
@@ -26,7 +26,7 @@ export default {
     },
     create: (payload: any) => hydrateEntry(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateEntry(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             return hydrateEntry(baseService.update(splitPayload(idOrItem)));
         }

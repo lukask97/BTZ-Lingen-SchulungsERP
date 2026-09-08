@@ -1,5 +1,4 @@
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import { PERMISSIONS } from "../../constants/permissions";
 import bestellungenService from "../../services/einkauf/bestellungenService";
@@ -9,7 +8,6 @@ import { canBookGoodsReceipt, getOpenGoodsReceiptOrders, getPurchaseStep, getPur
 import { useSyncedServiceData } from "../../hooks/useSyncedServiceData";
 
 export default function Wareneingaenge() {
-    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [bestellungen, setBestellungen] = useSyncedServiceData(["bestellungen"], () => bestellungenService.getAll());
     const offeneBestellungen = getOpenGoodsReceiptOrders(bestellungen);

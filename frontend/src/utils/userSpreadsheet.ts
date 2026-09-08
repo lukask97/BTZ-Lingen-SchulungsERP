@@ -1,5 +1,3 @@
-import * as XLSX from "xlsx";
-
 type UserImportRow = {
     vorname: string;
     nachname: string;
@@ -65,16 +63,72 @@ function getColumnValue(row: Record<string, unknown>, candidates: string[]) {
     return "";
 }
 
+function getCellText(value: unknown) {
+    if (value == null) return "";
+    if (typeof value === "object") {
+        const candidate = value as { text?: unknown; result?: unknown; richText?: Array<{ text?: unknown }> };
+        if (candidate.text != null) return normalizeCellValue(candidate.text);
+        if (candidate.result != null) return normalizeCellValue(candidate.result);
+        if (Array.isArray(candidate.richText)) {
+            return candidate.richText.map(part => normalizeCellValue(part.text)).join("");
+        }
+    }
+    return normalizeCellValue(value);
+}
+
+async function createExcelWorkbook() {
+    const module = await import("exceljs");
+    const ExcelJS = module.default ?? module;
+    return new ExcelJS.Workbook();
+}
+
+async function downloadExcelRows(rows: Array<Record<string, unknown>>, sheetName: string, fileName: string) {
+    const workbook = await createExcelWorkbook();
+    const worksheet = workbook.addWorksheet(sheetName);
+    const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+    worksheet.addRow(headers);
+    rows.forEach(row => {
+        worksheet.addRow(headers.map(header => row[header] ?? ""));
+    });
+    worksheet.columns.forEach(column => {
+        column.width = 20;
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer as ArrayBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${fileName}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
 export async function parseUserImportFile(file: File) {
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: "array" });
-    const firstSheetName = workbook.SheetNames[0];
-    if (!firstSheetName) return [];
+    const workbook = await createExcelWorkbook();
+    await workbook.xlsx.load(buffer);
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) return [];
 
-    const worksheet = workbook.Sheets[firstSheetName];
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, {
-        defval: ""
-    });
+    const headers = worksheet.getRow(1).values as unknown[];
+    const rows: Array<Record<string, unknown>> = [];
+    for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
+        const row = worksheet.getRow(rowNumber);
+        const values = Object.fromEntries(
+            headers.slice(1).map((header, index) => [
+                normalizeCellValue(header),
+                getCellText(row.getCell(index + 1).value)
+            ]).filter(([header]) => header)
+        );
+        if (Object.values(values).some(value => normalizeCellValue(value))) {
+            rows.push(values);
+        }
+    }
 
     if (rows.length === 0) return [];
 
@@ -91,10 +145,7 @@ export async function parseUserImportFile(file: File) {
 }
 
 export function exportUsersToExcel(rows: Array<Record<string, unknown>>, fileName: string) {
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Benutzer");
-    XLSX.writeFile(workbook, `${fileName}.xlsx`);
+    void downloadExcelRows(rows, "Benutzer", fileName);
 }
 
 export function normalizeImportedUsers(rows: UserImportRow[]) {

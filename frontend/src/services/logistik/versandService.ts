@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import auftraegeService from "../verkauf/auftraegeService";
 import { getCustomerName } from "../../utils/customerReferences";
 
@@ -15,7 +15,7 @@ function hydrateVersand(item: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { auftrag, kunde, ...basePayload } = payload;
+    const { auftrag: _auftrag, kunde: _kunde, ...basePayload } = payload;
     return basePayload;
 }
 
@@ -29,7 +29,7 @@ export default {
     },
     create: (payload: any) => hydrateVersand(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateVersand(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             return hydrateVersand(baseService.update(splitPayload(idOrItem)));
         }

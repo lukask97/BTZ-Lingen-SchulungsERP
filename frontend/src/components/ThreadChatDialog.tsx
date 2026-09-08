@@ -94,13 +94,6 @@ function getThreadMessageVariant(item: ThreadMessage, ownRole: string) {
     return "internal";
 }
 
-function getThreadMessageLabel(item: ThreadMessage, ownRole: string) {
-    const variant = getThreadMessageVariant(item, ownRole);
-    if (variant === "customer") return "Vom Kunden";
-    if (variant === "outbound") return "Zum Kunden";
-    return "Intern";
-}
-
 function getFirmenname() {
     return String(unternehmenService.get().firmenname || "Schülerfirma").trim();
 }
@@ -164,20 +157,20 @@ type ThreadChatDialogProps = {
     offers: ThreadOffer[];
     messages: ThreadMessage[];
     ownRole: string;
-    offerHrefResolver: (offer: ThreadOffer) => string;
-    offerClickResolver: (offer: ThreadOffer) => void;
-    documentLinks: ThreadDocumentLink[];
-    headerActionLink: ThreadActionLink;
-    actionLinks: ThreadActionLink[];
-    customActionSection: ReactNode;
-    replyLabel: string;
-    replyValue: string;
-    replyPlaceholder: string;
-    onReplyChange: (value: string) => void;
-    onReplySend: () => void;
-    showReplyBox: boolean;
-    documentsLabel: string;
-    actionSectionLabel: string;
+    offerHrefResolver?: (offer: ThreadOffer) => string;
+    offerClickResolver?: (offer: ThreadOffer) => void;
+    documentLinks?: ThreadDocumentLink[];
+    headerActionLink?: ThreadActionLink;
+    actionLinks?: ThreadActionLink[];
+    customActionSection?: ReactNode;
+    replyLabel?: string;
+    replyValue?: string;
+    replyPlaceholder?: string;
+    onReplyChange?: (value: string) => void;
+    onReplySend?: () => void;
+    showReplyBox?: boolean;
+    documentsLabel?: string;
+    actionSectionLabel?: string;
 };
 
 export default function ThreadChatDialog({

@@ -5,7 +5,7 @@ import { getBerlinDate } from "../../utils/dateTime";
 import { naechsteAuftragsnummer as createNextOrderNumber } from "../core/documentNumbering";
 
 export function naechsteAuftragsnummer() {
-    return createNextOrderNumber(auftraegeService.getAll());
+    return createNextOrderNumber(auftraegeService.getAll(), getBerlinDate());
 }
 
 export function angebotInAuftragUebernehmen(angebotId: any) {

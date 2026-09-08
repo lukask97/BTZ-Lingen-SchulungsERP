@@ -1,6 +1,5 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
-import HelpHint from "../../components/HelpHint";
 import OverviewCards from "../../components/OverviewCards";
 import SalesFlowBar from "../../components/SalesFlowBar";
 import { PERMISSIONS } from "../../constants/permissions";

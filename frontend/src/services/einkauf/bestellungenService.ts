@@ -30,7 +30,7 @@ function hydrateBestellung(item: any = {}) {
         positionen: positionService.listByParent(item.id || "")
             .map(position => {
                 const normalized = normalizePosition(position);
-                const { bestellungId, ...rest } = position;
+                const { bestellungId: _bestellungId, ...rest } = position;
                 return {
                     ...rest,
                     artikel: normalized.artikel
@@ -51,7 +51,7 @@ function normalizePosition(position: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { positionen = [], lieferant, ...basePayload } = payload;
+    const { positionen = [], lieferant: _lieferant, ...basePayload } = payload;
     return {
         basePayload,
         positionen: positionen.map(normalizePosition)
@@ -90,7 +90,7 @@ const service = {
         positionService.replaceForParent(created.id, positionen);
         return hydrateBestellung(created);
     },
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             const { basePayload, positionen } = splitPayload(idOrItem);
             const updated = bestellungenService.update(basePayload);

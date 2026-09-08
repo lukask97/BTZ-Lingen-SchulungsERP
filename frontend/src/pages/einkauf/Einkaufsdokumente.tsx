@@ -28,6 +28,8 @@ function createEinkaufsdokument(bestellungId: string, today: string) {
         bestellungId,
         dokumentTyp: "Bedarfsmeldung",
         datum: today,
+        versendetAm: "",
+        status: "",
         notiz: ""
     };
 }

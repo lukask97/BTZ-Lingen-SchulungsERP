@@ -1,4 +1,4 @@
-﻿import optionenDefault from "../../constants/optionenDefault";
+import optionenDefault from "../../constants/optionenDefault";
 import { createCRUDService } from "../core/genericService";
 
 const STORAGE_KEY = "lehrkraftOptionen";

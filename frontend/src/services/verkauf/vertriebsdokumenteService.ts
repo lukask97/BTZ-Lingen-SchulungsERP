@@ -53,7 +53,7 @@ function splitPayload(payload: any = {}) {
         ...payload,
         ...resolveProcessReferences(payload)
     };
-    const { auftragNr, kunde, kundeId, positionen, ...basePayload } = normalizedPayload;
+    const { auftragNr: _auftragNr, kunde: _kunde, kundeId: _kundeId, positionen: _positionen, ...basePayload } = normalizedPayload;
     return {
         ...basePayload,
         auftragId: basePayload.auftragId || ""
@@ -70,7 +70,7 @@ export default {
     },
     create: (payload: any) => hydrateDokument(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateDokument(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             return hydrateDokument(baseService.update(splitPayload(idOrItem)));
         }

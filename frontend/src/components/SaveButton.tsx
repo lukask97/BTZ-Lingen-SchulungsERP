@@ -3,15 +3,15 @@ import { useEffect, useRef, useState } from "react";
 type SaveButtonProps = {
     onSave: () => unknown | Promise<unknown>;
     onSuccess: () => void;
-    children: string;
-    className: string;
-    type: "button" | "submit" | "reset";
-    disabled: boolean;
-    savingLabel: string;
-    successLabel: string;
-    errorLabel: string;
-    successCloseDelayMs: number;
-    minSavingDurationMs: number;
+    children?: string;
+    className?: string;
+    type?: "button" | "submit" | "reset";
+    disabled?: boolean;
+    savingLabel?: string;
+    successLabel?: string;
+    errorLabel?: string;
+    successCloseDelayMs?: number;
+    minSavingDurationMs?: number;
 };
 
 type SaveState = "idle" | "saving" | "success" | "error";
@@ -101,22 +101,20 @@ export default function SaveButton({
                 await wait(minSavingDurationMs - elapsed);
             }
             if (result === false) {
-                console.log("Nicht erfolgreich");
                 setState("error");
-                resetLater("error");
+                resetLater("error", () => undefined);
                 return;
             }
 
             setState("success");
             resetLater("success", onSuccess);
         } catch {
-            console.log("Nicht erfolgreich");
             const elapsed = Date.now() - startedAt;
             if (elapsed < minSavingDurationMs) {
                 await wait(minSavingDurationMs - elapsed);
             }
             setState("error");
-            resetLater("error");
+            resetLater("error", () => undefined);
         }
     };
 

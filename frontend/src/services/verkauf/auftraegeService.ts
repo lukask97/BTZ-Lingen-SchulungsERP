@@ -68,7 +68,7 @@ function hydrateAuftrag(item: any = {}) {
         positionen: positionService.listByParent(item.id || "")
             .map(position => {
                 const hydrated = hydratePosition(position);
-                const { auftragId, ...rest } = hydrated;
+                const { auftragId: _auftragId, ...rest } = hydrated;
                 return rest;
             })
     };
@@ -122,7 +122,7 @@ function hydrateAuftraege(items: any[] = []) {
                 leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
                 einzelpreis: Number(position.einzelpreis ?? referenz?.verkaufspreis ?? referenz?.preis ?? 0)
             };
-            const { auftragId, ...rest } = hydrated;
+            const { auftragId: _auftragId, ...rest } = hydrated;
             return rest;
         });
 
@@ -142,7 +142,7 @@ function splitPayload(payload = {}) {
         ...(payload as any),
         ...resolveProcessReferences(payload as any)
     };
-    const { positionen = [], kunde, ...basePayload } = normalizedPayload;
+    const { positionen = [], kunde: _kunde, ...basePayload } = normalizedPayload;
     return {
         basePayload,
         positionen: positionen.map(position => {

@@ -5,6 +5,7 @@ import TextArea from "../../components/form/TextArea";
 import Label from "../../components/form/Label";
 import LookupField from "../../components/form/LookupField";
 import NumberField from "../../components/form/NumberField";
+import SaveButton from "../../components/SaveButton";
 
 import useAuth from "../../auth/useAuth";
 import { useCRUDPage } from "../../hooks/useCRUDPage";
@@ -18,6 +19,7 @@ import artikelBilderService from "../../services/logistik/artikelBilderService";
 
 const MAX_IMAGE_WIDTH = 1920;
 const MAX_IMAGE_HEIGHT = 1080;
+const CREATE_CATEGORY_OPTION_VALUE = "__create_category__";
 
 function createBaugruppenDraft() {
     return {
@@ -26,6 +28,14 @@ function createBaugruppenDraft() {
         menge: 1,
         preisaenderung: 0,
         standard: false
+    };
+}
+
+function createKategorieDraft() {
+    return {
+        name: "",
+        parentId: "",
+        beschreibung: ""
     };
 }
 
@@ -125,16 +135,20 @@ export default function Artikel() {
 
     const columns = getVisibleTableColumns(config.tableName);
     const allColumns = getAllTableColumns(config.tableName);
-    const kategorien = useMemo(() => kategorienService.list(), [syncTick]);
+    const [kategorieRefreshKey, setKategorieRefreshKey] = useState(0);
+    const kategorien = useMemo(() => kategorienService.list(), [syncTick, kategorieRefreshKey]);
 
     const [categoryFilter, setCategoryFilter] = useState("");
     const [baugruppenDraft, setBaugruppenDraft] = useState(createBaugruppenDraft);
-    const [ausgewaehlteOptionenJeKategorie, setAusgewaehlteOptionenJeKategorie] = useState({});
+    const [ausgewaehlteOptionenJeKategorie, setAusgewaehlteOptionenJeKategorie] = useState<Record<string, any>>({});
     const [bildVorschauen, setBildVorschauen] = useState([]);
     const [isImageDragActive, setIsImageDragActive] = useState(false);
     const [bildFehler, setBildFehler] = useState("");
     const [grossesBild, setGrossesBild] = useState<any>(null);
     const [isBildSpeichern, setIsBildSpeichern] = useState(false);
+    const [kategorieDialogOpen, setKategorieDialogOpen] = useState(false);
+    const [kategorieDraft, setKategorieDraft] = useState(createKategorieDraft);
+    const [kategorieFehler, setKategorieFehler] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleFieldChange = (field, value) => {
@@ -202,7 +216,7 @@ export default function Artikel() {
             }
 
             uebernehmeBilddateien(bildDateien);
-        } catch (clipboardError) {
+        } catch {
             setBildFehler("Das Bild konnte nicht aus der Zwischenablage gelesen werden.");
         }
     };
@@ -268,7 +282,18 @@ export default function Artikel() {
             value: String(item.id),
             label: `${item.artikelNr} - ${item.name} (${item.artikelTyp || "Einzelartikel"})`
         })), [allData, currentItem.id]);
-    const kategorienOptionen = useMemo(() => kategorien.map(item => ({
+    const kategorienOptionen = useMemo(() => [
+        {
+            value: CREATE_CATEGORY_OPTION_VALUE,
+            label: "Neue Kategorie anlegen...",
+            action: true
+        },
+        ...kategorien.map(item => ({
+            value: String(item.id),
+            label: item.pfad
+        }))
+    ], [kategorien]);
+    const kategorieParentOptionen = useMemo(() => kategorien.map(item => ({
         value: String(item.id),
         label: item.pfad
     })), [kategorien]);
@@ -305,9 +330,9 @@ export default function Artikel() {
 
     useEffect(() => {
         setAusgewaehlteOptionenJeKategorie(current => {
-            const next = {};
+            const next: Record<string, any> = {};
             Object.entries(individualisierungenNachKategorie).forEach(([kategorieId, optionen]) => {
-                const sortierteOptionen = [...optionen].sort((a, b) => {
+                const sortierteOptionen = [...(optionen as any[])].sort((a, b) => {
                     if (a.standard && !b.standard) return -1;
                     if (!a.standard && b.standard) return 1;
                     return String(a.artikel || "").localeCompare(String(b.artikel || ""));
@@ -413,6 +438,38 @@ export default function Artikel() {
         setCategoryFilter(filters.kategorie || "");
     };
 
+    const neueKategorieOeffnen = () => {
+        setKategorieDraft(createKategorieDraft());
+        setKategorieFehler("");
+        setKategorieDialogOpen(true);
+    };
+
+    const kategorieSpeichern = () => {
+        const name = kategorieDraft.name.trim();
+        if (!name) {
+            setKategorieFehler("Bitte das Pflichtfeld Name ausfüllen.");
+            return false;
+        }
+
+        const neueKategorie = kategorienService.create({
+            ...kategorieDraft,
+            name,
+            parentId: kategorieDraft.parentId || "",
+            beschreibung: kategorieDraft.beschreibung || ""
+        });
+        const normalisierteKategorie = kategorienService.getById(neueKategorie.id) || neueKategorie;
+
+        setCurrentItem(item => ({
+            ...item,
+            kategorieId: String(normalisierteKategorie.id),
+            kategorie: normalisierteKategorie.pfad?.split(" > ")[0] || normalisierteKategorie.name || "",
+            kategoriePfad: normalisierteKategorie.pfad || normalisierteKategorie.name || ""
+        }));
+        setKategorieFehler("");
+        setKategorieRefreshKey(value => value + 1);
+        return true;
+    };
+
     const dialogSchliessen = () => {
         resetBildVorschauen();
         handleClose();
@@ -443,8 +500,8 @@ export default function Artikel() {
             const backendBilder = editMode && gespeicherterArtikel.id
                 ? await artikelBilderService.list(gespeicherterArtikel.id)
                 : [];
-            const backendSlots = new Set(backendBilder.map(item => Number(item.slot)));
-            const aktuelleSlots = new Set(bildVorschauen.map(item => Number(item.slot)));
+            const backendSlots = new Set<number>(backendBilder.map(item => Number(item.slot)));
+            const aktuelleSlots = new Set<number>(bildVorschauen.map(item => Number(item.slot)));
 
             for (const slot of backendSlots) {
                 if (!aktuelleSlots.has(slot)) {
@@ -519,7 +576,7 @@ export default function Artikel() {
             <Dialog
                 open={open}
                 title={editMode ? "Artikel bearbeiten" : "Neuer Artikel"}
-                onClose={dialogSchliessen}
+                onClose={kategorieDialogOpen ? () => setKategorieDialogOpen(false) : dialogSchliessen}
             >
                 <Label required glossaryKey="artikelnummer">Artikelnummer</Label>
                 <TextField value={currentItem.artikelNr} onChange={v => handleFieldChange("artikelNr", v)} disabled />
@@ -529,6 +586,10 @@ export default function Artikel() {
 
                 <Label glossaryKey="kategorie">Kategorie</Label>
                 <LookupField value={currentItem.kategorieId || ""} options={kategorienOptionen} onChange={value => {
+                    if (value === CREATE_CATEGORY_OPTION_VALUE) {
+                        neueKategorieOeffnen();
+                        return;
+                    }
                     const kategorie = kategorien.find(item => String(item.id) === String(value));
                     setCurrentItem(item => ({
                         ...item,
@@ -681,7 +742,7 @@ export default function Artikel() {
                                     </thead>
                                     <tbody>
                                         {Object.entries(individualisierungenNachKategorie).map(([kategorieId, optionen]) => {
-                                            const sortierteOptionen = [...optionen].sort((a, b) => {
+                                            const sortierteOptionen = [...(optionen as any[])].sort((a, b) => {
                                                 if (a.standard && !b.standard) return -1;
                                                 if (!a.standard && b.standard) return 1;
                                                 return String(a.artikel || "").localeCompare(String(b.artikel || ""));
@@ -832,6 +893,41 @@ export default function Artikel() {
                 {grossesBild && <div className="form-row artikelbild-dialog-content">
                     <img src={grossesBild.url} alt={grossesBild.name} className="artikelbild-dialog-preview" />
                 </div>}
+            </Dialog>
+
+            <Dialog
+                open={kategorieDialogOpen}
+                title="Neue Kategorie"
+                onClose={() => {
+                    setKategorieFehler("");
+                    setKategorieDialogOpen(false);
+                }}
+                footer={<SaveButton onSave={kategorieSpeichern} onSuccess={() => setKategorieDialogOpen(false)}>Kategorie speichern</SaveButton>}
+            >
+                <div>
+                    <Label required>Name</Label>
+                    <TextField value={kategorieDraft.name} onChange={value => {
+                        setKategorieFehler("");
+                        setKategorieDraft(item => ({ ...item, name: value }));
+                    }} />
+                </div>
+                <div>
+                    <Label>Oberkategorie</Label>
+                    <LookupField value={kategorieDraft.parentId} options={kategorieParentOptionen} onChange={value => {
+                        setKategorieFehler("");
+                        setKategorieDraft(item => ({ ...item, parentId: value }));
+                    }} placeholder="Optional Oberkategorie waehlen..." />
+                </div>
+                <div className="form-row">
+                    <Label>Beschreibung</Label>
+                    <TextArea rows={3} value={kategorieDraft.beschreibung} onChange={value => {
+                        setKategorieFehler("");
+                        setKategorieDraft(item => ({ ...item, beschreibung: value }));
+                    }} />
+                </div>
+                <div className="form-row">
+                    {kategorieFehler && <p className="form-error">{kategorieFehler}</p>}
+                </div>
             </Dialog>
         </>
     );

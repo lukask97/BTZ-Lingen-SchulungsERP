@@ -1,4 +1,4 @@
-﻿import optionenDefault from "../../constants/optionenDefault";
+import optionenDefault from "../../constants/optionenDefault";
 import { createCRUDService } from "../core/genericService";
 
 function clone<T>(value: T): T {

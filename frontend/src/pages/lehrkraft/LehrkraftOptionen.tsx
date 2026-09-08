@@ -73,6 +73,10 @@ export default function LehrkraftOptionen() {
         () => regeln.reduce((sum, regel) => sum + Number(regel.gewichtung || 0), 0),
         [regeln]
     );
+    const nichtzahlungsRegel = regeln.find(regel => regel.startTag === 0 && regel.endTag === 0);
+    const nichtzahlungsAnteil = nichtzahlungsRegel && gesamtgewicht > 0
+        ? ((Number(nichtzahlungsRegel.gewichtung || 0) / gesamtgewicht) * 100).toFixed(1)
+        : "0.0";
 
     useEffect(() => {
         setOptionen(lehrkraftOptionenService.get());
@@ -161,6 +165,31 @@ export default function LehrkraftOptionen() {
             </button>)}
         </div>
 
+        <section className="module-panel">
+            <div className="dashboard-panel-header">
+                <h2>Automatik-Status</h2>
+                <span>Immer sichtbar</span>
+            </div>
+            <div className="status-grid">
+                <div className="status-card">
+                    <span>Lieferannahme</span>
+                    <strong>{optionen.autoLieferannahmeNach1Tag ? "Aktiv" : "Aus"}</strong>
+                </div>
+                <div className="status-card">
+                    <span>Debitorenzahlungen</span>
+                    <strong>{optionen.autoDebitorenzahlungNach1Tag ? "Aktiv" : "Aus"}</strong>
+                </div>
+                <div className="status-card">
+                    <span>Zahlungsregeln</span>
+                    <strong>{regeln.length}</strong>
+                </div>
+                <div className="status-card">
+                    <span>Nichtzahlung</span>
+                    <strong>{nichtzahlungsAnteil} %</strong>
+                </div>
+            </div>
+        </section>
+
         {activeTab === "lieferannahme" && <section className="dashboard-panel">
             <div className="dashboard-panel-header">
                 <h2>Lieferannahme</h2>
@@ -203,7 +232,7 @@ export default function LehrkraftOptionen() {
                 </div>
                 <p>Beispiel: <code>1-3 | 10</code> bedeutet 10 Anteile für Zahlungen zwischen Tag 1 und 3. Innerhalb der Spanne wird gleich verteilt. <code>0 | 1</code> bedeutet: in 1 Anteil findet gar keine Zahlung statt.</p>
                 <div className="lehrkraft-rule-list">
-                    {regeln.map((regel, index) => {
+                    {regeln.map((regel) => {
                         const anteil = gesamtgewicht > 0 ? ((regel.gewichtung / gesamtgewicht) * 100).toFixed(1) : "0.0";
                         return <article key={regel.id} className="lehrkraft-rule-card">
                             <div className="lehrkraft-rule-header">

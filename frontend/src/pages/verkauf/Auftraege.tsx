@@ -22,7 +22,7 @@ import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import { kundenanfrageInAuftragUebernehmen, naechsteAuftragsnummer } from "../../services/verkauf/verkaufService";
 import { getCustomerName } from "../../utils/customerReferences";
 import { getBerlinDate, getRelativeBerlinDate } from "../../utils/dateTime";
-import { canCreateOutgoingInvoice, canStartShipping, getInquiryForOrder, getSalesStepForOrder, getSalesStepLabel } from "../../utils/processFlow";
+import { canCreateOutgoingInvoice, getInquiryForOrder, getSalesStepForOrder, getSalesStepLabel } from "../../utils/processFlow";
 import { useDataSyncRefresh } from "../../hooks/useDataSyncRefresh";
 import { ACCESS, PERMISSIONS } from "../../constants/permissions";
 
@@ -119,7 +119,6 @@ export default function Auftraege() {
         setOpen(true);
     }, [newMode, inquiryIdFromQuery, kundeIdFromQuery, defaultKundeId, defaultLeistungId]);
 
-    const findeVersandZuAuftrag = (auftragId) => versandauftraege.find(item => String(item.auftragId) === String(auftragId));
     const kannMietvertragAbschliessen = auftrag => (auftrag.positionen || []).some(position =>
         position.leistungTyp === "Service"
         && position.vertragsEnde

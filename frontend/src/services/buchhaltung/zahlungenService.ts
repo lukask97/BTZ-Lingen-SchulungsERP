@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import rechnungenService from "./rechnungenService";
 import bestellungenService from "../einkauf/bestellungenService";
 import { getCustomerName } from "../../utils/customerReferences";
@@ -81,7 +81,7 @@ function normalizePayment(item: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { kunde, rechnungsnr, bestellNr, ...basePayload } = payload;
+    const { kunde: _kunde, rechnungsnr: _rechnungsnr, bestellNr: _bestellNr, ...basePayload } = payload;
     return {
         ...basePayload,
         rechnungId: basePayload.rechnungId || "",
@@ -127,7 +127,7 @@ const zahlungenService = {
         firmenkontoService.ensureBookingForPayment(created);
         return created;
     },
-    update: (idOrItem, payload) => {
+    update: (idOrItem, payload?) => {
         const updated = typeof idOrItem === "object"
             ? normalizePayment(baseService.update(splitPayload(idOrItem)))
             : normalizePayment(baseService.update(idOrItem, splitPayload(payload)));

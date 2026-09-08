@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import rechnungenService from "./rechnungenService";
 
 const baseService = createCRUDService("belege", []);
@@ -55,7 +55,7 @@ const belegeService = {
     },
     create: (payload: any) => normalizeReceipt(baseService.create(splitPayload(payload))),
     add: (payload: any) => normalizeReceipt(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             return normalizeReceipt(baseService.update(splitPayload(idOrItem)));
         }

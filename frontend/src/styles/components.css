@@ -784,7 +784,12 @@ select optgroup {
 }
 
 .form-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     margin-bottom: 0.25rem !important;
+    line-height: 1.2;
+    vertical-align: middle;
 }
 
 .label-with-hint {
@@ -795,15 +800,31 @@ select optgroup {
 
 .required {
     color: #d33f49;
-    margin-left: 4px;
+    margin-left: 0;
 }
 
 .number-field {
+    position: relative;
     width: 100%;
 }
 
+.number-field input {
+    width: 100%;
+}
+
+.number-field-has-suffix input {
+    padding-right: 2.4rem;
+}
+
 .number-field-suffix {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--erp-text-soft);
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
 }
 
 .erp-checkbox {
@@ -877,7 +898,7 @@ select optgroup {
 }
 
 .help-hint::before {
-    content: "";
+    content: "?";
 }
 
 .help-hint-tooltip {

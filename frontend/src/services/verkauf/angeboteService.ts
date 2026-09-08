@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import { formatOfferNumber, naechsteAngebotsrevision as buildNextAngebotsrevision } from "../core/documentNumbering";
 import { createPositionTableService } from "../core/positionTableService";
 import artikelService from "../logistik/artikelService";
@@ -54,7 +54,7 @@ function hydrateAngebot(item: any = {}) {
         positionen: positionService.listByParent(normalized.id || "")
             .map(position => {
                 const hydrated = hydratePosition(position);
-                const { angebotId, ...rest } = hydrated;
+                const { angebotId: _angebotId, ...rest } = hydrated;
                 return rest;
             })
     };
@@ -96,7 +96,7 @@ function hydrateAngebote(items: any[] = []) {
                 leistungTyp: istService ? "Service" : (position.leistungTyp || "Artikel"),
                 einzelpreis: Number(position.einzelpreis ?? referenz.verkaufspreis ?? referenz.preis ?? 0)
             };
-            const { angebotId, ...rest } = hydrated;
+            const { angebotId: _angebotId, ...rest } = hydrated;
             return rest;
         });
 
@@ -127,7 +127,7 @@ function hydratePosition(position: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { positionen = [], preispositionen = [], kunde, ...basePayload } = payload;
+    const { positionen = [], preispositionen = [], kunde: _kunde, ...basePayload } = payload;
     return {
         basePayload: {
             ...basePayload,

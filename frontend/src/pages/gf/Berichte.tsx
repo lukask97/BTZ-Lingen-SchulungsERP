@@ -37,6 +37,7 @@ const intervalDays = {
 
 function createEmptyBericht(today: string) {
     return {
+        id: "",
         titel: "",
         bereich: "verkauf",
         datum: today,

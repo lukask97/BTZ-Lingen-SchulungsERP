@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
 import NumberField from "../../components/form/NumberField";

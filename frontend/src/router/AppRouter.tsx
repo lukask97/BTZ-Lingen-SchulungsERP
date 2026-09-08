@@ -79,8 +79,6 @@ import Transportverzoegerung from "../pages/szenarien/Transportverzoegerung";
 import Kooperation from "../pages/szenarien/Kooperation";
 import LegacyLinkFallback from "../pages/fallback/LegacyLinkFallback";
 import { ACCESS } from "../constants/permissions";
-
-
 import ProtectedRoute from "../auth/ProtectedRoute";
 
 function AppRouter() {

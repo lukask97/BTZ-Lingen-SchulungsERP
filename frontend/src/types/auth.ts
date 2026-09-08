@@ -38,19 +38,19 @@ export interface AuthProviderProps {
 
 export interface ProtectedRouteProps {
     children: ReactNode;
-    access: AccessKey;
+    access?: AccessKey;
 }
 
 export interface CanProps {
     children: ReactNode;
-    access: AccessKey;
-    permission: PermissionKey;
+    access?: AccessKey;
+    permission?: PermissionKey;
 }
 
 export interface PermissionButtonProps {
     children: ReactNode;
-    permission: PermissionKey;
-    access: AccessKey;
+    permission?: PermissionKey;
+    access?: AccessKey;
     onClick: (...args: any[]) => void;
     disabled?: boolean;
     variant?: string;

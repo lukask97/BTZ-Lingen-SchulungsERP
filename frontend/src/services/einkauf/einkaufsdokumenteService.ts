@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import bestellungenService from "./bestellungenService";
 import { getSupplierName } from "../../utils/supplierReferences";
 
@@ -17,7 +17,7 @@ function hydrateDokument(item: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { bestellNr, lieferant, lieferantId, positionen, ...basePayload } = payload;
+    const { bestellNr: _bestellNr, lieferant: _lieferant, lieferantId: _lieferantId, positionen: _positionen, ...basePayload } = payload;
     return {
         ...basePayload,
         bestellungId: basePayload.bestellungId || ""
@@ -34,7 +34,7 @@ export default {
     },
     create: (payload: any) => hydrateDokument(baseService.create(splitPayload(payload))),
     add: (payload: any) => hydrateDokument(baseService.create(splitPayload(payload))),
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             return hydrateDokument(baseService.update(splitPayload(idOrItem)));
         }

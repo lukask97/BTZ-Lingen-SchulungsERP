@@ -50,8 +50,10 @@ export default function LookupField({
     }, [options, query, selectedOption?.label]);
 
     const selectOption = (option: LookupOption) => {
-        setQuery(option.label);
         setOpen(false);
+        if (!option.action) {
+            setQuery(option.label);
+        }
         if (onChange) onChange(String(option.value));
     };
 

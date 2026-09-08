@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import { getUserFullName } from "../../utils/userDisplay";
 
 const benutzerService = createCRUDService("benutzer", []);
@@ -33,7 +33,7 @@ export default {
     getById: id => normalizeUser(benutzerService.getById(id)),
     create: payload => normalizeUser(benutzerService.create(normalizeUser(payload))),
     add: payload => normalizeUser(benutzerService.add(normalizeUser(payload))),
-    update: (idOrItem, payload) => normalizeUser(benutzerService.update(
+    update: (idOrItem, payload?) => normalizeUser(benutzerService.update(
         typeof idOrItem === "object" ? normalizeUser(idOrItem) : idOrItem,
         payload ? normalizeUser(payload) : payload
     )),

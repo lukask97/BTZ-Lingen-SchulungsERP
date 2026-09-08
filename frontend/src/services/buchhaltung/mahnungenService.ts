@@ -39,7 +39,7 @@ function hydrateMahnung(item: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { kunde, rechnungsnr, kundeId, ...basePayload } = payload;
+    const { kunde: _kunde, rechnungsnr: _rechnungsnr, kundeId: _kundeId, ...basePayload } = payload;
     return {
         ...basePayload,
         rechnungId: basePayload.rechnungId || "",
@@ -120,7 +120,7 @@ export default {
         syncInvoiceStage(created.rechnungId);
         return created;
     },
-    update: (idOrItem: any, payload: any) => {
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
             const updated = hydrateMahnung(baseService.update(splitPayload(idOrItem)));
             syncInvoiceStage(updated.rechnungId);

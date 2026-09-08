@@ -81,7 +81,7 @@ export default function NumberField({
                 disabled={disabled}
                 onChange={e => {
                     setDraftValue(e.target.value);
-                    onChange && onChange(e.target.value);
+                    if (onChange) onChange(e.target.value);
                 }}
                 onFocus={() => setIsFocused(true)}
                 onWheel={event => {
@@ -90,7 +90,7 @@ export default function NumberField({
                 }}
                 onBlur={() => {
                     setIsFocused(false);
-                    onBlur && onBlur();
+                    if (onBlur) onBlur();
                 }}
             />
 

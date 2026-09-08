@@ -1,9 +1,8 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
 import Label from "../../components/form/Label";
-import LookupField from "../../components/form/LookupField";
 import SaveButton from "../../components/SaveButton";
 import TextArea from "../../components/form/TextArea";
 import SalesFlowBar from "../../components/SalesFlowBar";
@@ -22,12 +21,6 @@ import { getLieferscheinnummer } from "../../services/core/documentNumbering";
 import kundenService from "../../services/verkauf/customerService";
 
 const dokumentTypen = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier", "Lieferbestätigung"];
-const AUFTRAGS_FILTER = [
-    { value: "alle", label: "Alle Aufträge" },
-    { value: "offen", label: "Nur offene Aufträge" },
-    { value: "ohne_bestaetigung", label: "Ohne Auftragsbestätigung" },
-    { value: "bestaetigt", label: "Bestätigung versendet" }
-];
 const ARBEITSLISTE_TABS = [
     { key: "offen", label: "Alle offen" },
     { key: "bestaetigung_fehlend", label: "Auftragsbestätigung fehlt" },
@@ -53,6 +46,10 @@ function createVertriebsdokument(auftragId, today, dokumentTyp = "Auftragsbestä
         auftragId,
         dokumentTyp,
         datum: today,
+        dokumentNr: "",
+        versendetAm: "",
+        status: "",
+        annahmeAm: "",
         notiz: ""
     };
 }
@@ -188,7 +185,6 @@ export default function Vertriebsdokumente() {
     const rechnungen = withFallback(() => rechnungenService.list(), []);
     const initialAuftragId = routeAuftragId || "";
     const [selectedAuftragId, setSelectedAuftragId] = useState(initialAuftragId);
-    const [auftragsFilter, setAuftragsFilter] = useState("alle");
     const [dokumente, setDokumente] = useSyncedServiceData(
         ["vertriebsdokumente", "auftraege", "angebote", "kundenanfragen", "nachrichten"],
         () => vertriebsdokumenteService.list()
@@ -196,24 +192,6 @@ export default function Vertriebsdokumente() {
     const [open, setOpen] = useState(false);
     const [current, setCurrent] = useState(createVertriebsdokument(initialAuftragId, today));
     const [aktiveArbeitsliste, setAktiveArbeitsliste] = useState<(typeof ARBEITSLISTE_TABS)[number]["key"]>("offen");
-
-    const gefilterteAuftraegeFürAuswahl = useMemo(
-        () => auftraege.filter(item => {
-            const bestaetigung = getConfirmationDocument(item.id, dokumente);
-
-            if (auftragsFilter === "offen") {
-                return String(item.status || "").toLowerCase() === "offen";
-            }
-            if (auftragsFilter === "ohne_bestaetigung") {
-                return !bestaetigung;
-            }
-            if (auftragsFilter === "bestaetigt") {
-                return bestaetigung?.status === "versendet";
-            }
-            return true;
-        }),
-        [auftraege, dokumente, auftragsFilter]
-    );
 
     const selectedAuftrag = auftraege.find(item => String(item.id) === String(selectedAuftragId));
     const selectedAnfrage = selectedAuftrag ? getInquiryForOrder(selectedAuftrag, angebote, anfragen) : null;
@@ -287,9 +265,6 @@ export default function Vertriebsdokumente() {
         ] as const,
         [offeneArbeitsliste]
     );
-    const selectedArbeitsstatus = selectedAuftrag
-         ? getNaechstenDokumentSchritt(selectedAuftrag, gefilterteDokumente)
-        : null;
     const vorgangsverbindungen = useMemo(() => {
         if (!selectedAuftrag) return [];
         const dokumentReihenfolge = ["Auftragsbestätigung", "Lieferschein", "Warenbegleitpapier", "Transportpapier", "Lieferbestätigung"];

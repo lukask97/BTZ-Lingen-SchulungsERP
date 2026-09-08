@@ -37,13 +37,6 @@ function getApprovalMessageVariant(item: ApprovalMessage) {
     return "internal";
 }
 
-function getApprovalMessageLabel(item: ApprovalMessage) {
-    const variant = getApprovalMessageVariant(item);
-    if (variant === "customer") return "Vom Kunden";
-    if (variant === "outbound") return "Zum Kunden";
-    return "Intern";
-}
-
 function getFirmenname() {
     return String(unternehmenService.get().firmenname || "Schülerfirma").trim();
 }

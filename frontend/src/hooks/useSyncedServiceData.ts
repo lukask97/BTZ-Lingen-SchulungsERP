@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { subscribeToDataSync } from "../services/seed/dataSync";
 
 function isRecoverableFetchError(error: unknown) {
@@ -10,6 +10,8 @@ function isRecoverableFetchError(error: unknown) {
 }
 
 export function useSyncedServiceData<T>(keys: string[], load: () => T) {
+    const loadRef = useRef(load);
+    loadRef.current = load;
     const [data, setData] = useState(() => {
         try {
             return load();
@@ -21,25 +23,26 @@ export function useSyncedServiceData<T>(keys: string[], load: () => T) {
         }
     });
     const keysSignature = keys.join("|");
+    const watchedKeys = useMemo(() => keysSignature.split("|"), [keysSignature]);
 
-    const refresh = () => {
+    const refresh = useCallback(() => {
         try {
-            setData(load());
+            setData(loadRef.current());
         } catch (error) {
             if (isRecoverableFetchError(error)) {
                 return;
             }
             throw error;
         }
-    };
+    }, []);
 
     useEffect(() => {
         refresh();
 
-        return subscribeToDataSync(keys, () => {
+        return subscribeToDataSync(watchedKeys, () => {
             refresh();
         });
-    }, [keysSignature]);
+    }, [refresh, watchedKeys]);
 
     return [data, setData, refresh] as const;
 }

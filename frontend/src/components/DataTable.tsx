@@ -127,6 +127,14 @@ function haveSameColumns(
   });
 }
 
+function haveSameFilters(currentFilters: Record<string, unknown>, nextFilters: Record<string, unknown>) {
+  const currentKeys = Object.keys(currentFilters);
+  const nextKeys = Object.keys(nextFilters);
+  if (currentKeys.length !== nextKeys.length) return false;
+
+  return currentKeys.every((key) => currentFilters[key] === nextFilters[key]);
+}
+
 function getTableColSpan(columnCount: number, hasRowActions: boolean) {
   return columnCount + (hasRowActions ? 1 : 0);
 }
@@ -157,7 +165,7 @@ export default function DataTable({
 
   searchable = false,
 
-  selectableColumns = true,
+  selectableColumns: _selectableColumns = true,
 
   onColumnsChange: _onColumnsChange,
 
@@ -203,6 +211,7 @@ export default function DataTable({
         .join("|"),
     [sourceColumns]
   );
+  const initialFiltersSignature = useMemo(() => JSON.stringify(initialFilters), [initialFilters]);
   const hasRowActions = rowActions.length > 0;
   const selectionColumnOffset = selectableRows ? 1 : 0;
   const tableColSpan = getTableColSpan(visibleColumns.length + selectionColumnOffset, hasRowActions);
@@ -232,7 +241,7 @@ export default function DataTable({
         ? currentColumns
         : nextVisibleColumns
     );
-  }, [sourceColumnsSignature, username, tableName]);
+  }, [sourceColumns, sourceColumnsSignature, username, tableName]);
 
   function searchChange(e) {
     const value = e.target.value;
@@ -249,8 +258,12 @@ export default function DataTable({
   }
 
   useEffect(() => {
-    setActiveFilters(initialFilters);
-  }, [JSON.stringify(initialFilters)]);
+    setActiveFilters((currentFilters) =>
+      haveSameFilters(currentFilters, initialFilters)
+        ? currentFilters
+        : initialFilters
+    );
+  }, [initialFiltersSignature]);
 
   function sort(field) {
     let order = "asc";

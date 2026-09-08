@@ -1,5 +1,5 @@
 import type { DataTableColumn } from "../types/ui";
-import { PERMISSIONS, PERMISSION_GROUPS } from "./permissions";
+import { PERMISSIONS } from "./permissions";
 
 export { PERMISSIONS, PERMISSION_GROUPS } from "./permissions";
 

@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import rollenRechteService from "./rollenRechteService";
 
 const rechteService = createCRUDService("rechte", []);

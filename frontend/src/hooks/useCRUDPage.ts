@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { CrudService, EntityWithId, UseCrudPageOptions, UseCrudPageResult } from "../types/crud";
 import { subscribeToDataSync } from "../services/seed/dataSync";
 
@@ -33,7 +33,7 @@ export function useCRUDPage<T extends EntityWithId>(
     const [currentItem, setCurrentItem] = useState(initialData);
     const [error, setError] = useState("");
 
-    const refreshData = () => {
+    const refreshData = useCallback(() => {
         try {
             setData(services.list());
         } catch (error) {
@@ -43,7 +43,7 @@ export function useCRUDPage<T extends EntityWithId>(
             }
             throw error;
         }
-    };
+    }, [services]);
 
     useEffect(() => {
         refreshData();
@@ -51,7 +51,7 @@ export function useCRUDPage<T extends EntityWithId>(
         return subscribeToDataSync([tableName], () => {
             refreshData();
         });
-    }, [services, tableName]);
+    }, [refreshData, tableName]);
 
     const filteredData = data.filter(item =>
         Object.values(item)

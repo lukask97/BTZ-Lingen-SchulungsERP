@@ -172,13 +172,14 @@ export function createAngebotDraft(defaultLeistungId, defaultBearbeiter, braucht
 }
 
 export function createAngebotPositionDraft(auswahl, menge) {
-    const initialOptions = {};
+    const initialOptions: Record<string, any> = {};
     if (auswahl.artikelTyp === "Baugruppe" && auswahl.individualisierungen) {
         const groups = [...new Set(auswahl.individualisierungen.map(i => i.kategorieId))];
         groups.forEach(g => {
+            const groupId = String(g);
             const std = auswahl.individualisierungen.find(i => i.kategorieId === g && i.standard);
             if (std) {
-                initialOptions[g] = std.individualArtikelId;
+                initialOptions[groupId] = std.individualArtikelId;
             }
         });
     }
@@ -323,9 +324,10 @@ export function syncOptionRows(positionen, parentPosition, leistung, artikel) {
     const gruppenIds = [...new Set(leistung.individualisierungen.map(item => item.kategorieId))];
 
     gruppenIds.forEach(groupId => {
+        const optionGroupId = String(groupId);
         const gruppenOptionen = leistung.individualisierungen.filter(item => item.kategorieId === groupId);
         const defaultOpt = gruppenOptionen.find(item => item.standard) || gruppenOptionen[0];
-        const aktuelleOptionId = Number(parentPosition.selectedOptionen?.[groupId] || defaultOpt?.individualArtikelId || 0);
+        const aktuelleOptionId = Number(parentPosition.selectedOptionen?.[optionGroupId] || defaultOpt?.individualArtikelId || 0);
         const individuelleAuswahl = gruppenOptionen.find(item => Number(item.individualArtikelId) === aktuelleOptionId);
         if (!individuelleAuswahl || individuelleAuswahl.standard) {
             return;

@@ -9,6 +9,7 @@ TABLE_ACCESS_MAP = {
     "angebotspositionen": "verkauf",
     "arbeitszeiten": "personalwesen",
     "artikel": "artikel",
+    "artikelIndividualisierung": "artikel",
     "artikelStueckliste": "artikel",
     "auftraege": "verkauf",
     "auftragspositionen": "verkauf",

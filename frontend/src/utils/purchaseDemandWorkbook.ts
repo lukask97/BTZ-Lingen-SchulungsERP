@@ -87,7 +87,7 @@ function buildResolvedLookupFormula(sheetName: string, rowNumber: number, return
     return `IF($${matchColumn}${rowNumber}="","",INDEX('${sheetName}'!$${returnColumn}:$${returnColumn},$${matchColumn}${rowNumber}))`;
 }
 
-function buildBestMatchQtyFormula(sheetName: string, rowNumber: number, supplierRef: string) {
+function buildBestMatchQtyFormula(sheetName: string, rowNumber: number, _supplierRef: string) {
     return `IF($N${rowNumber}="","",INDEX('${sheetName}'!$B:$B,$N${rowNumber}))`;
 }
 
@@ -103,7 +103,7 @@ function buildBestMatchKeyFormula(rowNumber: number, supplierRef: string, bestQt
     return `IF(OR(${supplierRef}="",${supplierRef}="Auswahl treffen",$${bestQtyColumn}${rowNumber}=""),"",${supplierRef}&"|"&$${bestQtyColumn}${rowNumber})`;
 }
 
-function buildMaxIfsDebugFormula(sheetName: string, rowNumber: number, supplierRef: string) {
+function buildMaxIfsDebugFormula(sheetName: string, rowNumber: number, _supplierRef: string) {
     return `IF($M${rowNumber}="","",INDEX('${sheetName}'!$B:$B,$M${rowNumber}))`;
 }
 
@@ -132,6 +132,7 @@ function applyInvalidSupplierFormatting(sheet: ExcelJS.Worksheet, rowNumber: num
         rules: [
             {
                 type: "expression",
+                priority: rowNumber,
                 formulae: [
                     `AND($H${rowNumber}<>"",$H${rowNumber}<>"Auswahl treffen",COUNTIF('${articleSheetName}'!$H$3:$H$400,$H${rowNumber})=0)`
                 ],
@@ -159,37 +160,7 @@ function applyMinimumQuantityFormatting(sheet: ExcelJS.Worksheet, rowNumber: num
         rules: [
             {
                 type: "expression",
-                formulae: [minimumNotReachedFormula],
-                style: {
-                    fill: {
-                        type: "pattern",
-                        pattern: "solid",
-                        bgColor: { argb: "FFFDECEC" },
-                        fgColor: { argb: "FFFDECEC" }
-                    },
-                    font: {
-                        color: { argb: "FF9F1D1D" }
-                    }
-                }
-            }
-        ]
-    });
-}
-
-function applyMinimumQuantityFormattingForColumns(
-    sheet: ExcelJS.Worksheet,
-    rowNumber: number,
-    articleSheetName: string,
-    supplierColumn: string,
-    matchColumn: string
-) {
-    const minimumNotReachedFormula = `AND($G${rowNumber}>0,$${supplierColumn}${rowNumber}<>"",$${supplierColumn}${rowNumber}<>"Auswahl treffen",COUNTIF('${articleSheetName}'!$H$3:$H$400,$${supplierColumn}${rowNumber})>0,$${matchColumn}${rowNumber}="",COUNTIF('${articleSheetName}'!$G$2:$G$400,$${supplierColumn}${rowNumber})>0)`;
-
-    sheet.addConditionalFormatting({
-        ref: `G${rowNumber}:L${rowNumber}`,
-        rules: [
-            {
-                type: "expression",
+                priority: rowNumber,
                 formulae: [minimumNotReachedFormula],
                 style: {
                     fill: {
@@ -216,6 +187,7 @@ function applyComparisonFormatting(sheet: ExcelJS.Worksheet, rowNumber: number, 
         rules: [
             {
                 type: "expression",
+                priority: rowNumber,
                 formulae: [supplierUnavailableFormula],
                 style: {
                     fill: {
@@ -231,6 +203,7 @@ function applyComparisonFormatting(sheet: ExcelJS.Worksheet, rowNumber: number, 
             },
             {
                 type: "expression",
+                priority: rowNumber + 1000,
                 formulae: [noMatchFormula],
                 style: {
                     fill: {
@@ -439,7 +412,7 @@ export async function exportPurchaseDemandWorkbook(options: {
                 pattern: "solid",
                 fgColor: { argb: "FFF3F4F6" }
             };
-            cell.alignment = { vertical: "middle", horizontal: cell.col === 10 ? "left" : "center" };
+            cell.alignment = { vertical: "middle", horizontal: String(cell.col) === "10" ? "left" : "center" };
         });
     }
 
@@ -610,7 +583,7 @@ export async function exportPurchaseDemandWorkbook(options: {
                 pattern: "solid",
                 fgColor: { argb: "FFF3F4F6" }
             };
-            cell.alignment = { vertical: "middle", horizontal: cell.col === 8 || cell.col === 10 ? "left" : "center" };
+            cell.alignment = { vertical: "middle", horizontal: String(cell.col) === "8" || String(cell.col) === "10" ? "left" : "center" };
         });
     }
 

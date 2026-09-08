@@ -9,7 +9,6 @@ import NumberField from "../../components/form/NumberField";
 import TextArea from "../../components/form/TextArea";
 import OverviewCards from "../../components/OverviewCards";
 import SaveButton from "../../components/SaveButton";
-import HelpHint from "../../components/HelpHint";
 import rechnungenService from "../../services/buchhaltung/rechnungenService";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import mahnungenService from "../../services/buchhaltung/mahnungenService";

@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import { getCustomerName } from "../../utils/customerReferences";
 
 const baseService = createCRUDService("kundenanfragen", []);
@@ -43,7 +43,7 @@ function hydrateInquiry(item: any = {}) {
 }
 
 function splitPayload(payload: any = {}) {
-    const { kunde, ...basePayload } = payload;
+    const { kunde: _kunde, ...basePayload } = payload;
     return basePayload;
 }
 

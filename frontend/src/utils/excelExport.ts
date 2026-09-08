@@ -1,5 +1,3 @@
-import * as XLSX from "xlsx";
-
 type ExcelColumn = {
     key: string;
     label: string;
@@ -19,12 +17,29 @@ export function exportRowsToExcel(options: {
     rows: Array<Record<string, unknown>>;
 }) {
     const { fileName, sheetName, columns, rows } = options;
-    const exportRows = rows.map(row => Object.fromEntries(
-        columns.map(column => [column.label, row[column.key] ?? ""])
-    ));
+    import("exceljs").then(async module => {
+        const ExcelJS = module.default ?? module;
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet(sheetName);
+        worksheet.addRow(columns.map(column => column.label));
+        rows.forEach(row => {
+            worksheet.addRow(columns.map(column => row[column.key] ?? ""));
+        });
+        worksheet.columns.forEach(column => {
+            column.width = 20;
+        });
 
-    const worksheet = XLSX.utils.json_to_sheet(exportRows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-    XLSX.writeFile(workbook, `${sanitizeFileName(fileName)}.xlsx`);
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer as ArrayBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${sanitizeFileName(fileName)}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    });
 }

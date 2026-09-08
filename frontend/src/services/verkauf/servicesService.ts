@@ -36,6 +36,7 @@ function normalizeService(item: any = {}) {
 }
 
 const servicesService = {
+    ...baseService,
     list: () => withPermissionFallback(() => baseService.list().map(normalizeService), []),
     getAll: () => withPermissionFallback(() => baseService.list().map(normalizeService), []),
     getById: (id: any) => withPermissionFallback(
@@ -49,7 +50,18 @@ const servicesService = {
         return baseService.update(idOrItem, normalizeService(payload));
     },
     remove: (id: any) => baseService.remove(id),
-    delete: (id: any) => baseService.remove(id)
+    delete: (id: any) => baseService.remove(id),
+    removeMany: (ids: Array<number | string>) => baseService.removeMany(ids),
+    deleteMultiple: (ids: Array<number | string>) => baseService.removeMany(ids),
+    search: (query: string) => servicesService.list().filter(item =>
+        Object.values(item).join(" ").toLowerCase().includes(query.toLowerCase())
+    ),
+    sortBy: (field: string, order = "asc") => [...servicesService.list()].sort((a, b) => {
+        const aValue = a[field];
+        const bValue = b[field];
+        if (order === "asc") return aValue > bValue ? 1 : -1;
+        return aValue < bValue ? 1 : -1;
+    })
 };
 
 export default servicesService;

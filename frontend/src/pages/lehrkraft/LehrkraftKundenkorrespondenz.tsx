@@ -14,9 +14,8 @@ import auftraegeService from "../../services/verkauf/auftraegeService";
 import customerInquiryService from "../../services/verkauf/customerInquiryService";
 import kundenService from "../../services/verkauf/customerService";
 import nachrichtenService, { listNachrichtenZuVorgang } from "../../services/verkauf/nachrichtenService";
-import { angebotInAuftragUebernehmen } from "../../services/verkauf/verkaufService";
 import vertriebsdokumenteService from "../../services/verkauf/vertriebsdokumenteService";
-import { addDaysToIsoDate, formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
+import { formatTimestampForDisplay, getBerlinDate, getBerlinTimestamp } from "../../utils/dateTime";
 import { openDocumentPdf } from "../../utils/documentPdf";
 import zahlungenService from "../../services/buchhaltung/zahlungenService";
 import { getPaymentOpenItemStatus, isPendingPayment } from "../../utils/openItems";
@@ -495,7 +494,6 @@ export default function LehrkraftKundenkorrespondenz() {
     const wiedervorlageVorbereiten = (angebot: any) => {
         if (!angebot) return;
         const tage = Math.max(1, Number(wiedervorlageTage || 0));
-        const pruefdatum = addDaysToIsoDate(today, tage);
         setThreadItem(angebot);
         setCustomerReplyText(`Geben Sie uns das Angebot ${angebot.angebotsNr} wenn möglich in ${tage} Tagen zur Wiedervorlage. Wir prüfen es dann erneut und melden uns bei Ihnen.`);
         setThreadOpen(true);

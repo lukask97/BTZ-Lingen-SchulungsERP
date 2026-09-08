@@ -1,4 +1,4 @@
-﻿import { createCRUDService } from "../core/genericService";
+import { createCRUDService } from "../core/genericService";
 import { getCustomerName } from "../../utils/customerReferences";
 
 const reklamationenService = createCRUDService("reklamationen", []);
@@ -22,14 +22,14 @@ export default {
         const item = reklamationenService.getById(id);
         return item ? hydrateReklamation(item) : undefined;
     },
-    create: (payload: any) => hydrateReklamation(reklamationenService.create((( { kunde, ...rest }) => rest)(payload))),
-    add: (payload: any) => hydrateReklamation(reklamationenService.create((( { kunde, ...rest }) => rest)(payload))),
-    update: (idOrItem: any, payload: any) => {
+    create: (payload: any) => hydrateReklamation(reklamationenService.create((( { kunde: _kunde, ...rest }) => rest)(payload))),
+    add: (payload: any) => hydrateReklamation(reklamationenService.create((( { kunde: _kunde, ...rest }) => rest)(payload))),
+    update: (idOrItem: any, payload?: any) => {
         if (typeof idOrItem === "object") {
-            const { kunde, ...rest } = idOrItem;
+            const { kunde: _kunde, ...rest } = idOrItem;
             return hydrateReklamation(reklamationenService.update(rest));
         }
-        const { kunde, ...rest } = payload || {};
+        const { kunde: _kunde, ...rest } = payload || {};
         return hydrateReklamation(reklamationenService.update(idOrItem, rest));
     }
 };

@@ -5,11 +5,11 @@ type RoleLike = {
 };
 
 type RolePermissionLike = {
-    rolleId: number | string | null;
-    rollenId: number | string | null;
+    rolleId?: number | string | null;
+    rollenId?: number | string | null;
     rolleName: string;
     rechtName: string;
-    permission: string;
+    permission?: string;
 };
 
 type UserLike = {
