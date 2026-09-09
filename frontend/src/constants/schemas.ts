@@ -251,7 +251,7 @@ export const TABLE_COLUMNS: Record<string, DataTableColumn[]> = {
         { field: "name", title: "Kategorie" },
         { field: "parentName", title: "Oberkategorie" },
         { field: "pfad", title: "Pfad" },
-        { field: "beschreibung", title: "Beschreibung", visible: false }
+        { field: "beschreibung", title: "Beschreibung" }
     ],
     services: [
         { field: "serviceNr", title: "Servicenummer" },

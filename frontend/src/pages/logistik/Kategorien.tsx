@@ -36,24 +36,42 @@ function buildCategoryTree(kategorien) {
     return sortItems(byParent.get("")).map(buildNode);
 }
 
-function KategorienTreeList({ nodes }) {
+function KategorienTreeList({ nodes, depth = 0 }) {
     if (!nodes.length) {
         return null;
     }
 
     return <ul className="kategorien-simple-tree">
-        {nodes.map(node => <li key={node.id}>
-            {node.children.length > 0 ? <details className="kategorien-tree-node">
-                <summary>
-                    <span>{node.name}</span>
-                    <small>{node.children.length} Unterkategorien</small>
+        {nodes.map(node => {
+            const childCount = node.children.length;
+            const depthLabel = depth === 0 ? "Oberkategorie" : `Ebene ${depth + 1}`;
+
+            return <li key={node.id} className="kategorien-tree-item">
+                {childCount > 0 ? <details className="kategorien-tree-node">
+                    <summary>
+                        <span className="kategorien-tree-toggle" aria-hidden="true"></span>
+                        <span className="kategorien-tree-main">
+                            <strong>{node.name}</strong>
+                            {node.beschreibung ? <small>{node.beschreibung}</small> : null}
+                        </span>
+                        <span className="kategorien-tree-meta">
+                            <span>{depthLabel}</span>
+                            <span>{childCount} Unterkategorien</span>
+                        </span>
                 </summary>
-                <KategorienTreeList nodes={node.children}/>
-            </details> : <div className="kategorien-tree-leaf">
-                <span>{node.name}</span>
-                {node.beschreibung ? <small>{node.beschreibung}</small> : null}
-            </div>}
-        </li>)}
+                    <KategorienTreeList nodes={node.children} depth={depth + 1}/>
+                </details> : <div className="kategorien-tree-leaf">
+                    <span className="kategorien-tree-dot" aria-hidden="true"></span>
+                    <span className="kategorien-tree-main">
+                        <strong>{node.name}</strong>
+                        {node.beschreibung ? <small>{node.beschreibung}</small> : null}
+                    </span>
+                    <span className="kategorien-tree-meta">
+                        <span>{depthLabel}</span>
+                    </span>
+                </div>}
+            </li>;
+        })}
     </ul>;
 }
 

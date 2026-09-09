@@ -385,6 +385,13 @@ export default function DataTable({
     return value ?? "";
   }
 
+  function getCellTitle(value) {
+    const displayed = displayValue(value);
+    if (displayed === null || displayed === undefined) return undefined;
+    const text = String(displayed);
+    return text.length > 50 ? text : undefined;
+  }
+
   function renderDetailValue(field, row, value) {
     if (Array.isArray(value) && value.every(isLinkValue)) {
       return (
@@ -622,7 +629,7 @@ export default function DataTable({
   }
 
   return (
-    <div className="card">
+    <div className={["card", tableName ? `datatable-card--${tableName}` : ""].filter(Boolean).join(" ")}>
       <div className="toolbar">
         <h2>{title}</h2>
 
@@ -748,10 +755,10 @@ export default function DataTable({
                     </td>
                   )}
                   {visibleColumns.map((column) => (
-                    <td key={column.field}>
+                    <td key={column.field} title={column.render ? undefined : getCellTitle(row[column.field])}>
                       {column.render
                         ? column.render(row, row[column.field])
-                        : displayValue(row[column.field])}
+                        : <span className="datatable-cell-value">{displayValue(row[column.field])}</span>}
                     </td>
                   ))}
 

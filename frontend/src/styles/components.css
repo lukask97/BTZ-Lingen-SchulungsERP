@@ -208,6 +208,7 @@ select optgroup {
     gap: 10px;
     flex-wrap: wrap;
     position: relative;
+    z-index: 20;
     flex: 1 1 340px;
     justify-content: flex-end;
     min-width: 0;
@@ -274,6 +275,7 @@ select optgroup {
 }
 
 .datatable {
+    width: 100%;
     margin-bottom: 0 !important;
     min-width: max-content;
     background: var(--erp-surface);
@@ -375,6 +377,78 @@ select optgroup {
 
 .datatable tbody tr.datatable-row-inbound .datatable-actions-column {
     background: #eaf5ff;
+}
+
+.datatable-card--kategorien .datatable {
+    min-width: 760px;
+    table-layout: auto;
+}
+
+.datatable-card--kategorien .datatable th,
+.datatable-card--kategorien .datatable td {
+    padding: 0.45rem 0.65rem;
+}
+
+.datatable-card--kategorien .datatable th:nth-child(1),
+.datatable-card--kategorien .datatable td:nth-child(1) {
+    width: 1%;
+    max-width: 50ch;
+    white-space: nowrap;
+}
+
+.datatable-card--kategorien .datatable th:nth-child(2),
+.datatable-card--kategorien .datatable td:nth-child(2) {
+    width: 1%;
+    max-width: 50ch;
+    white-space: nowrap;
+}
+
+.datatable-card--kategorien .datatable th:nth-child(3),
+.datatable-card--kategorien .datatable td:nth-child(3) {
+    width: 1%;
+    max-width: 50ch;
+    white-space: nowrap;
+}
+
+.datatable-card--kategorien .datatable th:nth-child(4),
+.datatable-card--kategorien .datatable td:nth-child(4) {
+    width: 100%;
+    min-width: 360px;
+}
+
+.datatable-card--kategorien .datatable td:nth-child(4) .datatable-cell-value {
+    display: -webkit-box;
+    overflow: hidden;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+}
+
+.datatable-card--kategorien .datatable td:nth-child(-n+3) .datatable-cell-value {
+    display: block;
+    max-width: 50ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.datatable-card--kategorien .datatable .datatable-actions-column {
+    width: 186px;
+    min-width: 186px;
+}
+
+.datatable-card--kategorien .table-actions {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.datatable-card--kategorien .table-actions .button {
+    width: auto;
+    min-width: 82px;
+    min-height: 34px;
+    padding: 0.42rem 0.55rem;
+    white-space: nowrap;
 }
 
 [data-theme=dark] .datatable .datatable-actions-column,
@@ -513,13 +587,25 @@ select optgroup {
     right: 0;
     top: calc(100% + 10px);
     width: 220px;
-    z-index: 30;
+    z-index: 80;
+    padding: 12px;
+    border: 1px solid var(--erp-border);
+    border-radius: 12px;
+    background: var(--erp-surface);
+    color: var(--erp-text);
+    box-shadow: 0 18px 40px rgba(16, 39, 63, 0.18);
 }
 
 .column-popup label {
     display: flex;
+    align-items: center;
     gap: 8px;
-    padding: 0.45rem 0;
+    padding: 0.45rem 0.35rem;
+    border-radius: 8px;
+}
+
+.column-popup label:hover {
+    background: var(--erp-surface-soft);
 }
 
 .pagination {
@@ -1050,6 +1136,183 @@ select optgroup {
 
 .detail-link:hover {
     text-decoration: underline;
+}
+
+.kategorien-tree-panel {
+    border: 1px solid var(--erp-border);
+    border-radius: 12px;
+    background: var(--erp-surface-soft);
+    overflow: hidden;
+}
+
+.kategorien-tree-panel > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    color: var(--erp-text);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+
+.kategorien-tree-panel > summary::-webkit-details-marker,
+.kategorien-tree-node > summary::-webkit-details-marker {
+    display: none;
+}
+
+.kategorien-tree-panel > summary::after {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.16s ease;
+}
+
+.kategorien-tree-panel[open] > summary::after {
+    transform: rotate(225deg);
+}
+
+.kategorien-tree {
+    padding: 4px 14px 14px;
+}
+
+.kategorien-tree p {
+    margin: 0;
+    color: var(--erp-text-soft);
+}
+
+.kategorien-simple-tree {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kategorien-simple-tree .kategorien-simple-tree {
+    margin-top: 8px;
+    margin-left: 16px;
+    padding-left: 18px;
+    border-left: 1px solid var(--erp-border);
+}
+
+.kategorien-tree-item {
+    position: relative;
+    min-width: 0;
+}
+
+.kategorien-simple-tree .kategorien-simple-tree > .kategorien-tree-item::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: -18px;
+    width: 12px;
+    border-top: 1px solid var(--erp-border);
+}
+
+.kategorien-tree-node > summary,
+.kategorien-tree-leaf {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--erp-border);
+    border-radius: 10px;
+    background: var(--erp-surface);
+    color: var(--erp-text);
+    box-shadow: 0 8px 18px rgba(16, 39, 63, 0.05);
+}
+
+.kategorien-tree-node > summary {
+    cursor: pointer;
+}
+
+.kategorien-tree-node > summary:hover,
+.kategorien-tree-leaf:hover {
+    border-color: rgba(15, 108, 189, 0.38);
+    background: color-mix(in srgb, var(--erp-surface) 76%, var(--erp-accent));
+}
+
+.kategorien-tree-toggle,
+.kategorien-tree-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--erp-accent);
+    color: var(--erp-primary);
+    flex: 0 0 auto;
+}
+
+.kategorien-tree-toggle::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 0.16s ease;
+}
+
+.kategorien-tree-node[open] > summary .kategorien-tree-toggle::before {
+    transform: rotate(45deg);
+}
+
+.kategorien-tree-dot::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.kategorien-tree-main {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.kategorien-tree-main strong {
+    overflow: hidden;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kategorien-tree-main small {
+    overflow: hidden;
+    color: var(--erp-text-soft);
+    font-size: 0.78rem;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kategorien-tree-meta {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.kategorien-tree-meta span {
+    padding: 3px 8px;
+    border: 1px solid var(--erp-border);
+    border-radius: 999px;
+    background: var(--erp-surface-soft);
+    color: var(--erp-text-soft);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .button-link,
@@ -2041,6 +2304,26 @@ select optgroup {
 
     .dialog-body:has(> .form-label) > .form-label:not(:first-child) {
         margin-top: 8px;
+    }
+
+    .kategorien-tree-node > summary,
+    .kategorien-tree-leaf {
+        grid-template-columns: 24px minmax(0, 1fr);
+    }
+
+    .kategorien-tree-meta {
+        grid-column: 2;
+        justify-content: flex-start;
+    }
+
+    .kategorien-simple-tree .kategorien-simple-tree {
+        margin-left: 10px;
+        padding-left: 14px;
+    }
+
+    .kategorien-simple-tree .kategorien-simple-tree > .kategorien-tree-item::before {
+        left: -14px;
+        width: 10px;
     }
 
     .sales-flow-bar {

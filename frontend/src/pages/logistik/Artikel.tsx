@@ -39,6 +39,46 @@ function createKategorieDraft() {
     };
 }
 
+function getKategorieUndUnterkategorieIds(kategorien, kategorieId) {
+    const startId = String(kategorieId || "");
+    if (!startId) return new Set();
+
+    const childrenByParentId = kategorien.reduce((map, kategorie) => {
+        const parentId = String(kategorie.parentId || "");
+        if (!map.has(parentId)) {
+            map.set(parentId, []);
+        }
+        map.get(parentId).push(String(kategorie.id));
+        return map;
+    }, new Map());
+
+    const ids = new Set([startId]);
+    const pending = [...(childrenByParentId.get(startId) || [])];
+
+    while (pending.length > 0) {
+        const id = pending.pop();
+        if (!id || ids.has(id)) continue;
+        ids.add(id);
+        pending.push(...(childrenByParentId.get(id) || []));
+    }
+
+    return ids;
+}
+
+function sortArtikelNachKategorie(a, b) {
+    const kategorieCompare = String(a.kategoriePfad || a.kategorie || "").localeCompare(
+        String(b.kategoriePfad || b.kategorie || ""),
+        "de",
+        { numeric: true }
+    );
+    if (kategorieCompare !== 0) return kategorieCompare;
+
+    const nummerCompare = String(a.artikelNr || "").localeCompare(String(b.artikelNr || ""), "de", { numeric: true });
+    if (nummerCompare !== 0) return nummerCompare;
+
+    return String(a.name || a.artikel || "").localeCompare(String(b.name || b.artikel || ""), "de", { numeric: true });
+}
+
 function getCanvasOutputType(fileType = "") {
     return String(fileType).toLowerCase() === "image/png" ? "image/png" : "image/jpeg";
 }
@@ -527,7 +567,8 @@ export default function Artikel() {
     const filteredDisplayData = useMemo(() => {
         let filtered = allData;
         if (categoryFilter) {
-            filtered = filtered.filter(item => String(item.kategorieId) === String(categoryFilter));
+            const erlaubteKategorieIds = getKategorieUndUnterkategorieIds(kategorien, categoryFilter);
+            filtered = filtered.filter(item => erlaubteKategorieIds.has(String(item.kategorieId || "")));
         }
         if (search) {
             filtered = filtered.filter(item =>
@@ -537,8 +578,8 @@ export default function Artikel() {
                     .includes(search.toLowerCase())
             );
         }
-        return filtered;
-    }, [allData, categoryFilter, search]);
+        return [...filtered].sort(sortArtikelNachKategorie);
+    }, [allData, categoryFilter, kategorien, search]);
 
     const artikelFilters = useMemo(() => [
         {
