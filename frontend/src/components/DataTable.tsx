@@ -151,7 +151,7 @@ export default function DataTable({
 
   page = 1,
   totalPages = 1,
-  pageSize = 10,
+  pageSize = 25,
 
   onPageChange,
   onPageSizeChange,
@@ -189,6 +189,7 @@ export default function DataTable({
   const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [activeFilters, setActiveFilters] = useState(initialFilters);
+  const [internalPage, setInternalPage] = useState(page);
 
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<DataTableColumn[]>([]);
@@ -215,7 +216,8 @@ export default function DataTable({
   const hasRowActions = rowActions.length > 0;
   const selectionColumnOffset = selectableRows ? 1 : 0;
   const tableColSpan = getTableColSpan(visibleColumns.length + selectionColumnOffset, hasRowActions);
-  const pageSizeOptions = [10, 25, 50, 100];
+  const normalizedPageSize = Number.isFinite(Number(pageSize)) && Number(pageSize) > 0 ? Number(pageSize) : 25;
+  const pageSizeOptions = Array.from(new Set([10, 25, 50, 100, normalizedPageSize])).sort((a, b) => a - b);
 
   /*
         Initialisierung der Spalten
@@ -307,6 +309,14 @@ export default function DataTable({
       return aComparable < bComparable ? 1 : -1;
     });
   }, [data, sortField, sortOrder]);
+  const computedTotalPages = Math.max(1, Math.ceil(sortedData.length / normalizedPageSize));
+  const effectiveTotalPages = onPageChange ? totalPages : computedTotalPages;
+  const effectivePage = Math.min(Math.max(onPageChange ? page : internalPage, 1), effectiveTotalPages);
+  const pageData = useMemo(() => {
+    if (onPageChange) return sortedData;
+    const start = (effectivePage - 1) * normalizedPageSize;
+    return sortedData.slice(start, start + normalizedPageSize);
+  }, [effectivePage, normalizedPageSize, onPageChange, sortedData]);
 
   const columnLabelMap = useMemo(() => {
     return Object.fromEntries(
@@ -458,6 +468,29 @@ export default function DataTable({
     };
   }, [visibleColumns, data, rowActions]);
 
+  useEffect(() => {
+    if (onPageChange) return;
+    setInternalPage((currentPage) => Math.min(Math.max(currentPage, 1), computedTotalPages));
+  }, [computedTotalPages, onPageChange]);
+
+  function changePage(nextPage: number) {
+    const safePage = Math.min(Math.max(nextPage, 1), effectiveTotalPages);
+    if (onPageChange) {
+      onPageChange(safePage);
+      return;
+    }
+    setInternalPage(safePage);
+  }
+
+  function changePageSize(nextPageSize: number) {
+    if (!onPageChange) {
+      setInternalPage(1);
+    }
+    if (onPageSizeChange) {
+      onPageSizeChange(nextPageSize);
+    }
+  }
+
   function renderToolbarFilters() {
     if (filters.length === 0) return null;
 
@@ -543,7 +576,7 @@ export default function DataTable({
 
   function toggleSelectAllRows() {
     if (!onSelectedRowsChange) return;
-    const visibleIds = sortedData.map((row) => row.id);
+    const visibleIds = pageData.map((row) => row.id);
     const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedRowIds.some((selectedId) => String(selectedId) === String(id)));
     onSelectedRowsChange(allSelected ? [] : visibleIds);
   }
@@ -553,30 +586,28 @@ export default function DataTable({
       <div className="pagination">
         <button
           type="button"
-          disabled={page <= 1}
-          onClick={() => onPageChange && onPageChange(page - 1)}
+          disabled={effectivePage <= 1}
+          onClick={() => changePage(effectivePage - 1)}
         >
           Zurück
         </button>
 
         <span>
-          Seite {page} / {totalPages}
+          Seite {effectivePage} / {effectiveTotalPages}
         </span>
 
         <button
           type="button"
-          disabled={page >= totalPages}
-          onClick={() => onPageChange && onPageChange(page + 1)}
+          disabled={effectivePage >= effectiveTotalPages}
+          onClick={() => changePage(effectivePage + 1)}
         >
           Weiter
         </button>
 
         <select
           name="page-size"
-          value={pageSize}
-          onChange={(e) =>
-            onPageSizeChange && onPageSizeChange(Number(e.target.value))
-          }
+          value={normalizedPageSize}
+          onChange={(e) => changePageSize(Number(e.target.value))}
         >
           {pageSizeOptions.map((option) => (
             <option key={option} value={option}>
@@ -660,7 +691,7 @@ export default function DataTable({
                   <input
                     name="select-all-rows"
                     type="checkbox"
-                    checked={sortedData.length > 0 && sortedData.every((row) => selectedRowIds.some((id) => String(id) === String(row.id)))}
+                    checked={pageData.length > 0 && pageData.every((row) => selectedRowIds.some((id) => String(id) === String(row.id)))}
                     onChange={toggleSelectAllRows}
                     aria-label="Alle Zeilen auswählen"
                   />
@@ -699,7 +730,7 @@ export default function DataTable({
             )}
 
             {!loading &&
-              sortedData.map((row) => (
+              pageData.map((row) => (
                 <tr
                   key={row.id}
                   className={[showDetails ? "clickable-row" : "", rowClassName ? rowClassName(row) : ""].filter(Boolean).join(" ")}

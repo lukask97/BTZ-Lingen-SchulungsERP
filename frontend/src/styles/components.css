@@ -576,11 +576,22 @@ select optgroup {
 .dialog-body {
     padding: 22px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
     gap: 20px 24px;
     overflow: auto;
     align-content: start;
     overscroll-behavior: contain;
+}
+
+.dialog-body:has(> .form-label) {
+    grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr);
+    align-items: center;
+    column-gap: 14px;
+}
+
+.dialog-body:has(> .form-label) > .form-label {
+    margin-bottom: 0;
+    white-space: nowrap;
 }
 
 .dialog-body .form-row,
@@ -1934,6 +1945,10 @@ select optgroup {
         grid-template-columns: 1fr;
     }
 
+    .dialog-body:has(> .form-label) {
+        grid-template-columns: max-content minmax(0, 1fr);
+    }
+
     .toolbar-right {
         flex-basis: 100%;
         justify-content: flex-start;
@@ -2017,6 +2032,15 @@ select optgroup {
 
     .thread-form-grid-actions > button {
         width: 100%;
+    }
+
+    .dialog-body:has(> .form-label) {
+        grid-template-columns: 1fr;
+        row-gap: 8px;
+    }
+
+    .dialog-body:has(> .form-label) > .form-label:not(:first-child) {
+        margin-top: 8px;
     }
 
     .sales-flow-bar {

@@ -28,7 +28,7 @@ export function useCRUDPage<T extends EntityWithId>(
     });
     const [open, setOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(25);
     const [search, setSearch] = useState("");
     const [currentItem, setCurrentItem] = useState(initialData);
     const [error, setError] = useState("");
