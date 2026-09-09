@@ -25,6 +25,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [isAuthReady, setIsAuthReady] = useState(false);
     const [authError, setAuthError] = useState("");
 
+    function persistUser(nextUser: AuthUser | null) {
+        setUser(nextUser);
+        if (nextUser) {
+            sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextUser));
+            sessionStorage.removeItem(SESSION_EXPIRED_MESSAGE_KEY);
+        } else {
+            sessionStorage.removeItem(AUTH_STORAGE_KEY);
+        }
+    }
+
     useEffect(() => {
         let isMounted = true;
 
@@ -34,17 +44,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 if (!isMounted) return;
 
                 const hadStoredUser = Boolean(readInitialUser());
-                setUser(backendUser);
+                persistUser(backendUser);
                 setAuthError("");
 
-                if (backendUser) {
-                    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(backendUser));
-                    sessionStorage.removeItem(SESSION_EXPIRED_MESSAGE_KEY);
-                } else {
-                    if (hadStoredUser) {
-                        sessionStorage.setItem(SESSION_EXPIRED_MESSAGE_KEY, "Deine Sitzung ist aufgrund Inaktivität abgelaufen");
-                    }
-                    sessionStorage.removeItem(AUTH_STORAGE_KEY);
+                if (!backendUser && hadStoredUser) {
+                    sessionStorage.setItem(SESSION_EXPIRED_MESSAGE_KEY, "Deine Sitzung ist aufgrund Inaktivitaet abgelaufen");
                 }
             } catch (error) {
                 if (!isMounted) return;
@@ -72,23 +76,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     function login(userData: AuthUser) {
 
-        setUser(userData);
+        persistUser(userData);
         setIsAuthReady(true);
         setAuthError("");
-
-        sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
 
     }
 
 
     async function logout() {
 
-        setUser(null);
+        persistUser(null);
         setIsAuthReady(true);
         setAuthError("");
-
-        sessionStorage.removeItem(AUTH_STORAGE_KEY);
         await logoutSession();
+
+    }
+
+
+    async function refreshUser() {
+
+        const backendUser = await getCurrentBackendUser();
+        persistUser(backendUser);
+        setIsAuthReady(true);
+        setAuthError("");
+        return backendUser;
 
     }
 
@@ -97,10 +108,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         const updatedUser = await setActiveClass(classId);
         clearTableCache();
-        setUser(updatedUser);
-        if (updatedUser) {
-            sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
-        }
+        persistUser(updatedUser);
         window.location.reload();
 
     }
@@ -123,7 +131,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return (<AuthContext.Provider
         value={{
-            user, isAuthReady, authError, login, logout, switchActiveClass, hasFullAccess, hasPermission, hasAccess
+            user, isAuthReady, authError, login, logout, refreshUser, switchActiveClass, hasFullAccess, hasPermission, hasAccess
         }}
     >
         {children}

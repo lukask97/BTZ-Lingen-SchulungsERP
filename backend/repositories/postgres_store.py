@@ -322,6 +322,8 @@ class PostgresStore:
             self._ensure_schema(cursor)
             if self.insert_seed_on_empty and not self._has_relational_data(cursor):
                 self._insert_seed_records(cursor)
+            elif self.insert_seed_on_empty:
+                self._backfill_missing_seed_relations(cursor)
             connection.commit()
 
     def _ensure_schema(self, cursor, force_recreate=False):
@@ -612,6 +614,35 @@ class PostgresStore:
                     self._ensure_mapping_for_item(cursor, table_name, item)
                     self._insert_record(cursor, table_name, item.get("id"), item)
 
+    def _backfill_missing_seed_relations(self, cursor):
+        for table_name in self.list_tables():
+            mapping = self.mappings[table_name]
+            for item in self.seed_data.get(table_name, []):
+                if not isinstance(item, dict) or item.get("id") in (None, ""):
+                    continue
+
+                entity_id = str(item.get("id"))
+                cursor.execute(
+                    sql.SQL("select 1 from {} where entity_id = %s").format(mapping.qualified_name),
+                    (entity_id,)
+                )
+                if not cursor.fetchone():
+                    continue
+
+                for api_field, relation in mapping.relations.items():
+                    seed_value = item.get(api_field)
+                    if seed_value in (None, "", []):
+                        continue
+                    cursor.execute(
+                        sql.SQL("select exists(select 1 from {} where parent_id = %s)").format(
+                            relation.qualified_name
+                        ),
+                        (entity_id,)
+                    )
+                    if cursor.fetchone()[0]:
+                        continue
+                    self._save_single_relation(cursor, relation, entity_id, api_field, seed_value)
+
     def _clear_table(self, cursor, table_name):
         self._require_table(table_name)
         mapping = self.mappings[table_name]
@@ -764,17 +795,20 @@ class PostgresStore:
             if value in (None, ""):
                 continue
 
-            if relation.kind == "object":
-                self._insert_object_relation(cursor, relation, entity_id, value if isinstance(value, dict) else {})
-            elif relation.kind == "object_list":
-                values = value if isinstance(value, list) else []
-                for index, child in enumerate(values):
-                    if isinstance(child, dict):
-                        self._insert_object_list_relation(cursor, relation, entity_id, index, child)
-            else:
-                values = value if isinstance(value, list) else []
-                for index, child in enumerate(values):
-                    self._insert_scalar_relation(cursor, relation, entity_id, index, child)
+            self._save_single_relation(cursor, relation, entity_id, api_field, value)
+
+    def _save_single_relation(self, cursor, relation, entity_id, api_field, value):
+        if relation.kind == "object":
+            self._insert_object_relation(cursor, relation, entity_id, value if isinstance(value, dict) else {})
+        elif relation.kind == "object_list":
+            values = value if isinstance(value, list) else []
+            for index, child in enumerate(values):
+                if isinstance(child, dict):
+                    self._insert_object_list_relation(cursor, relation, entity_id, index, child)
+        else:
+            values = value if isinstance(value, list) else []
+            for index, child in enumerate(values):
+                self._insert_scalar_relation(cursor, relation, entity_id, index, child)
 
     def _insert_object_relation(self, cursor, relation, entity_id, value):
         fields = list(relation.scalar_fields.keys())

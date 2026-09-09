@@ -833,6 +833,79 @@ select optgroup {
     gap: 8px;
 }
 
+.class-checkbox-list {
+    display: grid;
+    gap: 8px;
+    max-height: 176px;
+    overflow: auto;
+    padding: 8px;
+    border: 1px solid var(--erp-border);
+    border-radius: 8px;
+    background: var(--erp-surface-soft);
+    scrollbar-gutter: stable;
+}
+
+.class-checkbox-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--erp-surface);
+    transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.class-checkbox-item:hover {
+    border-color: rgba(25, 118, 210, 0.28);
+    box-shadow: 0 4px 12px rgba(15, 40, 70, 0.06);
+}
+
+.class-checkbox-item.is-selected {
+    border-color: rgba(25, 118, 210, 0.45);
+    background: var(--erp-accent);
+}
+
+.class-checkbox-item .checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin: 0;
+}
+
+.class-checkbox-item input[type="checkbox"] {
+    flex: 0 0 auto;
+}
+
+.class-checkbox-label {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.class-checkbox-label strong {
+    color: var(--erp-text);
+    font-size: 0.95rem;
+}
+
+.class-checkbox-label small,
+.class-checkbox-empty {
+    color: var(--erp-text-soft);
+}
+
+.class-checkbox-badge {
+    flex: 0 0 auto;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--erp-primary);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
 .lookup-field {
     display: flex;
     gap: 8px;

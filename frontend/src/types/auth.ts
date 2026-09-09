@@ -26,6 +26,7 @@ export interface AuthContextValue {
     authError: string;
     login: (userData: AuthUser) => void;
     logout: () => Promise<void>;
+    refreshUser: () => Promise<AuthUser | null>;
     switchActiveClass: (classId: number | string) => Promise<void>;
     hasFullAccess: () => boolean;
     hasPermission: (permission: PermissionKey) => boolean;

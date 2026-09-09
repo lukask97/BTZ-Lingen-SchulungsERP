@@ -164,33 +164,45 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isDarkMode, onT
             </div>
 
             <div className="sidebar-footer">
-                <button className="sidebar-theme-button button is-link is-light" onClick={onToggleDarkMode}>
-                    {isDarkMode ? "Light Mode" : "Dark Mode"}
-                </button>
-                <div className="sidebar-user">
-                    angemeldet als:
-                    <strong>{getUserFullName(user)}</strong>
-                </div>
-                <div className="sidebar-user">
-                    Klasse:
-                    {assignedClasses.length > 1 ? (
-                        <select
-                            name="active-class"
-                            value={String((activeClass as any)?.id ?? "")}
-                            disabled={isSwitchingClass}
-                            onChange={event => handleClassChange(event.target.value)}
+                <div className="sidebar-account">
+                    <div className="sidebar-account-header">
+                        <div>
+                            <span>angemeldet als</span>
+                            <strong>{getUserFullName(user)}</strong>
+                        </div>
+                        <button
+                            type="button"
+                            className="sidebar-theme-button"
+                            onClick={onToggleDarkMode}
+                            aria-label={isDarkMode ? "Light Mode aktivieren" : "Dark Mode aktivieren"}
+                            title={isDarkMode ? "Light Mode" : "Dark Mode"}
                         >
-                            {assignedClasses.map((item: any) => (
-                                <option key={item.id} value={item.id}>{item.name}</option>
-                            ))}
-                        </select>
-                    ) : (
-                        <strong>{(activeClass as any)?.name || "-"}</strong>
-                    )}
-                </div>
-                <div className="sidebar-user">
-                    Rolle:
-                    <strong>{user.rolle || "-"}</strong>
+                            {isDarkMode ? "☀" : "☾"}
+                        </button>
+                    </div>
+
+                    <div className="sidebar-account-row">
+                        <span>Rolle</span>
+                        <strong>{user.rolle || "-"}</strong>
+                    </div>
+
+                    <div className="sidebar-account-row">
+                        <span>Klasse</span>
+                        {assignedClasses.length > 1 ? (
+                            <select
+                                name="active-class"
+                                value={String((activeClass as any)?.id ?? "")}
+                                disabled={isSwitchingClass}
+                                onChange={event => handleClassChange(event.target.value)}
+                            >
+                                {assignedClasses.map((item: any) => (
+                                    <option key={item.id} value={item.id}>{item.name}</option>
+                                ))}
+                            </select>
+                        ) : (
+                            <strong>{(activeClass as any)?.name || "-"}</strong>
+                        )}
+                    </div>
                 </div>
                 <button className="sidebar-logout-button button is-danger is-light" onClick={() => void logout()}>
                     Logout

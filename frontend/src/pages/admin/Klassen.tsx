@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useAuth from "../../auth/useAuth";
 import { createKlasse, deleteKlasseWithPassword, listKlassen, updateKlasse } from "../../services/admin/klassenService";
 import benutzerService from "../../services/verwaltung/benutzerService";
 import { getUserFullName } from "../../utils/userDisplay";
@@ -18,12 +19,16 @@ const EMPTY_CLASS = {
 };
 
 export default function Klassen() {
+    const { refreshUser } = useAuth();
     const [klassen, setKlassen] = useState<Klasse[]>([]);
     const [benutzer, setBenutzer] = useState<any[]>([]);
     const [current, setCurrent] = useState<any>(EMPTY_CLASS);
     const [editingId, setEditingId] = useState<number | string | null>(null);
     const [selectedClassId, setSelectedClassId] = useState<string>("0");
     const [selectedUserId, setSelectedUserId] = useState<string>("");
+    const [saving, setSaving] = useState(false);
+    const [copySourceId, setCopySourceId] = useState("");
+    const [copyParticipants, setCopyParticipants] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
@@ -48,25 +53,42 @@ export default function Klassen() {
     const resetForm = () => {
         setCurrent(EMPTY_CLASS);
         setEditingId(null);
+        setCopySourceId("");
+        setCopyParticipants(false);
     };
 
     const save = async () => {
+        if (saving) return;
         if (!String(current.name || "").trim()) {
             setError("Bitte einen Klassennamen eintragen.");
             return;
         }
+        setSaving(true);
+        setMessage("");
+        setError("");
         try {
             if (editingId === null) {
-                await createKlasse(current);
-                setMessage("Klasse wurde angelegt und mit Seed-Daten vorbereitet.");
+                await createKlasse({
+                    ...current,
+                    copyFromClassId: copySourceId || "",
+                    copyParticipants
+                });
+                setMessage(copySourceId
+                    ? `Klasse wurde angelegt und Daten${copyParticipants ? " sowie Teilnehmer" : ""} wurden kopiert.`
+                    : "Klasse wurde leer angelegt.");
             } else {
                 await updateKlasse(editingId, current);
                 setMessage("Klasse wurde gespeichert.");
             }
             resetForm();
             await load();
+            if (editingId === null) {
+                await refreshUser();
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : "Klasse konnte nicht gespeichert werden.");
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -77,6 +99,8 @@ export default function Klassen() {
             beschreibung: klasse.beschreibung || "",
             status: klasse.status || "aktiv"
         });
+        setCopySourceId("");
+        setCopyParticipants(false);
         setMessage("");
         setError("");
     };
@@ -117,6 +141,7 @@ export default function Klassen() {
     };
 
     const selectedClass = klassen.find(item => String(item.id) === String(selectedClassId));
+    const selectedCopySource = klassen.find(item => String(item.id) === String(copySourceId));
     const classMembers = benutzer.filter(item => getUserClassIds(item).includes(String(selectedClassId)));
     const assignableUsers = benutzer.filter(item => !getUserClassIds(item).includes(String(selectedClassId)));
 
@@ -150,31 +175,65 @@ export default function Klassen() {
         <h1>Klassen</h1>
         <p>Klassen verwalten und eigene ERP-Datenbanken fuer den Unterricht erzeugen.</p>
 
-        <section className="module-panel">
+        <section className={`module-panel class-editor-panel${saving ? " is-working" : ""}`}>
             <div className="dashboard-panel-header">
-                <h2>{editingId === null ? "Neue Klasse" : "Klasse bearbeiten"}</h2>
-                <span>{editingId === null ? "Automatische Datenbank" : "Bestehend"}</span>
+                <div>
+                    <h2>{editingId === null ? "Neue Klasse" : "Klasse bearbeiten"}</h2>
+                    <p>{editingId === null ? "Neue Klassen starten leer. Optional kannst du die Daten einer bestehenden Klasse kopieren." : "Name, Status und Beschreibung der bestehenden Klasse anpassen."}</p>
+                </div>
+                <span>{saving ? "In Arbeit" : editingId === null ? (copySourceId ? "Kopie" : "Leer") : "Bestehend"}</span>
             </div>
             <div className="form-grid two-columns">
                 <label>
                     Name
-                    <input value={current.name} onChange={event => setCurrent({ ...current, name: event.target.value })} />
+                    <input value={current.name} onChange={event => setCurrent({ ...current, name: event.target.value })} disabled={saving} />
                 </label>
                 <label>
                     Status
-                    <select value={current.status} onChange={event => setCurrent({ ...current, status: event.target.value })}>
+                    <select value={current.status} onChange={event => setCurrent({ ...current, status: event.target.value })} disabled={saving}>
                         <option value="aktiv">aktiv</option>
                         <option value="deaktiviert">deaktiviert</option>
                     </select>
                 </label>
                 <label className="is-wide">
                     Beschreibung
-                    <textarea rows={3} value={current.beschreibung} onChange={event => setCurrent({ ...current, beschreibung: event.target.value })} />
+                    <textarea rows={3} value={current.beschreibung} onChange={event => setCurrent({ ...current, beschreibung: event.target.value })} disabled={saving} />
                 </label>
             </div>
-            <div className="thread-document-links">
-                <button type="button" onClick={() => void save()}>{editingId === null ? "Klasse anlegen" : "Speichern"}</button>
-                {editingId !== null && <button type="button" className="button-secondary" onClick={resetForm}>Abbrechen</button>}
+            {editingId === null && <div className="class-copy-options">
+                <label>
+                    Daten uebernehmen
+                    <select value={copySourceId} onChange={event => setCopySourceId(event.target.value)} disabled={saving}>
+                        <option value="">Leer starten</option>
+                        {klassen.map(klasse => <option key={klasse.id} value={String(klasse.id)}>
+                            {klasse.name} ({klasse.datenbankName})
+                        </option>)}
+                    </select>
+                </label>
+                <label className={`class-copy-participants${copySourceId ? "" : " is-disabled"}`}>
+                    <input
+                        type="checkbox"
+                        checked={copyParticipants}
+                        disabled={saving || !copySourceId}
+                        onChange={event => setCopyParticipants(event.target.checked)}
+                    />
+                    <span>
+                        <strong>Teilnehmer ebenfalls uebernehmen</strong>
+                        <small>{selectedCopySource ? `Alle Nutzer aus ${selectedCopySource.name} werden auch der neuen Klasse zugeordnet.` : "Erst eine Quellklasse auswaehlen."}</small>
+                    </span>
+                </label>
+            </div>}
+            <div className="class-editor-actions">
+                <div className="thread-document-links">
+                    <button type="button" onClick={() => void save()} disabled={saving}>
+                        {saving && <span className="inline-button-spinner" aria-hidden="true" />}
+                        {saving ? (editingId === null ? "Klasse wird angelegt..." : "Klasse wird gespeichert...") : (editingId === null ? "Klasse anlegen" : "Speichern")}
+                    </button>
+                    {editingId !== null && <button type="button" className="button-secondary" onClick={resetForm} disabled={saving}>Abbrechen</button>}
+                </div>
+                {saving && <p className="class-editor-progress">
+                    {copySourceId ? "Datenbank wird vorbereitet und Klassendaten werden kopiert. Bitte kurz warten." : "Leere Klassendatenbank wird vorbereitet. Bitte kurz warten."}
+                </p>}
             </div>
             {message && <p>{message}</p>}
             {error && <p className="form-error">{error}</p>}

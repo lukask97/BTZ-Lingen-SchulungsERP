@@ -32,8 +32,13 @@ def create_class():
     if error:
         return error
     payload = request.get_json(silent=True) or {}
-    item = get_store_manager().create_class(payload)
+    try:
+        item = get_store_manager().create_class(payload)
+    except ValueError as error:
+        return build_error_response(400, str(error))
     publish_event("table-changed", {"table": "klassen", "action": "create", "id": item.get("id")})
+    if payload.get("copyParticipants"):
+        publish_event("table-changed", {"table": "benutzer", "action": "update"})
     return json_response({"ok": True, "item": item}, 201)
 
 

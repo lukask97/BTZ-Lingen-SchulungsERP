@@ -1,3 +1,4 @@
+import copy
 import re
 from datetime import datetime, timezone
 
@@ -181,9 +182,17 @@ class StoreManager:
         return next_number, f"erp_{next_number}"
 
     def create_class(self, payload):
+        copy_from_class_id = payload.get("copyFromClassId")
+        copy_participants = bool(payload.get("copyParticipants"))
+        source_class = None
+        if copy_from_class_id not in (None, ""):
+            source_class = self.common_store.get("klassen", copy_from_class_id)
+            if not source_class:
+                raise ValueError("Die Quellklasse zum Kopieren wurde nicht gefunden.")
+
         next_id, database_name = self.next_class_database()
         ensure_database_exists(self.base_dsn, database_name)
-        self._create_store(database_name, CLASS_TABLES, insert_seed_on_empty=False)
+        target_store = self._create_store(database_name, CLASS_TABLES, insert_seed_on_empty=False)
         class_item = {
             "id": next_id,
             "name": str(payload.get("name") or f"Klasse {next_id}").strip(),
@@ -193,7 +202,35 @@ class StoreManager:
             "createdAt": _now_iso(),
             "updatedAt": _now_iso(),
         }
-        return self.common_store.create("klassen", class_item)
+        created_class = self.common_store.create("klassen", class_item)
+
+        if source_class:
+            source_store = self.get_class_store(source_class.get("datenbankName"))
+            copied_records = {
+                table_name: copy.deepcopy(source_store.list(table_name))
+                for table_name in CLASS_TABLES
+                if source_store.table_exists(table_name) and target_store.table_exists(table_name)
+            }
+            target_store.replace_records(copied_records)
+
+        if source_class and copy_participants:
+            self._copy_class_participants(copy_from_class_id, created_class.get("id"))
+
+        return created_class
+
+    def _copy_class_participants(self, source_class_id, target_class_id):
+        for user in self.common_store.list("benutzer"):
+            class_ids = [str(value) for value in (user.get("klasseIds") or [])]
+            if user.get("klasseId") not in (None, ""):
+                class_ids.append(str(user.get("klasseId")))
+            if str(source_class_id) not in set(class_ids):
+                continue
+            next_ids = list(dict.fromkeys([*class_ids, str(target_class_id)]))
+            self.common_store.update("benutzer", user.get("id"), {
+                **user,
+                "klasseIds": next_ids,
+                "klasseId": user.get("klasseId") if user.get("klasseId") not in (None, "") else next_ids[0]
+            })
 
     def update_class(self, class_id, payload):
         current = self.common_store.get("klassen", class_id)

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import useAuth from "../../auth/useAuth";
 import DataTable from "../../components/DataTable";
 import Dialog from "../../components/Dialog";
+import Checkbox from "../../components/form/Checkbox";
 import Label from "../../components/form/Label";
 import TextField from "../../components/form/TextField";
 import SaveButton from "../../components/SaveButton";
@@ -98,6 +99,14 @@ export default function Benutzer() {
             klasseIds: values,
             klasseId: values[0] || ""
         });
+    };
+
+    const toggleUserClassId = (classId: string, checked: boolean) => {
+        const currentIds = getUserClassIds(currentItem);
+        const nextIds = checked
+            ? [...currentIds, classId].filter((value, index, values) => values.indexOf(value) === index)
+            : currentIds.filter(value => value !== classId);
+        setUserClassIds(nextIds);
     };
 
     const handleFilterChange = (filters) => {
@@ -300,14 +309,29 @@ export default function Benutzer() {
                 <TextField value={currentItem.rolle} onChange={v => handleFieldChange("rolle", v)} />
 
                 <Label>Klassen</Label>
-                <select
-                    name="klasseIds"
-                    multiple
-                    value={getUserClassIds(currentItem)}
-                    onChange={event => setUserClassIds(Array.from(event.target.selectedOptions).map(option => option.value))}
-                >
-                    {klassen.map(klasse => <option key={klasse.id} value={String(klasse.id)}>{klasse.name}</option>)}
-                </select>
+                <div className="class-checkbox-list">
+                    {klassen.length === 0 && <span className="class-checkbox-empty">Keine Klassen vorhanden</span>}
+                    {klassen.map(klasse => {
+                        const classId = String(klasse.id);
+                        const selectedClassIds = getUserClassIds(currentItem);
+                        const checked = selectedClassIds.includes(classId);
+                        const isPrimary = checked && String(currentItem.klasseId ?? "") === classId;
+                        return <div key={klasse.id} className={`class-checkbox-item${checked ? " is-selected" : ""}`}>
+                            <Checkbox
+                                id={`user-class-${klasse.id}`}
+                                name={`klasseIds-${klasse.id}`}
+                                checked={checked}
+                                onChange={value => toggleUserClassId(classId, value)}
+                            >
+                                <span className="class-checkbox-label">
+                                    <strong>{klasse.name}</strong>
+                                    <small>{klasse.datenbankName || `Klasse ${klasse.id}`}</small>
+                                </span>
+                            </Checkbox>
+                            {isPrimary && <span className="class-checkbox-badge">Standard</span>}
+                        </div>;
+                    })}
+                </div>
 
                 <Label>Anzeigename</Label>
                 <TextField value={getUserDisplayNameWithRole(currentItem, "")} onChange={() => {}} disabled />

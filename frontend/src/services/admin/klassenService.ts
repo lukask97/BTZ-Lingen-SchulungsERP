@@ -1,4 +1,5 @@
 import { apiRequest } from "../core/api";
+import { invalidateTableCache } from "../core/dataCache";
 
 export async function listKlassen() {
     const result = await apiRequest("/admin/klassen");
@@ -10,6 +11,7 @@ export async function createKlasse(payload) {
         method: "POST",
         body: JSON.stringify(payload)
     });
+    invalidateTableCache("benutzer");
     return result.item;
 }
 
