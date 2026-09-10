@@ -222,4 +222,4 @@ Die Login Seite ist bei zu schamlen Seiten irgendwann nicht mehr scrollbar.
 
 Ab einer gewissen Breite muss  man die Sidebar ausblenden, um den Inhalt der Seite zu sehen. abedr dann esrcheint auch durchgehend der Header mit "Willkommen im Lernsystem". Entweder dann ganz oben aheften oder dies Block entfernen. 
 
-Das Verhalten von Den Filteroptionen und der Personaliesierungsoption "Spalten" ist manchmal unterschiedlich, wenn die Fensterbreite verkleiner. 
+Das Verhalten von Den Filteroptionen und der Personaliesierungsoption "Spalten" ist manchmal unterschiedlich, wenn die Fensterbreite verkleiner.
