@@ -716,7 +716,9 @@ export default function DataTable({
                 </th>
               ))}
 
-              {hasRowActions && <th className="datatable-actions-column">Aktionen</th>}
+              {hasRowActions && <th className="datatable-actions-column">
+                <span className="datatable-actions-header">Aktionen</span>
+              </th>}
             </tr>
           </thead>
 

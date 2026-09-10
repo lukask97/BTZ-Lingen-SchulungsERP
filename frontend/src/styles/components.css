@@ -251,6 +251,7 @@ select optgroup {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .table-actions .button {
@@ -333,6 +334,10 @@ select optgroup {
     user-select: none;
 }
 
+.datatable thead th:not(:last-child) {
+    border-right: 1px solid var(--erp-border);
+}
+
 [data-theme=dark] .datatable th,
 .theme-dark .datatable th {
     background: #24394c;
@@ -379,6 +384,7 @@ select optgroup {
     position: sticky;
     right: 0;
     z-index: 2;
+    text-align: right !important;
     background: #eef5fb;
     min-width: 190px;
     box-shadow: -10px 0 14px -12px rgba(31, 41, 55, 0.45);
@@ -386,6 +392,12 @@ select optgroup {
 
 .datatable thead .datatable-actions-column {
     z-index: 3;
+}
+
+.datatable-actions-header {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
 }
 
 .datatable tbody .datatable-actions-column {
