@@ -205,21 +205,14 @@ Notieren, wenn eines davon auftritt:
 
 ## Kurzes Ergebnisprotokoll
 
-| Bereich | OK? | Benutzer | Browserbreite | Notiz |
-| --- | --- | --- | --- | --- |
-| Login/Layout |  |  |  |  |
-| Artikel/Kategorien |  |  |  |  |
-| Einkauf/Bestellung |  |  |  |  |
-| Verkauf/Angebot |  |  |  |  |
-| Auftrag/Rechnung |  |  |  |  |
-| Admin/Klassen |  |  |  |  |
-
-
+| Bereich            | OK? | Benutzer | Browserbreite | Notiz |
+| ------------------ | --- | -------- | ------------- | ----- |
+| Login/Layout       |     |          |               |       |
+| Artikel/Kategorien |     |          |               |       |
+| Einkauf/Bestellung |     |          |               |       |
+| Verkauf/Angebot    |     |          |               |       |
+| Auftrag/Rechnung   |     |          |               |       |
+| Admin/Klassen      |     |          |               |       |
 
 Befunde:
 
-Die Login Seite ist bei zu schamlen Seiten irgendwann nicht mehr scrollbar.
-
-Ab einer gewissen Breite muss  man die Sidebar ausblenden, um den Inhalt der Seite zu sehen. abedr dann esrcheint auch durchgehend der Header mit "Willkommen im Lernsystem". Entweder dann ganz oben aheften oder dies Block entfernen. 
-
-Das Verhalten von Den Filteroptionen und der Personaliesierungsoption "Spalten" ist manchmal unterschiedlich, wenn die Fensterbreite verkleiner.

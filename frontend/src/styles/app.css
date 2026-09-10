@@ -112,7 +112,6 @@ a {
     border-radius: var(--erp-radius);
     background: rgba(255, 255, 255, 0.82);
     box-shadow: var(--erp-shadow);
-    backdrop-filter: blur(18px);
 }
 
 [data-theme=dark] .header,
@@ -155,7 +154,6 @@ a {
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-gutter: stable;
     transition: width 0.2s ease, min-width 0.2s ease, padding 0.2s ease;
     z-index: 10;
 }
@@ -798,12 +796,17 @@ a {
 .login-layout,
 .login {
     min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .login-layout {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    height: 100vh;
+    height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
     padding: 24px;
 }
 
@@ -811,6 +814,8 @@ a {
     display: grid;
     gap: 24px;
     width: min(1100px, 100%);
+    min-height: auto;
+    margin-block: auto;
     padding: 40px 24px;
 }
 
@@ -904,9 +909,25 @@ a {
     }
 
     .header {
-        position: sticky;
+        position: fixed;
         top: 0;
-        z-index: 20;
+        left: 0;
+        right: 0;
+        z-index: 35;
+        min-height: 58px;
+        margin: 0;
+        padding: 10px 14px 10px 76px;
+        border-radius: 0;
+    }
+
+    .header-copy h3 {
+        font-size: 1rem;
+        line-height: 1.15;
+    }
+
+    .header-kicker {
+        margin-bottom: 0.1rem;
+        font-size: 0.68rem;
     }
 
     .backup-header-stats,
@@ -929,9 +950,11 @@ a {
     .mobile-sidebar-button {
         display: inline-flex;
         position: fixed;
-        top: 14px;
+        top: 10px;
         left: 14px;
         z-index: 50;
+        min-height: 38px;
+        padding: 0.45rem 0.7rem;
     }
 
     .sidebar {

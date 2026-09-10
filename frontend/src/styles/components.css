@@ -199,7 +199,6 @@ select optgroup {
     font-size: clamp(1.15rem, 1rem + 0.5vw, 1.45rem);
     font-weight: 700;
     line-height: 1.2;
-    text-wrap: balance;
 }
 
 .toolbar-right {
@@ -232,19 +231,47 @@ select optgroup {
 }
 
 .datatable-card--artikel .table-search-control {
-    flex: 1 1 220px;
+    flex: 1 1 180px;
+    width: clamp(150px, 24vw, 320px);
+    min-width: 0;
     max-width: 320px;
 }
 
 .datatable-card--artikel .toolbar-select {
-    flex: 1 1 260px;
+    flex: 1 1 220px;
+    min-width: 0;
     max-width: 360px;
 }
 
 .datatable-card--artikel .toolbar-select:hover,
 .datatable-card--artikel .toolbar-select:focus {
-    flex-basis: 420px;
-    max-width: min(52vw, 560px);
+    flex-basis: 220px;
+    max-width: 360px;
+}
+
+@media (max-width: 1180px) {
+    .datatable-card--artikel .toolbar-right {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: stretch;
+        justify-content: stretch;
+        width: 100%;
+    }
+
+    .datatable-card--artikel .table-search-control,
+    .datatable-card--artikel .toolbar-select,
+    .datatable-card--artikel .toolbar-select:hover,
+    .datatable-card--artikel .toolbar-select:focus {
+        width: 100%;
+        max-width: none;
+    }
+
+    .datatable-card--artikel .toolbar-right > .icon-button,
+    .datatable-card--artikel .toolbar-right > .button,
+    .datatable-card--artikel .toolbar-right > .erp-button,
+    .datatable-card--artikel .toolbar-right > button {
+        width: 100%;
+    }
 }
 
 .table-actions {
@@ -328,20 +355,29 @@ select optgroup {
 }
 
 .datatable th {
+    position: relative;
     background: #eef5fb;
     color: var(--erp-primary-strong);
     cursor: pointer;
+    -webkit-user-select: none;
     user-select: none;
 }
 
 .datatable thead th:not(:last-child) {
-    border-right: 1px solid var(--erp-border);
+    border-right: 3px solid rgba(15, 68, 126, 0.62);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.7);
 }
 
 [data-theme=dark] .datatable th,
 .theme-dark .datatable th {
     background: #24394c;
     color: #d8ebfb;
+}
+
+[data-theme=dark] .datatable thead th:not(:last-child),
+.theme-dark .datatable thead th:not(:last-child) {
+    border-right-color: rgba(216, 235, 251, 0.58);
+    box-shadow: inset -1px 0 0 rgba(8, 20, 32, 0.55);
 }
 
 [data-theme=dark] .datatable,
@@ -378,6 +414,80 @@ select optgroup {
 
 .datatable-header > span:first-child {
     min-width: 0;
+}
+
+.datatable-resizable-column {
+    min-width: 72px;
+}
+
+.datatable-reorderable-column {
+    cursor: grab;
+}
+
+.datatable-reorderable-column:active {
+    cursor: grabbing;
+}
+
+.datatable-reorderable-column.is-column-dragging {
+    opacity: 0.55;
+}
+
+.datatable-reorderable-column.is-column-drop-target {
+    background: #dcecff;
+}
+
+.datatable-reorderable-column.is-column-drop-target::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    border-radius: 999px;
+    background: var(--erp-primary);
+}
+
+.datatable-reorderable-column.is-column-drop-before::before {
+    left: 0;
+}
+
+.datatable-reorderable-column.is-column-drop-after::before {
+    right: 0;
+}
+
+.datatable-column-resizer {
+    position: absolute;
+    top: 0;
+    right: -5px;
+    bottom: 0;
+    width: 10px;
+    cursor: col-resize;
+    z-index: 5;
+    touch-action: none;
+}
+
+.datatable-column-resizer::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 4px;
+    bottom: 8px;
+    width: 2px;
+    border-radius: 999px;
+    background: transparent;
+    transition: background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.datatable-column-resizer:hover::after,
+.is-resizing-table-column .datatable-column-resizer::after {
+    background: var(--erp-primary);
+    box-shadow: 0 0 0 2px rgba(15, 108, 189, 0.14);
+}
+
+.is-resizing-table-column,
+.is-resizing-table-column * {
+    cursor: col-resize !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
 }
 
 .datatable .datatable-actions-column {
@@ -458,11 +568,11 @@ select optgroup {
 }
 
 .datatable-card--kategorien .datatable td:nth-child(4) .datatable-cell-value {
-    display: -webkit-box;
+    display: block;
     overflow: hidden;
     white-space: normal;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
+    line-height: 1.35;
+    max-height: 5.4em;
 }
 
 .datatable-card--kategorien .datatable td:nth-child(-n+3) .datatable-cell-value {
@@ -980,7 +1090,6 @@ select optgroup {
     border: 1px solid var(--erp-border);
     border-radius: 8px;
     background: var(--erp-surface-soft);
-    scrollbar-gutter: stable;
 }
 
 .class-checkbox-item {
@@ -1134,6 +1243,36 @@ select optgroup {
 
 .icon-button {
     white-space: nowrap;
+}
+
+.column-menu-button {
+    border-color: #d7b85e;
+    background: #fff7df;
+    color: #72520b;
+    box-shadow: inset 0 0 0 1px rgba(215, 184, 94, 0.18);
+}
+
+.column-menu-button:hover:not(:disabled),
+.column-menu-button[aria-pressed="true"] {
+    border-color: #c99a1b;
+    background: #f8e6ad;
+    color: #513900;
+}
+
+[data-theme=dark] .column-menu-button,
+.theme-dark .column-menu-button {
+    border-color: #8c7332;
+    background: #342f1b;
+    color: #f4d983;
+}
+
+[data-theme=dark] .column-menu-button:hover:not(:disabled),
+[data-theme=dark] .column-menu-button[aria-pressed="true"],
+.theme-dark .column-menu-button:hover:not(:disabled),
+.theme-dark .column-menu-button[aria-pressed="true"] {
+    border-color: #caa84a;
+    background: #453a1d;
+    color: #ffe8a3;
 }
 
 .link-list {
@@ -1658,7 +1797,6 @@ select optgroup {
     gap: 8px;
     overflow-x: auto;
     padding: 2px 2px 8px;
-    scrollbar-width: thin;
 }
 
 .sales-flow-step {
@@ -2259,13 +2397,14 @@ select optgroup {
     }
 
     .datatable-card--artikel .toolbar-right {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .datatable-card--artikel .toolbar-select,
     .datatable-card--artikel .toolbar-select:hover,
     .datatable-card--artikel .toolbar-select:focus {
-        flex: 1 1 260px;
+        flex: 1 1 auto;
         max-width: 100%;
     }
 
@@ -2310,6 +2449,10 @@ select optgroup {
         display: grid;
         grid-template-columns: 1fr;
         align-items: stretch;
+    }
+
+    .datatable-card--artikel .toolbar-right {
+        grid-template-columns: 1fr;
     }
 
     .toolbar-right > * {

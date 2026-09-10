@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import PermissionButton from "./PermissionButton";
 import Dialog from "./Dialog";
 import HelpHint from "./HelpHint";
-import { saveUserColumns, getUserColumns } from "../services/core/metadataService";
+import { saveUserColumnWidths, saveUserColumns, getUserColumnWidths, getUserColumns } from "../services/core/metadataService";
 import type { DataTableColumn, DataTableProps } from "../types/ui";
 
 function resolveActionVariant(action) {
@@ -139,6 +139,23 @@ function getTableColSpan(columnCount: number, hasRowActions: boolean) {
   return columnCount + (hasRowActions ? 1 : 0);
 }
 
+const MIN_RESIZABLE_COLUMN_WIDTH = 72;
+const MAX_RESIZABLE_COLUMN_WIDTH = 720;
+
+function resolveVisibleColumns(sourceColumns: DataTableColumn[], savedFields?: string[]) {
+  const defaultVisibleColumns = sourceColumns.filter((column) => column.visible !== false);
+  if (!savedFields?.length) return defaultVisibleColumns;
+
+  const sourceColumnByField = new Map(sourceColumns.map((column) => [column.field, column]));
+  const savedFieldSet = new Set(savedFields);
+  const savedVisibleColumns = savedFields
+    .map((field) => sourceColumnByField.get(field))
+    .filter((column): column is DataTableColumn => Boolean(column));
+  const newDefaultColumns = defaultVisibleColumns.filter((column) => !savedFieldSet.has(column.field));
+
+  return [...savedVisibleColumns, ...newDefaultColumns];
+}
+
 export default function DataTable({
   title = "",
   toolbarContent,
@@ -166,6 +183,8 @@ export default function DataTable({
   searchable = false,
 
   selectableColumns: _selectableColumns = true,
+  resizableColumns = true,
+  reorderableColumns = true,
 
   onColumnsChange: _onColumnsChange,
 
@@ -193,8 +212,20 @@ export default function DataTable({
 
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<DataTableColumn[]>([]);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const [draggedColumnField, setDraggedColumnField] = useState("");
+  const [dragOverColumnField, setDragOverColumnField] = useState("");
+  const [dragOverColumnSide, setDragOverColumnSide] = useState<"before" | "after">("before");
   const columnMenuRef = useRef<HTMLDivElement | null>(null);
   const tableWrapperRef = useRef<HTMLDivElement | null>(null);
+  const visibleColumnFieldsRef = useRef<string[]>([]);
+  const suppressHeaderClickRef = useRef(false);
+  const resizingColumnRef = useRef<{
+    field: string;
+    startX: number;
+    startWidth: number;
+    nextWidths: Record<string, number>;
+  } | null>(null);
   const [hasLeftOverflow, setHasLeftOverflow] = useState(false);
   const [hasRightOverflow, setHasRightOverflow] = useState(false);
 
@@ -219,6 +250,10 @@ export default function DataTable({
   const normalizedPageSize = Number.isFinite(Number(pageSize)) && Number(pageSize) > 0 ? Number(pageSize) : 25;
   const pageSizeOptions = Array.from(new Set([10, 25, 50, 100, normalizedPageSize])).sort((a, b) => a - b);
 
+  useEffect(() => {
+    visibleColumnFieldsRef.current = visibleColumns.map((column) => column.field);
+  }, [visibleColumns]);
+
   /*
         Initialisierung der Spalten
     */
@@ -226,16 +261,12 @@ export default function DataTable({
   useEffect(() => {
     if (!sourceColumns.length) return;
 
-    let nextVisibleColumns = sourceColumns.filter((c) => c.visible !== false);
+    let nextVisibleColumns = resolveVisibleColumns(sourceColumns);
 
     if (username && tableName) {
       const saved = getUserColumns(username, tableName);
 
-      if (saved) {
-        nextVisibleColumns = sourceColumns.filter((c) =>
-          saved.sichtbareFelder.includes(c.field)
-        );
-      }
+      nextVisibleColumns = resolveVisibleColumns(sourceColumns, saved?.sichtbareFelder);
     }
 
     setVisibleColumns((currentColumns) =>
@@ -244,6 +275,15 @@ export default function DataTable({
         : nextVisibleColumns
     );
   }, [sourceColumns, sourceColumnsSignature, username, tableName]);
+
+  useEffect(() => {
+    if (!username || !tableName) {
+      setColumnWidths({});
+      return;
+    }
+
+    setColumnWidths(getUserColumnWidths(username, tableName));
+  }, [username, tableName, sourceColumnsSignature]);
 
   function searchChange(e) {
     const value = e.target.value;
@@ -259,6 +299,49 @@ export default function DataTable({
     if (onFilter) onFilter(newFilters);
   }
 
+  function saveColumnWidths(widths: Record<string, number>) {
+    if (!username || !tableName) return;
+    saveUserColumnWidths(username, tableName, widths, visibleColumnFieldsRef.current);
+  }
+
+  function saveVisibleColumns(nextColumns: DataTableColumn[]) {
+    if (!username || !tableName) return;
+    saveUserColumns(
+      username,
+      tableName,
+      nextColumns.map((column) => column.field)
+    );
+  }
+
+  function startColumnResize(event: React.MouseEvent<HTMLSpanElement>, column: DataTableColumn) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!resizableColumns) return;
+
+    const headerCell = event.currentTarget.closest("th");
+    if (!headerCell) return;
+
+    resizingColumnRef.current = {
+      field: column.field,
+      startX: event.clientX,
+      startWidth: headerCell.getBoundingClientRect().width,
+      nextWidths: columnWidths
+    };
+
+    document.body.classList.add("is-resizing-table-column");
+  }
+
+  function resetColumnWidth(event: React.MouseEvent<HTMLSpanElement>, column: DataTableColumn) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!resizableColumns) return;
+
+    const nextWidths = { ...columnWidths };
+    delete nextWidths[column.field];
+    setColumnWidths(nextWidths);
+    saveColumnWidths(nextWidths);
+  }
+
   useEffect(() => {
     setActiveFilters((currentFilters) =>
       haveSameFilters(currentFilters, initialFilters)
@@ -268,6 +351,11 @@ export default function DataTable({
   }, [initialFiltersSignature]);
 
   function sort(field) {
+    if (suppressHeaderClickRef.current) {
+      suppressHeaderClickRef.current = false;
+      return;
+    }
+
     let order = "asc";
 
     if (field === sortField) {
@@ -340,14 +428,66 @@ export default function DataTable({
     }
 
     setVisibleColumns(result);
+    saveVisibleColumns(result);
+  }
 
-    if (username && tableName) {
-      saveUserColumns(
-        username,
-        tableName,
-        result.map((c) => c.field)
-      );
-    }
+  function moveColumn(sourceField: string, targetField: string, placement: "before" | "after") {
+    if (!reorderableColumns || sourceField === targetField) return;
+
+    setVisibleColumns((currentColumns) => {
+      const sourceIndex = currentColumns.findIndex((column) => column.field === sourceField);
+      const targetIndex = currentColumns.findIndex((column) => column.field === targetField);
+      if (sourceIndex < 0 || targetIndex < 0) return currentColumns;
+
+      const nextColumns = [...currentColumns];
+      const [movedColumn] = nextColumns.splice(sourceIndex, 1);
+      const targetIndexAfterRemoval = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+      const insertIndex = placement === "after" ? targetIndexAfterRemoval + 1 : targetIndexAfterRemoval;
+      nextColumns.splice(insertIndex, 0, movedColumn);
+      saveVisibleColumns(nextColumns);
+      return nextColumns;
+    });
+  }
+
+  function handleColumnDragStart(event: React.DragEvent<HTMLTableCellElement>, column: DataTableColumn) {
+    if (!reorderableColumns) return;
+
+    suppressHeaderClickRef.current = true;
+    setDraggedColumnField(column.field);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", column.field);
+  }
+
+  function handleColumnDragOver(event: React.DragEvent<HTMLTableCellElement>, column: DataTableColumn) {
+    if (!reorderableColumns || !draggedColumnField || draggedColumnField === column.field) return;
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    const headerRect = event.currentTarget.getBoundingClientRect();
+    const nextSide = event.clientX > headerRect.left + headerRect.width / 2 ? "after" : "before";
+    setDragOverColumnField(column.field);
+    setDragOverColumnSide(nextSide);
+  }
+
+  function handleColumnDrop(event: React.DragEvent<HTMLTableCellElement>, column: DataTableColumn) {
+    if (!reorderableColumns) return;
+
+    event.preventDefault();
+    const sourceField = event.dataTransfer.getData("text/plain") || draggedColumnField;
+    moveColumn(sourceField, column.field, dragOverColumnSide);
+    setDraggedColumnField("");
+    setDragOverColumnField("");
+    setDragOverColumnSide("before");
+    suppressHeaderClickRef.current = true;
+  }
+
+  function handleColumnDragEnd() {
+    setDraggedColumnField("");
+    setDragOverColumnField("");
+    setDragOverColumnSide("before");
+    window.setTimeout(() => {
+      suppressHeaderClickRef.current = false;
+    }, 80);
   }
 
   function openDetails(row) {
@@ -452,6 +592,48 @@ export default function DataTable({
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [showColumnMenu]);
+
+  useEffect(() => {
+    function handleMouseMove(event: MouseEvent) {
+      const resizeState = resizingColumnRef.current;
+      if (!resizeState) return;
+
+      const width = Math.min(
+        MAX_RESIZABLE_COLUMN_WIDTH,
+        Math.max(
+          MIN_RESIZABLE_COLUMN_WIDTH,
+          Math.round(resizeState.startWidth + event.clientX - resizeState.startX)
+        )
+      );
+      const nextWidths = {
+        ...resizeState.nextWidths,
+        [resizeState.field]: width
+      };
+
+      resizingColumnRef.current = {
+        ...resizeState,
+        nextWidths
+      };
+      setColumnWidths(nextWidths);
+    }
+
+    function handleMouseUp() {
+      const resizeState = resizingColumnRef.current;
+      if (!resizeState) return;
+
+      resizingColumnRef.current = null;
+      document.body.classList.remove("is-resizing-table-column");
+      saveColumnWidths(resizeState.nextWidths);
+    }
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.classList.remove("is-resizing-table-column");
+    };
+  }, [username, tableName]);
 
   useEffect(() => {
     const wrapper = tableWrapperRef.current;
@@ -650,11 +832,12 @@ export default function DataTable({
 
           {sourceColumns.length > 0 && (
             <button
-              className="icon-button"
+              className="button-secondary icon-button column-menu-button"
               type="button"
+              aria-pressed={showColumnMenu}
               onClick={() => setShowColumnMenu(!showColumnMenu)}
             >
-              Spalten
+              Spalten wählen
             </button>
           )}
 
@@ -692,6 +875,16 @@ export default function DataTable({
         }}
       >
         <table className="datatable">
+          <colgroup>
+            {selectableRows && <col className="datatable-selection-col" />}
+            {visibleColumns.map((column) => (
+              <col
+                key={column.field}
+                style={columnWidths[column.field] ? { width: `${columnWidths[column.field]}px` } : undefined}
+              />
+            ))}
+            {hasRowActions && <col className="datatable-actions-col" />}
+          </colgroup>
           <thead>
             <tr>
               {selectableRows && (
@@ -706,13 +899,41 @@ export default function DataTable({
                 </th>
               )}
               {visibleColumns.map((column) => (
-                <th key={column.field} onClick={() => sort(column.field)}>
+                <th
+                  key={column.field}
+                  className={[
+                    resizableColumns ? "datatable-resizable-column" : "",
+                    reorderableColumns ? "datatable-reorderable-column" : "",
+                    draggedColumnField === column.field ? "is-column-dragging" : "",
+                    dragOverColumnField === column.field ? "is-column-drop-target" : "",
+                    dragOverColumnField === column.field ? `is-column-drop-${dragOverColumnSide}` : "",
+                  ].filter(Boolean).join(" ")}
+                  style={columnWidths[column.field] ? { width: `${columnWidths[column.field]}px` } : undefined}
+                  draggable={reorderableColumns}
+                  onClick={() => sort(column.field)}
+                  onDragStart={(event) => handleColumnDragStart(event, column)}
+                  onDragOver={(event) => handleColumnDragOver(event, column)}
+                  onDragLeave={() => setDragOverColumnField((currentField) => currentField === column.field ? "" : currentField)}
+                  onDrop={(event) => handleColumnDrop(event, column)}
+                  onDragEnd={handleColumnDragEnd}
+                >
                   <span className="datatable-header">
                     <span>{column.title}</span>
                     {column.helpText && <HelpHint text={column.helpText} delay={500} />}
                     {sortField === column.field &&
-                      <span>{sortOrder === "asc" ? " aufsteigend" : " absteigend"}</span>}
+                      <span>{sortOrder === "asc" ? "▲" : "▼"}</span>}
                   </span>
+                  {resizableColumns && (
+                    <span
+                      className="datatable-column-resizer"
+                      role="separator"
+                      aria-orientation="vertical"
+                      aria-label={`Spalte ${column.title} in der Breite anpassen`}
+                      title="Ziehen zum Anpassen, Doppelklick zum Zuruecksetzen"
+                      onMouseDown={(event) => startColumnResize(event, column)}
+                      onDoubleClick={(event) => resetColumnWidth(event, column)}
+                    />
+                  )}
                 </th>
               ))}
 

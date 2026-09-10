@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+er Artikel in der zweiten Zeilleimport type { ReactNode } from "react";
 
 export interface DialogProps {
     open: boolean;
@@ -115,6 +115,8 @@ export interface DataTableProps {
     rowActions?: DataTableAction[];
     searchable?: boolean;
     selectableColumns?: boolean;
+    resizableColumns?: boolean;
+    reorderableColumns?: boolean;
     onColumnsChange?: (columns: DataTableColumn[]) => void;
     showDetails?: boolean;
     username?: string;

@@ -19,7 +19,7 @@ function MainLayout() {
     const contentRef = useRef<HTMLDivElement | null>(null);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
         if (typeof window === "undefined") return false;
-        return window.innerWidth <= 860;
+        return window.innerWidth <= 1180;
     });
     const [isDarkMode, setIsDarkMode] = useState(() => {
         if (typeof window === "undefined") return false;
@@ -35,10 +35,24 @@ function MainLayout() {
         if (contentRef.current) {
             contentRef.current.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
-        if (window.innerWidth <= 860) {
+        if (window.innerWidth <= 1180) {
             setIsSidebarCollapsed(true);
         }
     }, [location.pathname]);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const collapseSidebarForViewport = () => {
+            if (window.innerWidth <= 1180) {
+                setIsSidebarCollapsed(true);
+            }
+        };
+
+        collapseSidebarForViewport();
+        window.addEventListener("resize", collapseSidebarForViewport);
+        return () => window.removeEventListener("resize", collapseSidebarForViewport);
+    }, []);
 
     return (
         <div className="layout erp-shell">
