@@ -24,6 +24,8 @@ Diese Uebersicht hilft beim Einstieg in den `docs/`-Ordner.
 
 ## Sonstige Unterlagen
 
+- [Visuelle-Smoke-Tests.md](./Visuelle-Smoke-Tests.md)
+  Manuelle Sichtpruefung fuer wichtige Ablaufe, responsive Layouts, Dialoge und visuelle Unstimmigkeiten
 - [Logins.md](./Logins.md)
   Demo- und Test-Zugaenge
 
