@@ -1,5 +1,29 @@
 import ExcelJS from "exceljs";
 
+const HIDE_HELPER_COLUMNS = true;
+const PROTECT_WORKBOOK_WITH_PASSWORD = true;
+const LOCK_WORKSHEETS_AGAINST_CHANGES = true;
+const WORKSHEET_PROTECTION_SPIN_COUNT = 10;
+
+const WORKBOOK_PASSWORD = PROTECT_WORKBOOK_WITH_PASSWORD ? "geheim" : "";
+
+const WORKSHEET_PROTECTION_OPTIONS = {
+    selectLockedCells: true,
+    selectUnlockedCells: true,
+    formatCells: false,
+    formatColumns: false,
+    formatRows: false,
+    insertColumns: false,
+    insertRows: false,
+    insertHyperlinks: false,
+    deleteColumns: false,
+    deleteRows: false,
+    sort: false,
+    autoFilter: false,
+    pivotTables: false,
+    spinCount: WORKSHEET_PROTECTION_SPIN_COUNT
+};
+
 function sanitizeSheetName(value: string) {
     return String(value || "Tabelle")
         .replace(/[\\/*?:[\]]/g, " ")
@@ -340,12 +364,12 @@ export async function exportPurchaseDemandWorkbook(options: {
     bestellungSheet.getColumn(10).numFmt = "#,##0.00";
     bestellungSheet.getColumn(11).numFmt = "#,##0.00";
     bestellungSheet.getColumn(12).numFmt = `0 "Tag(e)"`;
-    bestellungSheet.getColumn(14).hidden = true;
-    bestellungSheet.getColumn(15).hidden = true;
-    bestellungSheet.getColumn(16).hidden = true;
-    bestellungSheet.getColumn(17).hidden = true;
-    bestellungSheet.getColumn(18).hidden = true;
-    bestellungSheet.getColumn(19).hidden = true;
+    bestellungSheet.getColumn(14).hidden = HIDE_HELPER_COLUMNS;
+    bestellungSheet.getColumn(15).hidden = HIDE_HELPER_COLUMNS;
+    bestellungSheet.getColumn(16).hidden = HIDE_HELPER_COLUMNS;
+    bestellungSheet.getColumn(17).hidden = HIDE_HELPER_COLUMNS;
+    bestellungSheet.getColumn(18).hidden = HIDE_HELPER_COLUMNS;
+    bestellungSheet.getColumn(19).hidden = HIDE_HELPER_COLUMNS;
 
     bedarfe.forEach((item, index) => {
         const rowNumber = index + 2;
@@ -489,13 +513,13 @@ export async function exportPurchaseDemandWorkbook(options: {
         "Match-Index"
     ]);
     applyHeaderStyle(bestellungV2Sheet.getRow(1));
-    bestellungV2Sheet.getColumn(14).hidden = true;
-    bestellungV2Sheet.getColumn(15).hidden = true;
-    bestellungV2Sheet.getColumn(16).hidden = true;
-    bestellungV2Sheet.getColumn(17).hidden = true;
-    bestellungV2Sheet.getColumn(18).hidden = true;
-    bestellungV2Sheet.getColumn(19).hidden = true;
-    bestellungV2Sheet.getColumn(20).hidden = true;
+    bestellungV2Sheet.getColumn(14).hidden = HIDE_HELPER_COLUMNS;
+    bestellungV2Sheet.getColumn(15).hidden = HIDE_HELPER_COLUMNS;
+    bestellungV2Sheet.getColumn(16).hidden = HIDE_HELPER_COLUMNS;
+    bestellungV2Sheet.getColumn(17).hidden = HIDE_HELPER_COLUMNS;
+    bestellungV2Sheet.getColumn(18).hidden = HIDE_HELPER_COLUMNS;
+    bestellungV2Sheet.getColumn(19).hidden = HIDE_HELPER_COLUMNS;
+    bestellungV2Sheet.getColumn(20).hidden = HIDE_HELPER_COLUMNS;
 
     bedarfe.forEach((item, index) => {
         const rowNumber = index + 2;
@@ -656,15 +680,15 @@ export async function exportPurchaseDemandWorkbook(options: {
         ]);
         applyHeaderStyle(articleSheet.getRow(2));
         articleSheet.views = [{ state: "frozen", ySplit: 2 }];
-        articleSheet.getColumn(6).hidden = true;
-        articleSheet.getColumn(7).hidden = true;
-        articleSheet.getColumn(8).hidden = true;
-        articleSheet.getColumn(9).hidden = true;
-        articleSheet.getColumn(10).hidden = true;
-        articleSheet.getColumn(11).hidden = true;
-        articleSheet.getColumn(12).hidden = true;
-        articleSheet.getColumn(13).hidden = true;
-        articleSheet.getColumn(14).hidden = true;
+        articleSheet.getColumn(6).hidden = HIDE_HELPER_COLUMNS;
+        articleSheet.getColumn(7).hidden = HIDE_HELPER_COLUMNS;
+        articleSheet.getColumn(8).hidden = HIDE_HELPER_COLUMNS;
+        articleSheet.getColumn(9).hidden = HIDE_HELPER_COLUMNS;
+        articleSheet.getColumn(10).hidden = HIDE_HELPER_COLUMNS;
+        articleSheet.getColumn(11).hidden = HIDE_HELPER_COLUMNS;
+        articleSheet.getColumn(12).hidden = HIDE_HELPER_COLUMNS;
+        articleSheet.getColumn(13).hidden = HIDE_HELPER_COLUMNS;
+        articleSheet.getColumn(14).hidden = HIDE_HELPER_COLUMNS;
 
         articleSheet.getCell("H3").value = "Auswahl treffen";
         suppliers.forEach((supplier, index) => {
@@ -707,61 +731,25 @@ export async function exportPurchaseDemandWorkbook(options: {
         });
     });
 
-    await bestellungSheet.protect("schueler", {
-        selectLockedCells: true,
-        selectUnlockedCells: true,
-        formatCells: false,
-        formatColumns: false,
-        formatRows: false,
-        insertColumns: false,
-        insertRows: false,
-        insertHyperlinks: false,
-        deleteColumns: false,
-        deleteRows: false,
-        sort: false,
-        autoFilter: false,
-        pivotTables: false
-    });
+    if (LOCK_WORKSHEETS_AGAINST_CHANGES) {
+        await bestellungSheet.protect(WORKBOOK_PASSWORD, WORKSHEET_PROTECTION_OPTIONS);
+    }
 
     bestellungV2Sheet.getRow(1).eachCell(cell => {
         cell.protection = { locked: true };
     });
 
-    await bestellungV2Sheet.protect("schueler", {
-        selectLockedCells: true,
-        selectUnlockedCells: true,
-        formatCells: false,
-        formatColumns: false,
-        formatRows: false,
-        insertColumns: false,
-        insertRows: false,
-        insertHyperlinks: false,
-        deleteColumns: false,
-        deleteRows: false,
-        sort: false,
-        autoFilter: false,
-        pivotTables: false
-    });
+    if (LOCK_WORKSHEETS_AGAINST_CHANGES) {
+        await bestellungV2Sheet.protect(WORKBOOK_PASSWORD, WORKSHEET_PROTECTION_OPTIONS);
+    }
 
     for (const sheet of workbook.worksheets) {
         if (sheet.name === "Bestellung" || sheet.name === "BestellungV2") {
             continue;
         }
-        await sheet.protect("schueler", {
-            selectLockedCells: true,
-            selectUnlockedCells: true,
-            formatCells: false,
-            formatColumns: false,
-            formatRows: false,
-            insertColumns: false,
-            insertRows: false,
-            insertHyperlinks: false,
-            deleteColumns: false,
-            deleteRows: false,
-            sort: false,
-            autoFilter: false,
-            pivotTables: false
-        });
+        if (LOCK_WORKSHEETS_AGAINST_CHANGES) {
+            await sheet.protect(WORKBOOK_PASSWORD, WORKSHEET_PROTECTION_OPTIONS);
+        }
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
