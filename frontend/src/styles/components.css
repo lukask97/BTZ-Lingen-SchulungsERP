@@ -218,6 +218,35 @@ select optgroup {
     min-width: 220px;
 }
 
+.toolbar-select {
+    min-width: 180px;
+    max-width: min(34vw, 360px);
+    flex: 0 1 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.datatable-card--artikel .toolbar-right {
+    flex-wrap: nowrap;
+}
+
+.datatable-card--artikel .table-search-control {
+    flex: 1 1 220px;
+    max-width: 320px;
+}
+
+.datatable-card--artikel .toolbar-select {
+    flex: 1 1 260px;
+    max-width: 360px;
+}
+
+.datatable-card--artikel .toolbar-select:hover,
+.datatable-card--artikel .toolbar-select:focus {
+    flex-basis: 420px;
+    max-width: min(52vw, 560px);
+}
+
 .table-actions {
     display: flex;
     gap: 8px;
@@ -2215,6 +2244,17 @@ select optgroup {
     .toolbar-right {
         flex-basis: 100%;
         justify-content: flex-start;
+    }
+
+    .datatable-card--artikel .toolbar-right {
+        flex-wrap: wrap;
+    }
+
+    .datatable-card--artikel .toolbar-select,
+    .datatable-card--artikel .toolbar-select:hover,
+    .datatable-card--artikel .toolbar-select:focus {
+        flex: 1 1 260px;
+        max-width: 100%;
     }
 
     .table-search-control {

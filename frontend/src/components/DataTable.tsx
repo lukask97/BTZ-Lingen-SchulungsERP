@@ -638,6 +638,7 @@ export default function DataTable({
 
           {searchable && (
             <input
+              className="table-search-control"
               name="table-search"
               placeholder="Suchen..."
               value={search}

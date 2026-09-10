@@ -13,6 +13,7 @@
     --erp-border: #d5e1ec;
     --erp-shadow: 0 20px 50px rgba(16, 39, 63, 0.08);
     --erp-radius: 18px;
+    --erp-card-padding: 20px 22px;
 }
 
 * {
@@ -453,6 +454,27 @@ a {
     box-shadow: var(--erp-shadow);
 }
 
+.module-panel:not(.accounting-dialog-section),
+.erp-card,
+.card:not(.dialog):not(.login-card),
+.dashboard-panel,
+.buchhaltung-liste,
+.kennzahl,
+.prozess-karte,
+.lernpfad-karte,
+.task-card,
+.teacher-class-card,
+.status-card {
+    padding: var(--erp-card-padding);
+}
+
+.card:not(.dialog):not(.login-card) > .toolbar:first-child,
+.module-panel > .dashboard-panel-header:first-child,
+.erp-card > .dashboard-panel-header:first-child,
+.dashboard-panel > .dashboard-panel-header:first-child {
+    margin-top: 0;
+}
+
 [data-theme=dark] .module-panel,
 [data-theme=dark] .erp-card,
 [data-theme=dark] .card,
@@ -864,6 +886,10 @@ a {
 }
 
 @media (max-width: 860px) {
+    :root {
+        --erp-card-padding: 16px;
+    }
+
     .login-layout {
         display: block;
         padding: 0;
