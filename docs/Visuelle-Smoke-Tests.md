@@ -215,4 +215,3 @@ Notieren, wenn eines davon auftritt:
 | Admin/Klassen      |     |          |               |       |
 
 Befunde:
-
